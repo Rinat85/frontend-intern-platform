@@ -1963,123 +1963,191 @@ export const htmlLessons: Lesson[] = [
     "id": "html-11",
     "moduleId": "html",
     "level": 11,
-    "title": "Микроразметка, SEO и метаданные",
-    "subtitle": "Meta description, Open Graph, Twitter Cards, Schema.org JSON-LD и фавиконки",
-    "description": "Профессиональная поисковая оптимизация и сниппеты в соцсетях: настройка Open Graph для Telegram/VK/WhatsApp, структурированные данные Schema.org JSON-LD и адаптивные favicon.",
-    "estimatedMinutes": 35,
+    "title": "Микроразметка, SEO и продвинутые метаданные",
+    "subtitle": "Schema.org (JSON-LD), Open Graph, Canonical URL, robots.txt, sitemap.xml и Rich Snippets",
+    "description": "Завершите трек HTML5 профессиональным освоением микроразметки и технического SEO: внедрение Schema.org через JSON-LD (Course, Article, Product, FAQPage), генерация расширенных сниппетов (Rich Snippets) в Google/Яндекс, полный стек Open Graph и Twitter Cards, защита от дублей через Canonical URL и настройка robots.txt/sitemap.xml.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "HTML",
-      "SEO",
-      "OpenGraph",
-      "Schema",
-      "JSON-LD",
-      "Metadata"
+      "seo",
+      "schema-org",
+      "json-ld",
+      "open-graph",
+      "rich-snippets",
+      "canonical",
+      "robots-txt",
+      "sitemap"
     ],
     "theory": {
-      "overview": "Создать красивый интерфейс — лишь половина задачи. Если поисковые роботы Яндекса и Google не могут правильно проиндексировать сайт, а при отправке ссылки в Telegram или VK отображается серая пустая плашка без картинки и описания — сайт теряет львиную долю аудитории.\n\nУправление метаданными в `<head>` и внедрение микроразметки Schema.org превращают сайт в привлекательный сниппет в поисковой выдаче со звездами рейтинга, ценами и автором.",
+      "overview": "Поздравляем с выходом на финальный 11-й уровень трека HTML5! На этом этапе вы уже умеете писать чистую, семантичную и доступную разметку. Финальный шаг — сделать сайт видимым для алгоритмов поисковых систем и привлекательным для пользователей в социальных сетях.\n\nВ этом уроке мы изучим семантическую микроразметку по стандарту **Schema.org** с использованием формата **JSON-LD** (рекомендованного Google), настроим расширенные сниппеты (звёзды рейтинга, цены, вопросы FAQ прямо в поиске), внедрим протокол **Open Graph** для идеального шеринга в Telegram, VK и Twitter, а также разберём технические файлы `robots.txt` и `sitemap.xml`.",
       "sections": [
         {
-          "title": "Базовые SEO мета-теги в <head>",
-          "content": "Обязательный джентльменский набор каждого сайта:\n- `<title>` — заголовок страницы до 60–70 символов. Самый важный SEO-фактор.\n- `<meta name=\"description\" content=\"...\">` — краткое резюме страницы (140–160 символов). Формирует сниппет описания в поисковой выдаче.\n- `<meta name=\"robots\" content=\"index, follow\">` — разрешает роботам индексировать страницу и переходить по ссылкам.\n- `<link rel=\"canonical\" href=\"https://site.com/page\">` — указывает канонический (основной) адрес страницы, исключая дубли контента.",
+          "title": "Что такое микроразметка и зачем бизнесу Rich Snippets",
+          "content": "Поисковые роботы видят текст страницы, но не всегда понимают его точный смысл: где здесь цена, где отзывы, а где дата проведения вебинара.\n\n1. Что дает семантическая микроразметка:\n- **Rich Snippets (Расширенные сниппеты)**: в поисковой выдаче Google и Яндекс под ссылкой на ваш сайт появляются звёздочки рейтинга (⭐️ 4.9/5), количество отзывов, цена товара («от 4 500 ₽»), статус «В наличии», раскрывающиеся ответы FAQ или видео-превью.\n- **Рост CTR (Click-Through Rate)**: карточки с расширенными сниппетами получают на **+30–35% больше кликов** из органического поиска при тех же позициях!\n\n2. Стандарты микроразметки:\n- **JSON-LD (JavaScript Object Notation for Linked Data)** — СОВРЕМЕННЫЙ ЗОЛОТОЙ СТАНДАРТ (рекомендован Google). Разметка размещается в отдельном блоке `<script type=\"application/ld+json\">` в `<head>` или в конце `<body>`, не смешиваясь с визуальным HTML-кодом!\n- **Microdata (itemscope, itemtype, itemprop)** — устаревший подход, загромождающий атрибутами обычные HTML-теги.\n- **Open Graph (OG)** — стандарт метаданных для социальных сетей и мессенджеров.",
+          "image": {
+            "src": "/images/lessons/html-microdata-seo.svg",
+            "alt": "Микроразметка Schema.org JSON-LD, Open Graph и SEO оптимизация",
+            "caption": "Schema.org через JSON-LD формирует привлекательные Rich Snippets со звёздами рейтинга, Open Graph генерирует превью в соцсетях, а Canonical защищает от дублей"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Базовые мета-теги SEO",
-            "code": "<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Курсы фронтенд разработки с нуля | Frontend Academy</title>\n  <meta name=\"description\" content=\"Практическая программа стажировки по HTML, CSS и JavaScript с ментором и реальными проектами.\">\n  <link rel=\"canonical\" href=\"https://academy.frontend.ru/internship\">\n</head>",
-            "explanation": "Полный комплект метаданных для правильной поисковой индексации."
+            "code": "<!-- Пример Schema.org JSON-LD разметки обучающего курса -->\n<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Course\",\n  \"name\": \"Frontend Intern: От Стажёра до Джуниора\",\n  \"description\": \"Интерактивная платформа обучения фронтенд-разработке с тренажёрами.\",\n  \"provider\": {\n    \"@type\": \"Organization\",\n    \"name\": \"Frontend Intern Academy\",\n    \"sameAs\": \"https://frontend-intern.dev\"\n  },\n  \"aggregateRating\": {\n    \"@type\": \"AggregateRating\",\n    \"ratingValue\": \"4.9\",\n    \"ratingCount\": \"148\",\n    \"bestRating\": \"5\"\n  },\n  \"offers\": {\n    \"@type\": \"Offer\",\n    \"price\": \"0\",\n    \"priceCurrency\": \"RUB\",\n    \"availability\": \"https://schema.org/InStock\"\n  }\n}\n</script>",
+            "title": "Разметка курса через Schema.org JSON-LD",
+            "explanation": "Блок JSON-LD сообщает поисковому роботу Google/Яндекс тип сущности Course, рейтинг 4.9 из 5 и бесплатную стоимость, формируя богатый сниппет в выдаче."
           }
         },
         {
-          "title": "Протокол Open Graph (OG) для мессенджеров и соцсетей",
-          "content": "Когда вы отправляете ссылку в Telegram, WhatsApp, Discord или ВКонтакте, мессенджер парсит специальные `og:*` теги:\n- `og:title` — заголовок карточки в превью.\n- `og:description` — краткое описание превью.\n- `og:image` — абсолютный URL баннера/картинки (рекомендуемый размер 1200x630px).\n- `og:url` — постоянная ссылка на страницу.\n- `og:type` — тип контента (`website`, `article`, `product`).\n- Для Twitter/X используются зеркальные теги: `twitter:card` (`summary_large_image`), `twitter:title`, `twitter:image`.",
+          "title": "Популярные схемы Schema.org: Course, Article, Product и FAQPage",
+          "content": "Ключевые типы данных Schema.org для коммерческих сайтов:\n\n1. **`FAQPage` (Вопросы и ответы)**:\nПозволяет отображать гармошку вопросов и ответов прямо в результатах поиска Google под ссылкой на сайт!\n```json\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"FAQPage\",\n  \"mainEntity\": [{\n    \"@type\": \"Question\",\n    \"name\": \"Сколько длится стажировка?\",\n    \"acceptedAnswer\": { \"@type\": \"Answer\", \"text\": \"Программа рассчитана на 60 часов.\" }\n  }]\n}\n```\n\n2. **`Article` / `BlogPosting`**:\nРазмечает статьи блога: заголовок `headline`, автор `author`, дата публикации `datePublished`, логотип издателя `publisher`.\n\n3. **`Product` (Интернет-магазины)**:\nРазмечает карточки товаров: название, изображение, бренд, отзывы `review`, цену и статус наличия `offers`.\n\n4. **`BreadcrumbList` (Хлебные крошки)**:\nПоисковик показывает красивую навигационную цепочку: `site.dev › Каталог › Frontend › React` вместо длинного URL.",
           "codeExample": {
-            "language": "html",
-            "title": "Настройка Open Graph карточки",
-            "code": "<!-- Open Graph для Telegram, VK, WhatsApp -->\n<meta property=\"og:type\" content=\"article\">\n<meta property=\"og:title\" content=\"Гайд по семантическому HTML5\">\n<meta property=\"og:description\" content=\"Узнайте, как правильно верстать доступные интерфейсы по стандартам WCAG.\">\n<meta property=\"og:image\" content=\"https://site.com/assets/og-cover.png\">\n<meta property=\"og:url\" content=\"https://site.com/articles/html-semantic\">\n\n<!-- Twitter Cards -->\n<meta name=\"twitter:card\" content=\"summary_large_image\">",
-            "explanation": "При отправке ссылки сформируется привлекательная кликабельная карточка с большим баннером."
+            "language": "json",
+            "code": "{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"BreadcrumbList\",\n  \"itemListElement\": [\n    {\n      \"@type\": \"ListItem\",\n      \"position\": 1,\n      \"name\": \"Главная\",\n      \"item\": \"https://frontend-intern.dev\"\n    },\n    {\n      \"@type\": \"ListItem\",\n      \"position\": 2,\n      \"name\": \"Курсы\",\n      \"item\": \"https://frontend-intern.dev/courses\"\n    },\n    {\n      \"@type\": \"ListItem\",\n      \"position\": 3,\n      \"name\": \"HTML5 Master\",\n      \"item\": \"https://frontend-intern.dev/courses/html\"\n    }\n  ]\n}",
+            "title": "Разметка хлебных крошек (BreadcrumbList) в JSON-LD",
+            "explanation": "Хлебные крошки отображаются в сниппете поиска в виде понятного иерархического пути по разделам сайта."
           }
         },
         {
-          "title": "Микроразметка Schema.org в формате JSON-LD",
-          "content": "Schema.org — международный словарь семантической разметки сущностей (товары, статьи, курсы, персоны, рецепты).\n- **Формат JSON-LD (рекомендация Google)**: разметка вставляется единым блоком `<script type=\"application/ld+json\">` в `<head>` или `<body>`.\n- Позволяет поисковикам формировать расширенные сниппеты (Rich Snippets): звездочки рейтинга, цену товара, наличие на складе, дату публикации и аватар автора.",
+          "title": "Протокол Open Graph и Twitter Cards для шеринга в соцсетях",
+          "content": "Когда пользователь отправляет ссылку на ваш сайт в Telegram, WhatsApp, VK или Twitter, мессенджер парсит мета-теги Open Graph в `<head>`:\n\n1. Обязательные теги Open Graph (`og:`):\n- `<meta property=\"og:title\" content=\"Заголовок статьи\" />`\n- `<meta property=\"og:description\" content=\"Краткое описание...\" />`\n- `<meta property=\"og:type\" content=\"website | article | product\" />`\n- `<meta property=\"og:url\" content=\"https://site.dev/page\" />`\n- `<meta property=\"og:image\" content=\"https://site.dev/og-banner.png\" />` (СТРОГО абсолютный URL! Рекомендуемый размер: **1200 × 630 px**).\n\n2. Twitter Cards (`twitter:`):\n- `<meta name=\"twitter:card\" content=\"summary_large_image\" />` (большой привлекательный баннер).\n- `<meta name=\"twitter:title\" content=\"...\" />`\n- `<meta name=\"twitter:image\" content=\"...\" />`\n\n3. Favicon стек и PWA Manifest:\n- `<link rel=\"icon\" href=\"/favicon.ico\" sizes=\"32x32\" />`\n- `<link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\" />` (векторный SVG favicon!)\n- `<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\" />` (для экрана iPhone).\n- `<meta name=\"theme-color\" content=\"#0a0e13\" />` (окрашивает шапку браузера на смартфонах).",
           "codeExample": {
             "language": "html",
-            "title": "Пример JSON-LD микроразметки статьи",
-            "code": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"TechArticle\",\n  \"headline\": \"Знакомство с HTML Fundamentals\",\n  \"author\": {\n    \"@type\": \"Person\",\n    \"name\": \"Алексей Смирнов\"\n  },\n  \"publisher\": {\n    \"@type\": \"Organization\",\n    \"name\": \"Frontend Intern Academy\"\n  },\n  \"datePublished\": \"2026-08-18\"\n}\n</script>",
-            "explanation": "Структурированные данные сообщают Google и Яндексу точный контекст статьи."
+            "code": "<head>\n  <!-- 1. Базовые SEO теги -->\n  <title>Frontend Intern Academy — Платформа для стажёров</title>\n  <meta name=\"description\" content=\"Интерактивная платформа обучения фронтенд-разработке с тренажёрами.\" />\n\n  <!-- 2. Open Graph (Telegram, VK, Facebook) -->\n  <meta property=\"og:site_name\" content=\"Frontend Intern Academy\" />\n  <meta property=\"og:title\" content=\"Frontend Intern Academy — Обучение фронтенду\" />\n  <meta property=\"og:description\" content=\"Тренажеры, теория уровня Senior и автопроверка кода.\" />\n  <meta property=\"og:image\" content=\"https://frontend-intern.dev/images/og-preview.png\" />\n  <meta property=\"og:image:width\" content=\"1200\" />\n  <meta property=\"og:image:height\" content=\"630\" />\n  <meta property=\"og:type\" content=\"website\" />\n\n  <!-- 3. Twitter Card -->\n  <meta name=\"twitter:card\" content=\"summary_large_image\" />\n  <meta name=\"twitter:title\" content=\"Frontend Intern Academy\" />\n  <meta name=\"twitter:image\" content=\"https://frontend-intern.dev/images/og-preview.png\" />\n</head>",
+            "title": "Полный комплект мета-тегов Open Graph и Twitter Cards",
+            "explanation": "При отправке ссылки в Telegram или VK отобразится сочный баннер 1200x630, заголовок и описание проекта."
+          }
+        },
+        {
+          "title": "Техническое SEO: Canonical URL, robots.txt и sitemap.xml",
+          "content": "Инфраструктурные аспекты поисковой оптимизации:\n\n1. **Канонический URL (`rel=\"canonical\"`)**:\n- Проблема: одна и та же страница доступна по разным адресам (`site.dev/course`, `site.dev/course?ref=tg`, `site.dev/course?utm_source=vk`). Поисковик считает это дублями и снижает позиции сайта!\n- Решение: `<link rel=\"canonical\" href=\"https://site.dev/course\" />` на каждой версии страницы сообщает роботу, какой URL является главным эталоном.\n\n2. **Файл `robots.txt`** (в корне сайта `/robots.txt`):\n- Сообщает поисковым роботам, какие разделы сайта МОЖНО или НЕЛЬЗЯ индексировать:\n```text\nUser-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\nDisallow: /checkout/\nSitemap: https://site.dev/sitemap.xml\n```\n\n3. **Карта сайта `sitemap.xml`**:\n- XML-список всех страниц сайта с датами их последнего обновления (`<lastmod>`), приоритетом (`<priority>`) и частотой изменения (`<changefreq>`). Помогает роботам быстро обойти весь контент.",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- 1. Канонический URL в теге head -->\n<link rel=\"canonical\" href=\"https://frontend-intern.dev/catalog/javascript\" />\n\n<!-- 2. Мета-тег управления роботами для служебных страниц -->\n<meta name=\"robots\" content=\"noindex, nofollow\" />\n<!-- noindex запрещает показ страницы в поиске, nofollow запрещает переход по ссылкам -->",
+            "title": "Использование rel='canonical' и meta robots",
+            "explanation": "rel='canonical' объединяет ссылочный вес со всех дублей и UTM-меток, а noindex скрывает приватные страницы корзины и админки от индексации."
           }
         }
       ],
       "seniorTips": [
-        "Всегда указывайте **абсолютный адрес** (с `https://`) в `og:image`. Относительный путь вроде `/image.png` мессенджеры не смогут загрузить!",
-        "Используйте валидаторы разметки: OpenGraph Previewers и Google Rich Results Test для проверки сниппетов перед релизом."
+        "Всегда используйте JSON-LD формат для Schema.org разметки вместо устаревших атрибутов Microdata — JSON-LD легче генерировать, тестировать и поддерживать.",
+        "Для мета-тега `og:image` ВСЕГДА указывайте полный абсолютный URL (с `https://`), а не относительный путь `/og.png`, иначе Telegram и мессенджеры не смогут загрузить картинку.",
+        "Добавляйте `<link rel=\"canonical\">` на ВСЕ страницы сайта — это предотвращает потерю позиций из-за дублей с рекламными UTM-метками.",
+        "Валидируйте разметку в официальном валидаторе Google Rich Results Test (https://search.google.com/test/rich-results) перед релизом в продакшн."
       ],
       "commonMistakes": [
         {
-          "bad": "<meta property=\"og:image\" content=\"banner.jpg\"> <!-- Относительный путь -->",
-          "good": "<meta property=\"og:image\" content=\"https://mycompany.com/images/banner.jpg\">",
-          "reason": "Telegram и соцсети требуют исключительно абсолютный URL для загрузки картинки превью."
+          "bad": "<!-- Относительный путь в og:image -->\n<meta property=\"og:image\" content=\"/images/banner.jpg\" />",
+          "good": "<meta property=\"og:image\" content=\"https://site.dev/images/banner.jpg\" />",
+          "reason": "Спецификация Open Graph строго требует абсолютный URL с протоколом https://. Мессенджеры проигнорируют относительный путь."
+        },
+        {
+          "bad": "<!-- Отсутствие canonical на страницах с UTM -->\n<!-- Пользователь переходит по ?utm_source=tg, и поисковик индексирует дубль -->",
+          "good": "<link rel=\"canonical\" href=\"https://site.dev/articles/css-grid\" />",
+          "reason": "Без canonical поисковые системы считают каждую страницу с UTM-меткой отдельным дублем, размывая ссылочный вес."
+        },
+        {
+          "bad": "<!-- Синтаксическая ошибка в JSON-LD (лишняя запятая в конце) -->\n{\n  \"name\": \"Курс\",\n  \"price\": \"0\",\n}",
+          "good": "{\n  \"name\": \"Курс\",\n  \"price\": \"0\"\n}",
+          "reason": "JSON-LD является строгим JSON форматом. Лишняя запятая перед закрывающей фигурной скобкой приводит к ошибке парсинга роботом."
         }
       ],
       "keyTakeaways": [
-        "meta description формирует сниппет в поисковиках и привлекает клики пользователей.",
-        "Теги Open Graph обеспечивают сочные превью при шеринге ссылки в Telegram и соцсетях.",
-        "JSON-LD Schema.org дает поисковикам структурированную информацию о товарах и статьях."
+        "Schema.org через JSON-LD формирует привлекательные Rich Snippets (звёзды, цены, FAQ) в поиске Google/Яндекс.",
+        "Open Graph и Twitter Cards создают красивые карточки-превью со ссылками в Telegram, VK и соцсетях.",
+        "`rel=\"canonical\"` защищает от дублей страниц с рекламными метками и объединяет ссылочный вес.",
+        "`robots.txt` управляет доступом роботов, а `sitemap.xml` ускоряет индексацию всех страниц.",
+        "Поздравляем с полным прохождением всех 11 уровней трека HTML5!"
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"seo-preview-card\">\n  <div class=\"seo-mock-google\">\n    <div class=\"google-url\">https://academy.frontend.ru › internship</div>\n    <div class=\"google-title\">Обучение Frontend разработке | Стажировка с ментором</div>\n    <div class=\"google-desc\">Практическая программа обучения с интерактивной песочницей, тестами и сертификацией для начинающих разработчиков.</div>\n  </div>\n</div>",
-      "initialCss": ".seo-preview-card { padding: 20px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; }\n.google-url { font-size: 12px; color: #202124; margin-bottom: 4px; }\n.google-title { font-size: 18px; color: #1a0dab; font-weight: 500; margin-bottom: 4px; cursor: pointer; }\n.google-title:hover { text-decoration: underline; }\n.google-desc { font-size: 14px; color: #4d5156; line-height: 1.5; }",
-      "initialJs": "console.log('SEO level loaded');",
-      "instructions": "Посмотрите, как правильный title и meta description формируют сниппет в Google."
+      "initialHtml": "<div class=\"seo-sandbox\">\n  <h3>Превью сниппета в поиске Google</h3>\n  <div class=\"google-card\">\n    <div class=\"url\">https://frontend-intern.dev › courses › web-dev</div>\n    <div class=\"title\">Frontend Intern Academy: Курсы для стажёров 2026</div>\n    <div class=\"rating\">⭐️⭐️⭐️⭐️⭐️ Рейтинг: 4.9 • 148 отзывов • Бесплатно</div>\n    <div class=\"desc\">Интерактивная платформа обучения фронтенд-разработке с тренажёрами, теорией и автопроверкой заданий.</div>\n  </div>\n</div>",
+      "initialCss": ".seo-sandbox { padding: 16px; background: #0a0e13; font-family: monospace; color: #e6edf3; border-radius: 8px; }\n.google-card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; margin-top: 10px; }\n.google-card .url { font-size: 11px; color: #8b949e; }\n.google-card .title { font-size: 16px; color: #29e7ff; font-weight: bold; margin: 4px 0; }\n.google-card .rating { font-size: 12px; color: #ffb02e; margin-bottom: 6px; }\n.google-card .desc { font-size: 13px; color: #8b949e; }",
+      "initialJs": "console.log('Песочница SEO и микроразметки активна');",
+      "instructions": "Практика с SEO:\n1. Изучите, как данные из JSON-LD превращаются в Rich Snippet\n2. Добавьте в JSON-LD разметку FAQPage с вопросом и ответом\n3. Настройте Open Graph теги для шеринга в Telegram"
     },
     "task": {
-      "title": "Настройка Open Graph метатегов",
-      "scenario": "Опишите в теге <head> карточку Open Graph для статьи блога с заголовком, описанием и абсолютным URL картинки.",
+      "title": "Внедрение полного пакета SEO, Open Graph и Schema.org JSON-LD микроразметки",
+      "scenario": "Вам необходимо оформить head-секцию и микроразметку для лендинга курса: настроить title, description, канонический URL, мета-теги Open Graph (title, description, absolute image, url) и блок Schema.org JSON-LD с типом Course (название, провайдер, рейтинг 4.9 и бесплатное предложение).",
       "criteria": [
-        "Указан og:title",
-        "Указан og:description",
-        "Указан абсолютный og:image с https://",
-        "Указан og:type"
+        "Присутствуют базовые теги title, description и rel='canonical'",
+        "Настроен полный стек Open Graph тегов с абсолютным URL картинки",
+        "Присутствует Twitter Card тег summary_large_image",
+        "Внедрен блок <script type='application/ld+json'> с валидным JSON-LD",
+        "JSON-LD размечает сущность Course со свойствами name, provider, aggregateRating и offers"
       ],
       "starterCode": {
-        "html": "<!-- Напишите Open Graph мета-теги -->\n",
-        "css": "/* Стили задания */\n"
+        "html": "<head>\n  <!-- Настройте метаданные и JSON-LD -->\n</head>"
       },
       "hints": [
-        "Используйте <meta property=\"og:title\" content=\"...\">..."
+        "Используйте <link rel='canonical' href='https://site.dev/course' />",
+        "Для Open Graph: <meta property='og:image' content='https://site.dev/og.png' />",
+        "В JSON-LD укажите @context: 'https://schema.org' и @type: 'Course'"
       ],
       "solution": {
-        "html": "<head>\n  <title>Гайд по чистому коду</title>\n  <meta name=\"description\" content=\"Советы по написанию чистого и поддерживаемого кода.\">\n  <!-- Open Graph -->\n  <meta property=\"og:type\" content=\"article\">\n  <meta property=\"og:title\" content=\"Гайд по чистому коду\">\n  <meta property=\"og:description\" content=\"Советы по написанию чистого и поддерживаемого кода.\">\n  <meta property=\"og:image\" content=\"https://site.ru/images/clean-code-cover.jpg\">\n  <meta property=\"og:url\" content=\"https://site.ru/blog/clean-code\">\n</head>",
-        "css": "/* Решение */\n",
-        "explanation": "Идеальная карточка метаданных для поисковых систем и всех современных мессенджеров."
+        "html": "<head>\n  <meta charset=\"UTF-8\" />\n  <title>Курс Frontend-разработчик 2026 — Академия стажёров</title>\n  <meta name=\"description\" content=\"Интерактивное обучение фронтенд-разработке: HTML5, CSS3, JavaScript и Web Pro.\" />\n  <link rel=\"canonical\" href=\"https://frontend-intern.dev/courses/frontend\" />\n\n  <!-- Open Graph -->\n  <meta property=\"og:site_name\" content=\"Frontend Intern Academy\" />\n  <meta property=\"og:type\" content=\"website\" />\n  <meta property=\"og:url\" content=\"https://frontend-intern.dev/courses/frontend\" />\n  <meta property=\"og:title\" content=\"Курс Frontend-разработчик 2026 — Академия стажёров\" />\n  <meta property=\"og:description\" content=\"Обучение с нуля до оффера с тренажёрами и теорией.\" />\n  <meta property=\"og:image\" content=\"https://frontend-intern.dev/images/og-frontend.png\" />\n  <meta property=\"og:image:width\" content=\"1200\" />\n  <meta property=\"og:image:height\" content=\"630\" />\n\n  <!-- Twitter Card -->\n  <meta name=\"twitter:card\" content=\"summary_large_image\" />\n  <meta name=\"twitter:title\" content=\"Курс Frontend-разработчик 2026\" />\n  <meta name=\"twitter:image\" content=\"https://frontend-intern.dev/images/og-frontend.png\" />\n\n  <!-- Schema.org JSON-LD -->\n  <script type=\"application/ld+json\">\n  {\n    \"@context\": \"https://schema.org\",\n    \"@type\": \"Course\",\n    \"name\": \"Frontend-разработчик 2026\",\n    \"description\": \"Полный курс подготовки фронтенд-инженеров.\",\n    \"provider\": {\n      \"@type\": \"Organization\",\n      \"name\": \"Frontend Intern Academy\"\n    },\n    \"aggregateRating\": {\n      \"@type\": \"AggregateRating\",\n      \"ratingValue\": \"4.9\",\n      \"reviewCount\": \"148\"\n    },\n    \"offers\": {\n      \"@type\": \"Offer\",\n      \"price\": \"0\",\n      \"priceCurrency\": \"RUB\",\n      \"availability\": \"https://schema.org/InStock\"\n    }\n  }\n  </script>\n</head>",
+        "explanation": "Разметка полностью укомплектована для поисковиков и соцсетей: canonical предотвращает дублирование, Open Graph генерирует превью в Telegram/VK, а JSON-LD формирует Rich Snippet с рейтингом в Google."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h11-q1",
-          "question": "Какой формат микроразметки официально рекомендует Google?",
+          "id": "html11-q1",
+          "question": "Какой формат микроразметки Schema.org официально рекомендован Google и поисковыми системами?",
           "options": [
-            "Microdata",
-            "JSON-LD (<script type=\"application/ld+json\">)",
-            "RDFa",
-            "XML Schema"
+            "Microformats",
+            "JSON-LD (<script type='application/ld+json'>)",
+            "Microdata в атрибутах тегов",
+            "RDFa"
           ],
           "correctIndex": 1,
-          "explanation": "Google официально рекомендует формат JSON-LD для структурированных данных Schema.org."
+          "explanation": "Google официально рекомендует формат JSON-LD, так как он изолирован в теге script, легко генерируется сервером и не ломается при изменении HTML верстки."
         },
         {
-          "id": "h11-q2",
-          "question": "Каким должен быть URL в атрибуте og:image?",
+          "id": "html11-q2",
+          "question": "Почему в мета-теге <meta property='og:image'> ОБЯЗАТЕЛЬНО указывать абсолютный URL (с https://)?",
           "options": [
-            "Относительным (/img.jpg)",
-            "Абсолютным с протоколом (https://domain.com/img.jpg)",
-            "Без разницы",
-            "В формате Base64"
+            "Чтобы картинка не сжималась",
+            "Мессенджеры (Telegram, WhatsApp) и соцсети парсят метаданные со сторонних серверов и не знают базовый домен сайта, поэтому относительные пути (/og.png) не загружаются",
+            "Относительные пути запрещены в HTML5",
+            "Для ускорения анимации"
           ],
           "correctIndex": 1,
-          "explanation": "Соцсети и мессенджеры парсят картинку удаленно, поэтому og:image обязан быть абсолютным URL."
+          "explanation": "Боты социальных сетей и мессенджеров требуют полный абсолютный URL протокола Open Graph, иначе изображение в превью ссылки не отобразится."
+        },
+        {
+          "id": "html11-q3",
+          "question": "Какую проблему решает тег <link rel='canonical' href='...'>?",
+          "options": [
+            "Ускоряет работу JavaScript",
+            "Предотвращает появление дублей страниц в поиске (из-за параметров ?utm_source=..., сортировок и слешей) и объединяет ссылочный вес на эталонном URL",
+            "Шифрует пароли пользователей",
+            "Создает карту сайта"
+          ],
+          "correctIndex": 1,
+          "explanation": "Canonical указывает поисковику главный канонический URL документа, защищая сайт от санкций за дублирование контента при рекламных кампаниях с UTM-метками."
+        },
+        {
+          "id": "html11-q4",
+          "question": "Какой тип Schema.org позволяет отображать раскрывающийся блок вопросов и ответов прямо в сниппете поисковой выдачи Google?",
+          "options": [
+            "QnAPage",
+            "FAQPage",
+            "AccordionList",
+            "AnswerBlock"
+          ],
+          "correctIndex": 1,
+          "explanation": "Схема FAQPage размечает сущности Question и Answer, позволяя поисковикам выводить раскрывающиеся ответы прямо под ссылкой на сайт в результатах поиска."
+        },
+        {
+          "id": "html11-q5",
+          "question": "Что произойдет, если в файле robots.txt указать директиву Disallow: /admin/?",
+          "options": [
+            "Папка admin удалится с сервера",
+            "Поисковые роботы не будут сканировать и индексировать страницы, находящиеся по адресу /admin/",
+            "Закроется доступ для всех пользователей",
+            "Включится двухфакторная аутентификация"
+          ],
+          "correctIndex": 1,
+          "explanation": "robots.txt с директивой Disallow: /admin/ запрещает поисковым краулерам заходить в административный раздел, экономя краулинговый бюджет и скрывая служебные страницы."
         }
       ]
     }

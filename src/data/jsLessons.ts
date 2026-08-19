@@ -1950,85 +1950,191 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-11",
     "moduleId": "javascript",
     "level": 11,
-    "title": "Классы в ES6+ (ООП)",
-    "subtitle": "Class, constructor, методы, static, getters/setters, наследование extends и super",
-    "description": "Объектно-ориентированное программирование: синтаксический сахар class над прототипами, метод constructor, инкапсуляция get/set, статические методы static и наследование через extends/super.",
-    "estimatedMinutes": 35,
+    "title": "Классы в ES6+ и Объектно-Ориентированное Программирование",
+    "subtitle": "class, constructor, extends, super, приватные поля #private, get/set и static",
+    "description": "Освойте современное ООП в JavaScript: синтаксис class, конструкторы, наследование через extends и super, настоящую инкапсуляцию через приватные поля (#private), аксессоры get/set, статические методы и фабричные паттерны.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "JavaScript",
-      "Classes",
-      "OOP",
-      "ES6"
+      "classes",
+      "oop",
+      "extends",
+      "super",
+      "private-fields",
+      "getters-setters",
+      "static-methods",
+      "es6"
     ],
     "theory": {
-      "overview": "Классы в ES6+ предоставляют элегантный и удобный синтаксис для объектно-ориентированного программирования, построения моделей данных и сервисов.",
+      "overview": "Классы в ES6+ (Class Syntax) — это удобный, выразительный и безопасный синтаксис для объектно-ориентированного программирования (ООП) в JavaScript.\n\nХотя под капотом классы по-прежнему опираются на прототипное наследование (Prototype Chain), синтаксис `class` решает множество проблем старых функций-конструкторов: автоматически включает строгий режим `'use strict'`, защищает от вызова без `new`, вводит удобное наследование через `extends/super` и нативную поддержку **приватных полей (`#privateField`)** стандарта ES2022.",
       "sections": [
         {
-          "title": "Синтаксис классов и наследование",
-          "content": "- `class User { constructor(name) { this.name = name; } }`.\n- `extends` — наследование от базового класса.\n- `super()` — вызов конструктора родительского класса (обязателен на первой строчке конструктора наследника!).\n- `static` — метод принадлежит самому классу, а не его экземплярам (`User.compareUsers(...)`).\n- `get / set` — геттеры и сеттеры для контролируемого доступа к полям.",
+          "title": "Анатомия класса: class, constructor и методы",
+          "content": "Базовая структура класса в современном JavaScript:\n\n1. Объявление класса: `class User { ... }`\n- Тело класса ВСЕГДА выполняется в строгом режиме `'use strict'`.\n- Классы НЕ всплывают (No Hoisting): к классу нельзя обратиться до строки его объявления (`ReferenceError`).\n- Класс нельзя вызвать как простую функцию `User()` — только с ключевым словом `new User()` (`TypeError: Class constructor cannot be invoked without 'new'`).\n\n2. Конструктор `constructor(...args)`:\n- Специальный метод для инициализации свойств создаваемого объекта.\n- Вызывается автоматически в момент `new User('Alex')`.\n\n3. Методы класса:\n- Объявляются без ключевого слова `function`.\n- Автоматически помещаются в `User.prototype`, разделяясь между всеми экземплярами класса и экономя оперативную память!",
+          "image": {
+            "src": "/images/lessons/js-classes-oop.svg",
+            "alt": "Классы ES6+ в JavaScript: constructor, extends, super, приватные поля #private, static",
+            "caption": "Классы ES6: constructor инициализирует поля, extends и super реализуют наследование, #field гарантирует приватность, static методы вызываются у класса"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Класс и наследование",
-            "code": "class Employee {\n  constructor(name, salary) {\n    this.name = name;\n    this.salary = salary;\n  }\n  getInfo() {\n    return `${this.name} — зарплата: ${this.salary} ₽`;\n  }\n}\n\nclass Developer extends Employee {\n  constructor(name, salary, tech) {\n    super(name, salary); // Вызов конструктора Employee\n    this.tech = tech;\n  }\n  getInfo() {\n    return `${super.getInfo()} (Стек: ${this.tech})`;\n  }\n}\n\nconst dev = new Developer('Максим', 180000, 'React, TS');\nconsole.log(dev.getInfo());",
-            "explanation": "extends и super реализуют чистое полиморфное наследование."
+            "code": "class User {\n  // Конструктор экземпляра\n  constructor(name, email) {\n    this.name = name;\n    this.email = email;\n    this.createdAt = new Date();\n  }\n\n  // Метод экземпляра (сохраняется в User.prototype)\n  getProfile() {\n    return `${this.name} <${this.email}>`;\n  }\n}\n\nconst user1 = new User('Александр', 'alex@dev.ru');\nconsole.log(user1.getProfile()); // 'Александр <alex@dev.ru>'\nconsole.log(typeof User);        // 'function' (под капотом это функция!)",
+            "title": "Синтаксис класса ES6 и методы прототипа",
+            "explanation": "Метод getProfile() сохраняется в User.prototype. Вызов User() без new вызовет ошибку TypeError."
+          }
+        },
+        {
+          "title": "Наследование: extends и вызов родителя через super",
+          "content": "Построение иерархии классов через наследование:\n\n1. Ключевое слово `extends`:\n- `class Admin extends User { ... }` — связывает прототип `Admin.prototype` с `User.prototype`.\n\n2. Ключевое слово `super`:\n- **`super(...args)` в конструкторе**: вызывает конструктор родительского класса `User`.\n- ⚠️ **Железное правило JS**: в конструкторе дочернего класса ОБЯЗАТЕЛЬНО вызвать `super()` ДО первого обращения к `this`! Попытка прочитать `this.role` до `super()` вызовет `ReferenceError: Must call super constructor in derived class`!\n- **`super.method()` в методах**: позволяет вызвать родительскую реализацию метода и дополнить её (Method Overriding / Переопределение методов).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "class Admin extends User {\n  constructor(name, email, permissions = ['read']) {\n    // 1. Вызов родительского конструктора ОБЯЗАТЕЛЕН до this!\n    super(name, email);\n    this.permissions = permissions;\n  }\n\n  // Переопределение родительского метода\n  getProfile() {\n    // Вызов родительской версии через super.getProfile()\n    const baseInfo = super.getProfile();\n    return `[ADMIN] ${baseInfo} | Права: ${this.permissions.join(', ')}`;\n  }\n\n  hasAccess(permission) {\n    return this.permissions.includes(permission);\n  }\n}\n\nconst superAdmin = new Admin('Елена', 'elena@dev.ru', ['read', 'write', 'delete']);\nconsole.log(superAdmin.getProfile());\n// '[ADMIN] Елена <elena@dev.ru> | Права: read, write, delete'",
+            "title": "Наследование классов через extends и super",
+            "explanation": "super(name, email) инициализирует базовые поля в User. super.getProfile() вызывает родительский метод внутри переопределенного метода Admin."
+          }
+        },
+        {
+          "title": "Приватные поля и методы (#private) стандарта ES2022",
+          "content": "До стандарта ES2022 в JavaScript не было настоящей инкапсуляции (разработчики использовали соглашение `_privateName`, которое на самом деле было публичным).\n\nСтандарт ES2022 ввел **приватные поля и методы с префиксом `#`**:\n1. Приватное поле объявляется в теле класса: `#password;`\n2. Доступно ТОЛЬКО внутри методов этого же класса: `this.#password`.\n3. **Настоящая аппаратная приватность (Hard Privacy)**:\n- К полю `#password` НЕЛЬЗЯ обратиться снаружи: `user.#password` вызовет синтаксическую ошибку `SyntaxError: Private field '#password' must be declared in an enclosing class`!\n- Поле `#` не видно в `Object.keys(user)`, `for...in` и `JSON.stringify(user)`.\n- Дочерние классы `extends` также НЕ имеют доступа к приватным полям родителя (для доступа используют публичные геттеры).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "class BankAccount {\n  // 1. Приватные поля (доступны только внутри BankAccount)\n  #balance = 0;\n  #pinCode;\n\n  constructor(initialDeposit, pin) {\n    this.#balance = initialDeposit;\n    this.#pinCode = pin;\n  }\n\n  deposit(amount) {\n    if (amount <= 0) throw new Error('Некорректная сумма');\n    this.#balance += amount;\n    return this.#balance;\n  }\n\n  withdraw(amount, pin) {\n    if (pin !== this.#pinCode) throw new Error('Неверный PIN!');\n    if (amount > this.#balance) throw new Error('Недостаточно средств!');\n    this.#balance -= amount;\n    return this.#balance;\n  }\n\n  getBalance(pin) {\n    if (pin !== this.#pinCode) throw new Error('Доступ запрещен');\n    return this.#balance;\n  }\n}\n\nconst account = new BankAccount(10000, 1234);\naccount.deposit(5000);\nconsole.log(account.getBalance(1234)); // 15000\n// console.log(account.#balance); // ❌ SyntaxError! Приватно на уровне движка V8",
+            "title": "Инкапсуляция данных через приватные поля #balance и #pinCode",
+            "explanation": "Приватные поля с решеткой # физически защищены от прямого чтения и изменения снаружи класса движком JavaScript."
+          }
+        },
+        {
+          "title": "Геттеры, Сеттеры (get/set) и Статические методы (static)",
+          "content": "Продвинутые механизмы классов:\n\n1. **Геттеры (`get`) и Сеттеры (`set`)**:\n- Позволяют управлять доступом к свойствам как к обычным полям (без круглых скобок `()`), добавляя валидацию и вычисляемую логику:\n```javascript\nclass Product {\n  #price = 0;\n  get price() { return `${this.#price} ₽`; }\n  set price(val) { if (val < 0) throw new Error('Цена < 0'); this.#price = val; }\n}\n```\n\n2. **Статические методы и поля (`static`)**:\n- Принадлежат САМОМУ КЛАССУ, а не его экземплярам!\n- Вызываются напрямую: `User.createGuest()` или `Math.max()`.\n- Внутри статического метода `this === сам класс User` (а не объект).\n- Применение: вспомогательные функции, фабричные методы (Factory Methods), кэши и счетчики экземпляров.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "class AppConfig {\n  // 1. Статическое поле\n  static API_VERSION = 'v2.4';\n  static #instancesCount = 0;\n\n  constructor(env = 'development') {\n    this.env = env;\n    AppConfig.#instancesCount++;\n  }\n\n  // 2. Геттер\n  get isProduction() {\n    return this.env === 'production';\n  }\n\n  // 3. Статический фабричный метод\n  static createProductionConfig() {\n    return new AppConfig('production');\n  }\n\n  static getCreatedCount() {\n    return AppConfig.#instancesCount;\n  }\n}\n\nconst cfg = AppConfig.createProductionConfig();\nconsole.log(cfg.isProduction);           // true (вызов геттера без скобок!)\nconsole.log(AppConfig.API_VERSION);      // 'v2.4'\nconsole.log(AppConfig.getCreatedCount()); // 1",
+            "title": "Использование get, static полей и фабричных методов",
+            "explanation": "Геттер isProduction читается как обычное свойство cfg.isProduction. Статический метод createProductionConfig вызывается у самого класса AppConfig."
           }
         }
       ],
       "seniorTips": [
-        "Используйте классы для создания сервисов работы с API (например, `ApiService`, `StorageManager`)."
+        "Используйте нативные приватные поля `#field` стандарта ES2022 вместо устаревшего соглашения `_field` — приватные поля гарантируют 100% инкапсуляцию.",
+        "В конструкторе дочернего класса `extends` ВСЕГДА вызывайте `super()` первой строкой до любого обращения к `this`.",
+        "Используйте статические фабричные методы (`static fromJSON(json)`) для создания объектов с комплексной валидацией.",
+        "Геттеры `get` должны быть чистыми функциями без сайд-эффектов — они должны только возвращать значение, не мутируя состояние."
       ],
       "commonMistakes": [
         {
-          "bad": "class Dev extends User { constructor() { /* Забыт super() -> ReferenceError! */ } }",
-          "good": "class Dev extends User { constructor(name) { super(name); } }",
-          "reason": "В производных классах вызов super() строго обязателен перед использованием this."
+          "bad": "// this до вызова super() в дочернем классе\nclass Admin extends User {\n  constructor(name, role) {\n    this.role = role; // ❌ ReferenceError!\n    super(name);\n  }\n}",
+          "good": "class Admin extends User {\n  constructor(name, role) {\n    super(name); // ✅ super вызывается первым\n    this.role = role;\n  }\n}",
+          "reason": "В производных классах объект this создается родительским конструктором. До вызова super() ключевое слово this не существует."
+        },
+        {
+          "bad": "// Вызов статического метода у экземпляра\nconst user = new User('Alex');\nuser.createGuest(); // ❌ TypeError: user.createGuest is not a function",
+          "good": "User.createGuest(); // ✅ Вызывается у самого класса",
+          "reason": "Статические методы static привязаны к функции-конструктору User, а не к его прототипу User.prototype."
+        },
+        {
+          "bad": "// Рекурсивный сеттер (переполнение стека)\nclass Item {\n  set price(val) {\n    this.price = val; // ❌ Бесконечная рекурсия RangeError!\n  }\n}",
+          "good": "class Item {\n  #price;\n  set price(val) {\n    this.#price = val; // ✅ Запись в приватное поле\n  }\n}",
+          "reason": "this.price = val внутри сеттера price снова вызывает этот же сеттер, приводя к переполнению стека (Maximum call stack size exceeded)."
         }
       ],
       "keyTakeaways": [
-        "class создает шаблон объектов.",
-        "extends и super реализуют наследование.",
-        "static методы вызываются через имя класса."
+        "`class` — удобный синтаксис над функциями-конструкторами со строгим режимом `'use strict'`.",
+        "`extends` и `super()` обеспечивают наследование, при этом `super()` обязан вызываться до `this`.",
+        "Приватные поля `#field` стандарта ES2022 обеспечивают настоящую аппаратную инкапсуляцию.",
+        "Геттеры `get` и сеттеры `set` управляют свойствами с валидацией без вызова со скобками.",
+        "`static` методы и поля принадлежат самому классу и служат фабриками и утилитами."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"cls-demo\"><h3>Классы ES6</h3><p id=\"cls-out\"></p></div>",
-      "initialCss": ".cls-demo { padding: 20px; background: white; border-radius: 12px; }",
-      "initialJs": "class Product {\n  constructor(name, price) { this.name = name; this.price = price; }\n  format() { return `${this.name} стоит ${this.price} ₽`; }\n}\nconst p = new Product('Монитор 4K', 45000);\ndocument.getElementById('cls-out').textContent = p.format();",
-      "instructions": "Посмотрите создание экземпляра класса через new Product()."
+      "initialHtml": "<div id=\"class-app\">\n  <h3>Интерактивный Банковский Счёт (ООП)</h3>\n  <div id=\"balance-display\" style=\"font-size:24px; font-weight:bold; color:#2dff8a; margin:12px 0;\">Баланс: 0 ₽</div>\n  <div style=\"display:flex; gap:8px;\">\n    <button id=\"dep-btn\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 12px; font-weight:bold; cursor:pointer;\">+ Пополнить 1000 ₽</button>\n    <button id=\"wd-btn\" style=\"background:#ffb02e; color:#0a0e13; border:none; padding:8px 12px; font-weight:bold; cursor:pointer;\">- Снять 500 ₽</button>\n  </div>\n  <pre id=\"bank-log\" style=\"margin-top:12px; color:#8b949e; font-size:12px;\"></pre>\n</div>",
+      "initialCss": "#class-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "class Account {\n  #balance = 0;\n  constructor(initial = 0) { this.#balance = initial; }\n  deposit(amt) { this.#balance += amt; return this.#balance; }\n  withdraw(amt) {\n    if (amt > this.#balance) throw new Error('Недостаточно средств');\n    this.#balance -= amt;\n    return this.#balance;\n  }\n  get balanceFormatted() { return `${this.#balance} ₽`; }\n}\n\nconst acc = new Account(1000);\nconst bEl = document.getElementById('balance-display');\nconst log = document.getElementById('bank-log');\nbEl.textContent = 'Баланс: ' + acc.balanceFormatted;\n\ndocument.getElementById('dep-btn').onclick = () => {\n  acc.deposit(1000);\n  bEl.textContent = 'Баланс: ' + acc.balanceFormatted;\n  log.textContent += '✓ Пополнение 1000 ₽\\n';\n};\n\ndocument.getElementById('wd-btn').onclick = () => {\n  acc.withdraw(500);\n  bEl.textContent = 'Баланс: ' + acc.balanceFormatted;\n  log.textContent += '✓ Снятие 500 ₽\\n';\n};",
+      "instructions": "Практика с классами:\n1. Пополните и снимите средства с баланса\n2. Попробуйте прочитать acc.#balance в консоли — получите ошибку приватности\n3. Создайте класс PremiumAccount extends Account с кэшбэком"
     },
     "task": {
-      "title": "Создание класса с наследованием",
-      "scenario": "Создайте класс Vehicle и производный класс Car с вызовом super.",
+      "title": "Разработка модульной системы интернет-магазина на ES6+ классах с наследованием и приватностью",
+      "scenario": "Вам необходимо спроектировать иерархию классов для корзины интернет-магазина: базовый класс Item с приватным полем #price, геттером/сеттером с валидацией, производный класс DiscountedItem extends Item со скидкой, и класс ShoppingCart со статическим методом createGuestCart().",
       "criteria": [
-        "Созданы классы с extends и super"
+        "Класс Item содержит приватное поле #price и валидацию в сеттере (цена >= 0)",
+        "Класс DiscountedItem наследуется через extends и вызывает super()",
+        "DiscountedItem переопределяет геттер totalPrice с учетом процента скидки",
+        "Класс ShoppingCart содержит методы addItem, removeItem, getCartTotal",
+        "ShoppingCart имеет статический фабричный метод createGuestCart()"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Реализуйте классы Item, DiscountedItem и ShoppingCart\nclass Item {\n  // Ваш код\n}"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "Объявите #price; и геттер get price() { return this.#price; }",
+        "В DiscountedItem: constructor(name, price, discount) { super(name, price); this.discount = discount; }",
+        "В ShoppingCart: static createGuestCart() { return new ShoppingCart('guest'); }"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "class Vehicle {\n  constructor(brand) { this.brand = brand; }\n}\nclass Car extends Vehicle {\n  constructor(brand, model) {\n    super(brand);\n    this.model = model;\n  }\n}\nconst c = new Car('Audi', 'RS6');\nconsole.log(`${c.brand} ${c.model}`);",
-        "explanation": "Наследование классов ES6."
+        "js": "class Item {\n  #price = 0;\n\n  constructor(name, price) {\n    this.name = name;\n    this.price = price; // Вызов сеттера для валидации\n  }\n\n  get price() {\n    return this.#price;\n  }\n\n  set price(newPrice) {\n    if (typeof newPrice !== 'number' || newPrice < 0) {\n      throw new Error('Цена должна быть положительным числом');\n    }\n    this.#price = newPrice;\n  }\n\n  get totalPrice() {\n    return this.#price;\n  }\n}\n\nclass DiscountedItem extends Item {\n  constructor(name, price, discountPercent = 0) {\n    super(name, price);\n    this.discountPercent = discountPercent;\n  }\n\n  get totalPrice() {\n    const base = super.totalPrice;\n    return base - (base * this.discountPercent) / 100;\n  }\n}\n\nclass ShoppingCart {\n  #items = [];\n\n  constructor(userId) {\n    this.userId = userId;\n  }\n\n  addItem(item) {\n    if (!(item instanceof Item)) throw new TypeError('Item must be instance of Item');\n    this.#items.push(item);\n  }\n\n  removeItem(itemName) {\n    this.#items = this.#items.filter((i) => i.name !== itemName);\n  }\n\n  getCartTotal() {\n    return this.#items.reduce((sum, item) => sum + item.totalPrice, 0);\n  }\n\n  get itemsCount() {\n    return this.#items.length;\n  }\n\n  static createGuestCart() {\n    return new ShoppingCart('guest_' + Math.random().toString(36).slice(2, 7));\n  }\n}\n\n// Тест системы\nconst cart = ShoppingCart.createGuestCart();\ncart.addItem(new Item('Клавиатура', 5000));\ncart.addItem(new DiscountedItem('Мышь', 3000, 10)); // 2700 ₽\nconsole.log(cart.getCartTotal()); // 7700 ₽",
+        "explanation": "Иерархия классов строго соблюдает принципы ООП: инкапсуляция через приватные поля #price и #items, полиморфизм геттера totalPrice, наследование через extends/super и статический фабричный метод."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j11-q1",
-          "question": "Какое ключевое слово вызывает конструктор родительского класса?",
+          "id": "js11-q1",
+          "question": "Какое ключевое правило действует при вызове конструктора в дочернем классе (extends)?",
           "options": [
-            "parent()",
-            "super()",
-            "base()",
-            "this()"
+            "Конструктор вообще не нужен",
+            "ОБЯЗАТЕЛЬНО вызвать super(...args) ДО любого обращения к ключевому слову this, иначе возникнет ReferenceError",
+            "super вызывается в самом конце метода",
+            "super нужен только в стрелочных функциях"
           ],
           "correctIndex": 1,
-          "explanation": "super() вызывает конструктор родительского класса."
+          "explanation": "В производных классах объект экземпляра this создается родительским конструктором. До вызова super() обращение к this вызывает ReferenceError."
+        },
+        {
+          "id": "js11-q2",
+          "question": "Как объявить настоящее приватное поле класса в современном стандарте JavaScript (ES2022+)?",
+          "options": [
+            "private myField = 10;",
+            "С префиксом решетки: #myField = 10; (поле недоступно снаружи класса на уровне движка V8)",
+            "_myField = 10;",
+            "local myField = 10;"
+          ],
+          "correctIndex": 1,
+          "explanation": "Синтаксис приватных полей #field обеспечивает нативную инкапсуляцию. Попытка прочитать user.#field снаружи вызовет SyntaxError."
+        },
+        {
+          "id": "js11-q3",
+          "question": "Как вызываются статические методы класса (static)?",
+          "options": [
+            "У экземпляра: const u = new User(); u.staticMethod();",
+            "Напрямую у самого класса: User.staticMethod()",
+            "Только через setTimeout",
+            "Только внутри конструктора"
+          ],
+          "correctIndex": 1,
+          "explanation": "Статические методы static привязаны к функции-конструктору самого класса и вызываются напрямую через имя класса (e.g., User.createGuest(), Math.max())."
+        },
+        {
+          "id": "js11-q4",
+          "question": "Чем классы ES6 отличаются от обычных функций-конструкторов?",
+          "options": [
+            "Классы всегда выполняются в строгом режиме 'use strict', не всплывают (No Hoisting) и требуют обязательного вызова с ключевым словом new",
+            "Классы не поддерживают методы",
+            "Классы работают медленнее",
+            "Разницы нет"
+          ],
+          "correctIndex": 0,
+          "explanation": "Классы автоматически работают в 'use strict', не позволяют вызов без new (TypeError) и не подвержены всплытию Hoisting."
+        },
+        {
+          "id": "js11-q5",
+          "question": "Что происходит при обращении к геттеру (get propertyName()) экземпляра класса?",
+          "options": [
+            "Геттер вызывается как обычное свойство obj.propertyName БЕЗ круглых скобок () и возвращает вычисленное значение",
+            "Геттер требует обязательного вызова со скобками obj.propertyName()",
+            "Геттер удаляет свойство",
+            "Геттер делает асинхронный сетевой запрос"
+          ],
+          "correctIndex": 0,
+          "explanation": "Геттеры в классах объявляются с ключевым словом get, а читаются как обычные свойства без круглых скобок (e.g. user.fullName)."
         }
       ]
     }

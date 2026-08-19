@@ -1953,85 +1953,191 @@ export const cssLessons: Lesson[] = [
     "id": "css-11",
     "moduleId": "css",
     "level": 11,
-    "title": "CSS Grid: Основы",
-    "subtitle": "Display: grid, фракции fr, repeat(), сетки колонок и gap",
-    "description": "Двумерная система раскладки: создание сеток строк и колонок, единицы fr, функция repeat(), линии сетки и gap.",
-    "estimatedMinutes": 40,
+    "title": "CSS Grid: Основы и двумерные сетки",
+    "subtitle": "display: grid, фракции fr, repeat(), minmax(), gap и auto-fit/auto-fill",
+    "description": "Освойте мощнейшую систему раскладки в CSS: модуль CSS Grid. Двумерная система координат (Rows & Columns), гибкие единицы fr, функции repeat() и minmax(), адаптивные сетки без медиа-запросов через auto-fit/auto-fill и управление отступами gap.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Grid",
-      "Layout"
+      "css-grid",
+      "grid-container",
+      "fr-units",
+      "minmax",
+      "auto-fit",
+      "repeat",
+      "gap",
+      "layout"
     ],
     "theory": {
-      "overview": "CSS Grid Layout — система двумерной раскладки строк и колонок одновременно.",
+      "overview": "CSS Grid Layout — самая мощная и совершенная система верстки в современном CSS. В отличие от Flexbox, который работает только в одном измерении (либо строка, либо колонка), CSS Grid является **двумерной (2D)** системой, позволяя одновременно управлять и строками, и столбцами.\n\nGrid полностью устраняет потребность в сторонних CSS-фреймворках (Bootstrap, Tailwind Grid), позволяя создавать адаптивные каталоги товаров, сложные асимметричные дашборды и макеты страниц всего в пару строк декларативного кода. В этом уроке мы изучим фундаментальные свойства grid-контейнера.",
       "sections": [
         {
-          "title": "Сетки и fr",
-          "content": "- `display: grid`: активирует grid.\n- `grid-template-columns: repeat(3, 1fr)`: 3 равные колонки.\n- `fr`: доля свободного пространства.\n- `gap: 20px`: отступ между ячейками.",
+          "title": "Двумерная координатная сетка: Grid vs Flexbox",
+          "content": "Принципиальное отличие Grid от Flexbox:\n\n1. **Flexbox (1D — одномерный)**:\n- Элементы выстраиваются вдоль ОДНОЙ оси (Main Axis). Перенос на новую строку (`flex-wrap`) создает независимые строки, ячейки которых не выравниваются по колонкам с соседними строками.\n- Идеален для: компонентов (кнопка с иконкой, строка навбара, аватарка + имя).\n\n2. **CSS Grid (2D — двумерный)**:\n- Управляет СТРОКАМИ И СТОЛБЦАМИ ОДНОВРЕМЕННО в единой координатной сетке.\n- Все ячейки строго согласованы по вертикальным и горизонтальным направляющим (Grid Lines).\n- Идеален для: общего каркаса страницы (Header/Sidebar/Content/Footer), каталогов карточек, дашбордов и фотогалерей.\n\n3. Активация Grid:\n`display: grid;` на родительском элементе превращает его в grid-контейнер, а всех прямых потомков — в grid-элементы (grid items).",
+          "image": {
+            "src": "/images/lessons/css-grid-fundamentals.svg",
+            "alt": "CSS Grid основы: двумерные сетки, fr, repeat, minmax и auto-fit",
+            "caption": "CSS Grid управляет строками и столбцами одновременно. auto-fit + minmax создают адаптивную сетку без единого media-запроса"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Сетка из 3 колонок",
-            "code": ".grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }",
-            "explanation": "3 равные колонки."
+            "code": "/* Базовый 3-колоночный Grid-контейнер */\n.dashboard-grid {\n  display: grid;\n  /* 3 колонки: левая 200px, центральная гибкая, правая 300px */\n  grid-template-columns: 200px 1fr 300px;\n  /* 2 строки: шапка 60px, контент по размеру */\n  grid-template-rows: 60px auto;\n  gap: 20px; /* Отступы между ячейками */\n}",
+            "title": "Создание двумерной координатной сетки через grid-template",
+            "explanation": "grid-template-columns задает ширину 3 колонок, grid-template-rows — высоту строк, а gap — отступы между всеми ячейками."
+          }
+        },
+        {
+          "title": "Единица измерения fr (Fraction) и функция repeat()",
+          "content": "Специализированные инструменты CSS Grid:\n\n1. **Единица `fr` (Fractional Unit — Доля свободного места)**:\n- Представляет собой долю ДОСТУПНОГО свободного пространства внутри grid-контейнера.\n- `grid-template-columns: 1fr 2fr 1fr;` — делит свободное место на 4 части: центральная колонка получит 2/4 (50%), а боковые — по 1/4 (25%).\n- В отличие от процентов (`%`), `fr` автоматически вычитает размер `gap` и фиксированных колонок (`px`), исключая появление горизонтального скролла!\n\n2. **Функция `repeat(count, track)`**:\n- Избавляет от дублирования значений:\n- `grid-template-columns: repeat(4, 1fr);` — создает 4 равные колонки по `1fr`.\n- `grid-template-columns: repeat(3, 100px 1fr);` — чередует: `100px 1fr 100px 1fr 100px 1fr`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Сетка из 4 абсолютно равных адаптивных колонок */\n.pricing-table {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 16px;\n}\n\n/* 2. Комбинация фиксированного сайдбара и гибких колонок */\n.admin-layout {\n  display: grid;\n  grid-template-columns: 260px repeat(2, 1fr);\n  gap: 24px;\n}",
+            "title": "Использование единиц fr и функции repeat()",
+            "explanation": "repeat(4, 1fr) лаконично создает 4 равные колонки, автоматически пересчитывающие размер при изменении ширины окна."
+          }
+        },
+        {
+          "title": "Функция minmax() и неявная сетка (Implicit Grid)",
+          "content": "Управление диапазонами размеров ячеек:\n\n1. **Функция `minmax(min, max)`**:\n- Задает диапазон допустимого размера трека: размер не может быть меньше `min` и больше `max`.\n- `minmax(200px, 1fr)` — колонка не сожмется меньше 200px, но сможет расти и забирать свободное место.\n- `minmax(100px, auto)` — минимальная высота строки 100px, но если контента много — строка плавно увеличится под контент.\n\n2. **Явная (Explicit) vs Неявная (Implicit) сетка**:\n- Явная сетка: строки и столбцы, явно объявленные через `grid-template-columns` и `grid-template-rows`.\n- Неявная сетка: если элементов больше, чем объявлено ячеек, браузер автоматически создает новые строки.\n- Свойство `grid-auto-rows: 250px;` — задает высоту для всех АВТОМАТИЧЕСКИ создаваемых строк неявной сетки!",
+          "codeExample": {
+            "language": "css",
+            "code": ".cards-container {\n  display: grid;\n  grid-template-columns: repeat(3, minmax(200px, 1fr));\n  /* Все автоматически создаваемые строки будут высотой не менее 180px */\n  grid-auto-rows: minmax(180px, auto);\n  gap: 16px;\n}",
+            "title": "Использование minmax() и grid-auto-rows для неявной сетки",
+            "explanation": "grid-auto-rows гарантирует аккуратную высоту для любых новых карточек, пришедших из API, даже если их 100 штук."
+          }
+        },
+        {
+          "title": "Революция адаптивности: auto-fit vs auto-fill БЕЗ медиа-запросов",
+          "content": "Самый знаменитый и мощный однострочник в истории CSS:\n`grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));`\n\nКак работает эта магия:\n1. Браузер сам вычисляет, сколько колонок минимальной шириной 280px помещается в контейнер:\n- На смартфоне 360px: помещается 1 колонка -> растягивается на 100% (1fr).\n- На планшете 768px: помещаются 2 колонки по 370px.\n- На ноутбуке 1200px: помещаются 4 колонки по 285px.\n- На 4K мониторе: помещаются 8 колонок.\n2. **БЕЗ ЕДИНОГО `@media` запроса!** Сетка полностью адаптивна от мобилок до 8K экранов!\n\nРазница между `auto-fit` и `auto-fill`:\n- **`auto-fit`** (используется в 95% случаев): если элементов меньше, чем колонок (например, всего 2 карточки на 4K экране), `auto-fit` схлопывает пустые треки и РАСТЯГИВАЕТ существующие карточки на всю ширину.\n- **`auto-fill`**: оставляет пустые невидимые колонки справа, сохраняя жесткий размер карточек.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Идеальная самоадаптирующаяся сетка каталога товаров */\n.product-catalog {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));\n  gap: 20px;\n  padding: 24px;\n}\n\n.product-card {\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 12px;\n  padding: 16px;\n}",
+            "title": "Адаптивная сетка repeat(auto-fit, minmax(260px, 1fr))",
+            "explanation": "Эта строка заменяет десятки строк media-запросов, автоматически перестраивая количество колонок под любую ширину экрана."
           }
         }
       ],
       "seniorTips": [
-        "Используйте Grid для 2D каркасов, Flexbox — для выравнивания внутри."
+        "Используйте `repeat(auto-fit, minmax(280px, 1fr))` для всех каталогов карточек — это адаптивный стандарт де-факто, избавляющий от десятков хрупких `@media` брейкпоинтов.",
+        "Всегда используйте единицы `fr` вместо процентов `%` внутри Grid — `fr` автоматически учитывает отступы `gap`, предотвращая выпадение элементов за край.",
+        "Задавайте `grid-auto-rows: minmax(100px, auto)` при динамической подгрузке данных, чтобы новые строки автоматически получали правильную высоту.",
+        "Помните: Flexbox — для одномерных компонентов (кнопки, навбар), а CSS Grid — для двумерных каркасов страниц и сеток карточек."
       ],
       "commonMistakes": [
         {
-          "bad": "Верстать 2D сетки вложенными flexbox",
-          "good": "display: grid; grid-template-columns: repeat(3, 1fr);",
-          "reason": "Grid требует меньше кода и проще в поддержке."
+          "bad": "/* Проценты в Grid с отступами gap */\n.grid { grid-template-columns: 33.3% 33.3% 33.3%; gap: 20px; } /* Горизонтальный скролл! */",
+          "good": ".grid { grid-template-columns: repeat(3, 1fr); gap: 20px; }",
+          "reason": "33.3% * 3 = 100% + gap (40px) превышает ширину контейнера, вызывая горизонтальную прокрутку. fr автоматически вычитает gap."
+        },
+        {
+          "bad": "/* Куча media-запросов для сетки */\n@media (max-width: 600px) { ... }\n@media (max-width: 900px) { ... }\n@media (max-width: 1200px) { ... }",
+          "good": ".grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }",
+          "reason": "repeat(auto-fit, minmax(...)) заменяет все эти медиа-запросы одной строкой, работая плавно на любых нестандартных разрешениях."
+        },
+        {
+          "bad": "/* Использование Flexbox там, где нужен Grid */\n/* Попытки выровнять карточки в 3 колонки через flex-basis: 30% + margin */",
+          "good": "display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;",
+          "reason": "Flexbox не гарантирует выравнивание колонок между разными строками при переносе. Grid создает строгую координатную сетку."
         }
       ],
       "keyTakeaways": [
-        "Grid управляет 2D сеткой (строки + колонки).",
-        "repeat(N, 1fr) создает N равных колонок."
+        "CSS Grid — двумерная система верстки, управляющая строками и колонками одновременно.",
+        "`fr` (Fraction) делит свободное место, автоматически вычитая отступы `gap`.",
+        "`repeat(auto-fit, minmax(280px, 1fr))` создает идеальную адаптивную сетку без медиа-запросов.",
+        "`minmax()` задает минимальные и максимальные границы размеров ячеек.",
+        "`grid-auto-rows` управляет геометрией автоматически генерируемых строк неявной сетки."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"grid-demo\"><div class=\"g\">1</div><div class=\"g\">2</div><div class=\"g\">3</div></div>",
-      "initialCss": ".grid-demo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; background: white; border-radius: 12px; }\n.g { padding: 20px; background: #e0e7ff; color: #3730a3; border-radius: 8px; font-weight: bold; text-align: center; }",
-      "initialJs": "console.log('Grid loaded');",
-      "instructions": "Измените repeat(3, 1fr) на repeat(2, 1fr)."
+      "initialHtml": "<div class=\"grid-sandbox\">\n  <div class=\"grid-box\" id=\"gb\">\n    <div class=\"g-cell\">Card 1</div>\n    <div class=\"g-cell\">Card 2</div>\n    <div class=\"g-cell\">Card 3</div>\n    <div class=\"g-cell\">Card 4</div>\n    <div class=\"g-cell\">Card 5</div>\n    <div class=\"g-cell\">Card 6</div>\n  </div>\n</div>",
+      "initialCss": ".grid-sandbox { padding: 16px; background: #0a0e13; font-family: monospace; }\n.grid-box {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));\n  gap: 12px;\n  background: #0d1117;\n  padding: 12px;\n  border-radius: 8px;\n  border: 1px dashed #30363d;\n}\n.g-cell {\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  border-radius: 6px;\n  padding: 16px;\n  color: #2dff8a;\n  text-align: center;\n}",
+      "initialJs": "console.log('Песочница CSS Grid активна');",
+      "instructions": "Практика с CSS Grid:\n1. Измените размер окна браузера и наблюдайте, как карточки плавно перестраиваются\n2. Измените grid-template-columns на 1fr 2fr 1fr\n3. Замените auto-fit на auto-fill и посмотрите на разницу"
     },
     "task": {
-      "title": "Сетка карточек",
-      "scenario": "Создайте сетку из 3 колонок с gap: 16px.",
+      "title": "Верстка адаптивного каталога курсов на CSS Grid без медиа-запросов",
+      "scenario": "Вам необходимо сверстать каталог курсов Академии стажёров: карточки должны быть размещены в двумерной сетке CSS Grid с автоматической адаптивностью repeat(auto-fit, minmax(260px, 1fr)), отступами gap: 20px, минимальной высотой строк grid-auto-rows: minmax(200px, auto) и стильной киберпанк-стилизацией.",
       "criteria": [
-        "Задан display: grid",
-        "Колонки repeat(3, 1fr)",
-        "Задан gap: 16px"
+        "Каталог использует display: grid",
+        "Применена адаптивная формула repeat(auto-fit, minmax(260px, 1fr))",
+        "Заданы отступы через свойство gap",
+        "Настроена высота неявных строк через grid-auto-rows: minmax()",
+        "Сетка работает адаптивно без единого @media запроса"
       ],
       "starterCode": {
-        "html": "<div class=\"grid-box\"><div>1</div><div>2</div><div>3</div></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте Grid-сетку каталога */\n.courses-catalog {\n}\n.course-item {\n}"
       },
       "hints": [
-        "Задайте .grid-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }"
+        "Используйте display: grid;",
+        "Колонки: grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));",
+        "Отступы: gap: 20px;"
       ],
       "solution": {
-        "html": "<div class=\"grid-box\"><div>1</div><div>2</div><div>3</div></div>",
-        "css": ".grid-box { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 16px; background: white; border-radius: 8px; }\n.grid-box > div { padding: 20px; background: #f1f5f9; border-radius: 8px; text-align: center; font-weight: bold; }",
-        "explanation": "3-колоночная сетка."
+        "css": ".courses-catalog {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));\n  grid-auto-rows: minmax(200px, auto);\n  gap: 20px;\n  padding: 24px;\n  background: #0a0e13;\n}\n\n.course-item {\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 12px;\n  padding: 20px;\n  display: flex;\n  flex-direction: column;\n  color: #e6edf3;\n  transition: border-color 0.2s ease, transform 0.2s ease;\n}\n\n.course-item:hover {\n  border-color: #2dff8a;\n  transform: translateY(-2px);\n}",
+        "explanation": "Сетка построена на чистом CSS Grid с авто-адаптацией через auto-fit + minmax, едиными отступами gap и гибкой высотой строк grid-auto-rows."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c11-q1",
-          "question": "Что означает 1fr?",
+          "id": "css11-q1",
+          "question": "В чём заключается фундаментальное отличие CSS Grid от Flexbox?",
           "options": [
-            "1px",
-            "1 доля свободного места",
-            "1 фрейм",
-            "1%"
+            "Flexbox работает только со шрифтами",
+            "CSS Grid — двумерная (2D) система, управляющая строками и столбцами одновременно, а Flexbox — одномерная (1D) система, выстраивающая элементы вдоль одной главной оси",
+            "Grid работает только в Firefox",
+            "Grid устарел"
           ],
           "correctIndex": 1,
-          "explanation": "fr — доля свободного пространства."
+          "explanation": "Flexbox управляет элементами вдоль одной линии (1D). CSS Grid создает двумерную матрицу (2D), согласуя положение ячеек по строкам и столбцам одновременно."
+        },
+        {
+          "id": "css11-q2",
+          "question": "Что означает единица измерения 1fr в CSS Grid?",
+          "options": [
+            "1 фрейм анимации",
+            "1 доля (Fraction) доступного свободного пространства внутри grid-контейнера после вычета фиксированных колонок и gap",
+            "1 физический миллиметр",
+            "100 пикселей"
+          ],
+          "correctIndex": 1,
+          "explanation": "1fr представляет собой одну долю свободного места. Две колонки по 1fr разделят доступное пространство поровну (50% на 50%)."
+        },
+        {
+          "id": "css11-q3",
+          "question": "Как работает формула grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));?",
+          "options": [
+            "Создает ровно 280 колонок",
+            "Автоматически вычисляет максимальное число колонок минимальной шириной 280px, помещающихся в контейнер, и растягивает их на всю ширину БЕЗ медиа-запросов",
+            "Отключает адаптивность",
+            "Фиксирует размер экрана"
+          ],
+          "correctIndex": 1,
+          "explanation": "auto-fit динамически подбирает количество колонок под ширину экрана. На мобилке будет 1 колонка, на планшете 2, на 4K мониторе 6 — полностью без @media."
+        },
+        {
+          "id": "css11-q4",
+          "question": "В чём разница между auto-fit и auto-fill при малом количестве элементов?",
+          "options": [
+            "Разницы нет",
+            "auto-fit схлопывает пустые неиспользуемые колонки и растягивает существующие карточки на всю ширину, а auto-fill оставляет пустые слоты справа",
+            "auto-fill запрещен стандартом W3C",
+            "auto-fit не поддерживает minmax"
+          ],
+          "correctIndex": 1,
+          "explanation": "Если у вас всего 2 карточки на широком экране, auto-fit растянет их на весь экран, а auto-fill сохранит их компактными, оставив пустые ячейки справа."
+        },
+        {
+          "id": "css11-q5",
+          "question": "Какое свойство задает высоту для автоматически создаваемых строк неявной сетки (Implicit Grid)?",
+          "options": [
+            "grid-auto-rows",
+            "implicit-height",
+            "row-auto-size",
+            "grid-row-gap"
+          ],
+          "correctIndex": 0,
+          "explanation": "Свойство grid-auto-rows определяет размер для всех строк, которые браузер генерирует автоматически при добавлении новых элементов сверх объявленных в grid-template-rows."
         }
       ]
     }

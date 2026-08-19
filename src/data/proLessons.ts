@@ -1942,5 +1942,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-11",
+    "moduleId": "pro",
+    "level": 11,
+    "title": "Реалтайм-коммуникация: WebSockets, Server-Sent Events (SSE) и Polling",
+    "subtitle": "Short/Long Polling, SSE EventSource, WebSockets (wss://), Heartbeat, Reconnection и архитектура онлайн-чата",
+    "description": "Освойте разработку приложений реального времени (Real-Time Web): архитектурное сравнение Polling vs Server-Sent Events (SSE) vs WebSockets, подключение по протоколу wss://, обработку разрывов связи (Heartbeat / Ping-Pong), алгоритм Exponential Backoff переподключения и реализацию отказоустойчивого клиента.",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "websockets",
+      "sse",
+      "polling",
+      "realtime",
+      "event-source",
+      "heartbeat",
+      "reconnection",
+      "chat"
+    ],
+    "theory": {
+      "overview": "Традиционная модель веба построена на однократных HTTP-запросах (Pull Model): клиент запрашивает данные — сервер отвечает и разрывает соединение. Однако современные сервисы (онлайн-чаты, биржевые дашборды, стриминг ответов нейросетей ChatGPT, совместная работа в Figma/Google Docs) требуют мгновенной доставки данных без задержек (Push Model).\n\nВ этом уроке мы разберём эволюцию технологий реального времени: от ресурсоемкого Polling до однонаправленного **Server-Sent Events (SSE)** и полнодуплексного **WebSockets (`wss://`)**, настроим надежное переподключение с Exponential Backoff и механизм контроля активности Heartbeat.",
+      "sections": [
+        {
+          "title": "Эволюция реалтайма: Polling vs Server-Sent Events (SSE) vs WebSockets",
+          "content": "Сравнение 3 подходов к получению данных в реальном времени:\n\n1. **Short Polling (Короткий опрос)**:\n- Клиент шлет обычный GET-запрос каждые 2–5 секунд через `setInterval`.\n- Минусы: 95% запросов возвращают пустые ответы, огромный оверхед HTTP-заголовков (1–2 КБ на каждый запрос), колоссальная нагрузка на сервер и базу данных!\n\n2. **Server-Sent Events (SSE / `EventSource`)**:\n- **Однонаправленный Push-поток** от сервера к клиенту поверх стандартного HTTP/2.\n- Плюсы: встроенное автоматическое переподключение, поддержка событий по именам (`event: message`), работает через стандартные HTTPS порты и прокси.\n- Идеален для: **стриминга ответов LLM (ChatGPT / Claude)**, биржевых котировок, лент уведомлений.\n\n3. **WebSockets (`ws://` и защищенный `wss://`)**:\n- **Полнодуплексный (Full-Duplex) двунаправленный протокол** поверх одного постоянного TCP-соединения.\n- Клиент и сервер могут слать сообщения в ЛЮБОЙ момент одновременно с минимальным оверхедом (всего 2–10 байт на фрейм!).\n- Идеален для: онлайн-чатов, мультиплеерных игр, совместного редактирования (Figma) и трейдинга.",
+          "image": {
+            "src": "/images/lessons/web-realtime-websockets.svg",
+            "alt": "Реалтайм веб-коммуникация: Polling, Server-Sent Events (SSE) и WebSockets",
+            "caption": "Polling шлет повторные GET-запросы, SSE обеспечивает однонаправленный push со стороны сервера (LLM стриминг), WebSockets — полнодуплексную связь для чатов"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Server-Sent Events (SSE) клиент: идеален для стриминга текста нейросети\nconst eventSource = new EventSource('/api/ai/stream?prompt=React');\n\neventSource.onmessage = (event) => {\n  const chunk = JSON.parse(event.data);\n  aiOutputDiv.textContent += chunk.token;\n};\n\neventSource.onerror = (err) => {\n  console.error('SSE Ошибка/Завершение:', err);\n  eventSource.close(); // Закрываем по завершении\n};",
+            "title": "Клиент Server-Sent Events (SSE) для стриминга ответов",
+            "explanation": "EventSource держит одно постоянное HTTP-соединение, получая чанки текста от сервера по мере их генерации."
+          }
+        },
+        {
+          "title": "Протокол WebSockets: Рукопожатие (Handshake) и WebSocket API",
+          "content": "Как устанавливается и работает WebSocket-соединение:\n\n1. **HTTP Upgrade Handshake (Рукопожатие)**:\n- Клиент отправляет стандартный HTTP-запрос с заголовками:\n  `Upgrade: websocket`\n  `Connection: Upgrade`\n  `Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==`\n- Сервер отвечает статус-кодом **`101 Switching Protocols`**.\n- Протокол переключается с HTTP на постоянный бинарный сокет WebSocket (`wss://`).\n\n2. Браузерный **`WebSocket API`**:\n- `const socket = new WebSocket('wss://chat.intern.dev/ws');`\n- Событие `open` — соединение успешно установлено.\n- Событие `message` (`event.data`) — получено новое сообщение от сервера (текст JSON или бинарный `Blob/ArrayBuffer`).\n- Событие `error` — ошибка связи.\n- Событие `close` (`event.code`, `event.reason`) — соединение закрыто.\n- Метод `socket.send(JSON.stringify(payload))` — отправка данных на сервер.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Базовый WebSocket клиент\nconst socket = new WebSocket('wss://api.intern.dev/chat');\n\nsocket.addEventListener('open', () => {\n  console.log('✅ WebSocket соединение установлено!');\n  // Отправка сообщения авторизации\n  socket.send(JSON.stringify({ type: 'AUTH', token: 'jwt_token_here' }));\n});\n\nsocket.addEventListener('message', (event) => {\n  const message = JSON.parse(event.data);\n  console.log('📩 Новое сообщение:', message);\n  displayChatMessage(message);\n});\n\nsocket.addEventListener('close', (event) => {\n  console.log(`🔌 Соединение закрыто. Код: ${event.code}, Причина: ${event.reason}`);\n});",
+            "title": "Инициализация и обработка событий WebSocket в браузере",
+            "explanation": "WebSocket API предоставляет события open, message, close и error для двусторонней связи с сервером без лишних HTTP-заголовков."
+          }
+        },
+        {
+          "title": "Надежность в Production: Heartbeat (Ping/Pong) и Exponential Backoff",
+          "content": "Подводные камни WebSockets в реальном продакшне и их решение:\n\n1. **Проблема «Зомби-соединений» (Silent Drop)**:\nWi-Fi отключился или мобильный интернет переключил вышку, но браузер не получил событие `close` (сокет «завис» в полуоткрытом состоянии).\n✅ Решение — **Heartbeat (Пинг-Понг)**:\nКлиент каждые 30 секунд шлет серверу сообщение `{ type: 'PING' }` и ждет `{ type: 'PONG' }` в течение 5 секунд. Если ответ не пришел — принудительно разрывает сокет `socket.close()` и запускает реконнект!\n\n2. **Exponential Backoff Reconnection (Умный реконнект)**:\nЕсли сервер упал на перезагрузку, 10 000 клиентов не должны одновременно долбить сервер каждую миллисекунду (лавинный эффект Thundering Herd).\n✅ Задержка между попытками растет экспоненциально с добавлением случайного шума (Jitter):\n1-я попытка: 1 сек, 2-я: 2 сек, 3-я: 4 сек, 4-я: 8 сек, максимум: 30 сек.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Алгоритм Exponential Backoff с Jitter\nfunction getReconnectDelay(attempt, baseDelay = 1000, maxDelay = 30000) {\n  // Экспоненциальный рост: 1000 * 2^attempt\n  const exponential = Math.min(maxDelay, baseDelay * Math.pow(2, attempt));\n  // Добавление случайного разброса (Jitter) ±20% для предотвращения одновременных запросов\n  const jitter = exponential * (0.8 + Math.random() * 0.4);\n  return Math.round(jitter);\n}\n\nconsole.log('Попытка 0:', getReconnectDelay(0)); // ~1000 мс\nconsole.log('Попытка 1:', getReconnectDelay(1)); // ~2000 мс\nconsole.log('Попытка 2:', getReconnectDelay(2)); // ~4000 мс\nconsole.log('Попытка 3:', getReconnectDelay(3)); // ~8000 мс",
+            "title": "Вычисление задержки Exponential Backoff с Jitter для реконнекта",
+            "explanation": "Экспоненциальная задержка со случайным разбросом защищает бэкенд от лавинной перегрузки при массовом реконнекте клиентов."
+          }
+        },
+        {
+          "title": "Архитектура устойчивого WebSocket-клиента в SPA",
+          "content": "Паттерн надежного WebSocket менеджера в Single Page Application:\n\n1. **Очередь неотправленных сообщений (Offline Message Queue)**:\nЕсли пользователь отправляет сообщение во время кратковременного обрыва связи, клиент не теряет данные, а сохраняет их в массив `offlineQueue` и отправляет пачкой сразу после восстановления события `open`.\n\n2. **Управление подписками через PubSub**:\nКомпоненты чата подписываются на конкретные типы событий (`ws.on('NEW_MESSAGE', fn)`), а при размонтировании экрана отписываются, предотвращая утечки памяти.\n\n3. **Масштабирование на бэкенде**:\nКогда у вас 10 серверов приложений, WebSocket-клиенты подключены к разным инстансам. Серверы синхронизируют сообщения между собой через брокер сообщений **Redis Pub/Sub** или RabbitMQ.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Архитектурный каркас надежного WebSocket клиента\nexport class ResilientWebSocket {\n  constructor(url) {\n    this.url = url;\n    this.socket = null;\n    this.queue = [];\n    this.attempt = 0;\n    this.connect();\n  }\n\n  connect() {\n    this.socket = new WebSocket(this.url);\n    this.socket.onopen = () => {\n      this.attempt = 0;\n      // Отправка сообщений, накопившихся во время офлайна\n      while (this.queue.length > 0) {\n        this.socket.send(this.queue.shift());\n      }\n    };\n    this.socket.onclose = () => this.scheduleReconnect();\n  }\n\n  send(data) {\n    const payload = JSON.stringify(data);\n    if (this.socket?.readyState === WebSocket.OPEN) {\n      this.socket.send(payload);\n    } else {\n      this.queue.push(payload); // Сохраняем в очередь\n    }\n  }\n\n  scheduleReconnect() {\n    const delay = Math.min(30000, 1000 * Math.pow(2, this.attempt++));\n    setTimeout(() => this.connect(), delay);\n  }\n}",
+            "title": "Отказоустойчивый WebSocket клиент с очередью сообщений",
+            "explanation": "Клиент буферизует сообщения при обрыве сети и автоматически восстанавливает связь по алгоритму Exponential Backoff."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Используйте Server-Sent Events (SSE) для стриминга ответов ИИ-нейросетей (ChatGPT LLM) — SSE проще в реализации, работает поверх HTTP/2 и имеет нативный реконнект.",
+        "Для WebSockets ВСЕГДА реализуйте механизм Heartbeat (Ping/Pong каждые 30с) — без него мобильные сети незаметно 'усыпляют' TCP-сокеты без вызова события onclose.",
+        "При реконнекте ВСЕГДА применяйте Exponential Backoff со случайным шумом (Jitter), чтобы не положить сервер лавиной одновременных запросов.",
+        "Буферизуйте неотправленные сообщения пользователя в очередь Offline Queue во время кратковременных обрывов связи."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Мгновенный бесконечный реконнект без задержки\nsocket.onclose = () => socket = new WebSocket(url);",
+          "good": "socket.onclose = () => setTimeout(() => connect(), getExponentialDelay());",
+          "reason": "При падении сервера мгновенный бесконечный реконнект создаст тысячи запросов в секунду (DDoS собственного сервера)."
+        },
+        {
+          "bad": "// Использование WebSockets для простых одноразовых уведомлений\n// Поднятие тяжелого WS-сервера ради редкого уведомления раз в день",
+          "good": "// Использование SSE или Web Push Notifications",
+          "reason": "WebSockets требуют постоянного TCP соединения и расходуют ресурсы сервера. Для редких пушей лучше подходят SSE или Web Push."
+        },
+        {
+          "bad": "// Отправка данных без проверки readyState\nsocket.send(data); // ❌ InvalidStateError: WebSocket is already in CLOSING or CLOSED state",
+          "good": "if (socket.readyState === WebSocket.OPEN) { socket.send(data); } else { queue.push(data); }",
+          "reason": "Вызов send на закрытом или подключающемся сокете выбрасывает фатальное исключение."
+        }
+      ],
+      "keyTakeaways": [
+        "Polling — частые GET-запросы с большим оверхедом, SSE — однонаправленный push для AI-стриминга, WebSockets — полнодуплексный двусторонний сокет.",
+        "WebSockets стартуют с HTTP Upgrade запроса и переключаются на постоянное TCP-соединение (101 Switching Protocols).",
+        "Heartbeat (Ping/Pong) выявляет 'зомби-соединения' при обрыве сети на смартфонах.",
+        "Exponential Backoff с Jitter защищает инфраструктуру от перегрузки при массовом переподключении.",
+        "Очередь Offline Queue гарантирует доставку сообщений, отправленных во время обрыва связи."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"ws-app\">\n  <h3>Симулятор WebSockets (Онлайн-чат)</h3>\n  <div id=\"chat-window\" style=\"height:120px; overflow-y:auto; background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:8px; font-size:12px; margin-bottom:8px;\">\n    <div style=\"color:#8b949e;\">🔌 Соединение установлено: wss://chat.intern.dev</div>\n  </div>\n  <div style=\"display:flex; gap:8px;\">\n    <input id=\"msg-input\" placeholder=\"Введите сообщение...\" style=\"flex:1; padding:6px; background:#0d1117; color:#2dff8a; border:1px solid #30363d; font-family:monospace;\" />\n    <button id=\"send-btn\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:6px 14px; font-weight:bold; cursor:pointer;\">Отправить</button>\n  </div>\n</div>",
+      "initialCss": "#ws-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0a0e13; border-radius: 8px; }",
+      "initialJs": "const chat = document.getElementById('chat-window');\nconst input = document.getElementById('msg-input');\n\nfunction addMsg(author, text, isSelf) {\n  const row = document.createElement('div');\n  row.style.color = isSelf ? '#2dff8a' : '#29e7ff';\n  row.style.marginTop = '4px';\n  row.textContent = `[${author}]: ${text}`;\n  chat.appendChild(row);\n  chat.scrollTop = chat.scrollHeight;\n}\n\ndocument.getElementById('send-btn').onclick = () => {\n  if (!input.value.trim()) return;\n  addMsg('Вы', input.value, true);\n  const text = input.value;\n  input.value = '';\n  \n  // Симуляция ответа сервера через сокет\n  setTimeout(() => {\n    addMsg('Сервер', `Эхо: «${text}» получено в ${new Date().toLocaleTimeString()}`, false);\n  }, 600);\n};",
+      "instructions": "Практика с WebSockets:\n1. Отправьте сообщение в чат и получите мгновенный эхо-ответ от сокета\n2. Реализуйте симуляцию PING/PONG сообщений каждые 5 секунд\n3. Добавьте проверку статуса соединения (Online / Reconnecting)"
+    },
+    "task": {
+      "title": "Разработка отказоустойчивого WebSocket менеджера с Heartbeat и Exponential Backoff",
+      "scenario": "Вам необходимо разработать production-ready класс RealtimeClient: клиент должен устанавливать соединение по протоколу WebSocket, слать Heartbeat PING каждые 10 секунд, переподключаться по алгоритму Exponential Backoff при обрыве связи и сохранять сообщения в очередь offlineQueue при отсутствии сети.",
+      "criteria": [
+        "Класс RealtimeClient инкапсулирует подключение к WebSocket",
+        "Реализован Heartbeat таймер (отправка PING каждые 10 секунд)",
+        "Реализован алгоритм Exponential Backoff для переподключения при закрытии сокета",
+        "Метод send() сохраняет сообщения в очередь, если сокет не в состоянии OPEN",
+        "Очередь сообщений автоматически сбрасывается на сервер при открытии сокета onopen"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте класс RealtimeClient\nclass RealtimeClient {\n  constructor(url) {\n    // Ваш код\n  }\n}"
+      },
+      "hints": [
+        "Используйте this.socket.readyState === WebSocket.OPEN",
+        "Для задержки: Math.min(30000, 1000 * Math.pow(2, this.retryCount))",
+        "Таймер Heartbeat: this.heartbeatTimer = setInterval(() => this.send({ type: 'PING' }), 10000)"
+      ],
+      "solution": {
+        "js": "class RealtimeClient {\n  constructor(url) {\n    this.url = url;\n    this.socket = null;\n    this.queue = [];\n    this.retryCount = 0;\n    this.heartbeatTimer = null;\n    this.listeners = new Map();\n    this.connect();\n  }\n\n  connect() {\n    this.socket = new WebSocket(this.url);\n\n    this.socket.onopen = () => {\n      console.log('WebSocket сокет открыт');\n      this.retryCount = 0;\n      this.startHeartbeat();\n\n      // Сброс очереди сообщений\n      while (this.queue.length > 0) {\n        this.socket.send(this.queue.shift());\n      }\n    };\n\n    this.socket.onmessage = (event) => {\n      try {\n        const data = JSON.parse(event.data);\n        if (data.type === 'PONG') return; // Игнорируем Heartbeat ответ\n        const handler = this.listeners.get(data.type);\n        if (handler) handler(data);\n      } catch (err) {\n        console.error('Ошибка парсинга WS сообщения:', err);\n      }\n    };\n\n    this.socket.onclose = () => {\n      this.stopHeartbeat();\n      this.scheduleReconnect();\n    };\n  }\n\n  send(payload) {\n    const str = JSON.stringify(payload);\n    if (this.socket && this.socket.readyState === WebSocket.OPEN) {\n      this.socket.send(str);\n    } else {\n      this.queue.push(str);\n    }\n  }\n\n  on(eventType, callback) {\n    this.listeners.set(eventType, callback);\n  }\n\n  startHeartbeat() {\n    this.stopHeartbeat();\n    this.heartbeatTimer = setInterval(() => {\n      this.send({ type: 'PING' });\n    }, 10000);\n  }\n\n  stopHeartbeat() {\n    if (this.heartbeatTimer) {\n      clearInterval(this.heartbeatTimer);\n      this.heartbeatTimer = null;\n    }\n  }\n\n  scheduleReconnect() {\n    const delay = Math.min(30000, 1000 * Math.pow(2, this.retryCount++));\n    console.log(`Реконнект через ${delay} мс...`);\n    setTimeout(() => this.connect(), delay);\n  }\n}",
+        "explanation": "RealtimeClient реализует промышленный стандарт: управление очередью в офлайне, автоматический Heartbeat (PING/PONG каждые 10с), экспоненциальный реконнект и диспетчеризацию сообщений по типам."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro11-q1",
+          "question": "Какая технология реального времени является оптимальным выбором для стриминга ответов LLM нейросетей (ChatGPT / Claude)?",
+          "options": [
+            "Short Polling каждые 100 мс",
+            "Server-Sent Events (SSE / EventSource) — однонаправленный Push поток поверх HTTP/2 с автоматическим реконнектом",
+            "Отправка email писем",
+            "WebRTC Data Channel"
+          ],
+          "correctIndex": 1,
+          "explanation": "SSE идеально подходит для генерации ответов ИИ: сервер отдает чанки текста по мере готовности через стандартный HTTP-поток, не требуя двустороннего WebSockets."
+        },
+        {
+          "id": "pro11-q2",
+          "question": "С какого HTTP-статус кода начинается рукопожатие (Handshake) протокола WebSockets?",
+          "options": [
+            "200 OK",
+            "101 Switching Protocols",
+            "301 Moved Permanently",
+            "404 Not Found"
+          ],
+          "correctIndex": 1,
+          "explanation": "Сервер отвечает кодом 101 Switching Protocols в ответ на заголовок Upgrade: websocket, переключая соединение на бинарный WebSocket-протокол."
+        },
+        {
+          "id": "pro11-q3",
+          "question": "Зачем в WebSockets клиентах используется механизм Heartbeat (Ping/Pong)?",
+          "options": [
+            "Для измерения пульса пользователя",
+            "Для детектирования 'зомби-соединений' и предотвращения разрыва связи прокси-серверами и мобильными операторами при отсутствии трафика",
+            "Для сжатия изображений",
+            "Для шифрования данных"
+          ],
+          "correctIndex": 1,
+          "explanation": "Мобильные операторы и роутеры закрывают неактивные TCP-соединения без отправки события close. Heartbeat (PING/PONG каждые 30с) держит сокет активным и вовремя обнаруживает обрыв."
+        },
+        {
+          "id": "pro11-q4",
+          "question": "В чём заключается алгоритм Exponential Backoff при повторном подключении к серверу?",
+          "options": [
+            "Клиент делает запросы без остановки",
+            "Время задержки между попытками переподключения растет экспоненциально (1с → 2с → 4с → 8с ...), защищая сервер от перегрузки при массовом сбое",
+            "Клиент перезагружает страницу",
+            "Сервер удаляет клиента"
+          ],
+          "correctIndex": 1,
+          "explanation": "Экспоненциальное увеличение задержки (Exponential Backoff) предотвращает одновременную атаку тысяч клиентов на перезагружающийся сервер (лавинный эффект Thundering Herd)."
+        },
+        {
+          "id": "pro11-q5",
+          "question": "Что происходит с сообщениями, если вызвать socket.send() при socket.readyState === WebSocket.CONNECTING?",
+          "options": [
+            "Сообщения отправятся автоматически",
+            "Будет выброшено фатальное исключение InvalidStateError, поэтому сообщения нужно сохранять в очередь (Offline Queue) до события open",
+            "Сообщения сохранятся в localStorage",
+            "Браузер зависнет"
+          ],
+          "correctIndex": 1,
+          "explanation": "Попытка отправить данные в еще не открытый сокет вызывает исключение InvalidStateError. Надежные клиенты буферизуют данные в массив до события open."
+        }
+      ]
+    }
   }
 ];

@@ -1591,30 +1591,147 @@ pre code,
 
 
 /* ==========================================================================
-   THEORY SECTION IMAGES & FIGURES
+   THEORY SECTION IMAGES & FIGURES (Compact, Responsive, Click-to-Zoom)
    ========================================================================== */
 .theory-section-figure {
-  margin: 16px 0;
-  padding: 0;
-  border: 1px solid var(--line);
+  margin: 20px auto;
+  max-width: 620px;
+  border: 1px solid var(--line-2);
   border-radius: 6px;
   overflow: hidden;
-  background: var(--void);
+  background: #03060a;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theory-section-figure:hover {
+  border-color: var(--neon-dim);
+  box-shadow: 0 6px 24px rgba(45, 255, 138, 0.08);
+}
+
+.theory-image-wrapper {
+  position: relative;
+  overflow: hidden;
+  background: #03060a;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .theory-section-image {
   display: block;
   width: 100%;
-  height: auto;
+  max-height: 340px;
+  object-fit: contain;
+  background: #03060a;
   border-bottom: 1px solid var(--line);
+  transition: opacity 0.2s ease;
+}
+
+.theory-image-overlay {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(3, 6, 10, 0.85);
+  border: 1px solid var(--line-2);
+  color: var(--neon);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease, background 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.theory-section-figure:hover .theory-image-overlay {
+  opacity: 1;
+  background: rgba(3, 6, 10, 0.95);
+  border-color: var(--neon);
 }
 
 .theory-section-caption {
-  padding: 10px 16px;
-  font-size: 12px;
+  padding: 8px 14px;
+  font-size: 11px;
   font-family: var(--font-mono);
   color: var(--fg-2);
   line-height: 1.5;
   text-align: center;
   letter-spacing: 0.02em;
+  background: var(--bg-1);
+}
+
+/* Image Zoom Modal */
+.image-zoom-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.15s ease-out;
+}
+
+.image-zoom-content {
+  position: relative;
+  max-width: 960px;
+  width: 100%;
+  background: #03060a;
+  border: 1px solid var(--neon-dim);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(45, 255, 138, 0.1);
+}
+
+.image-zoom-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(3, 6, 10, 0.8);
+  border: 1px solid var(--line-2);
+  color: var(--fg-1);
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.image-zoom-close:hover {
+  background: var(--red);
+  color: #ffffff;
+  border-color: var(--red);
+}
+
+.image-zoom-img {
+  display: block;
+  width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  background: #03060a;
+}
+
+.image-zoom-caption {
+  padding: 12px 18px;
+  background: var(--bg-1);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--neon);
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import { LessonTheory } from '../../types/curriculum';
 import { CodeBlock, CodeSnippet } from './CodeBlock';
-import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2 } from 'lucide-react';
+import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2, ZoomIn, X } from 'lucide-react';
 import { formatInlineCode } from '../../utils/formatText';
 
 interface TheorySectionProps {
@@ -9,6 +9,7 @@ interface TheorySectionProps {
 }
 
 export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
+  const [zoomedImage, setZoomedImage] = React.useState<{ src: string; alt: string; caption?: string } | null>(null);
   const renderParagraphs = (text: string) => {
     return text.split('\n\n').map((para, i) => {
       const trimmed = para.trim();
@@ -69,13 +70,19 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
             </div>
 
             {section.image && (
-              <figure className="theory-section-figure">
-                <img
-                  src={section.image.src}
-                  alt={section.image.alt}
-                  className="theory-section-image"
-                  loading="lazy"
-                />
+              <figure className="theory-section-figure" onClick={() => setZoomedImage(section.image || null)}>
+                <div className="theory-image-wrapper">
+                  <img
+                    src={section.image.src}
+                    alt={section.image.alt}
+                    className="theory-section-image"
+                    loading="lazy"
+                  />
+                  <div className="theory-image-overlay">
+                    <ZoomIn size={16} />
+                    <span>Увеличить</span>
+                  </div>
+                </div>
                 {section.image.caption && (
                   <figcaption className="theory-section-caption">
                     {section.image.caption}

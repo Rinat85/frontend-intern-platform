@@ -2,6 +2,7 @@
 import { CheatSheetCategory } from '../../types/curriculum';
 import { CodeBlock } from '../lesson/CodeBlock';
 import { X, BookOpen, Search } from 'lucide-react';
+import { formatInlineCode } from '../../utils/formatText';
 
 interface CheatSheetsModalProps {
   isOpen: boolean;
@@ -80,8 +81,8 @@ export const CheatSheetsModal: React.FC<CheatSheetsModalProps> = ({
               {filteredItems.map((item, idx) => (
                 <div key={idx} className="cheatsheet-item-card">
                   <div className="cheatsheet-item-header">
-                    <h4>{item.name}</h4>
-                    <span className="cheatsheet-item-desc">{item.description}</span>
+                    <h4>{formatInlineCode(item.name)}</h4>
+                    <span className="cheatsheet-item-desc">{formatInlineCode(item.description)}</span>
                   </div>
                   <div className="cheatsheet-item-code">
                     <CodeBlock code={item.syntax} title={item.name} />

@@ -1,7 +1,8 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { QuizQuestion } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { HelpCircle, CheckCircle2, XCircle, RotateCcw, Award } from 'lucide-react';
+import { formatInlineCode } from '../../utils/formatText';
 
 interface QuizSectionProps {
   lessonId: string;
@@ -65,7 +66,7 @@ export const QuizSection: React.FC<QuizSectionProps> = ({ lessonId, questions, o
             <div key={q.id} className="quiz-question-card">
               <div className="quiz-question-title">
                 <span className="quiz-question-num">Вопрос {qIndex + 1}:</span>
-                <span>{q.question}</span>
+                <span>{formatInlineCode(q.question)}</span>
               </div>
 
               <div className="quiz-options-list">
@@ -98,7 +99,7 @@ export const QuizSection: React.FC<QuizSectionProps> = ({ lessonId, questions, o
                           <span className={`radio-dot ${isSelected ? 'active' : ''}`} />
                         )}
                       </div>
-                      <span className="quiz-option-text">{opt}</span>
+                      <span className="quiz-option-text">{formatInlineCode(opt)}</span>
                     </div>
                   );
                 })}
@@ -106,7 +107,7 @@ export const QuizSection: React.FC<QuizSectionProps> = ({ lessonId, questions, o
 
               {submitted && (
                 <div className={`quiz-explanation ${isCorrect ? 'explanation-correct' : 'explanation-wrong'}`}>
-                  <strong>{isCorrect ? 'Правильно!' : 'Неверно.'}</strong> {q.explanation}
+                  <strong>{isCorrect ? 'Правильно!' : 'Неверно.'}</strong> {formatInlineCode(q.explanation)}
                 </div>
               )}
             </div>

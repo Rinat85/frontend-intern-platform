@@ -1,8 +1,9 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { PracticalTask } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { CodeBlock } from './CodeBlock';
 import { CheckCircle2, HelpCircle, Eye, EyeOff, Target, Sparkles, CheckSquare, Square } from 'lucide-react';
+import { formatInlineCode } from '../../utils/formatText';
 
 interface TaskSectionProps {
   lessonId: string;
@@ -33,7 +34,7 @@ export const TaskSection: React.FC<TaskSectionProps> = ({ lessonId, task, onComp
           <Target size={24} className="text-accent" />
           <div>
             <h2 className="task-title">{task.title}</h2>
-            <p className="task-scenario">{task.scenario}</p>
+            <p className="task-scenario">{formatInlineCode(task.scenario)}</p>
           </div>
         </div>
         <button
@@ -61,7 +62,7 @@ export const TaskSection: React.FC<TaskSectionProps> = ({ lessonId, task, onComp
                 ) : (
                   <Square size={18} className="text-muted" />
                 )}
-                <span>{crit}</span>
+                <span>{formatInlineCode(crit)}</span>
               </div>
             );
           })}
@@ -77,7 +78,7 @@ export const TaskSection: React.FC<TaskSectionProps> = ({ lessonId, task, onComp
           {showHints && (
             <ul className="hints-list">
               {task.hints.map((hint, idx) => (
-                <li key={idx}>{hint}</li>
+                <li key={idx}>{formatInlineCode(hint)}</li>
               ))}
             </ul>
           )}
@@ -94,7 +95,7 @@ export const TaskSection: React.FC<TaskSectionProps> = ({ lessonId, task, onComp
           <div className="solution-content">
             <div className="solution-explanation">
               <Sparkles size={16} className="text-accent" />
-              <p>{task.solution.explanation}</p>
+              <p>{formatInlineCode(task.solution.explanation)}</p>
             </div>
             {task.solution.html && (
               <div className="solution-code">

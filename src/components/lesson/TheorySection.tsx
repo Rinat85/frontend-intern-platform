@@ -1,7 +1,8 @@
-import React from 'react';
+﻿import React from 'react';
 import { LessonTheory } from '../../types/curriculum';
 import { CodeBlock } from './CodeBlock';
 import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2 } from 'lucide-react';
+import { formatInlineCode } from '../../utils/formatText';
 
 interface TheorySectionProps {
   theory: LessonTheory;
@@ -20,12 +21,12 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
 
         return (
           <div key={i} className="theory-paragraph-group">
-            {nonListParts && <p className="theory-text-paragraph">{nonListParts}</p>}
+            {nonListParts && <p className="theory-text-paragraph">{formatInlineCode(nonListParts)}</p>}
             <ul className="theory-bullet-list">
               {items.map((item, j) => (
                 <li key={j}>
                   <CheckCircle2 size={15} className="inline-icon text-accent" />
-                  <span>{item.replace(/^- /, '')}</span>
+                  <span>{formatInlineCode(item.replace(/^- /, ''))}</span>
                 </li>
               ))}
             </ul>
@@ -35,7 +36,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
 
       return (
         <p key={i} className="theory-text-paragraph">
-          {trimmed}
+          {formatInlineCode(trimmed)}
         </p>
       );
     });
@@ -60,7 +61,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
           <div key={idx} className="theory-section-block">
             <div className="theory-section-header">
               <span className="theory-section-number">{idx + 1}</span>
-              <h3 className="theory-section-title">{section.title}</h3>
+              <h3 className="theory-section-title">{formatInlineCode(section.title)}</h3>
             </div>
 
             <div className="theory-section-content">
@@ -76,7 +77,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
                 />
                 {section.codeExample.explanation && (
                   <div className="theory-code-expl">
-                    <strong>Разбор кода:</strong> {section.codeExample.explanation}
+                    <strong>Разбор кода:</strong> {formatInlineCode(section.codeExample.explanation)}
                   </div>
                 )}
               </div>
@@ -99,7 +100,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
             {theory.seniorTips.map((tip, idx) => (
               <li key={idx}>
                 <CheckCircle size={18} className="text-success inline-icon" />
-                <span>{tip}</span>
+                <span>{formatInlineCode(tip)}</span>
               </li>
             ))}
           </ul>
@@ -128,7 +129,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
                   <code>{m.good}</code>
                 </div>
                 <div className="mistake-reason">
-                  <strong>Почему это важно:</strong> {m.reason}
+                  <strong>Почему это важно:</strong> {formatInlineCode(m.reason)}
                 </div>
               </div>
             ))}
@@ -142,7 +143,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
           <h4>Ключевые выводы урока (шпаргалка):</h4>
           <ul className="takeaways-list">
             {theory.keyTakeaways.map((k, idx) => (
-              <li key={idx}>{k}</li>
+              <li key={idx}>{formatInlineCode(k)}</li>
             ))}
           </ul>
         </div>
@@ -150,3 +151,4 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
     </div>
   );
 };
+ 

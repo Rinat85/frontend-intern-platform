@@ -1378,120 +1378,192 @@ export const htmlLessons: Lesson[] = [
     "moduleId": "html",
     "level": 8,
     "title": "Списки и таблицы данных",
-    "subtitle": "Теги ul, ol, dl, table, thead, tbody, th, colspan и rowspan",
-    "description": "Структурирование данных: маркированные и нумерованные списки, списки определений, анатомия сложных таблиц с шапкой, подвалом и объединением ячеек.",
-    "estimatedMinutes": 35,
+    "subtitle": "ul, ol, dl, семантические таблицы (thead, tbody, tfoot), colspan/rowspan, scope и адаптивные таблицы",
+    "description": "Освойте структурирование сложных данных в HTML5: маркированные, нумерованные и ассоциативные списки описаний (dl/dt/dd), анатомию доступных таблиц с thead, tbody, tfoot, caption, scope, объединение ячеек colspan/rowspan и адаптивные техники.",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "HTML",
-      "Lists",
-      "Tables",
-      "Data",
-      "Accessibility"
+      "tables",
+      "lists",
+      "ul",
+      "ol",
+      "dl",
+      "colspan",
+      "rowspan",
+      "accessibility",
+      "responsive-tables"
     ],
     "theory": {
-      "overview": "Списки и таблицы — базовые строительные блоки для систематизации любой информации: меню навигации, каталогов товаров, финансовых отчетов, расписаний и списков характеристик.\n\nИспользование таблиц для раскладки страниц (Table Layout) давно устарело, но для отображения настоящих табличных данных (Tabular Data) тег `<table>` незаменим и должен верстаться с соблюдением стандартов доступности.",
+      "overview": "Отображение структурированных данных — списков, меню, характеристик товаров, финансовых отчетов и расписаний — базовая задача фронтенд-разработчика.\n\nВ этом уроке мы разберём 3 типа списков в HTML5 (`<ul>`, `<ol>`, `<dl>`), изучим семантическую анатомию таблиц (`<table>`, `<caption>`, `<thead>`, `<tbody>`, `<tfoot>`), освоим слияние ячеек по вертикали и горизонтали через `rowspan` и `colspan`, а также научимся делать таблицы адаптивными для мобильных экранов с полной поддержкой доступности (a11y).",
       "sections": [
         {
-          "title": "Типы списков: ul, ol и dl",
-          "content": "В HTML существует три типа списков:\n- **Неупорядоченный список `<ul>` (Unordered List)**: маркированный список маркерами-точками. Используется везде, где порядок пунктов не имеет значения (меню сайта, список преимуществ, теги). Дочерними элементами могут быть **только `<li>`**.\n- **Упорядоченный список `<ol>` (Ordered List)**: нумерованный список (1, 2, 3...). Используется для пошаговых инструкций, рецептов, рейтингов. Атрибуты: `start=\"5\"` (начать с 5), `reversed` (обратный отсчет), `type=\"A|a|I|i|1\"`.\n- **Список определений `<dl>` (Description List)**: список пар «термин — описание». Состоит из `<dt>` (термин) и `<dd>` (описание). Идеален для характеристик товара (Вес: 1.5 кг, Цвет: Черный) и FAQ.",
+          "title": "Виды списков в HTML5: <ul>, <ol>, <dl> (Списки описаний)",
+          "content": "HTML5 предоставляет три типа списков под разные семантические задачи:\n\n1. `<ul>` (Unordered List — Маркированный список):\n- Порядок элементов не имеет значения. Используется для навигационных меню, списков преимуществ, тегов карточек.\n- Элементы списка размечаются строго тегами `<li>` (List Item).\n\n2. `<ol>` (Ordered List — Нумерованный список):\n- Порядок элементов строго фиксирован (инструкции, рецепты, топ-рейтинги, этапы оформления заказа).\n- Атрибуты `<ol>`: `start=\"5\"` (начать нумерацию с 5), `reversed` (обратный отсчёт от N до 1), `type=\"A|a|I|i|1\"`.\n\n3. `<dl>`, `<dt>`, `<dd>` (Description List — Список описаний):\n- Специализированный список пар «ключ-значение» / «термин-определение».\n- `<dt>` (Description Term) — термин или название свойства.\n- `<dd>` (Description Details) — значение, описание или характеристика.\n- Идеален для: характеристик товаров (Процессор: M3 Max, ОЗУ: 64 ГБ), метаданных статьи, глоссариев и словарей терминов.",
+          "image": {
+            "src": "/images/lessons/html-tables-lists.svg",
+            "alt": "Списки ul ol dl и семантическая таблица данных в HTML",
+            "caption": "ul/ol/dl для списков, thead/tbody/tfoot с атрибутом scope для доступности и colspan/rowspan для слияния ячеек"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Примеры списков всех типов",
-            "code": "<!-- Список определений (Характеристики товара) -->\n<dl class=\"specs-list\">\n  <dt>Процессор</dt>\n  <dd>Apple M3 Pro (12 ядер)</dd>\n  \n  <dt>Оперативная память</dt>\n  <dd>36 ГБ Unified Memory</dd>\n</dl>\n\n<!-- Пошаговый нумерованный список -->\n<ol class=\"steps-list\">\n  <li>Установите Node.js</li>\n  <li>Склонируйте репозиторий</li>\n  <li>Выполните npm install</li>\n</ol>",
-            "explanation": "Список <dl> идеально связывает термины <dt> и их значения <dd>."
+            "code": "<!-- 1. Нумерованный список с обратным отсчетом -->\n<ol reversed start=\"3\">\n  <li>Запуск ракеты</li>\n  <li>Зажигание двигателей</li>\n  <li>Предстартовая проверка</li>\n</ol>\n\n<!-- 2. Семантический список характеристик товара (dl/dt/dd) -->\n<dl class=\"specs-list\">\n  <dt>Диагональ экрана:</dt>\n  <dd>16.2 дюйма Liquid Retina XDR</dd>\n  \n  <dt>Процессор:</dt>\n  <dd>Apple M3 Max (16 ядер)</dd>\n  \n  <dt>Объем накопителя:</dt>\n  <dd>1 ТБ SSD</dd>\n</dl>",
+            "title": "Использование списков ol (reversed) и списка описаний dl/dt/dd",
+            "explanation": "ol reversed автоматически нумерует 3, 2, 1. dl/dt/dd семантически связывает свойства с их значениями для скринридеров и SEO."
           }
         },
         {
-          "title": "Анатомия таблицы данных: table, thead, tbody, th, td",
-          "content": "Таблица строится из строгой иерархии элементов:\n- `<table>` — контейнер таблицы.\n- `<caption>` — заголовок/название таблицы (располагается первым тегом внутри table).\n- `<thead>` — шапка таблицы со строкой заголовков колонок.\n- `<tbody>` — тело таблицы с основными строками данных.\n- `<tfoot>` — подвал таблицы (итоговые суммы, средние значения).\n- `<tr>` (Table Row) — строка таблицы.\n- `<th>` (Table Header) — заголовочная ячейка (жирный текст, центрирование). Обязательно указывать атрибут `scope=\"col\"` (для колонок) или `scope=\"row\"` (для строк) для экранных дикторов.\n- `<td>` (Table Data) — обычная ячейка с данными.",
+          "title": "Анатомия семантической таблицы: <table>, <caption>, <thead>, <tbody>, <tfoot>",
+          "content": "Таблица данных в HTML5 — это строгая семантическая структура, предназначенная ТОЛЬКО для табличных данных (никогда не используйте таблицы для верстки сетки сайта!):\n\n1. `<caption>` — название таблицы. Обязано быть ПЕРВЫМ дочерним тегом внутри `<table>`. Скринридеры зачитывают `<caption>` перед началом чтения таблицы, сообщая незрячему пользователю контекст данных.\n\n2. `<thead>` — заголовочная секция таблицы. Содержит строки `<tr>` с заголовочными ячейками `<th>` (Table Header).\n\n3. `<tbody>` — основное тело таблицы со строками `<tr>` и ячейками данных `<td>` (Table Data).\n\n4. `<tfoot>` — итоговая строка подвала (суммы, средние значения, примечания).\n\n5. Атрибут `scope=\"col | row\"` на тегах `<th>`:\nКритически важен для доступности (WCAG)! `scope=\"col\"` сообщает скринридеру, что ячейка является заголовком столбца, а `scope=\"row\"` — заголовком текущей строки.",
           "codeExample": {
             "language": "html",
-            "title": "Доступная семантическая таблица",
-            "code": "<table class=\"data-table\">\n  <caption>Отчет по продажам за 1 квартал</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">Месяц</th>\n      <th scope=\"col\">Заказы</th>\n      <th scope=\"col\">Выручка</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Январь</th>\n      <td>120</td>\n      <td>$45,000</td>\n    </tr>\n    <tr>\n      <th scope=\"row\">Февраль</th>\n      <td>150</td>\n      <td>$58,000</td>\n    </tr>\n  </tbody>\n  <tfoot>\n    <tr>\n      <th scope=\"row\">Итого</th>\n      <td>270</td>\n      <td>$103,000</td>\n    </tr>\n  </tfoot>\n</table>",
-            "explanation": "Полная семантика: thead/tbody/tfoot, th с атрибутами scope и подвал tfoot."
+            "code": "<table class=\"finance-table\">\n  <caption>Отчет о доходах и расходах за Q1 2026 года</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">Месяц</th>\n      <th scope=\"col\">Доходы (₽)</th>\n      <th scope=\"col\">Расходы (₽)</th>\n      <th scope=\"col\">Прибыль (₽)</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Январь</th>\n      <td>1 500 000</td>\n      <td>900 000</td>\n      <td>+600 000</td>\n    </tr>\n    <tr>\n      <th scope=\"row\">Февраль</th>\n      <td>1 850 000</td>\n      <td>1 100 000</td>\n      <td>+750 000</td>\n    </tr>\n  </tbody>\n  <tfoot>\n    <tr>\n      <th scope=\"row\">Итого за квартал</th>\n      <td>3 350 000</td>\n      <td>2 000 000</td>\n      <td>+1 350 000</td>\n    </tr>\n  </tfoot>\n</table>",
+            "title": "Полная семантическая структура таблицы данных с caption и scope",
+            "explanation": "caption задает название таблицы, thead/tbody/tfoot четко разделяют слои, а scope='col/row' связывает данные с заголовками для голосового чтения."
           }
         },
         {
           "title": "Объединение ячеек: colspan и rowspan",
-          "content": "Для сложных многоуровневых отчетов используются атрибуты объединения:\n- `colspan=\"N\"` — объединяет N ячеек **по горизонтали** (вдоль колонок).\n- `rowspan=\"N\"` — объединяет N ячеек **по вертикали** (вдоль строк).\n- При объединении ячеек важно убрать лишние теги `<td>` из соседних строк, иначе таблица «поедет».",
+          "content": "Для построения сложных многоуровневых отчетов ячейки можно объединять по горизонтали и вертикали:\n\n1. `colspan=\"N\"` (Column Span — объединение столбцов):\n- Растягивает текущую ячейку на `N` столбцов вправо.\n- Внимание: в этой же строке `<tr>` необходимо удалить `N - 1` ячеек `<td>`, иначе таблица перекосится и вылезет вправо!\n\n2. `rowspan=\"N\"` (Row Span — объединение строк):\n- Растягивает текущую ячейку на `N` строк вниз.\n- Внимание: в следующих `N - 1` строках `<tr>` нужно удалить по одной ячейке на соответствующей позиции столбца!\n\n3. Теги `<colgroup>` и `<col>`:\nПозволяют централизованно задавать ширину и фоновые стили целым столбцам таблицы без добавления CSS-классов на каждую отдельную ячейку `<td>`:\n`<colgroup><col style=\"width: 30%;\"><col style=\"width: 70%;\"></colgroup>`.",
           "codeExample": {
             "language": "html",
-            "title": "Пример объединения colspan и rowspan",
-            "code": "<tr>\n  <!-- Объединение на 2 колонки -->\n  <th colspan=\"2\">Пользователь</th>\n  <th>Баланс</th>\n</tr>\n<tr>\n  <!-- Объединение на 2 строки -->\n  <td rowspan=\"2\">Фото</td>\n  <td>Иван Иванов</td>\n  <td>$500</td>\n</tr>",
-            "explanation": "colspan расширяет ячейку по ширине, rowspan — по высоте."
+            "code": "<table class=\"schedule-table\">\n  <caption>Расписание занятий стажёров</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">День</th>\n      <th scope=\"col\">Время</th>\n      <th scope=\"col\">Тема модуля</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <!-- Объединение на 2 строки вниз по вертикали -->\n      <th scope=\"row\" rowspan=\"2\">Понедельник</th>\n      <td>10:00 - 12:00</td>\n      <td>HTML5: Списки и таблицы</td>\n    </tr>\n    <tr>\n      <!-- Ячейка дня удалена, так как ее занял rowspan! -->\n      <td>14:00 - 16:00</td>\n      <td>CSS3: Рамки и тени</td>\n    </tr>\n    <tr>\n      <th scope=\"row\">Вторник</th>\n      <!-- Объединение на 2 колонки вправо -->\n      <td colspan=\"2\">Хакатон по верстке интерфейсов (весь день)</td>\n    </tr>\n  </tbody>\n</table>",
+            "title": "Использование rowspan для слияния строк и colspan для колонок",
+            "explanation": "rowspan='2' растягивает 'Понедельник' на 2 строки, а colspan='2' объединяет ячейки времени и темы во вторник."
+          }
+        },
+        {
+          "title": "Адаптивность таблиц и CSS-стилизация: border-collapse",
+          "content": "Таблицы по умолчанию имеют фиксированную ширину содержимого и на мобильных экранах шириной 360–400px выпадают за границы экрана (Overflow).\n\nДва стандарта адаптивности таблиц:\n\n1. Горизонтальный скролл-контейнер (Scrollable Container):\nОберните таблицу в `<div class=\"table-responsive\" tabindex=\"0\" role=\"region\" aria-label=\"Таблица данных\">` со стилями `overflow-x: auto; -webkit-overflow-scrolling: touch;`. `tabindex=\"0\"` позволяет пользователям прокручивать таблицу клавишами стрелок с клавиатуры!\n\n2. Трансформация таблицы в карточки (Table to Cards via CSS):\nНа мобильных экранах через `@media (max-width: 600px)` таблица переключается в `display: block`, а названия столбцов выводятся через `td::before { content: attr(data-label); font-weight: bold; }`.\n\n3. Свойство `border-collapse: collapse;`:\nПо умолчанию браузер рисует двойные рамки с зазором (`border-collapse: separate; border-spacing: 2px;`). Свойство `border-collapse: collapse;` схлопывает соседние границы ячеек в аккуратную единую линию 1px.",
+          "codeExample": {
+            "language": "html",
+            "code": "<div class=\"table-container\" tabindex=\"0\" role=\"region\" aria-label=\"Финансовая сводка\">\n  <table class=\"modern-table\">\n    <caption>Статистика посещаемости</caption>\n    <thead>\n      <tr>\n        <th scope=\"col\">Дата</th>\n        <th scope=\"col\">Уникальные визиты</th>\n      </tr>\n    </thead>\n    <tbody>\n      <tr>\n        <td>19.08.2026</td>\n        <td>14 250</td>\n      </tr>\n    </tbody>\n  </table>\n</div>\n\n<style>\n  .modern-table {\n    width: 100%;\n    border-collapse: collapse; /* Схлопывание рамок в 1px */\n    color: #e6edf3;\n  }\n  .modern-table th, .modern-table td {\n    border: 1px solid #30363d;\n    padding: 10px 14px;\n    text-align: left;\n  }\n  .modern-table thead {\n    background: #161b22;\n    color: #2dff8a;\n  }\n  .table-container {\n    overflow-x: auto; /* Плавный скролл на смартфонах */\n  }\n</style>",
+            "title": "Адаптивный скролл-контейнер и border-collapse: collapse",
+            "explanation": "border-collapse схлопывает рамки. Контейнер с overflow-x: auto и tabindex='0' делает прокрутку плавной и доступной с клавиатуры."
           }
         }
       ],
       "seniorTips": [
-        "Прямыми потомками `<ul>` и `<ol>` могут быть **исключительно теги `<li>`**. Нельзя вставлять `<div>` или `<p>` напрямую в `<ul>`.",
-        "Всегда используйте `<thead>`, `<tbody>` и `<th scope=\"col\">` для таблиц данных."
+        "Всегда добавляйте `<caption>` и `scope=\"col|row\"` на тегах `<th>` для таблиц данных — это ключевое требование доступности WCAG для скринридеров.",
+        "Оборачивайте таблицы в контейнер `<div class=\"table-responsive\" tabindex=\"0\" role=\"region\" aria-label=\"...\">` с `overflow-x: auto;` — это обеспечивает плавную прокрутку на смартфонах и доступность с клавиатуры.",
+        "Используйте список описаний `<dl><dt>Ключ</dt><dd>Значение</dd></dl>` для характеристик товаров и профилей пользователей вместо обычных `div`.",
+        "Для обратного отсчёта в `<ol>` используйте булев атрибут `reversed` — браузер сам пронумерует элементы от N до 1."
       ],
       "commonMistakes": [
         {
-          "bad": "<ul>\n  <div>Пункт меню</div> <!-- Ошибка! div внутри ul -->\n</ul>",
-          "good": "<ul>\n  <li><div class=\"menu-item\">Пункт меню</div></li>\n</ul>",
-          "reason": "Спецификация HTML запрещает любые прямые дочерние теги внутри ul/ol кроме li."
+          "bad": "<!-- Использование таблиц для раскладки сетки страницы -->\n<table><tr><td width=\"200\">Sidebar</td><td>Content</td></tr></table>",
+          "good": "<div class=\"layout-grid\"><aside>Sidebar</aside><main>Content</main></div>",
+          "reason": "Табличная верстка ломает семантику, разрушает мобильную адаптивность и блокирует нормальную работу скринридеров. Для сеток используйте CSS Grid и Flexbox."
+        },
+        {
+          "bad": "<!-- Невалидная вложенность ul напрямую внутрь ul -->\n<ul>\n  <ul><li>Подпункт</li></ul>\n</ul>",
+          "good": "<ul>\n  <li>Главный пункт\n    <ul><li>Подпункт</li></ul>\n  </li>\n</ul>",
+          "reason": "Тег <ul> может содержать прямыми потомками ТОЛЬКО теги <li>. Вложенный список обязан находиться внутри родительского <li>."
+        },
+        {
+          "bad": "<!-- Таблица без thead и scope -->\n<table><tr><td>Имя</td><td>Балл</td></tr><tr><td>Иван</td><td>95</td></tr></table>",
+          "good": "<table><thead><tr><th scope=\"col\">Имя</th><th scope=\"col\">Балл</th></tr></thead><tbody><tr><td>Иван</td><td>95</td></tr></tbody></table>",
+          "reason": "Без thead и th scope скринридер не может связать данные ячеек со столбцами, превращая чтение таблицы в бессмысленный набор цифр."
         }
       ],
       "keyTakeaways": [
-        "ul — для списков без порядка, ol — для нумерованных последовательностей, dl — для пар ключ/значение.",
-        "Таблицы должны содержать caption, thead, tbody и th со scope.",
-        "colspan объединяет по колонкам, rowspan — по строкам."
+        "`<ul>` — для маркированных списков, `<ol>` — для нумерованных с атрибутом `reversed`, `<dl>/<dt>/<dd>` — для пар ключ-значение.",
+        "Анатомия таблицы включает `<caption>`, `<thead>`, `<tbody>`, `<tfoot>` и строки `<tr>`.",
+        "Атрибут `scope=\"col|row\"` на тегах `<th>` связывает данные со структурой для доступности скринридеров.",
+        "`colspan` объединяет столбцы по горизонтали, `rowspan` объединяет строки по вертикали.",
+        "Свойство `border-collapse: collapse;` объединяет двойные рамки ячеек в аккуратную сетку 1px."
       ]
     },
     "sandbox": {
-      "initialHtml": "<table class=\"demo-table\">\n  <thead>\n    <tr>\n      <th>Уровень</th>\n      <th>Тема</th>\n      <th>Статус</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>1</td>\n      <td>HTML Basics</td>\n      <td><span class=\"badge-done\">Пройден</span></td>\n    </tr>\n    <tr>\n      <td>2</td>\n      <td>CSS & JS</td>\n      <td><span class=\"badge-done\">Пройден</span></td>\n    </tr>\n  </tbody>\n</table>",
-      "initialCss": ".demo-table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; }\n.demo-table th, .demo-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #e2e8f0; }\n.demo-table th { background: #f8fafc; font-weight: 600; color: #475569; }\n.badge-done { background: #dcfce7; color: #15803d; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }",
-      "initialJs": "console.log('Lists and tables sandbox loaded');",
-      "instructions": "Попробуйте добавить третью строку в таблицу <tbody>."
+      "initialHtml": "<div class=\"table-sandbox\">\n  <table class=\"cyber-table\">\n    <caption>Рейтинг стажёров платформы</caption>\n    <thead>\n      <tr>\n        <th scope=\"col\">Ранг</th>\n        <th scope=\"col\">Стажёр</th>\n        <th scope=\"col\">Модуль</th>\n        <th scope=\"col\">Баллы</th>\n      </tr>\n    </thead>\n    <tbody>\n      <tr>\n        <th scope=\"row\">#1</th>\n        <td>Александр К.</td>\n        <td>JavaScript Master</td>\n        <td>98 / 100</td>\n      </tr>\n      <tr>\n        <th scope=\"row\">#2</th>\n        <td>Мария В.</td>\n        <td>CSS Core</td>\n        <td>95 / 100</td>\n      </tr>\n    </tbody>\n  </table>\n</div>",
+      "initialCss": ".table-sandbox {\n  padding: 16px;\n  background: #0a0e13;\n  color: #e6edf3;\n  font-family: monospace;\n}\n.cyber-table {\n  width: 100%;\n  border-collapse: collapse;\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 6px;\n  overflow: hidden;\n}\n.cyber-table caption {\n  text-align: left;\n  padding-bottom: 8px;\n  color: #2dff8a;\n  font-weight: bold;\n}\n.cyber-table th, .cyber-table td {\n  padding: 10px 14px;\n  border-bottom: 1px solid #30363d;\n  text-align: left;\n}\n.cyber-table thead {\n  background: #0d1117;\n  color: #29e7ff;\n}",
+      "initialJs": "console.log('Песочница таблиц активна');",
+      "instructions": "Практика с таблицами и списками:\n1. Добавьте итоговую строку <tfoot> со средним баллом стажёров\n2. Объедините ячейки через colspan='2' в новой строке\n3. Добавьте список характеристик <dl><dt>Уровень:</dt><dd>Senior Intern</dd></dl>"
     },
     "task": {
-      "title": "Создание таблицы тарифов",
-      "scenario": "Сверстайте таблицу тарифов с колонками: Название плана, Цена, Количество пользователей и Кнопка выбора.",
+      "title": "Верстка финансовой сводки с объединением ячеек, caption, scope и списком dl",
+      "scenario": "Вам необходимо сверстать финансовый виджет для личного кабинета: отчет о расходах проекта с семантической таблицей (caption, thead, tbody, tfoot, scope, слияние строк rowspan и колонок colspan) и блоком метаданных проекта на базе списка описаний <dl>.",
       "criteria": [
-        "Использованы теги <table>, <thead>, <tbody>, <tr>, <th>, <td>",
-        "Шапка содержит <th> с атрибутом scope=\"col\"",
-        "В теле таблицы минимум 2 строки с тарифами"
+        "Таблица оформлена с тегами <caption>, <thead>, <tbody>, <tfoot>",
+        "Все заголовки <th> содержат атрибуты scope='col' или scope='row'",
+        "Использовано объединение ячеек по горизонтали (colspan) и по вертикали (rowspan)",
+        "Таблица обернута в адаптивный скролл-контейнер с tabindex='0' и aria-label",
+        "Метаданные проекта размечены через список описаний <dl> с тегами <dt> и <dd>",
+        "Задано свойство border-collapse: collapse"
       ],
       "starterCode": {
-        "html": "<!-- Создайте таблицу тарифов -->\n",
-        "css": "/* Стили задания */\n"
+        "html": "<div class=\"widget-card\">\n  <!-- Разметьте таблицу и список dl -->\n</div>"
       },
       "hints": [
-        "Используйте <table><thead><tr><th scope=\"col\">..."
+        "Используйте <caption>Отчет о расходах</caption>",
+        "Используйте <th scope='col'>Статья</th> и <th scope='row'>Итого</th>",
+        "Оберните таблицу в <div class='table-responsive' tabindex='0' role='region'>"
       ],
       "solution": {
-        "html": "<table class=\"pricing-table\">\n  <caption>Тарифные планы сервиса</caption>\n  <thead>\n    <tr>\n      <th scope=\"col\">Тариф</th>\n      <th scope=\"col\">Цена</th>\n      <th scope=\"col\">Пользователи</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <th scope=\"row\">Старт</th>\n      <td>0 ₽/мес</td>\n      <td>1 пользователь</td>\n    </tr>\n    <tr>\n      <th scope=\"row\">Про</th>\n      <td>990 ₽/мес</td>\n      <td>До 10 пользователей</td>\n    </tr>\n  </tbody>\n</table>",
-        "css": "/* Решение */\n",
-        "explanation": "Превосходная доступная таблица с caption и правильными scope."
+        "html": "<div class=\"widget-card\">\n  <dl class=\"project-meta\">\n    <dt>Проект:</dt>\n    <dd>Frontend Intern Academy 2026</dd>\n    <dt>Руководитель:</dt>\n    <dd>Lead Architect</dd>\n  </dl>\n\n  <div class=\"table-responsive\" tabindex=\"0\" role=\"region\" aria-label=\"Финансовый отчет проекта\">\n    <table class=\"finance-table\">\n      <caption>Сводная смета расходов на инфраструктуру</caption>\n      <thead>\n        <tr>\n          <th scope=\"col\">Категория</th>\n          <th scope=\"col\">Сервис</th>\n          <th scope=\"col\">Стоимость (₽)</th>\n        </tr>\n      </thead>\n      <tbody>\n        <tr>\n          <th scope=\"row\" rowspan=\"2\">Хостинг &amp; CDN</th>\n          <td>Vercel Enterprise</td>\n          <td>45 000</td>\n        </tr>\n        <tr>\n          <td>Cloudflare Pro</td>\n          <td>15 000</td>\n        </tr>\n        <tr>\n          <th scope=\"row\">База данных</th>\n          <td>PostgreSQL Cluster</td>\n          <td>30 000</td>\n        </tr>\n      </tbody>\n      <tfoot>\n        <tr>\n          <th scope=\"row\" colspan=\"2\">Итоговая сумма:</th>\n          <td><strong>90 000 ₽</strong></td>\n        </tr>\n      </tfoot>\n    </table>\n  </div>\n</div>",
+        "explanation": "Разметка полностью соответствует стандартам: dl/dt/dd размечает метаданные, таблица содержит caption, thead/tbody/tfoot, scope, слияния rowspan='2' и colspan='2', а контейнер гарантирует доступность и скролл."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h8-q1",
-          "question": "Какие элементы могут быть прямыми потомками тегов <ul> и <ol>?",
+          "id": "html8-q1",
+          "question": "Зачем в таблицах данных на тегах <th> обязательно указывать атрибуты scope='col' и scope='row'?",
           "options": [
-            "Любые теги",
-            "Только <li>",
-            "<div> и <span>",
-            "<p> и <a>"
+            "Для изменения цвета шрифта заголовков",
+            "Для доступности (a11y): сообщает скринридеру, к чему относится заголовок (к целому столбцу или к строке), позволяя незрячим пользователям понимать смысл каждой ячейки",
+            "Для автоматического выравнивания по центру",
+            "Без scope таблица не отобразится в браузере"
           ],
           "correctIndex": 1,
-          "explanation": "По спецификации HTML прямыми дочерними элементами списков могут быть только <li>."
+          "explanation": "Атрибут scope задает направление заголовка для голосовых программ чтения с экрана, связывая ячейку данных td со смысловым заголовком th."
         },
         {
-          "id": "h8-q2",
-          "question": "Какой атрибут объединяет ячейки таблицы по горизонтали?",
+          "id": "html8-q2",
+          "question": "Какой тег списка в HTML5 предназначен для семантической разметки пар «ключ-значение» (характеристики товаров, словарь терминов)?",
           "options": [
-            "rowspan",
-            "colspan",
-            "merge",
-            "span"
+            "<ul> с тегами <li>",
+            "<dl> с парами <dt> (термин) и <dd> (значение)",
+            "<ol> с атрибутом type='key'",
+            "<datalist>"
           ],
           "correctIndex": 1,
-          "explanation": "colspan (Column Span) объединяет ячейки вдоль колонок."
+          "explanation": "Тег <dl> (Description List) с потомками <dt> (Description Term) и <dd> (Description Details) — единственный семантический стандарт для пар ключ-значение."
+        },
+        {
+          "id": "html8-q3",
+          "question": "Что произойдет при установке атрибута colspan='3' на ячейке <td>?",
+          "options": [
+            "Ячейка разделится на 3 строки",
+            "Ячейка растянется по горизонтали на 3 столбца, и в этой строке нужно удалить 2 соседние ячейки td",
+            "Текст ячейки повторится 3 раза",
+            "Ширина ячейки увеличится на 3 пикселя"
+          ],
+          "correctIndex": 1,
+          "explanation": "colspan='3' объединяет 3 колонки в одну. Чтобы таблица не перекосилась, в этой же строке tr удаляют 2 лишние ячейки td."
+        },
+        {
+          "id": "html8-q4",
+          "question": "Какое свойство CSS объединяет двойные рамки соседних ячеек таблицы в единую аккуратную линию?",
+          "options": [
+            "border-style: single;",
+            "border-collapse: collapse;",
+            "table-layout: fixed;",
+            "border-spacing: 0px;"
+          ],
+          "correctIndex": 1,
+          "explanation": "По умолчанию таблицы имеют border-collapse: separate (двойные границы). Значение border-collapse: collapse схлопывает границы ячеек в аккуратную сетку 1px."
+        },
+        {
+          "id": "html8-q5",
+          "question": "Где внутри тега <table> должен располагаться заголовочный тег <caption> по спецификации HTML5?",
+          "options": [
+            "В самом конце таблицы после <tfoot>",
+            "Строго первым дочерним элементом сразу после открывающего тега <table>",
+            "Внутри <thead>",
+            "В любом месте таблицы"
+          ],
+          "correctIndex": 1,
+          "explanation": "По стандарту HTML5 тег <caption> обязан быть самым первым дочерним элементом внутри <table>, чтобы скринридеры сразу сообщили пользователю название таблицы."
         }
       ]
     }

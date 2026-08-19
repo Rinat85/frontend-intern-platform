@@ -1363,5 +1363,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-8",
+    "moduleId": "pro",
+    "level": 8,
+    "title": "Тестирование фронтенда: Unit, Integration, E2E и Vitest/Playwright",
+    "subtitle": "Пирамида тестирования, Vitest, Testing Library, Playwright, TDD и Mocking",
+    "description": "Освойте культуру автоматизированного тестирования фронтенда: пирамиду тестов (Unit, Integration, E2E), модульные тесты чистых функций в Vitest по паттерну AAA, компонентное тестирование с Testing Library, E2E автоматизацию браузера с Playwright и мокирование через MSW.",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "testing",
+      "unit-tests",
+      "vitest",
+      "playwright",
+      "testing-library",
+      "e2e",
+      "tdd",
+      "mocking"
+    ],
+    "theory": {
+      "overview": "Автоматизированное тестирование — главный гарант стабильности коммерческого продукта. Без тестов любой рефакторинг или добавление новой фичи рискует сломать критические бизнес-сценарии (оформление заказа, авторизацию, расчет скидок).\n\nВ этом уроке мы разберём пирамиду тестирования (Testing Pyramid), научимся писать быстрые Unit-тесты с помощью современного раннера Vitest по паттерну Arrange-Act-Assert, тестировать компоненты с Testing Library с точки зрения реального пользователя, мокировать сетевые запросы через MSW и автоматизировать сквозные E2E сценарии в реальных браузерах с Playwright.",
+      "sections": [
+        {
+          "title": "Пирамида тестирования (Testing Pyramid) и метрики покрытия",
+          "content": "Пирамида тестирования определяет оптимальный баланс между скоростью, стоимостью и надежностью тестов:\n\n1. **Unit-тесты (Модульные тесты — 70% базы)**:\n- Тестируют чистые функции, утилиты, хелперы, редьюсеры и хуки в полной изоляции.\n- Выполняются за миллисекунды (тысячи тестов за 2 секунды в Vitest).\n- Дешевы в написании и мгновенно локализуют место поломки.\n\n2. **Integration-тесты (Интеграционные тесты — 20% базы)**:\n- Тестируют совместную работу нескольких модулей: компонент формы + валидация + взаимодействие со стейтом + мок сетевого ответа API (React Testing Library + MSW).\n\n3. **E2E-тесты (End-to-End / Сквозные тесты — 10% вершины)**:\n- Запускают настоящий headless-браузер (Chromium, Firefox, WebKit) и эмулируют реальные действия пользователя (Playwright / Cypress): переход на сайт, клики, ввод пароля, оплата через Stripe/ЮKassa.\n- Самые надежные, но самые медленные и дорогие в поддержке.\n\nМетрика Code Coverage (Покрытие кода):\nПоказывает процент строк (Lines), условий (Branches) и функций (Functions), затронутых тестами. Норма для коммерческих проектов: 75–85%. Помните: 100% покрытие не гарантирует отсутствие багов в граничных случаях (Edge Cases)!",
+          "image": {
+            "src": "/images/lessons/web-testing-pyramid.svg",
+            "alt": "Пирамида тестирования: Unit Vitest, Integration Testing Library, E2E Playwright",
+            "caption": "Пирамида тестов: 70% Unit (быстро/дешево), 20% Integration (компоненты со стейтом) и 10% E2E Playwright (сквозные сценарии)"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Пример модульного теста чистой функции расчета скидки в Vitest:\nimport { describe, it, expect } from 'vitest';\nimport { calculateCartTotal } from './cartUtils';\n\ndescribe('calculateCartTotal()', () => {\n  it('должен корректно применять промокод 20%', () => {\n    // 1. Arrange (Подготовка)\n    const items = [{ price: 1000 }, { price: 2000 }];\n    const promo = { discountPercent: 20 };\n    \n    // 2. Act (Действие)\n    const total = calculateCartTotal(items, promo);\n    \n    // 3. Assert (Проверка)\n    expect(total).toBe(2400); // 3000 - 20% = 2400\n  });\n});",
+            "title": "Unit-тест функции по паттерну AAA (Arrange-Act-Assert) в Vitest",
+            "explanation": "Тест изолирован, структурирован по блокам Arrange-Act-Assert и выполняется в Vitest за 2 миллисекунды."
+          }
+        },
+        {
+          "title": "Unit-тестирование с Vitest: Паттерн AAA и матчеры",
+          "content": "Vitest — сверхбыстрый раннер тестов нового поколения, нативно интегрированный с Vite и ESM:\n\n1. Паттерн структуры теста **AAA (Arrange -> Act -> Assert)**:\n- **Arrange (Подготовка)**: создание тестовых данных, переменных, моков.\n- **Act (Действие)**: вызов тестируемой функции или метода.\n- **Assert (Проверка)**: сравнение полученного результата с ожидаемым через `expect()`.\n\n2. Базовые матчеры Vitest:\n- `expect(val).toBe(42)` — строгое равенство примитивов (`===`).\n- `expect(obj).toEqual({ a: 1 })` — глубокое сравнение объектов и массивов по значению.\n- `expect(arr).toContain('admin')` — проверка наличия элемента в массиве.\n- `expect(fn).toThrowError('Invalid input')` — проверка выброса исключения.\n- `expect(val).toBeNull()`, `.toBeDefined()`, `.toBeCloseTo(0.3, 2)` (для дробей `0.1 + 0.2`).\n\n3. Мокирование (Mocks & Spies):\n- `const spy = vi.fn()` — создание функции-пустышки для отслеживания вызовов (`expect(spy).toHaveBeenCalledWith('success')`).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "import { describe, it, expect, vi } from 'vitest';\n\nfunction notifyUser(user, sendEmailFn) {\n  if (!user.email) throw new Error('Email отсутствует');\n  sendEmailFn(user.email, 'Добро пожаловать!');\n}\n\ndescribe('notifyUser()', () => {\n  it('должен вызывать sendEmailFn с правильным адресом', () => {\n    const mockSendEmail = vi.fn(); // Мок функции\n    const user = { id: 1, email: 'intern@academy.ru' };\n\n    notifyUser(user, mockSendEmail);\n\n    expect(mockSendEmail).toHaveBeenCalledTimes(1);\n    expect(mockSendEmail).toHaveBeenCalledWith(\n      'intern@academy.ru',\n      'Добро пожаловать!'\n    );\n  });\n});",
+            "title": "Мокирование функций с помощью vi.fn() в Vitest",
+            "explanation": "vi.fn() перехватывает вызов, аргументы и количество вызовов функции sendEmailFn без отправки реальных писем."
+          }
+        },
+        {
+          "title": "Тестирование компонентов с Testing Library: Поведение вместо деталей",
+          "content": "Философия React / DOM Testing Library:\n*«Чем больше ваши тесты похожи на то, как реальный пользователь использует приложение, тем больше уверенности они дают».*\n\n1. Приоритет поиска элементов по доступности (Query Priority):\n- 1-й приоритет (Рекомендуется!): `screen.getByRole('button', { name: /войти/i })`, `screen.getByRole('heading', { level: 1 })`.\n- 2-й приоритет: `screen.getByLabelText('Пароль')` (связка с `<label>`).\n- 3-й приоритет: `screen.getByText('Успешно сохранено')`.\n- ❌ Антипаттерн: `container.querySelector('.btn-primary')` или `getByTestId` — пользователь не видит CSS-классы, а смена класса сломает тест!\n\n2. События пользователя: `@testing-library/user-event`:\nБиблиотека `userEvent` эмулирует реальный ввод: клики с фокусом, ввод символов с проверкой раскладки и событиями `keydown/keyup`:\n`await userEvent.type(input, 'password123');`\n`await userEvent.click(submitButton);`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "import { render, screen } from '@testing-library/react';\nimport userEvent from '@testing-library/user-event';\nimport { LoginForm } from './LoginForm';\n\ntest('успешная отправка формы авторизации', async () => {\n  const handleSuccess = vi.fn();\n  render(<LoginForm onLoginSuccess={handleSuccess} />);\n\n  // 1. Поиск элементов по семантическим ролям\n  const emailInput = screen.getByLabelText(/электронная почта/i);\n  const passInput = screen.getByLabelText(/пароль/i);\n  const submitBtn = screen.getByRole('button', { name: /войти/i });\n\n  // 2. Действия пользователя\n  await userEvent.type(emailInput, 'dev@intern.ru');\n  await userEvent.type(passInput, 'secretPass123');\n  await userEvent.click(submitBtn);\n\n  // 3. Проверка результата\n  expect(handleSuccess).toHaveBeenCalledWith({\n    email: 'dev@intern.ru',\n    pass: 'secretPass123'\n  });\n});",
+            "title": "Компонентный тест формы с Testing Library и userEvent",
+            "explanation": "Тест ищет элементы по ролям и меткам labelText так же, как незрячий пользователь или человек с клавиатурой, гарантируя доступность."
+          }
+        },
+        {
+          "title": "E2E тестирование с Playwright и методология TDD",
+          "content": "Сквозное тестирование реальных пользовательских сценариев:\n\n1. Преимущества Playwright:\n- Запуск в реальных движках: Chromium (Chrome, Edge), WebKit (Safari), Firefox.\n- Автоматическое ожидание (Auto-Waiting): Playwright сам ждёт, пока кнопка станет видимой, активной и завершится анимация перед кликом (нет нужды в `sleep(5000)`!).\n- Встроенный перехват сетевых запросов и запись видео сбоев.\n\n2. Паттерн Page Object Model (POM):\nИнкапсуляция работы со страницей в отдельный класс `LoginPage`, чтобы при изменении селекторов править 1 класс, а не 50 тестов.\n\n3. Методология TDD (Test-Driven Development):\nЦикл **Red -> Green -> Refactor**:\n- **Red**: пишем тест на новую функциональность -> тест падает (красный).\n- **Green**: пишем минимально необходимый рабочий код -> тест проходит (зеленый).\n- **Refactor**: улучшаем архитектуру и чистоту кода, сохраняя тесты зелеными.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Playwright E2E тест полного сценария покупки в интернет-магазине:\nimport { test, expect } from '@playwright/test';\n\ntest('пользователь может добавить товар в корзину и оформить заказ', async ({ page }) => {\n  // 1. Открытие страницы каталога\n  await page.goto('https://shop.intern.dev/catalog');\n\n  // 2. Клик по первому товару\n  const firstProduct = page.locator('.product-card').first();\n  await firstProduct.getByRole('button', { name: /в корзину/i }).click();\n\n  // 3. Переход в корзину\n  await page.getByRole('link', { name: /корзина/i }).click();\n\n  // 4. Проверка обновления бейджа корзины\n  await expect(page.getByText('Товаров в корзине: 1')).toBeVisible();\n  await expect(page.getByRole('button', { name: /оформить заказ/i })).toBeEnabled();\n});",
+            "title": "Сквозной E2E-тест пользовательского сценария в Playwright",
+            "explanation": "Playwright автоматически ожидает появления элементов и эмулирует полный путь покупателя в реальном окне браузера."
+          }
+        }
+      ],
+      "seniorTips": [
+        "В тестах компонентов ВСЕГДА ищите элементы по доступным ролям `screen.getByRole('button', { name: ... })` вместо хрупких CSS-классов `.btn-primary` или `id`. Это гарантирует доступность интерфейса.",
+        "Используйте Mock Service Worker (MSW) для перехвата сетевых запросов на уровне сети вместо ручного мокирования `global.fetch`.",
+        "Следуйте правилу AAA (Arrange, Act, Assert) для кристально чистой структуры каждого тест-кейса.",
+        "Не тестируйте детали реализации (приватные методы, внутренний стейт). Тестируйте только публичный контракт и поведение, видимое пользователю."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Поиск элементов по нестабильным классам стилей\nconst btn = container.querySelector('.css-18df-submit-btn');",
+          "good": "const btn = screen.getByRole('button', { name: /отправить/i });",
+          "reason": "При любом рефакторинге стилей или переходе на другой CSS-фреймворк тесты с поиском по классам немедленно упадут."
+        },
+        {
+          "bad": "// Забытый await перед асинхронными действиями userEvent\nuserEvent.click(submitBtn); // ❌ Промис не ожидается, тест завершается раньше времени!",
+          "good": "await userEvent.click(submitBtn);",
+          "reason": "userEvent работает асинхронно. Без await проверка expect выполнится до того, как обработчик клика успеет завершиться."
+        },
+        {
+          "bad": "// Тестирование приватного состояния компонента\nexpect(component.state.isLoading).toBe(true);",
+          "good": "expect(screen.getByText(/загрузка/i)).toBeInTheDocument();",
+          "reason": "Пользователь не видит state.isLoading — он видит индикатор загрузки на экране. Тестируйте визуальное поведение."
+        }
+      ],
+      "keyTakeaways": [
+        "Пирамида тестов: 70% быстрых Unit-тестов, 20% Integration-тестов компонентов и 10% E2E Playwright сценариев.",
+        "Структура теста всегда следует правилу AAA: Arrange (подготовка) -> Act (действие) -> Assert (проверка).",
+        "Testing Library рекомендует искать элементы по семантическим ролям `getByRole`, эмулируя опыт реального пользователя.",
+        "Playwright автоматизирует реальные браузеры с авто-ожиданием видимости элементов.",
+        "TDD цикл Red -> Green -> Refactor обеспечивает высокую надежность и архитектурную чистоту кода."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"test-runner-app\">\n  <h3>Мини Test Runner (Vitest Assertions)</h3>\n  <button id=\"run-tests-btn\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">Запустить Unit-тесты</button>\n  <div id=\"test-report\" style=\"margin-top:12px; font-family:monospace; font-size:12px;\"></div>\n</div>",
+      "initialCss": "#test-runner-app {\n  font-family: monospace;\n  color: #e6edf3;\n  padding: 16px;\n  background: #0d1117;\n  border-radius: 8px;\n}\n.pass-row { color: #2dff8a; margin-bottom: 4px; }\n.fail-row { color: #f85149; margin-bottom: 4px; }",
+      "initialJs": "const reportEl = document.getElementById('test-report');\n\nfunction expect(actual) {\n  return {\n    toBe: (expected) => {\n      if (actual !== expected) throw new Error(`Expected ${expected}, but got ${actual}`);\n    },\n    toEqual: (expected) => {\n      if (JSON.stringify(actual) !== JSON.stringify(expected)) {\n        throw new Error(`Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);\n      }\n    }\n  };\n}\n\nfunction test(name, fn) {\n  try {\n    fn();\n    reportEl.innerHTML += `<div class='pass-row'>✓ PASS: ${name}</div>`;\n  } catch (err) {\n    reportEl.innerHTML += `<div class='fail-row'>✕ FAIL: ${name} -> ${err.message}</div>`;\n  }\n}\n\n// Функция для тестирования\nconst calculateDiscount = (price, percent) => price - (price * percent / 100);\n\ndocument.getElementById('run-tests-btn').onclick = () => {\n  reportEl.innerHTML = '';\n  test('расчет скидки 10% от 1000', () => {\n    expect(calculateDiscount(1000, 10)).toBe(900);\n  });\n  test('скидка 0% не меняет цену', () => {\n    expect(calculateDiscount(500, 0)).toBe(500);\n  });\n  test('глубокое сравнение объектов', () => {\n    expect({ role: 'admin' }).toEqual({ role: 'admin' });\n  });\n};",
+      "instructions": "Практика с автотестами:\n1. Нажмите кнопку 'Запустить Unit-тесты' и изучите отчет прохождения\n2. Добавьте тест для проверки расчета скидки 100% (должен вернуть 0)\n3. Напишите тест с ожидаемой ошибкой и посмотрите, как Test Runner фиксирует падение"
+    },
+    "task": {
+      "title": "Написание набора Unit и Integration тестов для модуля оформления заказа",
+      "scenario": "Вам необходимо написать комплект надежных модульных тестов для функции checkoutService(cart, promoCode, user): тесты должны проверять расчет итоговой суммы со скидкой, валидацию промокодов, обработку пустого профиля пользователя и исключения при отрицательных ценах по стандарту AAA.",
+      "criteria": [
+        "Тесты написаны по паттерну Arrange-Act-Assert (AAA)",
+        "Проверена корректность расчета суммы нескольких товаров с учетом скидки",
+        "Проверена обработка невалидного промокода",
+        "Проверен выброс ошибки при отсутствии обязательного поля email пользователя",
+        "Использованы матчеры toBe, toEqual и toThrowError"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте функцию и набор тестов\nfunction checkoutService(cart, promo, user) {\n  // Ваш код\n}"
+      },
+      "hints": [
+        "В блоке Arrange создайте тестовую корзину: const cart = [{ price: 1000 }, { price: 2000 }];",
+        "Для проверки ошибок используйте: expect(() => checkoutService(...)).toThrowError();",
+        "Проверьте правильность итоговой суммы через expect(res.finalTotal).toBe(2700);"
+      ],
+      "solution": {
+        "js": "function checkoutService(cart = [], promo = null, user = null) {\n  if (!user || !user.email) {\n    throw new Error('User email is required for checkout');\n  }\n  \n  const subtotal = cart.reduce((sum, item) => {\n    if (item.price < 0) throw new Error('Invalid item price');\n    return sum + item.price;\n  }, 0);\n\n  let discountAmount = 0;\n  if (promo && promo.code === 'INTERN2026' && promo.percent > 0) {\n    discountAmount = (subtotal * promo.percent) / 100;\n  }\n\n  return {\n    itemsCount: cart.length,\n    subtotal,\n    discountAmount,\n    finalTotal: subtotal - discountAmount,\n    userEmail: user.email\n  };\n}\n\n// Набор тестов (Unit Test Suite):\ndescribe('checkoutService', () => {\n  it('должен корректно рассчитывать итоговую сумму с промокодом', () => {\n    // Arrange\n    const cart = [{ price: 1000 }, { price: 2000 }];\n    const promo = { code: 'INTERN2026', percent: 10 };\n    const user = { email: 'dev@intern.ru' };\n\n    // Act\n    const result = checkoutService(cart, promo, user);\n\n    // Assert\n    expect(result.subtotal).toBe(3000);\n    expect(result.discountAmount).toBe(300);\n    expect(result.finalTotal).toBe(2700);\n    expect(result.itemsCount).toBe(2);\n  });\n\n  it('должен выбрасывать ошибку, если у пользователя не указан email', () => {\n    // Arrange\n    const cart = [{ price: 500 }];\n    const user = { name: 'Гость' }; // нет email\n\n    // Act & Assert\n    expect(() => checkoutService(cart, null, user)).toThrowError(\n      'User email is required for checkout'\n    );\n  });\n});",
+        "explanation": "Тест-сьют строго структурирован по блокам AAA, проверяет граничные условия, расчет скидки, обязательные поля и выброс ошибок валидации."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro8-q1",
+          "question": "В чём заключается соотношение слоев в классической пирамиде тестирования (Testing Pyramid)?",
+          "options": [
+            "100% E2E тестов и 0% Unit тестов",
+            "70% быстрых Unit-тестов (основание), 20% Integration-тестов компонентов и 10% сквозных E2E-тестов Playwright (вершина)",
+            "Тесты должны писаться только для бэкенда",
+            "Все тесты должны быть одинаковыми"
+          ],
+          "correctIndex": 1,
+          "explanation": "Пирамида тестов обеспечивает идеальный баланс: тысячи дешевых и мгновенных Unit-тестов защищают логику, Integration проверяет компоненты, а небольшое число E2E проверяет ключевые сценарии."
+        },
+        {
+          "id": "pro8-q2",
+          "question": "Что обозначают три фазы в классическом паттерне структуры теста AAA?",
+          "options": [
+            "Add, Append, Apply",
+            "Arrange (подготовка данных и моков) -> Act (вызов функции) -> Assert (проверка ожидаемого результата)",
+            "Async, Await, Action",
+            "Auth, Access, Admin"
+          ],
+          "correctIndex": 1,
+          "explanation": "Паттерн AAA (Arrange-Act-Assert) — мировой стандарт чистоты тестов, разделяющий подготовку тестовых данных, запуск действия и валидацию результата через expect."
+        },
+        {
+          "id": "pro8-q3",
+          "question": "По какому селектору React Testing Library рекомендует искать интерактивные элементы в первую очередь?",
+          "options": [
+            "По CSS-классу кнопки: container.querySelector('.btn-submit')",
+            "По доступной роли: screen.getByRole('button', { name: /сохранить/i })",
+            "По внутреннему data-id атрибуту",
+            "По имени файла компонента"
+          ],
+          "correctIndex": 1,
+          "explanation": "Поиск по семантическим ролям getByRole имитирует взаимодействие реального пользователя или скринридера и не ломается при изменении CSS-классов."
+        },
+        {
+          "id": "pro8-q4",
+          "question": "В чём заключается цикл разработки по методологии TDD (Test-Driven Development)?",
+          "options": [
+            "Написание кода -> Ручное тестирование в браузере -> Деплой",
+            "Red (пишем падающий тест) -> Green (пишем минимальный код для прохождения) -> Refactor (улучшаем код)",
+            "Написание тестов после релиза",
+            "Тестирование только перед увольнением"
+          ],
+          "correctIndex": 1,
+          "explanation": "TDD цикл Red-Green-Refactor заставляет сначала сформулировать требования в виде падающего теста, затем реализовать рабочий код и провести рефакторинг с гарантией стабильности."
+        },
+        {
+          "id": "pro8-q5",
+          "question": "Какое преимущество дает инструмент Mock Service Worker (MSW) при интеграционном тестировании?",
+          "options": [
+            "MSW удаляет базу данных",
+            "MSW перехватывает сетевые запросы на уровне Service Worker, позволяя тестировать реальный сетевой стек fetch/axios без ручной подмены глобальных объектов",
+            "MSW ускоряет компиляцию TypeScript",
+            "MSW заменяет CSS стили"
+          ],
+          "correctIndex": 1,
+          "explanation": "MSW перехватывает HTTP-трафик на уровне браузерного сетевого слоя (Service Worker), обеспечивая максимально приближенное к продакшену тестирование без грязных моков."
+        }
+      ]
+    }
   }
 ];

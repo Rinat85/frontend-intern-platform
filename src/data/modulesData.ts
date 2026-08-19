@@ -41,12 +41,12 @@ export const modulesData: Module[] = [
   {
     id: 'pro',
     title: 'Web Development Pro',
-    subtitle: '7 уровней мастерства',
-    description: 'Узнайте о работе в ИТ-команде, Agile/Scrum процессах, Git workflow, архитектуре FSD, State Management, безопасности, WebSockets/SSE и Code Review.',
+    subtitle: '8 уровней мастерства',
+    description: 'Узнайте о работе в ИТ-команде, Agile/Scrum процессах, Git workflow, архитектуре FSD, State Management, тестировании (Vitest/Playwright), WebSockets и Code Review.',
     iconName: 'Award',
     accentColor: '#10b981',
     gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    levelsCount: 7,
+    levelsCount: 8,
     lessons: proLessons
   }
 ];

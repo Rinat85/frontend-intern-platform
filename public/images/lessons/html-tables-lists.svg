@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgh8" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgh8)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">HTML: Списки и Семантические Таблицы Данных</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">ul/ol/dl, thead/tbody/tfoot, colspan/rowspan, scope и адаптивный скролл</text>
+
+  <!-- Left: Lists -->
+  <rect x="20" y="65" width="370" height="175" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">3 Типа Списков в HTML5</text>
+  
+  <rect x="35" y="96" width="340" height="42" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="45" y="112" fill="#2dff8a" font-size="9" font-weight="600">&lt;ul&gt; &lt;li&gt; (Маркированный)</text>
+  <text x="45" y="126" fill="#8b949e" font-size="8">Порядок не имеет значения: навигация, списки фичей</text>
+
+  <rect x="35" y="142" width="340" height="42" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="45" y="158" fill="#ffb02e" font-size="9" font-weight="600">&lt;ol start="1" reversed&gt; (Нумерованный)</text>
+  <text x="45" y="172" fill="#8b949e" font-size="8">Строгий порядок: инструкции, топ-10, таймеры</text>
+
+  <rect x="35" y="188" width="340" height="42" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="45" y="204" fill="#29e7ff" font-size="9" font-weight="600">&lt;dl&gt; &lt;dt&gt;Термин&lt;/dt&gt; &lt;dd&gt;Описание&lt;/dd&gt; &lt;/dl&gt;</text>
+  <text x="45" y="218" fill="#8b949e" font-size="8">Списки пар ключ-значение: характеристики товаров, словарь</text>
+
+  <!-- Right: Table Architecture -->
+  <rect x="410" y="65" width="370" height="175" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Анатомия таблицы данных</text>
+  
+  <rect x="425" y="96" width="340" height="24" rx="3" fill="#161b22" stroke="#30363d"/>
+  <text x="595" y="112" fill="#d2a8ff" font-size="8" text-anchor="middle">&lt;caption&gt; Заголовок таблицы (Обязателен для a11y) &lt;/caption&gt;</text>
+
+  <rect x="425" y="124" width="340" height="26" rx="3" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="595" y="141" fill="#2dff8a" font-size="8" text-anchor="middle">&lt;thead&gt; &lt;tr&gt; &lt;th scope="col"&gt;Колонка A&lt;/th&gt; ... &lt;/thead&gt;</text>
+
+  <rect x="425" y="154" width="340" height="46" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="595" y="172" fill="#e6edf3" font-size="8" text-anchor="middle">&lt;tbody&gt; &lt;tr&gt; &lt;td colspan="2"&gt;Слияние 2 колонок&lt;/td&gt; ...</text>
+  <text x="595" y="188" fill="#8b949e" font-size="7" text-anchor="middle">&lt;td rowspan="2"&gt;Слияние строк по вертикали&lt;/td&gt; &lt;/tbody&gt;</text>
+
+  <rect x="425" y="204" width="340" height="26" rx="3" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="595" y="221" fill="#ffb02e" font-size="8" text-anchor="middle">&lt;tfoot&gt; &lt;tr&gt; &lt;td&gt;Итого: 450 000 ₽&lt;/td&gt; ... &lt;/tfoot&gt;</text>
+
+  <!-- Bottom: Table Accessibility & Responsive -->
+  <rect x="20" y="250" width="760" height="95" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="270" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Правила доступности (a11y) и Адаптивность таблиц</text>
+  
+  <rect x="35" y="280" width="230" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="150" y="298" fill="#29e7ff" font-size="9" text-anchor="middle">th scope="col" / scope="row"</text>
+  <text x="150" y="312" fill="#8b949e" font-size="7" text-anchor="middle">Связывает ячейку td с заголовком</text>
+  <text x="150" y="324" fill="#8b949e" font-size="7" text-anchor="middle">для голосового синтезатора</text>
+
+  <rect x="275" y="280" width="230" height="52" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="390" y="298" fill="#2dff8a" font-size="9" text-anchor="middle">border-collapse: collapse</text>
+  <text x="390" y="312" fill="#8b949e" font-size="7" text-anchor="middle">Схлопывает двойные границы ячеек</text>
+  <text x="390" y="324" fill="#8b949e" font-size="7" text-anchor="middle">в единую аккуратную сетку 1px</text>
+
+  <rect x="515" y="280" width="250" height="52" rx="4" fill="#161b22" stroke="#ffb02e"/>
+  <text x="640" y="298" fill="#ffb02e" font-size="9" text-anchor="middle">overflow-x: auto (Mobile)</text>
+  <text x="640" y="312" fill="#8b949e" font-size="7" text-anchor="middle">Скролл-контейнер с tabindex="0"</text>
+  <text x="640" y="324" fill="#8b949e" font-size="7" text-anchor="middle">Предотвращает поломку макета</text>
+
+  <!-- Bottom: Senior Tip -->
+  <rect x="20" y="355" width="760" height="70" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-dasharray="4,3"/>
+  <text x="400" y="375" fill="#2dff8a" font-size="10" font-weight="600" text-anchor="middle">💡 Совет Senior: dl для характеристик товаров</text>
+  <text x="400" y="392" fill="#e6edf3" font-size="8" text-anchor="middle">Вместо div-ов используйте &lt;dl&gt;&lt;dt&gt;Процессор:&lt;/dt&gt;&lt;dd&gt;Apple M3 Max&lt;/dd&gt;&lt;/dl&gt; — это семантический стандарт разметки характеристик!</text>
+  <text x="400" y="408" fill="#8b949e" font-size="7" text-anchor="middle">Никогда не используйте таблицы для верстки сетки страницы — только для табличных данных</text>
+</svg>

@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgj8" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgj8)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">JS: Событийная Модель Браузера (Events)</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">3 Фазы (Capturing/Target/Bubbling), Делегирование, stopPropagation и AbortController</text>
+
+  <!-- 3 Phases Diagram -->
+  <rect x="20" y="65" width="460" height="260" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="250" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">3 Фазы распространения события (Event Propagation)</text>
+  
+  <rect x="35" y="98" width="430" height="36" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="45" y="114" fill="#ffb02e" font-size="9" font-weight="600">1. Фаза погружения (Capturing):</text>
+  <text x="45" y="126" fill="#8b949e" font-size="8">window → document → &lt;html&gt; → &lt;body&gt; → &lt;main&gt; (сверху вниз)</text>
+
+  <rect x="35" y="140" width="430" height="36" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="45" y="156" fill="#2dff8a" font-size="9" font-weight="600">2. Фаза цели (Target):</text>
+  <text x="45" y="168" fill="#e6edf3" font-size="8">Событие достигает целевого элемента e.target (&lt;button&gt;)</text>
+
+  <rect x="35" y="182" width="430" height="36" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="45" y="198" fill="#29e7ff" font-size="9" font-weight="600">3. Фаза всплытия (Bubbling — по умолчанию):</text>
+  <text x="45" y="210" fill="#8b949e" font-size="8">&lt;button&gt; → &lt;main&gt; → &lt;body&gt; → document → window (снизу вверх!)</text>
+
+  <!-- Delegation Box -->
+  <rect x="35" y="226" width="430" height="85" rx="4" fill="#161b22" stroke="#2dff8a"/>
+  <text x="250" y="244" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">Паттерн Делегирования событий (Event Delegation)</text>
+  <text x="250" y="260" fill="#e6edf3" font-size="8" text-anchor="middle">1 слушатель на родительском контейнере вместо 10 000 на детях!</text>
+  <text x="250" y="276" fill="#ffb02e" font-size="8" text-anchor="middle">const card = e.target.closest('.card'); if (card) { ... }</text>
+  <text x="250" y="292" fill="#8b949e" font-size="7" text-anchor="middle">Автоматически работает для новых динамически добавленных элементов</text>
+
+  <!-- Right: Event Options -->
+  <rect x="500" y="65" width="280" height="260" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
+  <text x="640" y="85" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Опции addEventListener</text>
+  
+  <rect x="515" y="98" width="250" height="65" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="114" fill="#2dff8a" font-size="8" font-weight="600">{ once: true }</text>
+  <text x="525" y="126" fill="#8b949e" font-size="7">Авто-удаление после 1-го вызова</text>
+  <text x="525" y="142" fill="#29e7ff" font-size="8" font-weight="600">{ passive: true }</text>
+  <text x="525" y="154" fill="#8b949e" font-size="7">60 FPS скролл без блокировок</text>
+
+  <rect x="515" y="170" width="250" height="70" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="525" y="186" fill="#2dff8a" font-size="8" font-weight="600">{ signal: controller.signal }</text>
+  <text x="525" y="200" fill="#e6edf3" font-size="7">Массовое удаление слушателей:</text>
+  <text x="525" y="214" fill="#ffb02e" font-size="7">controller.abort(); // отписка разом</text>
+  <text x="525" y="226" fill="#8b949e" font-size="6">Идеально при размонтировании в SPA</text>
+
+  <rect x="515" y="248" width="250" height="63" rx="4" fill="#0d1117" stroke="#f85149"/>
+  <text x="640" y="266" fill="#f85149" font-size="8" font-weight="600" text-anchor="middle">e.target vs e.currentTarget</text>
+  <text x="640" y="282" fill="#e6edf3" font-size="7" text-anchor="middle">e.target = реальный клик (кнопка/иконка)</text>
+  <text x="640" y="296" fill="#8b949e" font-size="7" text-anchor="middle">e.currentTarget = контейнер со слушателем</text>
+
+  <!-- Bottom: Methods -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Управление поведением: preventDefault vs stopPropagation</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• e.preventDefault() — отменяет стандартное действие браузера (отправку формы submit, переход по ссылке a)</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• e.stopPropagation() — останавливает всплытие события вверх к родителям (не злоупотребляйте, ломает аналитику!)</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• e.stopImmediatePropagation() — останавливает всплытие и глушит другие обработчики на том же элементе</text>
+</svg>

@@ -1376,84 +1376,191 @@ export const cssLessons: Lesson[] = [
     "moduleId": "css",
     "level": 8,
     "title": "Оформление рамок и теней",
-    "subtitle": "Border, border-radius, outline и box-shadow",
-    "description": "Объем интерфейса: скругления border-radius, стек мягких теней box-shadow, разница между outline и border.",
-    "estimatedMinutes": 30,
+    "subtitle": "border, border-radius, outline vs border, box-shadow, drop-shadow, неоновые свечения и Glassmorphism",
+    "description": "Освойте стилизацию границ, теней и глубины в CSS: свойства border и логические границы border-inline, сложные эллиптические скругления border-radius, доступный фокус :focus-visible и outline-offset, многослойные тени (Layered Elevation), контурные тени filter: drop-shadow() и эффект матового стекла (Glassmorphism).",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "CSS",
-      "Borders",
-      "Shadows"
+      "borders",
+      "shadows",
+      "box-shadow",
+      "drop-shadow",
+      "border-radius",
+      "glassmorphism",
+      "outline",
+      "focus-visible"
     ],
     "theory": {
-      "overview": "Тени и скругления углов создают глубину и слои в интерфейсе.",
+      "overview": "Рамки, скругления и тени создают пространственную иерархию (Elevation), визуальный объем и ощущение материальности интерфейса.\n\nВ современном веб-дизайне плоские однослойные тени уступили место реалистичным многослойным теням (Layered Shadows), неоновым киберпанк-свечениям и эффекту матового стекла (**Glassmorphism**). В этом уроке мы изучим геометрию `border-radius`, разберём принципиальную разницу между `box-shadow` и `filter: drop-shadow()`, настроим доступный фокус через `:focus-visible` и создадим интерфейс в стиле матового стекла с помощью `backdrop-filter`.",
       "sections": [
         {
-          "title": "Стек теней",
-          "content": "- `border-radius: 12px`, `border-radius: 50%` (круг).\n- `box-shadow`: комбинация нескольких слоев теней через запятую дает реалистичную мягкую тень.",
+          "title": "Рамки и скругления: border, border-radius и сложные формы",
+          "content": "Свойства оформления границ элементов:\n\n1. Семейство `border`:\n- Сокращение: `border: 1px solid #30363d;` (`border-width`, `border-style`, `border-color`).\n- Стили границ: `solid`, `dashed`, `dotted`, `double`.\n- Логические свойства (Logical Properties): `border-inline-start`, `border-block-end` (адаптируются под направление письма RTL/LTR).\n\n2. Геометрия `border-radius`:\n- 1 значение: `border-radius: 12px;` (скругляет все 4 угла одинаково).\n- 2 значения: `border-radius: 12px 24px;` (верх-лево/низ-право и верх-право/низ-лево).\n- 4 значения: `border-radius: 10px 20px 30px 40px;` (по часовой стрелке от верхнего левого угла).\n- `border-radius: 50%;` — идеальный круг (если у элемента равны `width` и `height`).\n- `border-radius: 9999px;` — таблетка (Pill shape для кнопок и тегов).\n\n3. Эллиптические скругления через слеш `/`:\n`border-radius: 50px / 25px;` — задает раздельные радиусы скругления по горизонтальной оси X и вертикальной оси Y! Позволяет создавать органические природные формы, капли и асимметричные кляксы.",
+          "image": {
+            "src": "/images/lessons/css-borders-shadows.svg",
+            "alt": "CSS Рамки, Тени и Glassmorphism: box-shadow, drop-shadow, border-radius",
+            "caption": "Многослойные тени создают реалистичную глубину, drop-shadow повторяет прозрачный контур, а backdrop-filter создает эффект стекла"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Мягкая тень",
-            "code": ".card { background: white; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 15px -3px rgba(0,0,0,0.1); }",
-            "explanation": "Двойная тень."
+            "code": "/* 1. Кнопка-таблетка (Pill button) */\n.btn-pill {\n  border-radius: 9999px;\n  padding: 10px 24px;\n  border: 1px solid #2dff8a;\n  background: #161b22;\n  color: #2dff8a;\n}\n\n/* 2. Органическая форма бейджа с эллиптическими углами */\n.organic-badge {\n  border-radius: 40px 15px 35px 15px / 15px 35px 15px 40px;\n  background: linear-gradient(135deg, #2dff8a, #29e7ff);\n  color: #0a0e13;\n  padding: 8px 16px;\n  font-weight: bold;\n}",
+            "title": "Скругление border-radius: таблетки и эллиптические формы",
+            "explanation": "border-radius: 9999px гарантирует круглые бока при любой ширине. Синтаксис со слешем / создает асимметричные капли."
+          }
+        },
+        {
+          "title": "Фокус и доступность: outline vs border и псевдокласс :focus-visible",
+          "content": "Управление рамкой фокуса элемента:\n\n1. `outline` vs `border`:\n- `border` участвует в блочной модели Box Model (увеличивает физический размер элемента и может вызывать Reflow).\n- `outline` рисуется поверх элемента, НЕ занимает физического места в геометрии и поддерживает свойство `outline-offset: 4px;` (отступ рамки от границ элемента).\n\n2. Антипаттерн `outline: none`:\nУдаление `outline: none` без предоставления альтернативного стиля — грубейшее нарушение доступности (WCAG)! Люди с ограниченной моторикой, пользующиеся клавишей `Tab`, теряют фокус и не видят, на каком элементе находятся.\n\n3. Современный псевдокласс `:focus-visible`:\n- Отображает рамку фокуса ТОЛЬКО тогда, когда пользователь перемещается с клавиатуры (клавишами `Tab` или стрелками).\n- При клике мышью рамка НЕ появляется, сохраняя идеальную визуальную чистоту интерфейса!",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Идеальная доступная настройка фокуса в дизайн-системе */\nbutton, a, input {\n  /* Скрываем рамку при обычном клике мышью */\n  outline: none;\n}\n\n/* Показываем неоновый фокус ТОЛЬКО при навигации с клавиатуры */\nbutton:focus-visible,\na:focus-visible,\ninput:focus-visible {\n  outline: 2px solid #2dff8a;\n  outline-offset: 4px; /* Отступ рамки от кнопки */\n  box-shadow: 0 0 12px rgba(45, 255, 138, 0.5);\n  border-radius: 4px;\n}",
+            "title": "Настройка доступного фокуса через :focus-visible и outline-offset",
+            "explanation": ":focus-visible сохраняет красивый вид для пользователей мыши и гарантирует четкую неоновую рамку с отступом для навигации с клавиатуры."
+          }
+        },
+        {
+          "title": "Всё о тенях: box-shadow, inset и многослойные тени (Layered Elevation)",
+          "content": "Синтаксис свойства `box-shadow`:\n`box-shadow: [inset] x-offset y-offset blur-radius spread-radius color;`\n\n1. Параметры тени:\n- `x-offset`, `y-offset` — смещение тени по горизонтали и вертикали.\n- `blur-radius` — степень размытия тени (0 = жесткая тень).\n- `spread-radius` — увеличение или сжатие размера тени.\n- `inset` — переключает внешнюю тень на внутреннюю (эффект вдавленности в поля ввода).\n\n2. Секрет профессионального дизайна: Многослойные тени (Layered Elevation):\nВ реальном мире свет рассеивается мягко. Одна черная тень `0 10px 20px black` выглядит грязной и плоской. Профессиональный UI комбинирует 2–3 полупрозрачных слоя:\n`box-shadow: 0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.15), 0 20px 40px rgba(0,0,0,0.2);`.\n\n3. Неоновое киберпанк-свечение (Glow):\nТень с нулевым смещением (`x=0, y=0`), большим радиусом `blur: 25px` и цветом в пространстве OKLCH создает эффект яркого неонового ореола!",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Многослойная парящая карточка (Layered Shadow) */\n.elevated-card {\n  background: #161b22;\n  border-radius: 12px;\n  box-shadow:\n    0 2px 4px rgba(0, 0, 0, 0.2),\n    0 8px 16px rgba(0, 0, 0, 0.3),\n    0 24px 48px rgba(0, 0, 0, 0.4);\n}\n\n/* 2. Неоновая киберпанк-кнопка со свечением */\n.cyber-glow-btn {\n  background: #2dff8a;\n  color: #0a0e13;\n  border: none;\n  box-shadow:\n    0 0 10px oklch(0.85 0.22 142 / 0.8),\n    0 0 30px oklch(0.85 0.22 142 / 0.4);\n}",
+            "title": "Многослойная тень карточки и неоновое свечение кнопки",
+            "explanation": "Многослойная тень elevated-card создает ощущение физического объема. cyber-glow-btn использует двойной ореол свечения."
+          }
+        },
+        {
+          "title": "Контурная тень filter: drop-shadow() и матовое стекло Glassmorphism",
+          "content": "Разница между `box-shadow` и `filter: drop-shadow()`:\n\n1. `box-shadow`:\n- Всегда отбрасывает строго прямоугольную тень коробки контейнера (Box Model).\n- Если у вас есть SVG-иконка, прозрачный PNG или стрелочка тултипа `::after`, `box-shadow` проигнорирует прозрачность и нарисует сплошной квадрат!\n\n2. `filter: drop-shadow(x y blur color)`:\n- Тень отрисовывается на GPU по реальному альфа-каналу пикселей! Она ТОЧНО обтекает сложную форму SVG-иконки, прозрачный логотип и треугольник тултипа.\n\n3. Эффект матового стекла (**Glassmorphism**):\nСоздает иллюзию полупрозрачного стекла, сквозь которое размывается фоновый контент страницы:\n- `background: rgba(22, 27, 34, 0.75);` (полупрозрачная подложка)\n- `backdrop-filter: blur(16px) saturate(180%);` (размытие того, что ПОД элементом!)\n- `border: 1px solid rgba(255, 255, 255, 0.1);` (тонкая светящаяся стеклянная грань)",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Тултип с идеальной контурной тенью через drop-shadow */\n.tooltip-bubble {\n  position: relative;\n  background: #161b22;\n  border-radius: 8px;\n  padding: 12px 16px;\n  /* drop-shadow обтекает и саму плашку, и треугольную стрелочку! */\n  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));\n}\n.tooltip-bubble::after {\n  content: '';\n  position: absolute;\n  bottom: -8px;\n  left: 24px;\n  border-width: 8px 8px 0;\n  border-style: solid;\n  border-color: #161b22 transparent;\n}\n\n/* Модальное окно в стиле Glassmorphism */\n.glass-modal {\n  background: rgba(10, 14, 19, 0.7);\n  backdrop-filter: blur(20px) saturate(180%);\n  border: 1px solid rgba(45, 255, 138, 0.2);\n  border-radius: 16px;\n  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);\n}",
+            "title": "Контурная тень drop-shadow на тултипе и Glassmorphism",
+            "explanation": "drop-shadow отбрасывает тень вокруг стрелочки ::after. backdrop-filter: blur(20px) размывает фон под модальным окном glass-modal."
           }
         }
       ],
       "seniorTips": [
-        "Не удаляйте outline: none без добавления :focus-visible."
+        "Всегда используйте многослойные тени (Layered Shadows) из 2–3 слоев для создания реалистичной глубины и воздушности карточек.",
+        "Используйте `filter: drop-shadow()` вместо `box-shadow` для тултипов с треугольными стрелочками и SVG-иконок с прозрачностью.",
+        "Никогда не пишите `outline: none` без предоставления альтернативного `:focus-visible` стиля для доступности.",
+        "Для эффекта Glassmorphism обязательно добавляйте тонкую полупрозрачную границу `border: 1px solid rgba(255, 255, 255, 0.1)` — это придает стеклу четкие физические грани."
       ],
       "commonMistakes": [
         {
-          "bad": "box-shadow: 0 0 10px black;",
-          "good": "box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);",
-          "reason": "Грубые черные тени выглядят устаревшими."
+          "bad": "/* box-shadow на тултипе со стрелочкой */\n.tooltip { box-shadow: 0 4px 12px black; }\n.tooltip::after { /* Стрелочка отбросит квадратную тень на сам тултип! */ }",
+          "good": ".tooltip { filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4)); }",
+          "reason": "box-shadow рисует тень только для прямоугольника, игнорируя псевдоэлемент стрелочки. filter: drop-shadow обтекает всю фигуру целиком."
+        },
+        {
+          "bad": "/* Грубая жесткая черная тень */\n.card { box-shadow: 0 10px 20px #000000; }",
+          "good": ".card { box-shadow: 0 4px 6px rgba(0,0,0,0.15), 0 12px 24px rgba(0,0,0,0.25); }",
+          "reason": "Однослойная черная тень выглядит грязно и неестественно. Многослойная полупрозрачная тень создает чистый эффект парения."
+        },
+        {
+          "bad": "/* Отключение outline без замены */\nbutton:focus { outline: none; }",
+          "good": "button:focus-visible { outline: 2px solid #2dff8a; outline-offset: 4px; }",
+          "reason": "Полное отключение outline делает интерфейс невозможным для управления с клавиатуры, нарушая стандарты доступности WCAG."
         }
       ],
       "keyTakeaways": [
-        "border-radius: 50% делает круг.",
-        "Стек теней создает глубину."
+        "`border-radius: 9999px` создает форму таблетки, а синтаксис со слешем `/` — эллиптические органические формы.",
+        "`outline` не занимает места в Box Model, а `:focus-visible` показывает рамку только при навигации с клавиатуры.",
+        "Многослойные тени (Layered Elevation) из 2–3 слоев обеспечивают реалистичный объем и воздушность.",
+        "`filter: drop-shadow()` повторяет контур прозрачных PNG, SVG-иконок и стрелочек тултипов.",
+        "Glassmorphism строится на триаде: полупрозрачный фон, `backdrop-filter: blur()` и светящаяся граница `border`."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"shadow-card\"><div class=\"av\">👨‍💻</div><h3>Карточка</h3></div>",
-      "initialCss": ".shadow-card { width: 220px; padding: 24px; background: white; border-radius: 16px; text-align: center; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }\n.av { width: 48px; height: 48px; border-radius: 50%; background: #e0e7ff; line-height: 48px; margin: 0 auto 10px; }",
-      "initialJs": "console.log('Shadows loaded');",
-      "instructions": "Попробуйте изменить blur радиус."
+      "initialHtml": "<div class=\"shadow-playground\">\n  <div class=\"glass-card\">\n    <h3>Glassmorphism Card</h3>\n    <p>Матовое стекло с backdrop-filter: blur(12px).</p>\n    <button class=\"neon-btn\">Focus Me (Tab)</button>\n  </div>\n</div>",
+      "initialCss": ".shadow-playground {\n  padding: 30px;\n  background: radial-gradient(circle at top left, #29e7ff22, transparent), #0a0e13;\n  min-height: 200px;\n  font-family: monospace;\n}\n.glass-card {\n  background: rgba(22, 27, 34, 0.7);\n  backdrop-filter: blur(12px) saturate(180%);\n  border: 1px solid rgba(45, 255, 138, 0.2);\n  border-radius: 12px;\n  padding: 20px;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);\n  color: #e6edf3;\n}\n.neon-btn {\n  background: #2dff8a;\n  color: #0a0e13;\n  font-weight: bold;\n  border: none;\n  padding: 8px 16px;\n  border-radius: 9999px;\n  cursor: pointer;\n  box-shadow: 0 0 15px rgba(45, 255, 138, 0.4);\n}\n.neon-btn:focus-visible {\n  outline: 2px solid #29e7ff;\n  outline-offset: 4px;\n}",
+      "initialJs": "console.log('Песочница рамок и теней активна');",
+      "instructions": "Практика с тенями и стеклом:\n1. Нажмите Tab на клавиатуре и проверьте работу :focus-visible с outline-offset\n2. Измените степень размытия backdrop-filter: blur(24px)\n3. Настройте многослойную тень box-shadow из 3 уровней глубины"
     },
     "task": {
-      "title": "Парящая карточка",
-      "scenario": "Оформите карточку с круглым аватаром и мягкой тенью.",
+      "title": "Создание интерфейса карточки в стиле Glassmorphism с неоновым свечением и :focus-visible",
+      "scenario": "Вам необходимо сверстать карточку профиля разработчика в стиле Glassmorphism: блок должен иметь полупрозрачную подложку с размытием фона backdrop-filter, аккуратную световую грань, многослойную тень парения, круглую аватарку с border-radius: 50% и интерактивные кнопки с доступным :focus-visible и outline-offset.",
       "criteria": [
-        "Задан border-radius: 16px",
-        "Применен box-shadow",
-        "Аватар с border-radius: 50%"
+        "Карточка использует эффект Glassmorphism (backdrop-filter: blur() и полупрозрачный фон)",
+        "Применена многослойная тень парения box-shadow (не менее 2 слоев)",
+        "Аватарка оформлена через border-radius: 50%",
+        "Кнопка действия оформлена в форме таблетки (border-radius: 9999px)",
+        "Настроен доступный фокус :focus-visible с outline-offset: 4px",
+        "Применены тонкие границы border со светлым полупрозрачным оттенком"
       ],
       "starterCode": {
-        "html": "<div class=\"float-card\"><div class=\"av\">🚀</div><h4>Старт</h4></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили Glassmorphism карточки */\n.glass-profile-card {\n}\n.avatar {\n}\n.action-btn {\n}"
       },
       "hints": [
-        "Примените .float-card { border-radius: 16px; box-shadow: 0 10px 20px rgba(0,0,0,0.08); } .av { border-radius: 50%; }"
+        "Используйте backdrop-filter: blur(16px) saturate(180%);",
+        "Для многослойной тени: box-shadow: 0 4px 6px rgba(0,0,0,0.2), 0 16px 32px rgba(0,0,0,0.4);",
+        "Для фокуса: button:focus-visible { outline: 2px solid #2dff8a; outline-offset: 4px; }"
       ],
       "solution": {
-        "html": "<div class=\"float-card\"><div class=\"av\">🚀</div><h4>Старт</h4></div>",
-        "css": ".float-card { padding: 24px; background: white; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); text-align: center; }\n.av { width: 48px; height: 48px; border-radius: 50%; background: #fee2e2; line-height: 48px; margin: 0 auto 10px; }",
-        "explanation": "Объемная карточка."
+        "css": ".glass-profile-card {\n  width: 320px;\n  padding: 24px;\n  background: rgba(13, 17, 23, 0.75);\n  backdrop-filter: blur(16px) saturate(180%);\n  border: 1px solid rgba(255, 255, 255, 0.12);\n  border-radius: 16px;\n  box-shadow:\n    0 4px 8px rgba(0, 0, 0, 0.3),\n    0 16px 36px rgba(0, 0, 0, 0.5);\n  color: #e6edf3;\n  text-align: center;\n}\n\n.avatar {\n  width: 80px;\n  height: 80px;\n  border-radius: 50%;\n  border: 2px solid #2dff8a;\n  box-shadow: 0 0 15px rgba(45, 255, 138, 0.35);\n  margin-bottom: 12px;\n}\n\n.action-btn {\n  border-radius: 9999px;\n  padding: 10px 24px;\n  background: #2dff8a;\n  color: #0a0e13;\n  font-weight: bold;\n  border: none;\n  cursor: pointer;\n  box-shadow: 0 0 20px rgba(45, 255, 138, 0.3);\n  outline: none;\n}\n\n.action-btn:focus-visible {\n  outline: 2px solid #29e7ff;\n  outline-offset: 4px;\n}",
+        "explanation": "Стилистика полностью реализует Glassmorphism: размытие фона backdrop-filter, многослойная тень глубины, круглая аватарка 50%, кнопка-таблетка 9999px и доступный :focus-visible."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c8-q1",
-          "question": "Как сделать квадратную картинку круглой?",
+          "id": "css8-q1",
+          "question": "В чём заключается принципиальная разница между box-shadow и filter: drop-shadow()?",
           "options": [
-            "border-radius: 10px",
-            "border-radius: 50%",
-            "clip: circle",
-            "overflow: round"
+            "box-shadow работает только со шрифтами",
+            "box-shadow отбрасывает строго прямоугольную тень коробки блока, а filter: drop-shadow() точно обтекает реальный контур непрозрачных пикселей (стрелочки тултипов, SVG-иконки, прозрачные PNG)",
+            "filter: drop-shadow() запрещен на мобильных устройствах",
+            "Разницы нет"
           ],
           "correctIndex": 1,
-          "explanation": "border-radius: 50% делает круг."
+          "explanation": "filter: drop-shadow() вычисляет тень на основе альфа-канала изображения, идеально повторяя силуэты прозрачных PNG, векторных SVG и псевдоэлементов ::after."
+        },
+        {
+          "id": "css8-q2",
+          "question": "Какое поведение обеспечивает псевдокласс :focus-visible?",
+          "options": [
+            "Показывает элемент только при прокрутке",
+            "Отображает индикатор фокуса ТОЛЬКО при навигации с клавиатуры (клавишами Tab/стрелками), скрывая рамку при клике мышью",
+            "Удаляет элемент со страницы",
+            "Делает текст полужирным"
+          ],
+          "correctIndex": 1,
+          "explanation": ":focus-visible — стандарт доступности: он не раздражает пользователей мыши появлением рамок при клике, но обеспечивает четкую рамку фокуса для людей, использующих клавиатуру."
+        },
+        {
+          "id": "css8-q3",
+          "question": "Какая комбинация свойств создает эффект матового стекла (Glassmorphism)?",
+          "options": [
+            "opacity: 0.5; filter: blur(5px);",
+            "Полупрозрачный фон rgba(...) + backdrop-filter: blur(...) + тонкая полупрозрачная граница border",
+            "background: black; box-shadow: 0 0 10px white;",
+            "display: grid; overflow: hidden;"
+          ],
+          "correctIndex": 1,
+          "explanation": "Glassmorphism требует трех компонентов: полупрозрачного фона, backdrop-filter: blur() для размытия лежащего ПОД элементом контента и тонкого светящегося border."
+        },
+        {
+          "id": "css8-q4",
+          "question": "Почему outline предпочтительнее border для отображения фокуса интерактивных элементов?",
+          "options": [
+            "outline не поддерживается в Firefox",
+            "outline не участвует в геометрии Box Model (не сдвигает соседние элементы и не вызывает Reflow) и поддерживает отступ outline-offset",
+            "outline меняет цвет фона",
+            "border нельзя анимировать"
+          ],
+          "correctIndex": 1,
+          "explanation": "outline рисуется поверх элемента, не влияя на размеры контейнера и не расталкивая соседей, а outline-offset позволяет отодвинуть рамку фокуса от кнопки для лучшей видимости."
+        },
+        {
+          "id": "css8-q5",
+          "question": "Как создать эллиптическое скругление углов с разными радиусами по горизонтали и вертикали?",
+          "options": [
+            "border-radius: 50%;",
+            "border-radius: 50px / 25px; (через символ слеша /)",
+            "border-ellipse: 50px 25px;",
+            "border-round: horizontal 50px vertical 25px;"
+          ],
+          "correctIndex": 1,
+          "explanation": "Синтаксис со слешем (border-radius: 50px / 25px) задает горизонтальный радиус 50px и вертикальный радиус 25px, создавая органические эллиптические формы."
         }
       ]
     }

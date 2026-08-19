@@ -1369,85 +1369,191 @@ export const jsLessons: Lesson[] = [
     "moduleId": "javascript",
     "level": 8,
     "title": "События в браузере (Events)",
-    "subtitle": "AddEventListener, объект Event, всплытие (bubbling) и делегирование событий",
-    "description": "Интерактивность: регистрация слушателей addEventListener, объект Event (target vs currentTarget), фазы Bubbling/Capturing, отмена действий preventDefault и паттерн Event Delegation.",
-    "estimatedMinutes": 40,
+    "subtitle": "3 фазы событий (Capturing/Target/Bubbling), Делегирование, preventDefault и AbortController",
+    "description": "Освойте событийную модель браузера: фазы погружения (Capturing) и всплытия (Bubbling), разницу e.target vs e.currentTarget, паттерн делегирования событий (Event Delegation), управление поведением preventDefault / stopPropagation, опции passive и отписку через AbortController.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "JavaScript",
-      "Events",
-      "Bubbling",
-      "Delegation"
+      "events",
+      "bubbling",
+      "capturing",
+      "delegation",
+      "preventDefault",
+      "stopPropagation",
+      "abortcontroller",
+      "passive"
     ],
     "theory": {
-      "overview": "События (Events) — это сигналы браузера о действиях пользователя: клик мыши (`click`), ввод текста (`input`), отправка формы (`submit`), скролл (`scroll`) или нажатие клавиши (`keydown`).",
+      "overview": "Событийная модель (Event-Driven Architecture) — основа интерактивности браузера. Любое действие пользователя (клик мыши, ввод текста, скролл, отправка формы, свайп на тачскрине) порождает объект события `Event`, который путешествует по дереву DOM.\n\nВ этом уроке мы разберём 3 фазы распространения события, освоим паттерн делегирования событий (Event Delegation), научимся тонко управлять поведением через `preventDefault()` и `stopPropagation()`, оптимизировать мобильный скролл с помощью опции `{ passive: true }` и отписываться от сотен слушателей одной строкой через `AbortController`.",
       "sections": [
         {
-          "title": "addEventListener и всплытие (Bubbling)",
-          "content": "- `element.addEventListener('click', (event) => { ... })`.\n- **Объект `event`**:\n  • `event.target`: элемент, на который **фактически кликнули**.\n  • `event.currentTarget`: элемент, на котором **висит обработчик**.\n  • `event.preventDefault()`: отменяет стандартное действие браузера (например, переход по ссылке или перезагрузку формы).\n- **Всплытие (Bubbling)**: событие поднимается от кликнутого элемента вверх по дереву до `document`.\n- **Делегирование событий (Event Delegation)**: один обработчик вешается на родительский список `<ul>` вместо навешивания 1000 обработчиков на каждый `<li>`!",
+          "title": "Механизм событий и 3 фазы распространения (Event Propagation)",
+          "content": "Когда пользователь кликает по кнопке внутри сложного документа, событие проходит три последовательные фазы:\n\n1. **Фаза погружения (Capturing Phase)**:\nСобытие спускается от корня `window` вниз через `document`, `<html>`, `<body>` к предкам целевого элемента.\n- По умолчанию `addEventListener` игнорирует эту фазу. Чтобы поймать событие на спуске, передают флаг: `el.addEventListener('click', fn, { capture: true })`.\n\n2. **Фаза цели (Target Phase)**:\nСобытие достигает элемента, на котором произошел клик (`e.target`).\n\n3. **Фаза всплытия (Bubbling Phase — стандартный режим)**:\nСобытие «всплывает» от целевого элемента обратно вверх к `window`, последовательно вызывая обработчики на всех родительских узлах.\n\nРазница между `e.target` и `e.currentTarget`:\n- `e.target` — реальный самый глубокий элемент, по которому кликнули (например, иконка `<svg>` внутри кнопки).\n- `e.currentTarget` (или `this`) — элемент, к которому ПРИКРЕПЛЕН текущий обработчик `addEventListener` (например, родительский контейнер).",
+          "image": {
+            "src": "/images/lessons/js-browser-events.svg",
+            "alt": "Событийная модель браузера: 3 фазы, делегирование и AbortController",
+            "caption": "Событие погружается сверху вниз (Capturing), достигает цели (Target) и всплывает наверх (Bubbling). Делегирование использует всплытие"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Делегирование событий",
-            "code": "const list = document.querySelector('.todo-list');\n\n// Один обработчик на весь список!\nlist.addEventListener('click', (e) => {\n  if (e.target.matches('.delete-btn')) {\n    const item = e.target.closest('.todo-item');\n    item.remove();\n    console.log('Элемент удален через делегирование');\n  }\n});",
-            "explanation": "Делегирование событий экономит память и работает для динамически добавленных элементов."
+            "code": "// Демонстрация разницы target и currentTarget\nconst list = document.querySelector('.card-list');\n\nlist.addEventListener('click', function (e) {\n  console.log('e.target (по чему реально кликнули):', e.target);\n  console.log('e.currentTarget (где висит слушатель):', e.currentTarget); // === list\n  \n  // Определение нажатой кнопки через closest\n  const btn = e.target.closest('.btn-action');\n  if (btn) {\n    console.log('Клик по кнопке:', btn.dataset.action);\n  }\n});",
+            "title": "Разница e.target и e.currentTarget при всплытии событий",
+            "explanation": "e.target указывает на конкретный дочерний узел (текст/иконку), а e.currentTarget указывает на родительский list, где зарегистрирован обработчик."
+          }
+        },
+        {
+          "title": "Паттерн Делегирования событий (Event Delegation)",
+          "content": "Делегирование событий — один из важнейших паттернов веб-разработки:\n\nПроблема:\nЕсли у вас есть таблица или каталог с 1 000 товаров, навешивание слушателя `card.addEventListener` на каждую карточку создаст 1 000 функций-замыканий в памяти кучи (Heap) и приведет к утечкам памяти при удалении/добавлении товаров.\n\nРешение (Делегирование):\nМы вешаем ВСЕГО ОДИН обработчик на общий родительский контейнер (`#catalog-grid`) и используем всплытие событий (Bubbling):\n1. Пользователь кликает по кнопке внутри карточки.\n2. Событие всплывает до контейнера каталога.\n3. В обработчике мы проверяем источник клика через `const card = e.target.closest('.product-card');`.\n\nОгромный бонус делегирования: новые товары, динамически добавленные через API или WebSocket, СРАЗУ становятся кликабельными без повторного вызова `addEventListener`!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const table = document.querySelector('#users-table');\n\n// 1 слушатель на всю таблицу любого размера\ntable.addEventListener('click', (e) => {\n  // 1. Клик по кнопке редактирования\n  const editBtn = e.target.closest('.btn-edit');\n  if (editBtn) {\n    const row = editBtn.closest('tr');\n    openEditModal(row.dataset.userId);\n    return;\n  }\n\n  // 2. Клик по кнопке удаления\n  const delBtn = e.target.closest('.btn-delete');\n  if (delBtn) {\n    const row = delBtn.closest('tr');\n    row.remove();\n  }\n});",
+            "title": "Делегирование событий в таблице через closest()",
+            "explanation": "Один слушатель на таблице перехватывает клики по кнопкам редактирования и удаления в любых строках, экономя память."
+          }
+        },
+        {
+          "title": "Управление поведением: preventDefault vs stopPropagation",
+          "content": "Управление стандартным и каскадным поведением событий:\n\n1. `e.preventDefault()`:\n- Отменяет СТАНДАРТНОЕ ДЕЙСТВИЕ браузера по умолчанию (отправку формы `<form>` с перезагрузкой страницы, переход по ссылке `<a>`, открытие контекстного меню по правому клику).\n- При этом всплытие события ПРОДОЛЖАЕТСЯ штатно!\n\n2. `e.stopPropagation()`:\n- Останавливает дальнейшее всплытие события вверх по DOM-дереву (родительские обработчики не сработают).\n- ⚠️ Золотое правило Senior: НЕ злоупотребляйте `stopPropagation()` без крайней необходимости! Это ломает глобальные клик-аутсайды (закрытие модалок/дропдаунов по клику вне) и сторонние системы аналитики (Яндекс Метрика, Google Analytics).\n\n3. `e.stopImmediatePropagation()`:\n- Не только останавливает всплытие вверх, но и БЛОКИРУЕТ выполнение других обработчиков этого же события, висящих на ТЕКУЩЕМ элементе.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const form = document.querySelector('#auth-form');\n\nform.addEventListener('submit', (e) => {\n  // Отменяем перезагрузку страницы браузером\n  e.preventDefault();\n  \n  const formData = new FormData(form);\n  const credentials = Object.fromEntries(formData);\n  \n  // Отправляем данные асинхронно через AJAX/Fetch\n  sendLoginRequest(credentials);\n});",
+            "title": "Отмена стандартной отправки формы через e.preventDefault()",
+            "explanation": "preventDefault() блокирует перезагрузку страницы браузером, позволяя отправить форму в фоне через Fetch API."
+          }
+        },
+        {
+          "title": "Опции addEventListener: passive, once и AbortController",
+          "content": "Третий аргумент `addEventListener(type, fn, options)` принимает объект мощных конфигураций:\n\n1. `{ once: true }`:\nОбработчик автоматически удалится после первого же срабатывания (идеально для анимаций завершения `animationend`, разовых подсказок).\n\n2. `{ passive: true }` (Критично для Mobile Performance):\n- Сообщает браузеру, что обработчик НИКОГДА не вызовет `e.preventDefault()`.\n- Браузер запускает прокрутку страницы параллельно в отдельном потоке Compositor БЕЗ ожидания выполнения JS-кода.\n- Гарантирует идеальные 60/120 FPS при скролле (`scroll`, `touchmove`, `wheel`).\n\n3. Массовая отписка через `AbortController` (Стандарт ES2022+):\nВместо ручного сохранения ссылок на функции и вызовов `removeEventListener`, вы передаете сигнал `signal: controller.signal`. Вызов `controller.abort()` мгновенно отписывает все слушатели разом!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Использование passive: true для идеального скролла\nwindow.addEventListener('touchmove', handleTouch, { passive: true });\n\n// 2. Массовое управление событиями через AbortController в SPA:\nclass ModalWidget {\n  constructor() {\n    this.abortController = new AbortController();\n  }\n\n  mount() {\n    const { signal } = this.abortController;\n    \n    window.addEventListener('keydown', this.handleKey, { signal });\n    window.addEventListener('resize', this.handleResize, { signal });\n    document.addEventListener('click', this.handleClickOutside, { signal });\n  }\n\n  destroy() {\n    // Мгновенно удаляет ВСЕ 3 слушателя одной командой!\n    this.abortController.abort();\n  }\n}",
+            "title": "Плавный скролл passive и массовая отписка через AbortController",
+            "explanation": "controller.abort() предотвращает утечки памяти в SPA-приложениях, отписывая все слушатели при размонтировании виджета."
           }
         }
       ],
       "seniorTips": [
-        "Всегда используйте делегирование событий для списков и таблиц с динамическими строками."
+        "Всегда используйте делегирование событий через `e.target.closest('.item')` для списков, таблиц и галерей вместо циклов `addEventListener`.",
+        "Для обработчиков скролла `wheel` и тача `touchmove` ВСЕГДА передавайте `{ passive: true }` — это устраняет задержки прокрутки на смартфонах.",
+        "Используйте `AbortController` для массовой отписки от событий при размонтировании компонентов в SPA (`{ signal: controller.signal }`).",
+        "Различайте `e.target` (источник клика) и `e.currentTarget` (элемент со слушателем события)."
       ],
       "commonMistakes": [
         {
-          "bad": "form.onsubmit = fn; /* Старый синтаксис, перезаписывает другие обработчики */",
-          "good": "form.addEventListener('submit', fn);",
-          "reason": "addEventListener позволяет навешивать несколько независимых слушателей."
+          "bad": "// Навешивание слушателей в цикле без удаления\nitems.forEach(item => {\n  item.addEventListener('click', () => { ... });\n});",
+          "good": "// 1 слушатель на контейнере (делегирование)\ncontainer.addEventListener('click', (e) => {\n  const item = e.target.closest('.item');\n  if (item) { ... }\n});",
+          "reason": "Циклы addEventListener создают сотни дублирующихся замыканий в памяти и ломаются при динамическом добавлении новых элементов."
+        },
+        {
+          "bad": "// Вызов stopPropagation без крайней необходимости\nbutton.addEventListener('click', (e) => { e.stopPropagation(); });",
+          "good": "button.addEventListener('click', (e) => { e.preventDefault(); });",
+          "reason": "stopPropagation ломает логику закрытия дропдаунов по клику вне (Click Outside) и блокирует работу систем веб-аналитики."
+        },
+        {
+          "bad": "// Забыли preventDefault в submit формы\nform.onsubmit = () => { doLogin(); };",
+          "good": "form.addEventListener('submit', (e) => { e.preventDefault(); doLogin(); });",
+          "reason": "Без e.preventDefault() браузер перезагрузит страницу, сбросив состояние JavaScript и прервав асинхронный сетевой запрос."
         }
       ],
       "keyTakeaways": [
-        "addEventListener регистрирует событие.",
-        "event.preventDefault() отменяет дефолтное действие.",
-        "Делегирование слушает события на родителе."
+        "Событие проходит 3 фазы: Capturing (погружение) -> Target (цель) -> Bubbling (всплытие).",
+        "Делегирование событий через `e.target.closest()` экономит память и поддерживает динамический DOM.",
+        "`e.preventDefault()` отменяет действие браузера, а `e.stopPropagation()` останавливает всплытие.",
+        "Опция `{ passive: true }` обеспечивает плавную прокрутку на смартфонах без блокировки потока.",
+        "`AbortController` позволяет отписаться от десятков слушателей одной командой `abort()`."
       ]
     },
     "sandbox": {
-      "initialHtml": "<ul id=\"d-list\"><li data-id=\"1\">Пункт 1 <button class=\"d-btn\">Удалить</button></li><li data-id=\"2\">Пункт 2 <button class=\"d-btn\">Удалить</button></li></ul>",
-      "initialCss": "#d-list { list-style: none; padding: 0; }\n#d-list li { display: flex; justify-content: space-between; padding: 8px; background: white; margin-bottom: 6px; border-radius: 6px; }\n.d-btn { background: #ef4444; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; }",
-      "initialJs": "document.getElementById('d-list').addEventListener('click', (e) => {\n  if (e.target.classList.contains('d-btn')) {\n    e.target.closest('li').remove();\n  }\n});",
-      "instructions": "Кликните «Удалить» на любом пункте списка."
+      "initialHtml": "<div id=\"event-app\">\n  <h3>Интерактивное Делегирование и AbortController</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"add-item-btn\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">+ Добавить карточку</button>\n    <button id=\"abort-btn\" style=\"background:#f85149; color:#fff; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">Отписать слушатели (Abort)</button>\n  </div>\n  <div id=\"items-grid\" style=\"display:flex; flex-direction:column; gap:6px;\">\n    <div class=\"item-box\" data-id=\"1\">Карточка #1 <button class=\"del-btn\">✕</button></div>\n  </div>\n  <div id=\"log-box\" style=\"margin-top:12px; padding:8px; background:#161b22; border-radius:4px; font-size:12px;\"></div>\n</div>",
+      "initialCss": "#event-app {\n  font-family: monospace;\n  color: #e6edf3;\n  padding: 16px;\n  background: #0d1117;\n  border-radius: 8px;\n}\n.item-box {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 8px 12px;\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 4px;\n}\n.del-btn {\n  background: #ffb02e;\n  color: #0a0e13;\n  border: none;\n  padding: 2px 8px;\n  cursor: pointer;\n  border-radius: 2px;\n}",
+      "initialJs": "const grid = document.getElementById('items-grid');\nconst logEl = document.getElementById('log-box');\nconst controller = new AbortController();\n\nlet count = 1;\n\n// Делегирование со связкой AbortController\ngrid.addEventListener('click', (e) => {\n  const del = e.target.closest('.del-btn');\n  if (del) {\n    const card = del.closest('.item-box');\n    logEl.textContent = `Удалена карточка ID: ${card.dataset.id}`;\n    card.remove();\n  }\n}, { signal: controller.signal });\n\ndocument.getElementById('add-item-btn').onclick = () => {\n  count++;\n  grid.insertAdjacentHTML('beforeend', `<div class=\"item-box\" data-id=\"${count}\">Карточка #${count} <button class=\"del-btn\">✕</button></div>`);\n};\n\ndocument.getElementById('abort-btn').onclick = () => {\n  controller.abort();\n  logEl.textContent = 'Слушатели удалены через AbortController! Кнопки больше не реагируют.';\n};",
+      "instructions": "Практика с событиями:\n1. Добавьте новые карточки и удалите их — обратите внимание, что новые элементы сразу работают благодаря делегированию\n2. Нажмите кнопку 'Отписать слушатели (Abort)' и убедитесь в остановке обработки\n3. Изучите консоль и добавьте проверку e.target vs e.currentTarget"
     },
     "task": {
-      "title": "Отмена отправки формы",
-      "scenario": "Навесьте слушатель submit на форму и отмените перезагрузку страницы через event.preventDefault().",
+      "title": "Разработка модульной системы контекстного меню с делегированием и AbortController",
+      "scenario": "Вам необходимо разработать модуль выпадающего меню / контекстного меню (Dropdown Menu): модуль должен открываться по клику на кнопки через делегирование, закрываться по клику вне (Click Outside) или клавише Escape, отменять стандартное контекстное меню preventDefault() и поддерживать полную очистку слушателей через AbortController.",
       "criteria": [
-        "Использован addEventListener('submit', ...)",
-        "Вызван event.preventDefault()"
+        "Обработка открытия меню реализована через делегирование событий с closest()",
+        "Реализовано закрытие меню при клике вне элемента (Click Outside)",
+        "Реализовано закрытие по нажатию клавиши Escape (keydown)",
+        "Стандартное действие контекстного меню отменяется через e.preventDefault()",
+        "Класс MenuManager использует AbortController для полного удаления всех слушателей в методе destroy()"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "html": "<div id=\"menu-container\">\n  <button class=\"menu-trigger\" data-menu-id=\"m1\">Действия ▾</button>\n  <div id=\"m1\" class=\"dropdown-menu\" hidden>\n    <button class=\"menu-item\" data-action=\"copy\">Копировать</button>\n    <button class=\"menu-item\" data-action=\"delete\">Удалить</button>\n  </div>\n</div>",
+        "js": "// Реализуйте класс MenuManager\nclass MenuManager {\n  constructor(container) {\n    // Ваш код\n  }\n}"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "Создайте this.controller = new AbortController();",
+        "Передавайте { signal: this.controller.signal } во все addEventListener",
+        "Для закрытия вне: if (!e.target.closest('.dropdown-menu') && !e.target.closest('.menu-trigger'))"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const form = document.querySelector('form');\nform.addEventListener('submit', (event) => {\n  event.preventDefault();\n  console.log('Отправка формы перехвачена в JS');\n});",
-        "explanation": "Отмена стандартного поведения формы."
+        "js": "class MenuManager {\n  constructor(container) {\n    this.container = container;\n    this.activeMenu = null;\n    this.controller = new AbortController();\n    this.init();\n  }\n\n  init() {\n    const { signal } = this.controller;\n\n    // 1. Делегирование кликов открытия и действий меню\n    this.container.addEventListener('click', (e) => {\n      const trigger = e.target.closest('.menu-trigger');\n      if (trigger) {\n        const menuId = trigger.dataset.menuId;\n        this.toggleMenu(document.getElementById(menuId));\n        return;\n      }\n\n      const item = e.target.closest('.menu-item');\n      if (item) {\n        console.log(`Выполнено действие: ${item.dataset.action}`);\n        this.closeAll();\n      }\n    }, { signal });\n\n    // 2. Click Outside закрытие\n    document.addEventListener('click', (e) => {\n      if (!e.target.closest('.menu-trigger') && !e.target.closest('.dropdown-menu')) {\n        this.closeAll();\n      }\n    }, { signal });\n\n    // 3. Закрытие по Escape\n    window.addEventListener('keydown', (e) => {\n      if (e.key === 'Escape') {\n        this.closeAll();\n      }\n    }, { signal });\n  }\n\n  toggleMenu(menuEl) {\n    if (!menuEl) return;\n    const isOpened = !menuEl.hidden;\n    this.closeAll();\n    menuEl.hidden = isOpened;\n    this.activeMenu = isOpened ? null : menuEl;\n  }\n\n  closeAll() {\n    if (this.activeMenu) {\n      this.activeMenu.hidden = true;\n      this.activeMenu = null;\n    }\n  }\n\n  destroy() {\n    this.controller.abort(); // Мгновенное удаление всех слушателей\n    this.closeAll();\n  }\n}",
+        "explanation": "MenuManager реализует промышленный паттерн: делегирование на контейнере, Click Outside, закрытие по Escape и гарантированную отписку через AbortController в методе destroy()."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j8-q1",
-          "question": "Какой метод отменяет стандартное действие браузера (например, перезагрузку страницы при submit формы)?",
+          "id": "js8-q1",
+          "question": "В каком порядке фазы распространения события происходят в браузере при клике на элемент?",
           "options": [
-            "event.stopPropagation()",
-            "event.preventDefault()",
-            "event.cancel()",
-            "return false"
+            "1. Bubbling -> 2. Target -> 3. Capturing",
+            "1. Capturing (погружение) -> 2. Target (достижение цели) -> 3. Bubbling (всплытие)",
+            "1. Target -> 2. Bubbling",
+            "Событие происходит мгновенно без фаз"
           ],
           "correctIndex": 1,
-          "explanation": "event.preventDefault() отменяет действие браузера по умолчанию."
+          "explanation": "Событие сначала спускается от window вниз по дереву DOM к целевому элементу (Capturing), срабатывает на элементе (Target) и затем всплывает обратно вверх к window (Bubbling)."
+        },
+        {
+          "id": "js8-q2",
+          "question": "В чём заключается ключевое преимущество паттерна Делегирования событий (Event Delegation)?",
+          "options": [
+            "Делегирование шифрует данные клика",
+            "Один слушатель на родительском контейнере обрабатывает события всех дочерних элементов (включая динамически добавленные позже), экономя оперативную память",
+            "Делегирование отключает анимации CSS",
+            "Делегирование работает без JavaScript"
+          ],
+          "correctIndex": 1,
+          "explanation": "Делегирование событий использует всплытие (Bubbling). Вместо сотен слушателей на каждом элементе вешается один обработчик на контейнер, который работает и для новых элементов."
+        },
+        {
+          "id": "js8-q3",
+          "question": "Зачем в addEventListener для обработчиков скролла и тача (touchmove/wheel) передавать опцию { passive: true }?",
+          "options": [
+            "Чтобы отключить скролл",
+            "Сообщает браузеру, что обработчик не вызовет preventDefault(), позволяя браузеру выполнять прокрутку параллельно на GPU с плавными 60/120 FPS без задержек",
+            "Для изменения цвета полосы прокрутки",
+            "Для отслеживания кликов"
+          ],
+          "correctIndex": 1,
+          "explanation": "Флаг passive: true освобождает главный поток от ожидания вызова preventDefault(), обеспечивая идеально плавный мобильный скролл."
+        },
+        {
+          "id": "js8-q4",
+          "question": "Как мгновенно удалить десятки зарегистрированных слушателей событий одной командой в современном JS?",
+          "options": [
+            "window.clearAllEvents()",
+            "Передать в addEventListener опцию { signal: controller.signal } и вызвать controller.abort() при размонтировании",
+            "Перезагрузить браузер",
+            "document.body.innerHTML = ''"
+          ],
+          "correctIndex": 1,
+          "explanation": "Использование AbortController ({ signal: controller.signal }) — это нативный стандарт массовой отписки от событий, исключающий утечки памяти в SPA-приложениях."
+        },
+        {
+          "id": "js8-q5",
+          "question": "В чём разница между e.target и e.currentTarget в обработчике события?",
+          "options": [
+            "Они абсолютно идентичны",
+            "e.target указывает на реальный элемент, по которому произошел клик, а e.currentTarget — на элемент, к которому прикреплен текущий слушатель addEventListener",
+            "e.target доступен только на мобильных",
+            "e.currentTarget всегда равен null"
+          ],
+          "correctIndex": 1,
+          "explanation": "e.target — это самый глубокий узел DOM, вызвавший событие (например, иконка внутри кнопки), а e.currentTarget (this) — родительский элемент со слушателем."
         }
       ]
     }

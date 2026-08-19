@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgcf9" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgcf9)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">CSS Flexbox: Контейнер (Flex Container)</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">display: flex, flex-direction, justify-content, align-items, flex-wrap и gap</text>
+
+  <!-- Axes Diagram -->
+  <rect x="20" y="65" width="460" height="195" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="250" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">Оси Flexbox: Main Axis и Cross Axis</text>
+  
+  <rect x="50" y="105" width="400" height="140" rx="6" fill="#0d1117" stroke="#30363d"/>
+  <text x="250" y="122" fill="#e6edf3" font-size="8" text-anchor="middle">display: flex; flex-direction: row; (по умолчанию)</text>
+  
+  <!-- Main axis arrow -->
+  <line x1="70" y1="175" x2="420" y2="175" stroke="#2dff8a" stroke-width="2" marker-end="url(#arrowG9)"/>
+  <text x="245" y="168" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">Main Axis → (justify-content)</text>
+  
+  <!-- Cross axis arrow -->
+  <line x1="440" y1="115" x2="440" y2="235" stroke="#ffb02e" stroke-width="2" marker-end="url(#arrowO9)"/>
+  <text x="435" y="230" fill="#ffb02e" font-size="8" font-weight="600" text-anchor="end">Cross Axis ↓</text>
+  <text x="435" y="240" fill="#ffb02e" font-size="7" text-anchor="end">(align-items)</text>
+
+  <!-- Flex items -->
+  <rect x="80" y="185" width="70" height="40" rx="4" fill="#2dff8a22" stroke="#2dff8a"/>
+  <text x="115" y="210" fill="#2dff8a" font-size="8" text-anchor="middle">Item 1</text>
+  <rect x="160" y="185" width="90" height="40" rx="4" fill="#29e7ff22" stroke="#29e7ff"/>
+  <text x="205" y="210" fill="#29e7ff" font-size="8" text-anchor="middle">Item 2</text>
+  <rect x="260" y="185" width="60" height="40" rx="4" fill="#ffb02e22" stroke="#ffb02e"/>
+  <text x="290" y="210" fill="#ffb02e" font-size="8" text-anchor="middle">Item 3</text>
+
+  <defs>
+    <marker id="arrowG9" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8" fill="#2dff8a"/></marker>
+    <marker id="arrowO9" markerWidth="8" markerHeight="8" refX="4" refY="8" orient="auto"><path d="M0,0 L4,8 L8,0" fill="#ffb02e"/></marker>
+  </defs>
+
+  <!-- Right: justify-content -->
+  <rect x="500" y="65" width="280" height="195" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="640" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">justify-content (Main)</text>
+  
+  <rect x="515" y="96" width="250" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="111" fill="#2dff8a" font-size="8">flex-start</text><text x="680" y="111" fill="#8b949e" font-size="7">|▪▪▪        |</text>
+  <rect x="515" y="122" width="250" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="137" fill="#29e7ff" font-size="8">center</text><text x="680" y="137" fill="#8b949e" font-size="7">|   ▪▪▪   |</text>
+  <rect x="515" y="148" width="250" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="163" fill="#ffb02e" font-size="8">flex-end</text><text x="680" y="163" fill="#8b949e" font-size="7">|        ▪▪▪|</text>
+  <rect x="515" y="174" width="250" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="189" fill="#ff2bd6" font-size="8">space-between</text><text x="680" y="189" fill="#8b949e" font-size="7">|▪   ▪   ▪|</text>
+  <rect x="515" y="200" width="250" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="215" fill="#f85149" font-size="8">space-around</text><text x="680" y="215" fill="#8b949e" font-size="7">| ▪  ▪  ▪ |</text>
+  <rect x="515" y="226" width="250" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="241" fill="#e6edf3" font-size="8">space-evenly</text><text x="680" y="241" fill="#8b949e" font-size="7">|  ▪  ▪  ▪  |</text>
+
+  <!-- Bottom: align-items & flex-wrap & gap -->
+  <rect x="20" y="270" width="370" height="155" rx="8" fill="#0d1117" stroke="#ffb02e" stroke-width="1.5"/>
+  <text x="205" y="290" fill="#ffb02e" font-size="11" font-weight="600" text-anchor="middle">align-items (Cross Axis)</text>
+  <rect x="35" y="300" width="340" height="22" rx="3" fill="#161b22" stroke="#30363d"/>
+  <text x="45" y="315" fill="#2dff8a" font-size="8">stretch (default)</text><text x="300" y="315" fill="#8b949e" font-size="7">Растяжение на всю высоту</text>
+  <rect x="35" y="326" width="340" height="22" rx="3" fill="#161b22" stroke="#30363d"/>
+  <text x="45" y="341" fill="#29e7ff" font-size="8">center</text><text x="300" y="341" fill="#8b949e" font-size="7">Идеальное центрирование!</text>
+  <rect x="35" y="352" width="340" height="22" rx="3" fill="#161b22" stroke="#30363d"/>
+  <text x="45" y="367" fill="#ffb02e" font-size="8">flex-start / flex-end</text><text x="300" y="367" fill="#8b949e" font-size="7">Верх / Низ</text>
+  <rect x="35" y="378" width="340" height="22" rx="3" fill="#161b22" stroke="#30363d"/>
+  <text x="45" y="393" fill="#ff2bd6" font-size="8">baseline</text><text x="300" y="393" fill="#8b949e" font-size="7">По базовой линии текста</text>
+
+  <rect x="410" y="270" width="370" height="155" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="290" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">flex-wrap и gap</text>
+  <rect x="425" y="300" width="340" height="42" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="435" y="316" fill="#29e7ff" font-size="8" font-weight="600">flex-wrap: wrap;</text>
+  <text x="435" y="332" fill="#8b949e" font-size="7">Перенос элементов на новую строку при нехватке места</text>
+  <rect x="425" y="350" width="340" height="42" rx="4" fill="#161b22" stroke="#2dff8a"/>
+  <text x="435" y="366" fill="#2dff8a" font-size="8" font-weight="600">gap: 16px; (row-gap / column-gap)</text>
+  <text x="435" y="382" fill="#8b949e" font-size="7">Отступы между элементами БЕЗ внешних margin!</text>
+  <rect x="425" y="398" width="340" height="22" rx="3" fill="#161b22" stroke="#ffb02e"/>
+  <text x="435" y="413" fill="#ffb02e" font-size="7">margin: auto (волшебный авто-отступ для прижатия к краю)</text>
+</svg>

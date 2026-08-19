@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgj9" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgj9)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">JS: Замыкания (Closures) и Область Видимости (Scope)</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">Scope Chain, Lexical Environment, var/let/const TDZ, IIFE и Модуль через замыкание</text>
+
+  <!-- Left: Scope Chain -->
+  <rect x="20" y="65" width="370" height="240" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">Цепочка областей видимости (Scope Chain)</text>
+
+  <rect x="40" y="100" width="330" height="55" rx="6" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="55" y="118" fill="#2dff8a" font-size="9" font-weight="600">Global Scope (Глобальная область)</text>
+  <text x="55" y="134" fill="#e6edf3" font-size="7">const API_URL = 'https://api.intern.dev';</text>
+  <text x="55" y="146" fill="#8b949e" font-size="6">Доступна отовсюду. Живёт пока открыта вкладка.</text>
+
+  <rect x="60" y="162" width="290" height="55" rx="6" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="75" y="180" fill="#ffb02e" font-size="9" font-weight="600">Function Scope (Область функции)</text>
+  <text x="75" y="196" fill="#e6edf3" font-size="7">function fetchUser(id) { const token = '...'; }</text>
+  <text x="75" y="208" fill="#8b949e" font-size="6">token виден только внутри fetchUser</text>
+
+  <rect x="80" y="224" width="250" height="55" rx="6" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="95" y="242" fill="#29e7ff" font-size="9" font-weight="600">Block Scope (Блочная область { })</text>
+  <text x="95" y="258" fill="#e6edf3" font-size="7">if (...) { let result = 42; } // let/const!</text>
+  <text x="95" y="270" fill="#8b949e" font-size="6">result виден ТОЛЬКО внутри фигурных скобок</text>
+
+  <!-- Arrows showing chain lookup -->
+  <text x="345" y="250" fill="#f85149" font-size="7" text-anchor="end">↑ ищет вверх</text>
+  <text x="345" y="210" fill="#f85149" font-size="7" text-anchor="end">↑ ищет вверх</text>
+
+  <!-- Right: Closure Mechanism -->
+  <rect x="410" y="65" width="370" height="240" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Замыкание (Closure)</text>
+  
+  <rect x="425" y="98" width="340" height="80" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="435" y="114" fill="#2dff8a" font-size="8" font-weight="600">function createCounter() {</text>
+  <text x="445" y="128" fill="#ffb02e" font-size="8">let count = 0; // Приватная переменная!</text>
+  <text x="445" y="142" fill="#e6edf3" font-size="8">return () => ++count; // Замыкание!</text>
+  <text x="435" y="156" fill="#2dff8a" font-size="8">}</text>
+  <text x="435" y="172" fill="#e6edf3" font-size="8">const inc = createCounter();</text>
+
+  <rect x="425" y="185" width="340" height="55" rx="4" fill="#161b22" stroke="#2dff8a"/>
+  <text x="595" y="202" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">Как это работает?</text>
+  <text x="435" y="218" fill="#e6edf3" font-size="7">Возвращенная функция «запоминает» переменную count</text>
+  <text x="435" y="232" fill="#8b949e" font-size="7">из Lexical Environment родительской createCounter(),</text>
+
+  <rect x="425" y="248" width="340" height="45" rx="4" fill="#161b22" stroke="#ffb02e"/>
+  <text x="595" y="265" fill="#ffb02e" font-size="8" font-weight="600" text-anchor="middle">даже после завершения вызова createCounter!</text>
+  <text x="595" y="282" fill="#8b949e" font-size="7" text-anchor="middle">inc(); → 1, inc(); → 2, inc(); → 3 (count жив!)</text>
+
+  <!-- Bottom: var vs let vs const & TDZ -->
+  <rect x="20" y="315" width="760" height="110" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="335" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">var vs let vs const и TDZ (Temporal Dead Zone)</text>
+
+  <rect x="35" y="345" width="235" height="70" rx="4" fill="#161b22" stroke="#f85149"/>
+  <text x="153" y="362" fill="#f85149" font-size="9" font-weight="600" text-anchor="middle">var (устаревший!)</text>
+  <text x="153" y="378" fill="#8b949e" font-size="7" text-anchor="middle">Function Scope (не Block!)</text>
+  <text x="153" y="392" fill="#8b949e" font-size="7" text-anchor="middle">Hoisting = undefined до объявления</text>
+  <text x="153" y="406" fill="#f85149" font-size="6" text-anchor="middle">Утечка из циклов for!</text>
+
+  <rect x="280" y="345" width="235" height="70" rx="4" fill="#161b22" stroke="#29e7ff"/>
+  <text x="398" y="362" fill="#29e7ff" font-size="9" font-weight="600" text-anchor="middle">let (переменная)</text>
+  <text x="398" y="378" fill="#8b949e" font-size="7" text-anchor="middle">Block Scope { }</text>
+  <text x="398" y="392" fill="#8b949e" font-size="7" text-anchor="middle">TDZ: ReferenceError до строки let!</text>
+  <text x="398" y="406" fill="#29e7ff" font-size="6" text-anchor="middle">Можно переприсваивать</text>
+
+  <rect x="525" y="345" width="240" height="70" rx="4" fill="#161b22" stroke="#2dff8a"/>
+  <text x="645" y="362" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">const (константа)</text>
+  <text x="645" y="378" fill="#8b949e" font-size="7" text-anchor="middle">Block Scope { }</text>
+  <text x="645" y="392" fill="#8b949e" font-size="7" text-anchor="middle">TDZ: ReferenceError до строки const!</text>
+  <text x="645" y="406" fill="#2dff8a" font-size="6" text-anchor="middle">Нельзя переприсвоить (но объект мутируется)</text>
+</svg>

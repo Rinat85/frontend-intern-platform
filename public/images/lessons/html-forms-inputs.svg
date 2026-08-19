@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgh9" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgh9)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">HTML: Формы, Элементы Ввода и Валидация</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">form, input types, label, fieldset/legend, pattern, required, novalidate и FormData API</text>
+
+  <!-- Left: Form Structure -->
+  <rect x="20" y="65" width="370" height="200" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">Анатомия формы &lt;form&gt;</text>
+  
+  <rect x="35" y="96" width="340" height="28" rx="4" fill="#161b22" stroke="#2dff8a"/>
+  <text x="205" y="114" fill="#2dff8a" font-size="8" text-anchor="middle">&lt;form action="/api/register" method="POST" novalidate&gt;</text>
+
+  <rect x="50" y="130" width="310" height="28" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="205" y="148" fill="#ffb02e" font-size="8" text-anchor="middle">&lt;fieldset&gt; &lt;legend&gt;Личные данные&lt;/legend&gt;</text>
+
+  <rect x="65" y="164" width="280" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="205" y="179" fill="#e6edf3" font-size="7" text-anchor="middle">&lt;label for="email"&gt;Email&lt;/label&gt; &lt;input id="email" type="email" required /&gt;</text>
+
+  <rect x="65" y="190" width="280" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="205" y="205" fill="#e6edf3" font-size="7" text-anchor="middle">&lt;label for="pass"&gt;Пароль&lt;/label&gt; &lt;input id="pass" type="password" minlength="8" /&gt;</text>
+
+  <rect x="50" y="218" width="310" height="20" rx="3" fill="#0d1117" stroke="#30363d"/>
+  <text x="205" y="232" fill="#ffb02e" font-size="7" text-anchor="middle">&lt;/fieldset&gt;</text>
+
+  <rect x="35" y="244" width="340" height="12" rx="3" fill="none" stroke="#29e7ff" stroke-dasharray="3,2"/>
+  <text x="205" y="253" fill="#29e7ff" font-size="7" text-anchor="middle">&lt;/form&gt;</text>
+
+  <!-- Right: Input Types -->
+  <rect x="410" y="65" width="370" height="200" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Типы &lt;input type="..."&gt;</text>
+  
+  <rect x="425" y="96" width="168" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="509" y="112" fill="#29e7ff" font-size="8" text-anchor="middle">text / password</text>
+  <text x="509" y="124" fill="#8b949e" font-size="6" text-anchor="middle">Текст и пароль</text>
+
+  <rect x="597" y="96" width="168" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="681" y="112" fill="#2dff8a" font-size="8" text-anchor="middle">email / url / tel</text>
+  <text x="681" y="124" fill="#8b949e" font-size="6" text-anchor="middle">Мобильная клавиатура!</text>
+
+  <rect x="425" y="138" width="168" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="509" y="154" fill="#ffb02e" font-size="8" text-anchor="middle">number / range</text>
+  <text x="509" y="166" fill="#8b949e" font-size="6" text-anchor="middle">Спиннер и ползунок</text>
+
+  <rect x="597" y="138" width="168" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="681" y="154" fill="#ff2bd6" font-size="8" text-anchor="middle">date / time / datetime-local</text>
+  <text x="681" y="166" fill="#8b949e" font-size="6" text-anchor="middle">Нативный выбор даты</text>
+
+  <rect x="425" y="180" width="168" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="509" y="196" fill="#f85149" font-size="8" text-anchor="middle">checkbox / radio</text>
+  <text x="509" y="208" fill="#8b949e" font-size="6" text-anchor="middle">Чекбокс и радио</text>
+
+  <rect x="597" y="180" width="168" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="681" y="196" fill="#29e7ff" font-size="8" text-anchor="middle">file / color / hidden</text>
+  <text x="681" y="208" fill="#8b949e" font-size="6" text-anchor="middle">Загрузка, пипетка, скрытое</text>
+
+  <rect x="425" y="222" width="340" height="36" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="595" y="238" fill="#2dff8a" font-size="8" text-anchor="middle">select / textarea / datalist / output</text>
+  <text x="595" y="250" fill="#8b949e" font-size="6" text-anchor="middle">Выпадающие списки, текстовые поля, автоподсказки</text>
+
+  <!-- Bottom: Validation -->
+  <rect x="20" y="275" width="760" height="75" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="295" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Нативная HTML5 валидация</text>
+
+  <rect x="35" y="305" width="175" height="35" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="123" y="320" fill="#29e7ff" font-size="8" text-anchor="middle">required</text>
+  <text x="123" y="332" fill="#8b949e" font-size="6" text-anchor="middle">Обязательное поле</text>
+
+  <rect x="215" y="305" width="175" height="35" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="303" y="320" fill="#ffb02e" font-size="8" text-anchor="middle">minlength / maxlength</text>
+  <text x="303" y="332" fill="#8b949e" font-size="6" text-anchor="middle">Длина строки</text>
+
+  <rect x="395" y="305" width="175" height="35" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="483" y="320" fill="#2dff8a" font-size="8" text-anchor="middle">pattern="[A-Z]{3}"</text>
+  <text x="483" y="332" fill="#8b949e" font-size="6" text-anchor="middle">Регулярное выражение</text>
+
+  <rect x="575" y="305" width="190" height="35" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="670" y="320" fill="#ff2bd6" font-size="8" text-anchor="middle">min / max / step</text>
+  <text x="670" y="332" fill="#8b949e" font-size="6" text-anchor="middle">Числа и диапазоны</text>
+
+  <!-- Bottom: Tips -->
+  <rect x="20" y="360" width="760" height="65" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-dasharray="4,3"/>
+  <text x="400" y="380" fill="#2dff8a" font-size="10" font-weight="600" text-anchor="middle">💡 Связка &lt;label for="id"&gt; + &lt;input id="id"&gt;</text>
+  <text x="400" y="397" fill="#e6edf3" font-size="8" text-anchor="middle">Клик по тексту &lt;label&gt; автоматически фокусирует связанный &lt;input&gt;. Увеличивает область касания на тачскринах на 300%!</text>
+  <text x="400" y="412" fill="#8b949e" font-size="7" text-anchor="middle">Для type="email/tel/url" смартфон показывает специализированную клавиатуру с @, цифрами или .com</text>
+</svg>

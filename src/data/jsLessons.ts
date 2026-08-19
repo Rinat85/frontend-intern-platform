@@ -1563,83 +1563,192 @@ export const jsLessons: Lesson[] = [
     "moduleId": "javascript",
     "level": 9,
     "title": "Замыкания (Closures) и область видимости",
-    "subtitle": "Scope Chain, Lexical Environment и инкапсуляция состояния",
-    "description": "Глубокое понимание языка: как работает лексическое окружение Lexical Environment, область видимости (глобальная, блочная), механизм замыканий и фабрики функций.",
-    "estimatedMinutes": 40,
+    "subtitle": "Scope Chain, Lexical Environment, var vs let vs const, TDZ, IIFE и приватность через замыкания",
+    "description": "Освойте фундаментальный механизм JavaScript: замыкания (Closures) и цепочку областей видимости (Scope Chain). Разберём Lexical Environment, разницу var/let/const, Temporal Dead Zone (TDZ), паттерн модуля через IIFE и создание приватных переменных через замыкания.",
+    "estimatedMinutes": 65,
     "difficulty": "advanced",
     "tags": [
-      "JavaScript",
-      "Closures",
-      "Scope",
-      "Advanced"
+      "closures",
+      "scope",
+      "lexical-environment",
+      "var",
+      "let",
+      "const",
+      "tdz",
+      "iife",
+      "module-pattern"
     ],
     "theory": {
-      "overview": "Замыкание (Closure) — это способность функции запоминать и иметь доступ к переменным из своего внешнего лексического окружения (Lexical Environment) даже после того, как внешняя функция завершила свое выполнение.",
+      "overview": "Замыкание (Closure) — один из самых глубоких и мощных механизмов JavaScript. Без понимания замыканий невозможно освоить колбэки, промисы, обработчики событий, каррирование, фабричные функции, React хуки (`useState`, `useEffect`) и Redux.\n\nВ этом уроке мы разберём, как JavaScript определяет видимость переменных через Scope Chain и Lexical Environment, почему `var` утекает из циклов `for`, как `let`/`const` создают блочную область видимости с TDZ (Temporal Dead Zone) и как замыкания позволяют создавать приватные переменные и паттерн модуля.",
       "sections": [
         {
-          "title": "Как работает замыкание",
-          "content": "- Каждая функция в JS при рождении получает ссылку на внешнее лексическое окружение `[[Environment]]`.\n- Когда функция выполняется в другом месте программы, она всё равно сохраняет доступ к своим исходным внешним переменным.\n- **Применение:** инкапсуляция приватных переменных, фабричные функции, мемоизация и кастомные React-хуки (например, `useState`).",
+          "title": "Цепочка областей видимости (Scope Chain) и Lexical Environment",
+          "content": "Область видимости (Scope) определяет, где в коде переменная доступна для чтения и записи:\n\n1. **Global Scope (Глобальная область)**:\nПеременные, объявленные вне любых функций и блоков. Доступны из любого места программы. Живут до закрытия вкладки.\n\n2. **Function Scope (Область функции)**:\nПеременные, объявленные внутри функции (через `var`, `let` или `const`), видны ТОЛЬКО внутри этой функции и её вложенных функций.\n\n3. **Block Scope (Блочная область)**:\nПеременные `let` и `const` ограничены ближайшими фигурными скобками `{ }` (`if`, `for`, `while`, блок `{ }`). Переменная `var` НЕ имеет блочной области!\n\nScope Chain (Цепочка областей видимости):\nКогда движок JavaScript встречает обращение к переменной, он ищет её сначала в текущей области видимости. Если не находит — поднимается на уровень вверх к родительской области. И так далее до Global Scope. Если переменная не найдена нигде — выбрасывается `ReferenceError`.",
+          "image": {
+            "src": "/images/lessons/js-closures-scope.svg",
+            "alt": "Замыкания и Scope Chain: Global/Function/Block Scope, var vs let vs const",
+            "caption": "Scope Chain ищет переменную снизу вверх по вложенности. Замыкание запоминает Lexical Environment родительской функции. let/const имеют TDZ"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Фабрика счетчиков на замыкании",
-            "code": "function createCounter(initialValue = 0) {\n  let count = initialValue; // Приватная переменная!\n  \n  return {\n    increment: () => ++count,\n    decrement: () => --count,\n    getValue: () => count\n  };\n}\n\nconst counter1 = createCounter(10);\nconsole.log(counter1.increment()); // 11\nconsole.log(counter1.increment()); // 12\nconsole.log(counter1.getValue());  // 12 (count недоступен напрямую извне!)",
-            "explanation": "Переменная count полностью изолирована внутри замыкания."
+            "code": "const globalVar = 'Глобальная';\n\nfunction outer() {\n  const outerVar = 'Внешняя функция';\n  \n  function inner() {\n    const innerVar = 'Внутренняя функция';\n    \n    // Scope Chain: inner → outer → global\n    console.log(innerVar);  // ✅ Найдена в текущей области\n    console.log(outerVar);  // ✅ Найдена на 1 уровень выше (outer)\n    console.log(globalVar); // ✅ Найдена на 2 уровня выше (global)\n  }\n  \n  inner();\n  // console.log(innerVar); // ❌ ReferenceError! innerVar не видна снаружи\n}\n\nouter();",
+            "title": "Демонстрация Scope Chain: поиск переменной вверх по вложенности",
+            "explanation": "inner() видит все переменные из своей области и из родительских областей. Но outer() не видит переменные inner() — поиск идёт ТОЛЬКО вверх."
+          }
+        },
+        {
+          "title": "var vs let vs const: Hoisting, TDZ и блочная область видимости",
+          "content": "Три способа объявления переменных в JavaScript:\n\n1. `var` (устаревший, избегайте в новом коде!):\n- Область видимости: Function Scope (НЕ Block Scope!). `var` внутри `if` или `for` «утекает» наружу!\n- Hoisting (Подъём): Объявление `var` поднимается в начало функции и инициализируется значением `undefined`. Поэтому обращение к `var` до строки объявления НЕ вызывает ошибку, а возвращает `undefined`.\n\n2. `let` (современная переменная):\n- Область видимости: Block Scope `{ }`. `let` внутри `if` НЕ утекает наружу.\n- TDZ (Temporal Dead Zone): обращение к `let` ДО строки её объявления вызывает `ReferenceError` (а не тихий `undefined` как `var`).\n- Можно переприсваивать: `let x = 1; x = 2; // OK`.\n\n3. `const` (константа):\n- Идентичен `let` по Block Scope и TDZ.\n- Запрещает ПЕРЕПРИСВОЕНИЕ: `const x = 1; x = 2; // TypeError!`.\n- НО: объекты и массивы, объявленные через `const`, МУТИРУЮТСЯ! `const arr = [1]; arr.push(2); // OK!`. Замораживается только сама привязка имени, а не содержимое объекта.\n\nПравило Senior: по умолчанию ВСЕГДА используйте `const`. Используйте `let` ТОЛЬКО когда переменная будет переприсвоена (счетчик цикла, аккумулятор). Никогда не используйте `var`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. var утекает из блока (НЕ Block Scope!)\nif (true) {\n  var leaked = 'Я утёк из if!'; // ❌\n}\nconsole.log(leaked); // 'Я утёк из if!' — видна снаружи!\n\n// 2. let/const заперты в блоке (Block Scope!)\nif (true) {\n  let safe = 'Я внутри блока';\n  const alsoSafe = 'Тоже внутри';\n}\n// console.log(safe); // ❌ ReferenceError!\n\n// 3. Классическая ловушка var в цикле for:\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log('var:', i), 100);\n}\n// Выведет: var: 3, var: 3, var: 3 (одна общая переменная i!)\n\n// Решение: let создает ОТДЕЛЬНУЮ переменную для каждой итерации!\nfor (let j = 0; j < 3; j++) {\n  setTimeout(() => console.log('let:', j), 100);\n}\n// Выведет: let: 0, let: 1, let: 2 ✅",
+            "title": "Ловушка var в цикле for и её решение через let",
+            "explanation": "var создает одну переменную i для всех итераций, а let создает отдельный экземпляр переменной j на каждой итерации цикла."
+          }
+        },
+        {
+          "title": "Замыкание (Closure): Функция запоминает Lexical Environment",
+          "content": "Замыкание — это функция, которая «запоминает» переменные из Lexical Environment (лексического окружения) области видимости, в которой она была СОЗДАНА, даже после завершения вызова родительской функции.\n\nКак это работает:\n1. При вызове `createCounter()` движок JS создает Lexical Environment (LE) с переменной `count = 0`.\n2. Возвращенная стрелочная функция `() => ++count` хранит ссылку на этот LE.\n3. Когда `createCounter()` завершает выполнение, его LE НЕ удаляется сборщиком мусора (GC), потому что на него ссылается возвращенная функция.\n4. Каждый вызов `inc()` модифицирует `count` в сохранённом LE.\n\nПрактические применения замыканий:\n- **Приватные переменные**: эмуляция private-полей до появления `#privateField` в классах.\n- **Фабрики функций**: `createMultiplier(5)` -> `fn(x) => x * 5`.\n- **Каррирование**: `add(2)(3)` -> `5`.\n- **Мемоизация**: кэширование результатов дорогих вычислений.\n- **React хуки**: `useState` и `useEffect` работают через замыкания!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Замыкание: приватный счетчик\nfunction createCounter(initial = 0) {\n  let count = initial; // Приватная переменная (не доступна снаружи!)\n\n  return {\n    increment: () => ++count,\n    decrement: () => --count,\n    getCount: () => count,\n    reset: () => { count = initial; }\n  };\n}\n\nconst counter = createCounter(10);\ncounter.increment(); // 11\ncounter.increment(); // 12\nconsole.log(counter.getCount()); // 12\n// console.log(counter.count); // undefined! (приватная переменная)\n\n// 2. Фабрика функций\nfunction createMultiplier(factor) {\n  return (value) => value * factor; // Замыкание над factor!\n}\n\nconst double = createMultiplier(2);\nconst triple = createMultiplier(3);\nconsole.log(double(5));  // 10\nconsole.log(triple(5));  // 15",
+            "title": "Замыкание для приватных переменных и фабрика функций",
+            "explanation": "Переменная count недоступна снаружи — она заперта в Lexical Environment функции createCounter. Каждый вызов createMultiplier создает независимое замыкание над factor."
+          }
+        },
+        {
+          "title": "IIFE, Модульный паттерн и утечки памяти через замыкания",
+          "content": "Продвинутые применения и подводные камни замыканий:\n\n1. IIFE (Immediately Invoked Function Expression):\n`(function() { ... })();` — функция, которая создается и СРАЗУ вызывается.\nВ эпоху до модулей ES6 (`import/export`) IIFE были единственным способом изолировать переменные от глобальной области и избежать конфликтов имён между скриптами.\n\n2. Модульный паттерн (Module Pattern):\nIIFE, возвращающая объект с публичными методами, при этом приватные переменные скрыты в замыкании:\n`const module = (function() { let secret = '...'; return { getSecret: () => secret }; })();`\n\n3. Утечки памяти через замыкания:\nЕсли замыкание удерживает ссылку на большой массив данных, DOM-узел или тяжелый объект, сборщик мусора (Garbage Collector) не сможет освободить эту память!\nПравило: обнуляйте ссылки на тяжелые объекты после использования: `heavyData = null;`. При удалении DOM-узлов снимайте слушатели событий (или используйте `AbortController`).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. IIFE: изоляция переменных от глобальной области\n(function() {\n  const SECRET_KEY = 'sk_abc123';\n  console.log('IIFE выполнена, SECRET_KEY изолирован');\n})();\n// console.log(SECRET_KEY); // ❌ ReferenceError!\n\n// 2. Модульный паттерн через IIFE\nconst AuthModule = (function() {\n  let token = null; // Приватная переменная\n\n  return {\n    login(credentials) {\n      token = `jwt_${Date.now()}`;\n      return true;\n    },\n    getToken() {\n      return token;\n    },\n    logout() {\n      token = null;\n    }\n  };\n})();\n\nAuthModule.login({ email: 'dev@intern.ru' });\nconsole.log(AuthModule.getToken()); // 'jwt_...'\nconsole.log(AuthModule.token);      // undefined (приватный!)",
+            "title": "IIFE и Модульный паттерн для изоляции и приватности",
+            "explanation": "IIFE создает изолированную область видимости. Модульный паттерн возвращает публичный API, скрывая token в замыкании."
           }
         }
       ],
       "seniorTips": [
-        "Используйте замыкания для создания приватного состояния модулей и утилитарных функций."
+        "По умолчанию ВСЕГДА используйте `const`. Используйте `let` ТОЛЬКО когда переменная будет переприсвоена. Никогда не используйте `var` в современном коде.",
+        "Помните о ловушке `var` в циклах `for`: все итерации делят одну переменную. Используйте `let` для создания отдельной переменной на каждой итерации.",
+        "Замыкания в обработчиках событий и таймерах могут вызывать утечки памяти, если удерживают ссылки на большие объекты или DOM-узлы. Обнуляйте ссылки и используйте AbortController.",
+        "React хуки `useState` и `useEffect` работают через замыкания — понимание замыканий критически важно для отладки Stale Closure багов в React."
       ],
       "commonMistakes": [
         {
-          "bad": "let globalCounter = 0; /* Глобальная переменная, доступная для перезаписи любому скрипту */",
-          "good": "const createCounter = () => { let count = 0; return () => ++count; };",
-          "reason": "Глобальные переменные загрязняют window и приводят к конфликтам имен."
+          "bad": "// Ловушка var в цикле: все колбэки ссылаются на одну переменную\nfor (var i = 0; i < 5; i++) {\n  setTimeout(() => console.log(i), 100); // 5, 5, 5, 5, 5\n}",
+          "good": "for (let i = 0; i < 5; i++) {\n  setTimeout(() => console.log(i), 100); // 0, 1, 2, 3, 4\n}",
+          "reason": "var создает одну переменную i в области видимости функции. К моменту срабатывания setTimeout цикл завершен и i === 5. let создает отдельный экземпляр i для каждой итерации."
+        },
+        {
+          "bad": "// Попытка изменить привязку const\nconst status = 'active';\nstatus = 'inactive'; // ❌ TypeError!",
+          "good": "let status = 'active';\nstatus = 'inactive'; // ✅ let разрешает переприсвоение\n\n// const с объектом — мутация разрешена!\nconst user = { name: 'Ivan' };\nuser.name = 'Oleg'; // ✅ Объект мутируется",
+          "reason": "const запрещает переприсвоение привязки (=), но объекты и массивы в const можно свободно мутировать, т.к. ссылка на объект не меняется."
+        },
+        {
+          "bad": "// Обращение к let/const до объявления (TDZ!)\nconsole.log(x); // ❌ ReferenceError! (Temporal Dead Zone)\nlet x = 42;",
+          "good": "let x = 42;\nconsole.log(x); // 42 ✅ Объявлено до использования",
+          "reason": "В отличие от var (undefined до объявления), let/const находятся в TDZ от начала блока до строки объявления. Обращение в TDZ немедленно выбрасывает ReferenceError."
         }
       ],
       "keyTakeaways": [
-        "Замыкание помнит переменные из места своего создания.",
-        "Замыкания обеспечивают приватность данных."
+        "Scope Chain ищет переменную снизу вверх: Block → Function → Global.",
+        "`var` имеет Function Scope и Hoisting (undefined), `let`/`const` имеют Block Scope и TDZ (ReferenceError).",
+        "Замыкание — функция, запоминающая Lexical Environment родительской области даже после её завершения.",
+        "Замыкания используются для приватных переменных, фабрик функций, каррирования и мемоизации.",
+        "IIFE и Модульный паттерн изолируют переменные от глобальной области и скрывают приватные данные."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"closure-demo\"><h3>Счетчик на замыкании</h3><button id=\"c-inc\">+1</button> <span id=\"c-val\">0</span></div>",
-      "initialCss": ".closure-demo { padding: 20px; background: white; border-radius: 12px; }\n#c-inc { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; }\n#c-val { font-size: 20px; font-weight: bold; margin-left: 10px; color: #4f46e5; }",
-      "initialJs": "const createCounter = () => {\n  let val = 0;\n  return () => ++val;\n};\nconst inc = createCounter();\ndocument.getElementById('c-inc').addEventListener('click', () => {\n  document.getElementById('c-val').textContent = inc();\n});",
-      "instructions": "Кликайте на кнопку +1 и наблюдайте работу изолированного счетчика."
+      "initialHtml": "<div id=\"closure-app\">\n  <h3>Замыкание: Приватный Счетчик</h3>\n  <div id=\"counter-display\" style=\"font-size:32px; font-weight:bold; color:#2dff8a; margin:12px 0;\">0</div>\n  <div style=\"display:flex; gap:8px;\">\n    <button id=\"inc-btn\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">+ Increment</button>\n    <button id=\"dec-btn\" style=\"background:#ffb02e; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">- Decrement</button>\n    <button id=\"rst-btn\" style=\"background:#f85149; color:#fff; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">Reset</button>\n  </div>\n  <pre id=\"closure-log\" style=\"margin-top:12px; color:#8b949e; font-size:11px;\"></pre>\n</div>",
+      "initialCss": "#closure-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "function createCounter(start = 0) {\n  let count = start;\n  return {\n    inc: () => ++count,\n    dec: () => --count,\n    get: () => count,\n    reset: () => { count = start; return count; }\n  };\n}\n\nconst counter = createCounter(0);\nconst display = document.getElementById('counter-display');\nconst logEl = document.getElementById('closure-log');\n\nfunction update(action) {\n  display.textContent = counter.get();\n  logEl.textContent += `${action}: count = ${counter.get()}\\n`;\n}\n\ndocument.getElementById('inc-btn').onclick = () => { counter.inc(); update('inc'); };\ndocument.getElementById('dec-btn').onclick = () => { counter.dec(); update('dec'); };\ndocument.getElementById('rst-btn').onclick = () => { counter.reset(); update('reset'); };",
+      "instructions": "Практика с замыканиями:\n1. Нажимайте кнопки и наблюдайте, как приватная переменная count изменяется через методы замыкания\n2. Попробуйте обратиться к counter.count в консоли — вы получите undefined (приватность!)\n3. Создайте второй независимый счетчик const c2 = createCounter(100); и убедитесь в независимости"
     },
     "task": {
-      "title": "Генератор префиксов на замыкании",
-      "scenario": "Напишите функцию createGreeter(greeting), которая возвращает функцию, принимающую имя.",
+      "title": "Разработка модуля авторизации с приватным токеном через замыкание",
+      "scenario": "Вам необходимо разработать модуль управления авторизацией AuthModule через паттерн замыкания (Module Pattern): модуль должен хранить приватный JWT-токен и список прав доступа, предоставлять публичные методы login(), logout(), isAuthenticated(), getToken() и hasPermission(role), при этом прямой доступ к token и permissions должен быть невозможен извне.",
       "criteria": [
-        "Создана функция, возвращающая другую функцию через замыкание"
+        "Переменные token и permissions приватны (недоступны через AuthModule.token)",
+        "Метод login(credentials) устанавливает token и permissions",
+        "Метод logout() обнуляет token и permissions",
+        "Метод isAuthenticated() возвращает true/false",
+        "Метод hasPermission(role) проверяет наличие роли в массиве permissions",
+        "Реализован через IIFE или фабричную функцию"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Реализуйте приватный AuthModule через замыкание\nconst AuthModule = (function() {\n  // Ваш код\n})();"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "Объявите let token = null; и let permissions = []; внутри IIFE",
+        "Верните объект с публичными методами: return { login, logout, isAuthenticated, ... }",
+        "hasPermission: return permissions.includes(role);"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const createGreeter = (greeting) => (name) => `${greeting}, ${name}!`;\nconst sayHello = createGreeter('Привет');\nconsole.log(sayHello('Алексей')); // 'Привет, Алексей!'",
-        "explanation": "Классический пример каррирования на замыканиях."
+        "js": "const AuthModule = (function() {\n  // Приватные переменные (скрыты в замыкании!)\n  let token = null;\n  let permissions = [];\n  let user = null;\n\n  return {\n    login(credentials) {\n      if (!credentials.email) throw new Error('Email обязателен');\n      token = `jwt_${Date.now()}_${Math.random().toString(36).slice(2)}`;\n      user = { email: credentials.email };\n      permissions = credentials.roles || ['viewer'];\n      return true;\n    },\n\n    logout() {\n      token = null;\n      permissions = [];\n      user = null;\n    },\n\n    isAuthenticated() {\n      return token !== null;\n    },\n\n    getToken() {\n      return token;\n    },\n\n    hasPermission(role) {\n      return permissions.includes(role);\n    },\n\n    getUser() {\n      return user ? { ...user } : null; // Возвращаем копию!\n    }\n  };\n})();\n\n// Тест\nAuthModule.login({ email: 'admin@intern.ru', roles: ['admin', 'editor'] });\nconsole.log(AuthModule.isAuthenticated());   // true\nconsole.log(AuthModule.hasPermission('admin')); // true\nconsole.log(AuthModule.token);               // undefined (приватно!)",
+        "explanation": "IIFE создает замыкание, скрывающее token, permissions и user от внешнего кода. Публичный API предоставляет безопасные методы для работы с приватным состоянием."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j9-q1",
+          "id": "js9-q1",
           "question": "Что такое замыкание (Closure) в JavaScript?",
           "options": [
-            "Ошибка переполнения стека",
-            "Комбинация функции и лексического окружения, в котором она была объявлена",
-            "Завершение программы",
-            "Специальный цикл"
+            "Метод шифрования данных",
+            "Функция, которая запоминает переменные из Lexical Environment области видимости, в которой она была создана, даже после завершения вызова родительской функции",
+            "Специальный тип массива",
+            "Синтаксис для импорта модулей"
           ],
           "correctIndex": 1,
-          "explanation": "Замыкание — это функция вместе со всеми внешними переменными, которые ей доступны."
+          "explanation": "Замыкание сохраняет ссылку на Lexical Environment родительской функции. Это позволяет возвращенной функции обращаться к переменным, которые уже вышли из стека вызовов."
+        },
+        {
+          "id": "js9-q2",
+          "question": "Почему var в цикле for приводит к неожиданному поведению с setTimeout?",
+          "options": [
+            "setTimeout не работает с var",
+            "var имеет Function Scope (не Block Scope!), поэтому все итерации цикла разделяют ОДНУ общую переменную, которая к моменту вызова колбэков уже равна финальному значению",
+            "Цикл for выполняется после setTimeout",
+            "var удаляет переменную после цикла"
+          ],
+          "correctIndex": 1,
+          "explanation": "var не создает отдельную область для каждой итерации. Все замыкания setTimeout ссылаются на одну и ту же переменную i, которая после завершения цикла содержит финальное значение."
+        },
+        {
+          "id": "js9-q3",
+          "question": "Что произойдет при обращении к переменной let до строки её объявления?",
+          "options": [
+            "Вернется undefined (как с var)",
+            "Будет выброшена ошибка ReferenceError, потому что переменная находится в Temporal Dead Zone (TDZ) от начала блока до строки объявления",
+            "Переменная автоматически создастся со значением null",
+            "Код продолжит выполнение без ошибки"
+          ],
+          "correctIndex": 1,
+          "explanation": "TDZ (Temporal Dead Zone) — это зона от начала блока { до строки let/const, в которой обращение к переменной немедленно выбрасывает ReferenceError, а не тихий undefined."
+        },
+        {
+          "id": "js9-q4",
+          "question": "Можно ли мутировать объект, объявленный через const?",
+          "options": [
+            "Нет, const полностью замораживает объект",
+            "Да, const запрещает только переприсвоение привязки (=), но свойства объекта и элементы массива можно свободно изменять",
+            "Только если объект пустой",
+            "Только через Object.assign"
+          ],
+          "correctIndex": 1,
+          "explanation": "const obj = {a:1}; obj.a = 2; — разрешено, потому что сама ссылка obj не меняется. Для полной заморозки объекта используйте Object.freeze()."
+        },
+        {
+          "id": "js9-q5",
+          "question": "Зачем используется паттерн IIFE (Immediately Invoked Function Expression)?",
+          "options": [
+            "Для анимации DOM элементов",
+            "Для создания изолированной области видимости и предотвращения загрязнения глобального пространства имён (Global Scope)",
+            "Для подключения CSS стилей",
+            "Для установки npm-пакетов"
+          ],
+          "correctIndex": 1,
+          "explanation": "IIFE (function(){...})() создает изолированную Function Scope, в которой переменные не утекают в глобальную область и не конфликтуют с другими скриптами на странице."
         }
       ]
     }

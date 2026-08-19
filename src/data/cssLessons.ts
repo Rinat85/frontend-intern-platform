@@ -1569,84 +1569,190 @@ export const cssLessons: Lesson[] = [
     "id": "css-9",
     "moduleId": "css",
     "level": 9,
-    "title": "Flexbox: Контейнер",
-    "subtitle": "Display: flex, оси, выравнивание justify-content, align-items и gap",
-    "description": "Одномерная раскладка: главная и поперечная оси, flex-direction, выравнивание по центру, space-between, flex-wrap и gap.",
-    "estimatedMinutes": 40,
+    "title": "Flexbox: Контейнер (Flex Container)",
+    "subtitle": "display: flex, flex-direction, justify-content, align-items, flex-wrap, gap и margin: auto",
+    "description": "Освойте модуль CSS Flexible Box Layout: оси Main Axis и Cross Axis, свойства контейнера flex-direction, justify-content, align-items, flex-wrap, gap, а также волшебный margin: auto для прижатия элементов к краям без Spacer-хаков.",
+    "estimatedMinutes": 60,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Flexbox",
-      "Layout"
+      "flexbox",
+      "flex-container",
+      "justify-content",
+      "align-items",
+      "flex-wrap",
+      "gap",
+      "flex-direction"
     ],
     "theory": {
-      "overview": "Flexbox — модуль одномерной раскладки в строках или колонках.",
+      "overview": "Flexbox (Flexible Box Layout) — одномерная система раскладки в CSS, решающая задачи выравнивания, распределения пространства и адаптивного переноса элементов внутри контейнера.\n\nFlexbox произвел революцию в верстке, заменив хрупкие конструкции из `float`, `inline-block`, отрицательных `margin` и `vertical-align` на простые декларативные свойства. В этом уроке мы освоим свойства flex-контейнера (родителя): `flex-direction`, `justify-content`, `align-items`, `flex-wrap` и `gap`.",
       "sections": [
         {
-          "title": "Оси и выравнивание",
-          "content": "- `justify-content`: выравнивание по главной оси (`center`, `space-between`).\n- `align-items`: выравнивание по поперечной оси (`center`, `stretch`).\n- `gap: 16px`: отступ между элементами.\n- `flex-direction: row | column`.",
+          "title": "Оси Flexbox: Main Axis и Cross Axis",
+          "content": "Активация Flexbox: `display: flex;` на родительском элементе превращает его в flex-контейнер, а все прямые дочерние элементы автоматически становятся flex-элементами (flex items).\n\nДве оси Flexbox:\n1. **Main Axis (Главная ось)** — направление раскладки элементов. По умолчанию направлена горизонтально слева направо (`flex-direction: row`).\n2. **Cross Axis (Поперечная ось)** — всегда перпендикулярна Main Axis. При `flex-direction: row` Cross Axis направлена сверху вниз.\n\nСвойство `flex-direction` задает направление Main Axis:\n- `row` (по умолчанию) — горизонтально слева направо.\n- `row-reverse` — горизонтально справа налево.\n- `column` — вертикально сверху вниз (Main Axis = вертикаль!).\n- `column-reverse` — вертикально снизу вверх.\n\n⚠️ Критический момент: при `flex-direction: column` свойства `justify-content` и `align-items` МЕНЯЮТСЯ МЕСТАМИ! `justify-content` начинает управлять ВЕРТИКАЛЬНЫМ положением, а `align-items` — ГОРИЗОНТАЛЬНЫМ!",
+          "image": {
+            "src": "/images/lessons/css-flexbox-container.svg",
+            "alt": "CSS Flexbox: Main Axis, Cross Axis, justify-content и align-items",
+            "caption": "Main Axis управляется через justify-content, Cross Axis через align-items. flex-wrap переносит элементы на новую строку. gap задает отступы"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Центрирование",
-            "code": ".center { display: flex; justify-content: center; align-items: center; min-height: 150px; gap: 16px; }",
-            "explanation": "Идеальное центрирование."
+            "code": "/* Идеальное горизонтальное и вертикальное центрирование */\n.centered-container {\n  display: flex;\n  justify-content: center; /* Main Axis → горизонталь */\n  align-items: center;     /* Cross Axis ↓ вертикаль  */\n  height: 100vh;           /* Контейнер на весь экран */\n}\n\n/* Вертикальная раскладка (column) */\n.sidebar {\n  display: flex;\n  flex-direction: column;  /* Main Axis ↓ теперь вертикаль */\n  justify-content: space-between; /* Распределение по вертикали! */\n  height: 100vh;\n}",
+            "title": "Центрирование через flex и вертикальная column-раскладка",
+            "explanation": "display: flex + justify-content: center + align-items: center — каноническое решение задачи идеального центрирования в CSS."
+          }
+        },
+        {
+          "title": "justify-content: Распределение по главной оси (Main Axis)",
+          "content": "Свойство `justify-content` управляет положением flex-элементов вдоль Main Axis:\n\n1. `flex-start` (по умолчанию) — элементы прижаты к началу оси.\n2. `flex-end` — элементы прижаты к концу оси.\n3. `center` — элементы сгруппированы в центре.\n4. `space-between` — первый элемент прижат к левому краю, последний — к правому, остальные равномерно распределены. Нет отступов по бокам!\n5. `space-around` — отступы вокруг каждого элемента равны, но по краям контейнера отступы вдвое меньше.\n6. `space-evenly` — абсолютно одинаковые промежутки между элементами и по краям контейнера (идеально ровная сетка).\n\nТипичные сценарии:\n- `space-between` — навигация Header (лого слева, меню справа).\n- `center` — центрирование модального окна.\n- `space-evenly` — сетка карточек с ровными отступами.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Header: лого слева, навигация справа */\n.main-header {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 0 24px;\n  height: 64px;\n  background: #0d1117;\n  border-bottom: 1px solid #30363d;\n}\n\n/* Группа действий карточки (кнопки по центру) */\n.card-actions {\n  display: flex;\n  justify-content: center;\n  gap: 12px; /* Отступы между кнопками */\n}",
+            "title": "justify-content: space-between для хедера и center для кнопок",
+            "explanation": "space-between расталкивает лого и навигацию к противоположным краям. center группирует кнопки действий по центру."
+          }
+        },
+        {
+          "title": "align-items: Выравнивание по поперечной оси (Cross Axis)",
+          "content": "Свойство `align-items` управляет положением flex-элементов вдоль Cross Axis:\n\n1. `stretch` (по умолчанию) — элементы растягиваются на всю высоту контейнера (если не заданы явные `height`).\n2. `flex-start` — элементы прижаты к верху контейнера.\n3. `flex-end` — элементы прижаты к низу контейнера.\n4. `center` — элементы выровнены по центру поперечной оси (идеально для вертикального центрирования!).\n5. `baseline` — элементы выровнены по базовой линии текста. Критически важно, когда рядом стоят элементы с разным `font-size` (логотип + заголовок + значок).\n\nРазница между `align-items` и `align-content`:\n- `align-items` — выравнивает элементы ВНУТРИ одной строки.\n- `align-content` — управляет распределением ЦЕЛЫХ СТРОК при `flex-wrap: wrap` (работает аналогично `justify-content`, но по Cross Axis).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Навигация с иконкой, текстом и бейджом разных размеров */\n.nav-item {\n  display: flex;\n  align-items: center; /* Вертикальное центрирование */\n  gap: 8px;\n}\n\n/* Сетка карточек с равной высотой (stretch) */\n.cards-grid {\n  display: flex;\n  align-items: stretch; /* Все карточки растянутся до высоты самой высокой */\n  gap: 16px;\n}\n\n/* Выравнивание по базовой линии текста */\n.price-block {\n  display: flex;\n  align-items: baseline; /* Рубль 199 и копейки .00 выровнены по базовой линии */\n  gap: 2px;\n}",
+            "title": "align-items: center, stretch и baseline для разных сценариев",
+            "explanation": "center центрирует вертикально, stretch растягивает карточки до одинаковой высоты, baseline выравнивает шрифты разных размеров."
+          }
+        },
+        {
+          "title": "flex-wrap, gap и волшебный margin: auto",
+          "content": "Свойства для управления переносом и промежутками:\n\n1. `flex-wrap`:\n- `nowrap` (по умолчанию) — все элементы в одну строку (могут сжиматься или выпадать за пределы).\n- `wrap` — элементы переносятся на новую строку, когда не помещаются.\n- `wrap-reverse` — перенос снизу вверх.\n\n2. `gap` (современный стандарт отступов):\n- `gap: 16px;` — единый отступ между всеми элементами.\n- `gap: 16px 24px;` — разные отступы (`row-gap` и `column-gap`).\n- Преимущество перед `margin`: `gap` не создает лишних внешних отступов по краям контейнера!\n\n3. Волшебный `margin: auto` во Flexbox:\n- `margin-left: auto;` на элементе «съедает» всё свободное пространство слева, прижимая элемент к правому краю.\n- `margin-top: auto;` прижимает элемент к нижнему краю контейнера `flex-direction: column`.\n- Идеальная техника для прижатия кнопки «Выход» к низу боковой панели или иконки уведомлений к правому краю хедера.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Адаптивная сетка тегов с переносом */\n.tags-cloud {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 8px;\n}\n\n/* 2. Хедер: лого — навигация — [margin:auto] — иконка уведомлений */\n.header {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n}\n.header .notifications-icon {\n  margin-left: auto; /* Прижатие к правому краю */\n}\n\n/* 3. Sidebar: навигация вверху, кнопка 'Выход' внизу */\n.sidebar {\n  display: flex;\n  flex-direction: column;\n  height: 100vh;\n}\n.sidebar .logout-btn {\n  margin-top: auto; /* Прижатие к низу */\n}",
+            "title": "flex-wrap, gap и margin: auto для прижатия элементов",
+            "explanation": "margin-left: auto на notifications-icon съедает свободное пространство, прижимая иконку к правому краю без пустых Spacer-div'ов."
           }
         }
       ],
       "seniorTips": [
-        "Используйте gap вместо margin между flex-детьми."
+        "Для вертикального и горизонтального центрирования используйте каноническую тройку: `display: flex; justify-content: center; align-items: center;`.",
+        "Используйте `gap` вместо `margin` для отступов между flex-элементами — gap не создает лишних внешних отступов по краям контейнера.",
+        "Используйте `margin-left: auto` или `margin-top: auto` для прижатия элементов к краям контейнера вместо создания пустых `<div class=\"spacer\">`.",
+        "При `flex-direction: column` помните, что `justify-content` управляет ВЕРТИКАЛЬНЫМ распределением, а `align-items` — ГОРИЗОНТАЛЬНЫМ!"
       ],
       "commonMistakes": [
         {
-          "bad": ".child { margin-right: 10px; }",
-          "good": ".parent { display: flex; gap: 10px; }",
-          "reason": "gap не создает лишнего отступа у последнего элемента."
+          "bad": "/* Пустой Spacer для прижатия элемента к краю */\n<div class=\"spacer\" style=\"flex-grow:1;\"></div>",
+          "good": ".logout-btn { margin-left: auto; }",
+          "reason": "margin: auto во Flexbox поглощает свободное пространство без создания бессмысленных пустых элементов в DOM."
+        },
+        {
+          "bad": "/* Использование margin для отступов между flex-элементами */\n.card { margin: 0 8px; } /* Лишний отступ по краям! */",
+          "good": ".cards-container { display: flex; gap: 16px; }",
+          "reason": "gap создает отступы ТОЛЬКО между элементами, не добавляя лишнего пространства по краям контейнера."
+        },
+        {
+          "bad": "/* Центрирование без понимания осей */\n.container { display: flex; align-items: center; /* Не по центру по горизонтали! */ }",
+          "good": ".container { display: flex; justify-content: center; align-items: center; }",
+          "reason": "align-items центрирует только по Cross Axis (вертикаль при row). Для полного центрирования нужны оба свойства."
         }
       ],
       "keyTakeaways": [
-        "justify-content по главной оси, align-items по поперечной.",
-        "gap задает расстояние."
+        "`display: flex` превращает элемент в flex-контейнер, дочерние элементы становятся flex-items.",
+        "`justify-content` управляет раскладкой по Main Axis, `align-items` — по Cross Axis.",
+        "`flex-direction: column` разворачивает Main Axis вертикально, МЕНЯЯ МЕСТАМИ оси для justify/align.",
+        "`gap` задает промежутки без лишних внешних отступов по краям контейнера.",
+        "`margin: auto` поглощает свободное пространство, прижимая элементы к краям без хаков."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"flex-demo\"><div class=\"f\">1</div><div class=\"f\">2</div></div>",
-      "initialCss": ".flex-demo { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px; background: white; border-radius: 12px; }\n.f { padding: 12px 20px; background: #4f46e5; color: white; border-radius: 6px; font-weight: bold; }",
-      "initialJs": "console.log('Flex loaded');",
-      "instructions": "Попробуйте поменять justify-content на center."
+      "initialHtml": "<div class=\"flex-demo\">\n  <div class=\"flex-container\" id=\"fc\">\n    <div class=\"flex-item\" style=\"background:#2dff8a33; border-color:#2dff8a;\">Item 1</div>\n    <div class=\"flex-item\" style=\"background:#29e7ff33; border-color:#29e7ff;\">Item 2 — Long Content</div>\n    <div class=\"flex-item\" style=\"background:#ffb02e33; border-color:#ffb02e;\">Item 3</div>\n    <div class=\"flex-item\" style=\"background:#ff2bd633; border-color:#ff2bd6;\">Item 4</div>\n  </div>\n</div>",
+      "initialCss": ".flex-demo { padding: 16px; background: #0a0e13; font-family: monospace; }\n.flex-container {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  flex-wrap: wrap;\n  gap: 12px;\n  padding: 16px;\n  min-height: 120px;\n  background: #0d1117;\n  border: 1px dashed #30363d;\n  border-radius: 8px;\n}\n.flex-item {\n  padding: 12px 16px;\n  border: 1px solid;\n  border-radius: 6px;\n  color: #e6edf3;\n  font-size: 13px;\n}",
+      "initialJs": "console.log('Песочница Flexbox активна');",
+      "instructions": "Практика с Flexbox:\n1. Измените justify-content: попробуйте center, flex-end, space-evenly\n2. Измените flex-direction на column и посмотрите, как перевернутся оси\n3. Добавьте margin-left: auto на третий элемент и наблюдайте за прижатием"
     },
     "task": {
-      "title": "Навигационная шапка",
-      "scenario": "Выровняйте логотип слева, а ссылки справа через space-between.",
+      "title": "Верстка адаптивного хедера и карточной сетки на чистом Flexbox",
+      "scenario": "Вам необходимо сверстать хедер сайта с лого, навигацией и иконкой профиля (прижатой к правому краю через margin-left: auto), а также адаптивную карточную сетку с flex-wrap: wrap и gap для каталога курсов.",
       "criteria": [
-        "Задан display: flex",
-        "Использован justify-content: space-between"
+        "Хедер использует display: flex с align-items: center",
+        "Лого и навигация расположены слева, иконка профиля прижата к правому краю через margin-left: auto",
+        "Карточная сетка использует flex-wrap: wrap и gap для адаптивного переноса",
+        "Карточки имеют одинаковую высоту благодаря align-items: stretch",
+        "Кнопка внутри карточки прижата к нижнему краю через margin-top: auto в column-контейнере"
       ],
       "starterCode": {
-        "html": "<header class=\"bar\"><div class=\"logo\">Logo</div><nav class=\"links\"><a href=\"#\">О нас</a></nav></header>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили хедера и карточной сетки */\n.site-header {\n}\n.course-grid {\n}\n.course-card {\n}"
       },
       "hints": [
-        "Задайте .bar { display: flex; justify-content: space-between; align-items: center; } .links { display: flex; gap: 16px; }"
+        "Для хедера: display: flex; align-items: center; gap: 16px;",
+        "Для иконки: .profile-icon { margin-left: auto; }",
+        "Для сетки: display: flex; flex-wrap: wrap; gap: 16px;"
       ],
       "solution": {
-        "html": "<header class=\"bar\"><div class=\"logo\">Logo</div><nav class=\"links\"><a href=\"#\">О нас</a></nav></header>",
-        "css": ".bar { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border-radius: 8px; }\n.logo { font-weight: bold; color: #4f46e5; }\n.links { display: flex; gap: 16px; }\n.links a { color: #334155; text-decoration: none; }",
-        "explanation": "Шапка на Flexbox."
+        "css": ".site-header {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  padding: 0 24px;\n  height: 56px;\n  background: #0d1117;\n  border-bottom: 1px solid #30363d;\n  color: #e6edf3;\n}\n\n.profile-icon {\n  margin-left: auto; /* Прижимает к правому краю */\n}\n\n.course-grid {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 20px;\n  padding: 24px;\n}\n\n.course-card {\n  display: flex;\n  flex-direction: column; /* Вертикальная раскладка */\n  width: 280px;\n  padding: 16px;\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 12px;\n}\n\n.course-card .enroll-btn {\n  margin-top: auto; /* Кнопка прижата к низу */\n  padding: 10px;\n  background: #2dff8a;\n  color: #0a0e13;\n  border: none;\n  border-radius: 6px;\n  font-weight: bold;\n  cursor: pointer;\n}",
+        "explanation": "Хедер использует space-between-эффект через margin-left: auto. Карточная сетка адаптивно переносит карточки через flex-wrap: wrap + gap. Кнопка внутри column-контейнера прижата к низу через margin-top: auto."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c9-q1",
-          "question": "Какое свойство выравнивает по главной оси?",
+          "id": "css9-q1",
+          "question": "Какая комбинация CSS-свойств обеспечивает идеальное горизонтальное и вертикальное центрирование элемента?",
           "options": [
-            "align-items",
-            "justify-content",
-            "align-content",
-            "flex-wrap"
+            "text-align: center; vertical-align: middle;",
+            "display: flex; justify-content: center; align-items: center;",
+            "margin: 0 auto; padding: auto;",
+            "float: center;"
           ],
           "correctIndex": 1,
-          "explanation": "justify-content выравнивает по главной оси."
+          "explanation": "Тройка display: flex + justify-content: center + align-items: center — каноническое решение задачи полного центрирования в CSS."
+        },
+        {
+          "id": "css9-q2",
+          "question": "Что произойдет со свойствами justify-content и align-items при установке flex-direction: column?",
+          "options": [
+            "Ничего не изменится",
+            "justify-content начнет управлять ВЕРТИКАЛЬНЫМ положением элементов, а align-items — ГОРИЗОНТАЛЬНЫМ, так как Main Axis становится вертикальной",
+            "Свойства перестанут работать",
+            "Оба свойства начнут управлять только цветом"
+          ],
+          "correctIndex": 1,
+          "explanation": "При column Main Axis разворачивается вертикально, поэтому justify-content распределяет элементы по вертикали, а align-items выравнивает по горизонтали."
+        },
+        {
+          "id": "css9-q3",
+          "question": "Какое преимущество свойства gap перед margin для создания отступов между flex-элементами?",
+          "options": [
+            "gap не поддерживается в Chrome",
+            "gap создает отступы ТОЛЬКО между элементами, не добавляя лишнего пространства по внешним краям контейнера",
+            "gap анимирует элементы",
+            "gap работает только с числовыми значениями"
+          ],
+          "correctIndex": 1,
+          "explanation": "gap идеален для Flexbox-сеток: он генерирует аккуратные промежутки только между соседними элементами, в то время как margin создает лишние отступы по краям."
+        },
+        {
+          "id": "css9-q4",
+          "question": "Как прижать элемент к правому краю flex-контейнера без создания пустых Spacer-элементов?",
+          "options": [
+            "float: right;",
+            "Установить margin-left: auto на элементе — авто-отступ поглотит всё свободное пространство, прижав элемент к правому краю",
+            "text-align: right;",
+            "position: absolute; right: 0;"
+          ],
+          "correctIndex": 1,
+          "explanation": "margin: auto во Flexbox поглощает всё доступное свободное пространство в указанном направлении, автоматически прижимая элемент к противоположному краю."
+        },
+        {
+          "id": "css9-q5",
+          "question": "Какое значение justify-content создает абсолютно одинаковые промежутки между элементами и по краям контейнера?",
+          "options": [
+            "space-between",
+            "space-evenly",
+            "flex-start",
+            "center"
+          ],
+          "correctIndex": 1,
+          "explanation": "space-evenly распределяет абсолютно равные промежутки и между элементами, и от элементов до краёв контейнера (в отличие от space-between и space-around)."
         }
       ]
     }

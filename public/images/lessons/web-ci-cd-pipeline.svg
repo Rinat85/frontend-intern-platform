@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgp9" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgp9)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Pro: CI/CD Pipeline и Автоматизация Деплоя</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">GitHub Actions, Lint/Test/Build, Preview Deployments, Vercel/Netlify и мониторинг</text>
+
+  <!-- Pipeline Stages -->
+  <rect x="20" y="70" width="760" height="105" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="90" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Конвейер CI/CD: от git push до Production</text>
+
+  <rect x="35" y="100" width="130" height="60" rx="6" fill="#161b22" stroke="#2dff8a"/>
+  <text x="100" y="120" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">1. Lint</text>
+  <text x="100" y="134" fill="#8b949e" font-size="7" text-anchor="middle">ESLint + Prettier</text>
+  <text x="100" y="146" fill="#8b949e" font-size="6" text-anchor="middle">Стиль кода</text>
+
+  <text x="172" y="130" fill="#2dff8a" font-size="14">→</text>
+
+  <rect x="185" y="100" width="130" height="60" rx="6" fill="#161b22" stroke="#29e7ff"/>
+  <text x="250" y="120" fill="#29e7ff" font-size="9" font-weight="600" text-anchor="middle">2. Test</text>
+  <text x="250" y="134" fill="#8b949e" font-size="7" text-anchor="middle">Vitest + Playwright</text>
+  <text x="250" y="146" fill="#8b949e" font-size="6" text-anchor="middle">Unit + E2E</text>
+
+  <text x="322" y="130" fill="#29e7ff" font-size="14">→</text>
+
+  <rect x="335" y="100" width="130" height="60" rx="6" fill="#161b22" stroke="#ffb02e"/>
+  <text x="400" y="120" fill="#ffb02e" font-size="9" font-weight="600" text-anchor="middle">3. Build</text>
+  <text x="400" y="134" fill="#8b949e" font-size="7" text-anchor="middle">tsc + Vite build</text>
+  <text x="400" y="146" fill="#8b949e" font-size="6" text-anchor="middle">Бандл + Tree Shaking</text>
+
+  <text x="472" y="130" fill="#ffb02e" font-size="14">→</text>
+
+  <rect x="485" y="100" width="130" height="60" rx="6" fill="#161b22" stroke="#ff2bd6"/>
+  <text x="550" y="120" fill="#ff2bd6" font-size="9" font-weight="600" text-anchor="middle">4. Preview</text>
+  <text x="550" y="134" fill="#8b949e" font-size="7" text-anchor="middle">Vercel Preview URL</text>
+  <text x="550" y="146" fill="#8b949e" font-size="6" text-anchor="middle">Ревью до мержа</text>
+
+  <text x="622" y="130" fill="#ff2bd6" font-size="14">→</text>
+
+  <rect x="635" y="100" width="130" height="60" rx="6" fill="#161b22" stroke="#2dff8a"/>
+  <text x="700" y="120" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">5. Deploy</text>
+  <text x="700" y="134" fill="#8b949e" font-size="7" text-anchor="middle">Production CDN</text>
+  <text x="700" y="146" fill="#8b949e" font-size="6" text-anchor="middle">Rollback + Canary</text>
+
+  <!-- GitHub Actions YAML -->
+  <rect x="20" y="185" width="370" height="170" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="205" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">GitHub Actions Workflow (.yml)</text>
+  
+  <rect x="35" y="215" width="340" height="130" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="45" y="230" fill="#8b949e" font-size="7">name: CI</text>
+  <text x="45" y="242" fill="#8b949e" font-size="7">on: [push, pull_request]</text>
+  <text x="45" y="256" fill="#2dff8a" font-size="7">jobs:</text>
+  <text x="55" y="268" fill="#ffb02e" font-size="7">  lint-test-build:</text>
+  <text x="65" y="280" fill="#e6edf3" font-size="7">    runs-on: ubuntu-latest</text>
+  <text x="65" y="292" fill="#e6edf3" font-size="7">    steps:</text>
+  <text x="75" y="304" fill="#29e7ff" font-size="7">      - run: npm ci</text>
+  <text x="75" y="316" fill="#29e7ff" font-size="7">      - run: npm run lint</text>
+  <text x="75" y="328" fill="#29e7ff" font-size="7">      - run: npm test && npm run build</text>
+
+  <!-- Right: Environments & Strategies -->
+  <rect x="410" y="185" width="370" height="170" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
+  <text x="595" y="205" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Среды и стратегии деплоя</text>
+
+  <rect x="425" y="218" width="340" height="38" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="234" fill="#2dff8a" font-size="8" font-weight="600">Preview Deployment (PR Preview)</text>
+  <text x="435" y="248" fill="#8b949e" font-size="7">Каждый PR получает уникальный URL для ревью</text>
+
+  <rect x="425" y="262" width="340" height="38" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="435" y="278" fill="#29e7ff" font-size="8" font-weight="600">Staging (Предпродакшн)</text>
+  <text x="435" y="292" fill="#8b949e" font-size="7">Копия прода для QA/UAT тестирования</text>
+
+  <rect x="425" y="306" width="340" height="38" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="435" y="322" fill="#ffb02e" font-size="8" font-weight="600">Production (CDN Edge Network)</text>
+  <text x="435" y="336" fill="#8b949e" font-size="7">Canary / Blue-Green / Rolling deploy</text>
+
+  <!-- Bottom: Monitoring -->
+  <rect x="20" y="365" width="760" height="60" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-dasharray="4,3"/>
+  <text x="400" y="385" fill="#2dff8a" font-size="10" font-weight="600" text-anchor="middle">💡 Мониторинг после деплоя</text>
+  <text x="400" y="402" fill="#e6edf3" font-size="8" text-anchor="middle">Sentry (Error Tracking) + Lighthouse CI (Web Vitals) + Grafana/Datadog (Метрики и алерты)</text>
+  <text x="400" y="416" fill="#8b949e" font-size="7" text-anchor="middle">Автоматический Rollback при росте 5xx ошибок или деградации LCP более 2.5 секунд</text>
+</svg>

@@ -1573,126 +1573,193 @@ export const htmlLessons: Lesson[] = [
     "moduleId": "html",
     "level": 9,
     "title": "HTML-формы и элементы ввода",
-    "subtitle": "Теги form, input, label, textarea, select, кнопки и валидация",
-    "description": "Создание интерактивных форм сбора данных: правильная связка label + input для доступности, все типы полей, чекбоксы, радиокнопки, селекты, кнопки submit и нативная валидация HTML5.",
-    "estimatedMinutes": 40,
+    "subtitle": "form, input types, label, fieldset/legend, нативная HTML5 валидация, FormData API и datalist",
+    "description": "Освойте создание профессиональных HTML5-форм: семантическую связку label + input, группировку полей fieldset/legend, все типы input (email, tel, date, file, range, color), нативную валидацию (required, pattern, minlength), сбор данных через FormData API и автоподсказки через datalist.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "HTML",
-      "Forms",
-      "Inputs",
-      "Validation",
-      "UX"
+      "forms",
+      "input",
+      "label",
+      "fieldset",
+      "validation",
+      "pattern",
+      "required",
+      "formdata",
+      "datalist"
     ],
     "theory": {
-      "overview": "Формы (`<form>`) — главный способ взаимодействия пользователя с бэкендом: авторизация, регистрация, оформление заказа в интернет-магазине, фильтрация товаров, отправка сообщений и загрузка файлов.\n\nКачественная форма должна быть не просто красивой, но и доступной с клавиатуры, понятной скринридерам и обладать встроенной валидацией, предотвращающей отправку некорректных данных на сервер.",
+      "overview": "Формы — единственный стандартный механизм сбора данных от пользователя в HTML: регистрация, авторизация, оформление заказа, настройки профиля, поиск и фильтры.\n\nВ этом уроке мы изучим семантическую анатомию формы (`<form>`, `<fieldset>`, `<legend>`), разберём все современные типы `<input>` (включая специализированные мобильные клавиатуры для `type=\"email\"`, `type=\"tel\"` и `type=\"url\"`), научимся настраивать нативную HTML5 валидацию через `required`, `pattern` и `minlength`, а также собирать данные формы для отправки на сервер через объект `FormData`.",
       "sections": [
         {
-          "title": "Анатомия формы: action, method и обязательный тег <label>",
-          "content": "Ключевые элементы управления формой:\n- `<form action=\"/api/login\" method=\"POST\">`:\n  • `action` — URL адрес эндпоинта на сервере, куда отправятся данные.\n  • `method` — HTTP-метод (`GET` — данные передаются в URL параметрах, `POST` — данные передаются в теле запроса).\n  • `enctype=\"multipart/form-data\"` — обязателен, если форма содержит загрузку файлов (`<input type=\"file\">`).\n- **Тег `<label>`**: связывает текстовую подпись с полем ввода. **Правило доступности:** клик по тексту label обязан ставить фокус в связанное поле! Связка делается через `for=\"inputId\"` и `id=\"inputId\"`.",
+          "title": "Анатомия формы: <form>, <label>, <fieldset> и <legend>",
+          "content": "Семантическая структура HTML5-формы:\n\n1. Тег `<form>`:\n- `action=\"/api/register\"` — URL для отправки данных.\n- `method=\"POST\"` — HTTP-метод (GET помещает данные в URL-строку, POST — в тело запроса; для конфиденциальных данных ВСЕГДА используйте POST!).\n- `novalidate` — отключает встроенную браузерную валидацию (если вы хотите обрабатывать ошибки кастомно через JavaScript).\n\n2. Связка `<label for=\"id\">` + `<input id=\"id\">`:\n- Клик по тексту `<label>` автоматически фокусирует связанный `<input>` — увеличивает зону касания (Touch Target) на смартфонах на 300%!\n- Скринридеры озвучивают текст `<label>` при фокусе на поле.\n\n3. Группировка полей: `<fieldset>` и `<legend>`:\n- `<fieldset>` визуально и семантически объединяет группу связанных полей («Контактные данные», «Адрес доставки», «Способ оплаты»).\n- `<legend>` — заголовок группы, озвучиваемый скринридерами.\n\n4. Атрибут `autocomplete`:\nПозволяет браузерам автозаполнять поля из сохранённых данных пользователя:\n`autocomplete=\"name\"`, `autocomplete=\"email\"`, `autocomplete=\"tel\"`, `autocomplete=\"street-address\"`.",
+          "image": {
+            "src": "/images/lessons/html-forms-inputs.svg",
+            "alt": "HTML формы, типы input и валидация: label, fieldset, required, pattern",
+            "caption": "Связка label+input увеличивает зону касания, fieldset/legend группирует поля, а type='email' подключает мобильную клавиатуру с @"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Правильная связка label и input",
-            "code": "<form action=\"/api/register\" method=\"POST\" class=\"auth-form\">\n  <div class=\"form-group\">\n    <!-- Атрибут for совпадает с id у input -->\n    <label for=\"user-email\">Электронная почта:</label>\n    <input \n      id=\"user-email\"\n      type=\"email\"\n      name=\"email\"\n      required\n      placeholder=\"name@example.com\"\n      autocomplete=\"email\"\n    />\n  </div>\n  <button type=\"submit\">Зарегистрироваться</button>\n</form>",
-            "explanation": "Связка label for + input id увеличивает зону клика на смартфонах и озвучивает поле скринридерам."
+            "code": "<form action=\"/api/register\" method=\"POST\" novalidate>\n  <fieldset>\n    <legend>Регистрация стажёра</legend>\n\n    <label for=\"reg-name\">Полное имя:</label>\n    <input id=\"reg-name\" type=\"text\" name=\"fullName\"\n           required minlength=\"2\" autocomplete=\"name\" />\n\n    <label for=\"reg-email\">Электронная почта:</label>\n    <input id=\"reg-email\" type=\"email\" name=\"email\"\n           required autocomplete=\"email\"\n           placeholder=\"intern@academy.dev\" />\n\n    <label for=\"reg-pass\">Пароль:</label>\n    <input id=\"reg-pass\" type=\"password\" name=\"password\"\n           required minlength=\"8\" autocomplete=\"new-password\" />\n  </fieldset>\n\n  <button type=\"submit\">Зарегистрироваться</button>\n</form>",
+            "title": "Семантическая форма с fieldset, legend, label и autocomplete",
+            "explanation": "Каждый input связан с label через for/id, поля объединены в fieldset с заголовком legend, а autocomplete ускоряет заполнение."
           }
         },
         {
-          "title": "Типы полей <input> и элементы управления",
-          "content": "Основные типы инпутов (`type=\"...\"`):\n- `text` — обычная однострочная строка.\n- `password` — маскированный ввод пароля (точки/звездочки).\n- `email`, `tel`, `url` — специализированные типы (на смартфонах вызывают удобную клавиатуру с `@` или цифрами).\n- `number` — числовой ввод с атрибутами `min`, `max`, `step`.\n- `checkbox` — независимый флажок (галочка).\n- `radio` — радиокнопка переключения (для выбора одного из группы у всех кнопок должен быть **одинаковый атрибут `name`**).\n- `file` — загрузка файлов с атрибутом `accept=\"image/*,.pdf\"`.\n- `date`, `time`, `color`, `range` — нативные виджеты календаря, выбора цвета и ползунка.\n- `<textarea rows=\"4\" cols=\"50\">` — многострочное текстовое поле.\n- `<select>` и `<option>` — выпадающий список выбора.",
+          "title": "Типы <input>: от текста и пароля до даты, файла и цвета",
+          "content": "HTML5 предоставляет десятки специализированных типов полей ввода:\n\n1. Текстовые типы:\n- `type=\"text\"` — универсальное текстовое поле.\n- `type=\"password\"` — маскирует ввод символами ●●●●.\n- `type=\"email\"` — на смартфоне показывает клавиатуру с кнопкой `@`. Браузер проверяет формат email.\n- `type=\"tel\"` — на смартфоне открывает цифровую клавиатуру. Браузер НЕ валидирует формат (телефоны слишком разнообразны).\n- `type=\"url\"` — мобильная клавиатура с кнопками `.com` и `/`.\n- `type=\"search\"` — поле поиска с кнопкой очистки «✕».\n\n2. Числовые и временные типы:\n- `type=\"number\"` — поле с кнопками-спиннерами ▲▼. Атрибуты: `min`, `max`, `step`.\n- `type=\"range\"` — ползунок (Slider). Используется для громкости, яркости, рейтинга.\n- `type=\"date\"` / `type=\"time\"` / `type=\"datetime-local\"` — нативный выбор даты/времени (календарь) без сторонних библиотек!\n\n3. Переключатели и выбор:\n- `type=\"checkbox\"` — множественный выбор (одна или несколько опций из набора).\n- `type=\"radio\"` — единственный выбор из группы (связаны общим атрибутом `name`).\n\n4. Специальные типы:\n- `type=\"file\"` — загрузка файлов. Атрибут `accept=\"image/*\"` ограничивает только изображениями.\n- `type=\"color\"` — нативная пипетка выбора цвета!\n- `type=\"hidden\"` — скрытое поле для CSRF-токенов и идентификаторов.",
           "codeExample": {
             "language": "html",
-            "title": "Примеры радиокнопок, чекбоксов и select",
-            "code": "<!-- Группа радиокнопок (выбор доставки) -->\n<fieldset>\n  <legend>Способ доставки:</legend>\n  <label>\n    <input type=\"radio\" name=\"delivery\" value=\"courier\" checked> Курьер\n  </label>\n  <label>\n    <input type=\"radio\" name=\"delivery\" value=\"pickup\"> Самовывоз\n  </label>\n</fieldset>\n\n<!-- Выпадающий список -->\n<label for=\"city-select\">Город:</label>\n<select id=\"city-select\" name=\"city\">\n  <option value=\"\">-- Выберите город --</option>\n  <option value=\"msk\">Москва</option>\n  <option value=\"spb\">Санкт-Петербург</option>\n</select>",
-            "explanation": "Теги fieldset и legend логически группируют радиокнопки с единым именем name=\"delivery\"."
+            "code": "<!-- Числа, даты, файлы и цвет -->\n<label for=\"budget\">Бюджет проекта (₽):</label>\n<input id=\"budget\" type=\"number\" name=\"budget\"\n       min=\"10000\" max=\"10000000\" step=\"5000\" />\n\n<label for=\"deadline\">Дедлайн:</label>\n<input id=\"deadline\" type=\"date\" name=\"deadline\"\n       min=\"2026-08-01\" max=\"2027-12-31\" />\n\n<label for=\"avatar\">Аватарка:</label>\n<input id=\"avatar\" type=\"file\" name=\"avatar\"\n       accept=\"image/png, image/jpeg, image/webp\" />\n\n<label for=\"brand-color\">Цвет бренда:</label>\n<input id=\"brand-color\" type=\"color\" name=\"brandColor\"\n       value=\"#2dff8a\" />",
+            "title": "Числовые поля, выбор даты, загрузка файлов и пипетка цвета",
+            "explanation": "type='number' получает спиннер с ограничениями min/max/step. type='date' отображает нативный календарь. type='file' с accept фильтрует форматы."
           }
         },
         {
-          "title": "Нативная валидация HTML5: UX без единой строчки JS",
-          "content": "Браузер умеет автоматически валидировать форму перед отправкой:\n- `required` — поле обязательно для заполнения.\n- `minlength=\"8\"` и `maxlength=\"32\"` — ограничения на длину строки.\n- `min=\"18\"` и `max=\"99\"` — числовые границы.\n- `pattern=\"[0-9]{4}-[0-9]{4}\"` — проверка по регулярному выражению (RegEx).\n- `placeholder` — пример заполнения (не должен заменять label!).\n- `novalidate` — атрибут у `<form>`, отключающий браузерную валидацию (нужен, если вы валидируете форму через React/JS).",
+          "title": "Нативная HTML5 валидация: required, pattern, minlength и Constraint Validation API",
+          "content": "HTML5 предоставляет мощную встроенную валидацию БЕЗ JavaScript:\n\n1. Базовые атрибуты валидации:\n- `required` — поле обязательно для заполнения.\n- `minlength=\"8\"` / `maxlength=\"100\"` — ограничения длины строки.\n- `min=\"1\"` / `max=\"999\"` — ограничения числовых значений и дат.\n- `pattern=\"[A-Z]{2}\\d{4}\"` — валидация по регулярному выражению (например, формат авиабилета: AB1234).\n\n2. Визуальные псевдоклассы CSS:\n- `:valid` — стиль для корректного поля (зеленая рамка ✓).\n- `:invalid` — стиль для некорректного поля (красная рамка ✕).\n- `:required` — стилизация обязательных полей (звездочка *).\n- `:placeholder-shown` — стиль, пока поле пустое (текст подсказки виден).\n\n3. JavaScript: Constraint Validation API:\n- `input.checkValidity()` — возвращает `true/false`.\n- `input.validity.valueMissing` / `.typeMismatch` / `.patternMismatch` — детализированный объект ошибки.\n- `input.setCustomValidity('Пароль слишком слабый')` — установка кастомного сообщения об ошибке.",
           "codeExample": {
             "language": "html",
-            "title": "Поле с комплексной валидацией",
-            "code": "<input \n  type=\"password\"\n  id=\"pwd\"\n  name=\"password\"\n  required\n  minlength=\"8\"\n  pattern=\"(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{8,}\"\n  title=\"Пароль должен содержать минимум 8 символов, цифру, заглавную и строчную буквы\"\n/>",
-            "explanation": "Браузер сам покажет красивый тултип ошибки при несоответствии регулярному выражению."
+            "code": "<!-- Валидация промокода через pattern -->\n<label for=\"promo\">Промокод (3 буквы + 4 цифры):</label>\n<input id=\"promo\" type=\"text\" name=\"promoCode\"\n       pattern=\"[A-Z]{3}\\d{4}\"\n       title=\"Формат: три заглавные буквы и четыре цифры (например, ABC1234)\"\n       placeholder=\"ABC1234\"\n       required />\n\n<style>\n  input:valid   { border-color: #2dff8a; }\n  input:invalid { border-color: #f85149; }\n</style>",
+            "title": "Валидация промокода по регулярному выражению pattern",
+            "explanation": "Атрибут pattern задает маску ввода, title показывает подсказку при ошибке, а CSS-псевдоклассы :valid/:invalid подсвечивают поле в реальном времени."
+          }
+        },
+        {
+          "title": "Сбор данных FormData API, тег <select>, <textarea> и автоподсказки <datalist>",
+          "content": "Работа с данными формы и дополнительными элементами ввода:\n\n1. `FormData API` — современный способ сбора данных формы в JavaScript:\n`const data = new FormData(formElement);`\n`const obj = Object.fromEntries(data);`\nFormData автоматически собирает значения ВСЕХ полей формы по атрибуту `name` в пары ключ-значение, включая загруженные файлы!\n\n2. Тег `<select>` (Выпадающий список):\n- `<option value=\"js\">JavaScript</option>`\n- Группировка опций через `<optgroup label=\"Frontend\">`.\n- Атрибут `multiple` позволяет выбрать несколько опций (через Ctrl/Cmd+Click).\n\n3. Тег `<textarea>` (Многострочное текстовое поле):\n- Атрибуты `rows` и `cols` задают видимые размеры.\n- CSS-свойство `resize: vertical;` ограничивает изменение размера только по вертикали.\n\n4. Тег `<datalist>` (Автоподсказки):\n- Связывается с `<input>` через атрибут `list=\"id\"`.\n- Браузер показывает выпадающий список подсказок, но пользователь может ввести произвольное значение (в отличие от `<select>`)!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const form = document.querySelector('#order-form');\n\nform.addEventListener('submit', (e) => {\n  e.preventDefault(); // Отмена перезагрузки страницы\n\n  // 1. Сбор ВСЕХ данных формы через FormData\n  const formData = new FormData(form);\n  \n  // 2. Преобразование в обычный объект\n  const orderData = Object.fromEntries(formData);\n  console.log(orderData);\n  // { fullName: 'Иван', email: 'ivan@dev.ru', plan: 'pro' }\n\n  // 3. Отправка на сервер через Fetch API\n  fetch('/api/orders', {\n    method: 'POST',\n    body: formData // FormData автоматически устанавливает Content-Type!\n  });\n});",
+            "title": "Сбор и отправка данных формы через FormData API",
+            "explanation": "FormData собирает значения всех полей по атрибуту name. Object.fromEntries преобразует FormData в обычный объект."
           }
         }
       ],
       "seniorTips": [
-        "Всегда указывайте `type=\"submit\"` или `type=\"button\"` у тегов `<button>`. По умолчанию кнопка внутри формы имеет тип `submit` и непреднамеренно перезагрузит страницу при клике!",
-        "Никогда не используйте `placeholder` вместо `<label>` — как только пользователь начинает ввод, плейсхолдер исчезает, и контекст поля теряется."
+        "ВСЕГДА связывайте `<label for=\"id\">` с `<input id=\"id\">` — это увеличивает зону касания на мобилках и критически важно для доступности скринридеров.",
+        "Используйте `type=\"email\"`, `type=\"tel\"`, `type=\"url\"` — на смартфонах браузер автоматически подключает специализированную клавиатуру с символами `@`, `.com` и цифровой панелью.",
+        "Для формы с кастомной JavaScript-валидацией добавляйте атрибут `novalidate` на тег `<form>`, чтобы отключить стандартные всплывающие сообщения браузера.",
+        "Используйте `FormData` вместо ручного чтения `input.value` для каждого поля — это автоматически обрабатывает файлы, чекбоксы и множественные значения."
       ],
       "commonMistakes": [
         {
-          "bad": "<input type=\"text\" placeholder=\"Ваше имя\"> <!-- Без label -->",
-          "good": "<label for=\"name-field\">Ваше имя</label>\n<input id=\"name-field\" type=\"text\" placeholder=\"Например, Иван\">",
-          "reason": "Без label поле недоступно для пользователей с экранными дикторами и нарушает стандарты WCAG."
+          "bad": "<!-- Input без label -->\n<input type=\"email\" placeholder=\"Введите email\" />",
+          "good": "<label for=\"user-email\">Электронная почта:</label>\n<input id=\"user-email\" type=\"email\" placeholder=\"name@company.com\" />",
+          "reason": "Без связки с label скринридер не сможет озвучить назначение поля. Placeholder НЕ является заменой label (он исчезает при вводе!)."
         },
         {
-          "bad": "<form>\n  <button onclick=\"doSomething()\">Клик</button> <!-- Перезагрузит форму! -->\n</form>",
-          "good": "<form>\n  <button type=\"button\" onclick=\"doSomething()\">Клик</button>\n</form>",
-          "reason": "Кнопка без явного type=\"button\" по умолчанию работает как submit и отправляет форму."
+          "bad": "<!-- Пароли через GET -->\n<form action=\"/login\" method=\"GET\">\n  <input type=\"password\" name=\"pass\" />\n</form>",
+          "good": "<form action=\"/login\" method=\"POST\">\n  <input type=\"password\" name=\"pass\" autocomplete=\"current-password\" />\n</form>",
+          "reason": "GET-метод помещает пароль в URL строку (?pass=secret), который сохраняется в истории браузера, логах серверов и аналитике."
+        },
+        {
+          "bad": "<!-- Радиокнопки с разными name -->\n<input type=\"radio\" name=\"option1\" value=\"a\" />\n<input type=\"radio\" name=\"option2\" value=\"b\" />",
+          "good": "<input type=\"radio\" name=\"plan\" value=\"free\" />\n<input type=\"radio\" name=\"plan\" value=\"pro\" />",
+          "reason": "Радиокнопки с одинаковым атрибутом name образуют группу взаимоисключающего выбора. Разные name позволяют выбрать оба варианта, превращая радио в чекбоксы."
         }
       ],
       "keyTakeaways": [
-        "Связка label for + input id обязательна для каждого интерактивного поля.",
-        "Радиокнопки объединяются в группу с помощью общего атрибута name.",
-        "Нативная валидация required, pattern, min/max защищает от отправки пустых полей."
+        "Связка `<label for>` + `<input id>` критически важна для доступности и увеличивает Touch Target на мобилках.",
+        "`<fieldset>` и `<legend>` семантически группируют поля формы для скринридеров.",
+        "Типы `email`, `tel`, `url` активируют специализированные клавиатуры на смартфонах.",
+        "Атрибуты `required`, `pattern`, `minlength` обеспечивают нативную HTML5 валидацию без JavaScript.",
+        "`FormData API` автоматически собирает данные всех полей формы по атрибуту `name`."
       ]
     },
     "sandbox": {
-      "initialHtml": "<form class=\"demo-form\" onsubmit=\"event.preventDefault(); alert('Форма успешно прошла валидацию!');\">\n  <div class=\"form-row\">\n    <label for=\"demo-name\">Имя *</label>\n    <input id=\"demo-name\" type=\"text\" required placeholder=\"Иван Иванов\">\n  </div>\n  <div class=\"form-row\">\n    <label for=\"demo-email\">Email *</label>\n    <input id=\"demo-email\" type=\"email\" required placeholder=\"ivan@mail.ru\">\n  </div>\n  <div class=\"form-row\">\n    <label>\n      <input type=\"checkbox\" required> Согласен с условиями\n    </label>\n  </div>\n  <button type=\"submit\" class=\"btn-submit\">Отправить форму</button>\n</form>",
-      "initialCss": ".demo-form { padding: 20px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; }\n.form-row { margin-bottom: 14px; display: flex; flex-direction: column; gap: 6px; }\n.form-row label { font-size: 13px; font-weight: 600; color: #334155; }\n.form-row input[type=\"text\"], .form-row input[type=\"email\"] { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }\n.form-row input:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }\n.btn-submit { padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }",
-      "initialJs": "console.log('Forms sandbox ready');",
-      "instructions": "Попробуйте нажать «Отправить форму» с пустыми полями и проверьте встроенную валидацию браузера."
+      "initialHtml": "<form id=\"sandbox-form\" novalidate>\n  <fieldset>\n    <legend>Заявка стажёра</legend>\n    <div style=\"margin-bottom:10px;\">\n      <label for=\"sf-name\">Имя:</label><br/>\n      <input id=\"sf-name\" type=\"text\" name=\"fullName\" required minlength=\"2\" style=\"width:100%; padding:6px; background:#0d1117; color:#2dff8a; border:1px solid #30363d; font-family:monospace;\" />\n    </div>\n    <div style=\"margin-bottom:10px;\">\n      <label for=\"sf-email\">Email:</label><br/>\n      <input id=\"sf-email\" type=\"email\" name=\"email\" required style=\"width:100%; padding:6px; background:#0d1117; color:#2dff8a; border:1px solid #30363d; font-family:monospace;\" />\n    </div>\n    <div style=\"margin-bottom:10px;\">\n      <label for=\"sf-lang\">Предпочитаемый язык:</label><br/>\n      <input id=\"sf-lang\" list=\"langs\" name=\"language\" style=\"width:100%; padding:6px; background:#0d1117; color:#e6edf3; border:1px solid #30363d; font-family:monospace;\" />\n      <datalist id=\"langs\">\n        <option value=\"JavaScript\" />\n        <option value=\"TypeScript\" />\n        <option value=\"Python\" />\n      </datalist>\n    </div>\n  </fieldset>\n  <button type=\"submit\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer; margin-top:8px;\">Отправить</button>\n  <pre id=\"output\" style=\"margin-top:12px; color:#8b949e; font-size:12px;\"></pre>\n</form>",
+      "initialCss": "form { font-family: monospace; color: #e6edf3; padding: 16px; background: #0a0e13; border-radius: 8px; }\nfieldset { border: 1px solid #30363d; border-radius: 6px; padding: 12px; }\nlegend { color: #2dff8a; font-weight: bold; }\nlabel { color: #29e7ff; font-size: 13px; }\ninput:valid { border-color: #2dff8a !important; }\ninput:invalid:not(:placeholder-shown) { border-color: #f85149 !important; }",
+      "initialJs": "document.getElementById('sandbox-form').addEventListener('submit', (e) => {\n  e.preventDefault();\n  const data = new FormData(e.target);\n  const obj = Object.fromEntries(data);\n  document.getElementById('output').textContent = JSON.stringify(obj, null, 2);\n});",
+      "instructions": "Практика с формами:\n1. Заполните форму и нажмите 'Отправить' — данные отобразятся в JSON\n2. Попробуйте ввести невалидный email и посмотрите на :invalid стили\n3. Начните вводить текст в поле языка — появятся подсказки datalist"
     },
     "task": {
-      "title": "Создание формы авторизации",
-      "scenario": "Сверстайте форму входа с полями email, пароль, чекбоксом «Запомнить меня» и кнопкой отправки.",
+      "title": "Верстка формы регистрации с группировкой fieldset, нативной валидацией и FormData",
+      "scenario": "Вам необходимо разработать форму регистрации участника хакатона: форма должна содержать группировку полей в fieldset/legend (Личные данные и Настройки), типы input email/tel/date/file, нативную валидацию required/pattern/minlength, выпадающий select для выбора трека, datalist для навыков, и обработку submit через FormData API.",
       "criteria": [
-        "Использован тег <form> с методом POST",
-        "Поля email и password имеют связанные <label>",
-        "Присутствует нативная валидация required",
-        "Использована кнопка <button type=\"submit\">"
+        "Форма содержит минимум 2 группы fieldset с legend",
+        "Все input связаны с label через for/id",
+        "Используются типы input: email, tel, date, file и text",
+        "Настроена нативная валидация: required, pattern и minlength",
+        "Обработка submit использует e.preventDefault() и FormData API",
+        "Есть select для выбора трека и datalist для навыков"
       ],
       "starterCode": {
-        "html": "<!-- Создайте форму входа -->\n",
-        "css": "/* Стили задания */\n"
+        "html": "<form id=\"hackathon-form\" novalidate>\n  <!-- Разметьте форму -->\n</form>"
       },
       "hints": [
-        "Используйте <form method=\"POST\"><label for=\"email\">...<input id=\"email\" type=\"email\" required>..."
+        "Используйте <fieldset><legend>Личные данные</legend>...</fieldset>",
+        "Свяжите: <label for='phone'>Телефон:</label> <input id='phone' type='tel' />",
+        "Обработка: const fd = new FormData(form); const data = Object.fromEntries(fd);"
       ],
       "solution": {
-        "html": "<form action=\"/login\" method=\"POST\" class=\"login-form\">\n  <h2>Вход в систему</h2>\n  <div class=\"field\">\n    <label for=\"login-email\">Электронная почта:</label>\n    <input id=\"login-email\" type=\"email\" name=\"email\" required placeholder=\"user@company.com\">\n  </div>\n  <div class=\"field\">\n    <label for=\"login-pwd\">Пароль:</label>\n    <input id=\"login-pwd\" type=\"password\" name=\"password\" required minlength=\"6\">\n  </div>\n  <div class=\"checkbox-field\">\n    <label>\n      <input type=\"checkbox\" name=\"remember\"> Запомнить меня\n    </label>\n  </div>\n  <button type=\"submit\">Войти</button>\n</form>",
-        "css": "/* Решение */\n",
-        "explanation": "Идеальная доступная форма авторизации со всеми необходимыми типами полей."
+        "html": "<form id=\"hackathon-form\" novalidate>\n  <fieldset>\n    <legend>Личные данные</legend>\n    <label for=\"h-name\">ФИО:</label>\n    <input id=\"h-name\" type=\"text\" name=\"fullName\" required minlength=\"3\" autocomplete=\"name\" />\n\n    <label for=\"h-email\">Email:</label>\n    <input id=\"h-email\" type=\"email\" name=\"email\" required autocomplete=\"email\" />\n\n    <label for=\"h-tel\">Телефон:</label>\n    <input id=\"h-tel\" type=\"tel\" name=\"phone\" pattern=\"\\+7\\d{10}\" title=\"Формат: +7XXXXXXXXXX\" />\n\n    <label for=\"h-bday\">Дата рождения:</label>\n    <input id=\"h-bday\" type=\"date\" name=\"birthday\" />\n  </fieldset>\n\n  <fieldset>\n    <legend>Хакатон</legend>\n    <label for=\"h-track\">Трек:</label>\n    <select id=\"h-track\" name=\"track\" required>\n      <option value=\"\">Выберите трек</option>\n      <option value=\"frontend\">Frontend</option>\n      <option value=\"backend\">Backend</option>\n      <option value=\"design\">UI/UX Design</option>\n    </select>\n\n    <label for=\"h-skills\">Навыки:</label>\n    <input id=\"h-skills\" list=\"skill-list\" name=\"skills\" />\n    <datalist id=\"skill-list\">\n      <option value=\"React\" />\n      <option value=\"TypeScript\" />\n      <option value=\"Node.js\" />\n    </datalist>\n\n    <label for=\"h-resume\">Резюме (PDF):</label>\n    <input id=\"h-resume\" type=\"file\" name=\"resume\" accept=\".pdf\" />\n  </fieldset>\n\n  <button type=\"submit\">Подать заявку</button>\n</form>",
+        "js": "document.getElementById('hackathon-form').addEventListener('submit', (e) => {\n  e.preventDefault();\n  const formData = new FormData(e.target);\n  const data = Object.fromEntries(formData);\n  console.log('Заявка:', data);\n});",
+        "explanation": "Форма полностью семантична: 2 fieldset с legend, все input связаны с label, нативная валидация required/pattern/minlength, select для треков, datalist для навыков и обработка через FormData."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h9-q1",
-          "question": "Как связать тег <label> с полем <input>?",
+          "id": "html9-q1",
+          "question": "Почему критически важно связывать каждый <input> с тегом <label> через атрибуты for и id?",
           "options": [
-            "Через атрибут class",
-            "Через атрибут for у label и атрибут id у input",
-            "Через имя name",
-            "Они связываются автоматически"
+            "Label изменяет цвет шрифта",
+            "Клик по тексту label фокусирует связанный input (увеличивает Touch Target на смартфонах на 300%), а скринридеры озвучивают назначение поля для незрячих пользователей",
+            "Без label input не работает",
+            "Label обязателен только для чекбоксов"
           ],
           "correctIndex": 1,
-          "explanation": "Атрибут for у label должен точно совпадать со значением id целевого поля input."
+          "explanation": "Связка label + input критически важна для доступности (скринридеры) и UX на сенсорных экранах (увеличение области нажатия)."
         },
         {
-          "id": "h9-q2",
-          "question": "Какой тип кнопки по умолчанию внутри тега <form>?",
+          "id": "html9-q2",
+          "question": "Какое преимущество дает использование type='email' и type='tel' на мобильных устройствах?",
           "options": [
-            "type=\"button\"",
-            "type=\"submit\"",
-            "type=\"reset\"",
-            "type=\"menu\""
+            "Меняет цвет курсора",
+            "Браузер на смартфоне автоматически подключает специализированную клавиатуру: с символом @ для email и цифровую панель для tel",
+            "Шифрует ввод пользователя",
+            "Отправляет данные через WebSocket"
           ],
           "correctIndex": 1,
-          "explanation": "По умолчанию любая кнопка внутри формы имеет type=\"submit\" и пытается отправить форму."
+          "explanation": "Мобильные ОС (iOS и Android) адаптируют виртуальную клавиатуру под тип поля, добавляя кнопки @, .com, цифры и т.д."
+        },
+        {
+          "id": "html9-q3",
+          "question": "Что делает атрибут pattern на теге <input>?",
+          "options": [
+            "Применяет CSS-фон",
+            "Задает регулярное выражение для валидации формата ввода (например, pattern='[A-Z]{3}\\d{4}' для кода ABC1234)",
+            "Добавляет звуковой сигнал",
+            "Автоматически форматирует номер телефона"
+          ],
+          "correctIndex": 1,
+          "explanation": "Атрибут pattern принимает регулярное выражение JavaScript и блокирует отправку формы, если введенное значение не соответствует маске."
+        },
+        {
+          "id": "html9-q4",
+          "question": "Чем тег <datalist> отличается от тега <select>?",
+          "options": [
+            "datalist является устаревшим элементом",
+            "datalist предлагает автоподсказки при вводе, но пользователь может ввести произвольное значение, а select ограничивает выбор только предложенными опциями",
+            "datalist не поддерживается в Chrome",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "datalist показывает выпадающий список подсказок, но не ограничивает ввод. select строго ограничивает выбор заданными option."
+        },
+        {
+          "id": "html9-q5",
+          "question": "Как объект FormData собирает данные из HTML-формы?",
+          "options": [
+            "Парсит innerHTML формы",
+            "Автоматически собирает значения всех полей формы по атрибуту name в пары ключ-значение, включая файлы",
+            "Считывает только первый input",
+            "Отправляет запрос на сервер при создании"
+          ],
+          "correctIndex": 1,
+          "explanation": "new FormData(formElement) сканирует все поля с атрибутом name внутри формы и формирует коллекцию пар 'имя поля: значение' для передачи на сервер."
         }
       ]
     }

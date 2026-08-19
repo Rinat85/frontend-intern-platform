@@ -1556,5 +1556,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-9",
+    "moduleId": "pro",
+    "level": 9,
+    "title": "CI/CD Pipeline и Автоматизация Деплоя",
+    "subtitle": "GitHub Actions, Lint/Test/Build конвейер, Preview Deployments, Vercel/Netlify и мониторинг",
+    "description": "Освойте практику непрерывной интеграции и доставки (CI/CD): настройку конвейера GitHub Actions с этапами Lint, Test, Build, Preview Deployment и Production Deploy на платформах Vercel/Netlify, стратегии деплоя (Canary, Blue-Green), мониторинг ошибок через Sentry и откат при деградации Web Vitals.",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "ci-cd",
+      "github-actions",
+      "deployment",
+      "vercel",
+      "netlify",
+      "preview",
+      "sentry",
+      "monitoring"
+    ],
+    "theory": {
+      "overview": "В современной разработке код попадает в продакшн не через ручную загрузку по FTP, а через полностью автоматизированный конвейер CI/CD (Continuous Integration / Continuous Delivery).\n\nЗадача CI/CD — гарантировать, что каждое изменение кода автоматически проверяется (линтинг, тесты, сборка), проходит ревью на Preview-окружении и безопасно доставляется на Production с возможностью мгновенного отката (Rollback) при обнаружении ошибок. В этом уроке мы разберём архитектуру CI/CD конвейера, настроим GitHub Actions, освоим Preview Deployments и стратегии безопасного деплоя.",
+      "sections": [
+        {
+          "title": "Что такое CI/CD и зачем нужна автоматизация",
+          "content": "CI/CD состоит из двух дисциплин:\n\n1. **CI — Continuous Integration (Непрерывная Интеграция)**:\n- Разработчики ежедневно вливают свой код в общую ветку (main/develop).\n- При каждом `git push` или Pull Request автоматически запускаются проверки: линтинг кода (ESLint, Prettier), модульные тесты (Vitest), TypeScript-компиляция и сборка бандла (Vite Build).\n- Если хотя бы одна проверка падает — мерж блокируется (Branch Protection Rules).\n\n2. **CD — Continuous Delivery / Deployment (Непрерывная Доставка)**:\n- После успешного прохождения CI код автоматически деплоится на Preview-окружение (для Pull Request) или на Production (при мерже в main).\n- Continuous Delivery: деплой на прод требует ручного нажатия кнопки.\n- Continuous Deployment: деплой на прод происходит полностью автоматически после CI.\n\nПочему CI/CD критически важен:\n- Устраняет «Работает на моём компьютере» — код проверяется в стандартизированной среде (Ubuntu в облаке).\n- Предотвращает деградацию качества: тесты ловят баги ДО попадания в прод.\n- Ускоряет Time-to-Market: от коммита до продакшна — минуты, а не дни.",
+          "image": {
+            "src": "/images/lessons/web-ci-cd-pipeline.svg",
+            "alt": "CI/CD конвейер: Lint, Test, Build, Preview, Deploy и мониторинг Sentry",
+            "caption": "Конвейер CI/CD: каждый git push запускает Lint → Test → Build → Preview → Deploy. Sentry и Lighthouse CI мониторят после деплоя"
+          },
+          "codeExample": {
+            "language": "bash",
+            "code": "# .github/workflows/ci.yml — Полный конвейер CI\nname: CI Pipeline\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  lint-test-build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 22\n          cache: 'npm'\n      - run: npm ci          # Чистая установка зависимостей\n      - run: npm run lint    # ESLint + Prettier\n      - run: npm test        # Vitest Unit Tests\n      - run: npm run build   # TypeScript + Vite build",
+            "title": "Полный CI конвейер в GitHub Actions: Lint → Test → Build",
+            "explanation": "npm ci устанавливает зависимости из lock-файла для воспроизводимости. Каждый этап (lint, test, build) блокирует мерж при ошибке."
+          }
+        },
+        {
+          "title": "Этапы конвейера: Lint, Test, Build и защита веток",
+          "content": "Каждый этап конвейера CI решает свою задачу:\n\n1. **Lint (Статический анализ кода)**:\n- ESLint проверяет качество и паттерны кода (неиспользуемые переменные, отсутствие return, опасные конструкции).\n- Prettier гарантирует единый стиль форматирования (отступы, кавычки, точки с запятой).\n- `npm run lint` должен завершаться с кодом 0 (успех).\n\n2. **Test (Автоматизированные тесты)**:\n- Unit-тесты (Vitest) проверяют утилиты, хелперы и редьюсеры за миллисекунды.\n- Integration-тесты (Testing Library) проверяют компоненты с моками API.\n- E2E-тесты (Playwright) — опционально на CI для критических сценариев.\n\n3. **Build (Сборка продакшн-бандла)**:\n- `tsc` (TypeScript) проверяет типы на этапе компиляции.\n- Vite/Webpack создаёт минифицированный бандл с Tree Shaking.\n- Ошибки типов или сборки мгновенно блокируют мерж.\n\n4. **Branch Protection Rules (GitHub)**:\n- Запрет прямого push в main (только через Pull Request).\n- Обязательное прохождение всех CI-проверок перед мержем.\n- Обязательный ревью от минимум 1 коллеги (Code Review).",
+          "codeExample": {
+            "language": "json",
+            "code": "// package.json — скрипты CI/CD\n{\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"tsc && vite build\",\n    \"preview\": \"vite preview\",\n    \"lint\": \"eslint src/ --ext .ts,.tsx --max-warnings 0\",\n    \"lint:fix\": \"eslint src/ --ext .ts,.tsx --fix\",\n    \"format\": \"prettier --write 'src/**/*.{ts,tsx,css}'\",\n    \"test\": \"vitest run\",\n    \"test:watch\": \"vitest\",\n    \"test:coverage\": \"vitest run --coverage\",\n    \"typecheck\": \"tsc --noEmit\"\n  }\n}",
+            "title": "Скрипты package.json для CI конвейера",
+            "explanation": "--max-warnings 0 превращает предупреждения ESLint в ошибки, блокируя мерж. tsc --noEmit проверяет типы без генерации файлов."
+          }
+        },
+        {
+          "title": "Preview Deployments и среды (Environments)",
+          "content": "Среды развертывания фронтенд-приложения:\n\n1. **Development (Local)**: `npm run dev` — локальный Vite-сервер с HMR.\n\n2. **Preview Deployment (PR Preview)**:\n- Каждый Pull Request автоматически получает уникальный URL для ревью (напр. `https://my-project-pr-42.vercel.app`).\n- Ревьюер открывает Preview URL и тестирует функциональность визуально, не скачивая ветку.\n- Vercel, Netlify и Cloudflare Pages генерируют Preview URL автоматически при каждом пуше в PR.\n\n3. **Staging (Предпродакшн)**:\n- Полная копия Production с реальными данными (или синтетическими).\n- QA-инженеры и Product Managers проводят приёмочное тестирование (UAT).\n\n4. **Production (Продакшн / CDN Edge)**:\n- Финальная версия для реальных пользователей.\n- Статические файлы раздаются через CDN Edge Network (Cloudflare, Vercel Edge, AWS CloudFront) с минимальной задержкой по всему миру.\n\nПеременные окружения (Environment Variables):\n`.env.development` (локальные ключи), `.env.production` (продакшн API URLs). В CI переменные хранятся в Secrets (GitHub) или Environment Variables (Vercel).",
+          "codeExample": {
+            "language": "bash",
+            "code": "# Автоматический деплой на Vercel через GitHub Actions\nname: Deploy to Vercel\non:\n  push:\n    branches: [main]\n\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 22\n          cache: 'npm'\n      - run: npm ci\n      - run: npm run build\n\n      - name: Deploy to Vercel Production\n        uses: amondnet/vercel-action@v25\n        with:\n          vercel-token: ${{ secrets.VERCEL_TOKEN }}\n          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}\n          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}\n          vercel-args: '--prod'",
+            "title": "Автоматический Deploy на Vercel через GitHub Actions",
+            "explanation": "Secrets хранят токены безопасно. Vercel Action деплоит бандл на CDN. Каждый PR автоматически получает Preview URL для ревью."
+          }
+        },
+        {
+          "title": "Стратегии деплоя и мониторинг после релиза",
+          "content": "Стратегии безопасного выпуска обновлений:\n\n1. **Rolling Deploy (По умолчанию)**:\nНовая версия постепенно заменяет старую на серверах. Если ошибки — автоматический откат.\n\n2. **Blue-Green Deployment**:\nДва идентичных окружения: Blue (текущий прод) и Green (новая версия). Переключение трафика происходит мгновенно через DNS или Load Balancer. При ошибках — мгновенный откат на Blue.\n\n3. **Canary Deployment (Канарейка)**:\n1–5% реальных пользователей получают новую версию. Мониторинг ошибок и метрик. При успехе — постепенное расширение до 100%. При росте ошибок — мгновенный откат.\n\nМониторинг после деплоя:\n\n1. **Sentry** — отслеживание ошибок JavaScript в реальном времени:\n- Автоматически перехватывает необработанные исключения, промисы и сетевые ошибки.\n- Source Maps позволяют видеть номер строки исходного кода (не минифицированного бандла!).\n\n2. **Lighthouse CI** — автоматическая проверка Web Vitals:\n- LCP, FID, CLS проверяются после каждого деплоя.\n- При деградации метрик (LCP > 2.5с) — алерт и автоматический Rollback.\n\n3. **Grafana / Datadog** — дашборды метрик, алертинг и трейсинг.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Инициализация Sentry для мониторинга ошибок в продакшне\nimport * as Sentry from '@sentry/react';\n\nSentry.init({\n  dsn: 'https://xxxxx@sentry.io/project-id',\n  environment: import.meta.env.MODE,         // 'production' | 'staging'\n  release: import.meta.env.VITE_APP_VERSION, // '2.4.1'\n  \n  integrations: [\n    Sentry.browserTracingIntegration(),       // Трейсинг запросов\n    Sentry.replayIntegration()                // Запись сессий с ошибками\n  ],\n  \n  tracesSampleRate: 0.1,  // 10% запросов трейсятся\n  replaysOnErrorSampleRate: 1.0  // 100% сессий с ошибками записываются\n});",
+            "title": "Подключение Sentry для мониторинга ошибок в Production",
+            "explanation": "Sentry перехватывает необработанные ошибки, привязывает их к Source Maps для читаемых стек-трейсов и записывает сессии пользователей для воспроизведения багов."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Всегда настраивайте Branch Protection Rules: запрет push в main, обязательный CI и минимум 1 Code Review.",
+        "Используйте Preview Deployments для каждого Pull Request — ревьюер должен иметь возможность открыть живой URL и протестировать визуально.",
+        "Загружайте Source Maps в Sentry при каждом релизе — без них стек-трейсы ошибок из минифицированного бандла нечитаемы.",
+        "Настройте Lighthouse CI в конвейере для автоматической проверки Web Vitals после каждого деплоя."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "# Хранение API-ключей в коде\nconst API_KEY = 'sk_live_abc123secret'; // ❌ Утечка в Git!",
+          "good": "# Использование переменных окружения\nconst API_KEY = import.meta.env.VITE_API_KEY;\n# Secrets хранятся в GitHub Secrets / Vercel Environment Variables",
+          "reason": "Ключи в коде попадают в Git-историю и доступны всем, кто имеет доступ к репозиторию. Переменные окружения хранятся безопасно вне кода."
+        },
+        {
+          "bad": "# Деплой без тестов\ngit push origin main  # Прямой деплой без CI!",
+          "good": "# Создание PR → CI (lint + test + build) → Code Review → Merge → CD",
+          "reason": "Прямой push без CI позволяет сломанному коду попасть в продакшн, вызывая простой сервиса для реальных пользователей."
+        },
+        {
+          "bad": "# npm install в CI\nrun: npm install  # Нестабильно! Может установить другие версии",
+          "good": "run: npm ci  # Чистая установка строго из package-lock.json",
+          "reason": "npm install может обновить зависимости до новых минорных версий, нарушив воспроизводимость сборки. npm ci устанавливает ровно те версии, которые зафиксированы в lock-файле."
+        }
+      ],
+      "keyTakeaways": [
+        "CI автоматически проверяет каждый push/PR: Lint (ESLint) → Test (Vitest) → Build (tsc + Vite).",
+        "CD автоматически доставляет проверенный код на Preview, Staging и Production.",
+        "Preview Deployments дают каждому PR уникальный URL для визуального ревью до мержа.",
+        "Стратегии Canary и Blue-Green обеспечивают безопасный деплой с мгновенным Rollback.",
+        "Sentry и Lighthouse CI мониторят ошибки и Web Vitals после каждого релиза."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"cicd-app\">\n  <h3>Симулятор CI/CD Pipeline</h3>\n  <button id=\"run-pipeline\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">▶ Запустить Pipeline</button>\n  <div id=\"pipeline-stages\" style=\"margin-top:16px;\"></div>\n</div>",
+      "initialCss": "#cicd-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }\n.stage { padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; border-left: 3px solid; }\n.stage-pending { border-color: #8b949e; color: #8b949e; }\n.stage-running { border-color: #ffb02e; color: #ffb02e; }\n.stage-pass { border-color: #2dff8a; color: #2dff8a; background: rgba(45,255,138,0.05); }\n.stage-fail { border-color: #f85149; color: #f85149; background: rgba(248,81,73,0.05); }",
+      "initialJs": "const stages = ['Lint (ESLint)', 'Unit Tests (Vitest)', 'TypeScript Check', 'Build (Vite)', 'Deploy Preview'];\nconst container = document.getElementById('pipeline-stages');\n\nasync function runPipeline() {\n  container.innerHTML = stages.map(s => `<div class='stage stage-pending'>⏳ ${s}</div>`).join('');\n  const els = container.querySelectorAll('.stage');\n  \n  for (let i = 0; i < stages.length; i++) {\n    els[i].className = 'stage stage-running';\n    els[i].textContent = `⚙️ Running: ${stages[i]}...`;\n    await new Promise(r => setTimeout(r, 800 + Math.random() * 400));\n    els[i].className = 'stage stage-pass';\n    els[i].textContent = `✅ ${stages[i]} — Passed`;\n  }\n}\n\ndocument.getElementById('run-pipeline').onclick = runPipeline;",
+      "instructions": "Практика с CI/CD:\n1. Нажмите 'Запустить Pipeline' и наблюдайте этапы Lint → Test → Build → Deploy\n2. Добавьте этап 'E2E Tests (Playwright)' в массив stages\n3. Добавьте случайный сбой (Math.random() < 0.2) для имитации падения тестов"
+    },
+    "task": {
+      "title": "Написание конфигурации GitHub Actions CI/CD с тестами, Preview Deploy и мониторингом",
+      "scenario": "Вам необходимо настроить полный CI/CD конвейер для фронтенд-проекта на GitHub Actions: при каждом Pull Request должны запускаться этапы Lint, TypeScript Check, Unit Tests и Build; при мерже в main — деплой на Vercel Production; а после деплоя — проверка Lighthouse CI.",
+      "criteria": [
+        "Workflow запускается на push в main и на pull_request",
+        "Этапы выполняются последовательно: npm ci → lint → typecheck → test → build",
+        "Используется actions/setup-node с кэшированием npm",
+        "При мерже в main выполняется деплой на Vercel с --prod",
+        "Секреты (VERCEL_TOKEN) хранятся в GitHub Secrets"
+      ],
+      "starterCode": {
+        "html": "# Напишите .github/workflows/ci.yml\n# Ваш код"
+      },
+      "hints": [
+        "Используйте runs-on: ubuntu-latest и actions/checkout@v4",
+        "Для кэширования: actions/setup-node@v4 с cache: 'npm'",
+        "Для деплоя: amondnet/vercel-action@v25 с secrets"
+      ],
+      "solution": {
+        "html": "name: CI/CD Pipeline\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  ci:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 22\n          cache: 'npm'\n      - run: npm ci\n      - run: npm run lint\n      - run: npx tsc --noEmit\n      - run: npm test\n      - run: npm run build\n\n  deploy:\n    needs: ci\n    if: github.ref == 'refs/heads/main'\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with: { node-version: 22, cache: 'npm' }\n      - run: npm ci && npm run build\n      - uses: amondnet/vercel-action@v25\n        with:\n          vercel-token: ${{ secrets.VERCEL_TOKEN }}\n          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}\n          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}\n          vercel-args: '--prod'",
+        "explanation": "Job ci проверяет код на каждом PR. Job deploy запускается только при мерже в main (if: github.ref == 'refs/heads/main') и деплоит на Vercel Production через Secrets."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro9-q1",
+          "question": "В чём заключается разница между CI (Continuous Integration) и CD (Continuous Delivery)?",
+          "options": [
+            "CI и CD — одно и то же",
+            "CI автоматически проверяет код при каждом push/PR (lint, test, build), а CD автоматически доставляет проверенный код на Preview, Staging или Production",
+            "CI — это ручное тестирование, CD — ручной деплой",
+            "CI работает только с Python"
+          ],
+          "correctIndex": 1,
+          "explanation": "CI отвечает за автоматическую проверку качества кода, CD — за автоматическую доставку проверенного кода на целевые среды развертывания."
+        },
+        {
+          "id": "pro9-q2",
+          "question": "Почему в CI нужно использовать npm ci вместо npm install?",
+          "options": [
+            "npm ci быстрее скачивает пакеты",
+            "npm ci устанавливает зависимости строго из package-lock.json, гарантируя воспроизводимость сборки, в то время как npm install может обновить версии",
+            "npm ci шифрует пакеты",
+            "npm ci доступен только на Linux"
+          ],
+          "correctIndex": 1,
+          "explanation": "npm ci удаляет node_modules и устанавливает ровно те версии, которые зафиксированы в lock-файле, исключая проблемы 'работало вчера, сломалось сегодня'."
+        },
+        {
+          "id": "pro9-q3",
+          "question": "Что такое Preview Deployment и зачем он нужен?",
+          "options": [
+            "Показывает превью фотографий",
+            "Каждый Pull Request автоматически получает уникальный URL с собранной версией приложения, позволяя ревьюеру визуально протестировать изменения до мержа",
+            "Предварительный просмотр PDF файлов",
+            "Загрузка исходного кода на FTP"
+          ],
+          "correctIndex": 1,
+          "explanation": "Preview Deployment (Vercel, Netlify, Cloudflare Pages) автоматически деплоит каждый PR на уникальный URL, ускоряя Code Review и тестирование."
+        },
+        {
+          "id": "pro9-q4",
+          "question": "В чём заключается стратегия Canary Deployment?",
+          "options": [
+            "Новая версия сразу раскатывается на 100% пользователей",
+            "Новая версия сначала выпускается на 1–5% реальных пользователей, мониторятся ошибки и метрики, и при успехе постепенно расширяется до 100%",
+            "Деплой выполняется только ночью",
+            "Новая версия деплоится только для разработчиков"
+          ],
+          "correctIndex": 1,
+          "explanation": "Canary Deployment постепенно увеличивает процент трафика на новую версию, минимизируя радиус потенциального ущерба при наличии багов."
+        },
+        {
+          "id": "pro9-q5",
+          "question": "Зачем загружать Source Maps в Sentry при каждом релизе?",
+          "options": [
+            "Чтобы ускорить загрузку сайта",
+            "Чтобы Sentry мог показывать номера строк исходного (не минифицированного) кода в стек-трейсах ошибок, позволяя мгновенно найти баг",
+            "Чтобы шифровать исходный код",
+            "Source Maps нужны только для CSS"
+          ],
+          "correctIndex": 1,
+          "explanation": "Без Source Maps стек-трейсы из продакшна показывают нечитаемые имена из минифицированного бандла (e.g., 'a.b() at chunk-abc:1:4523'). С Source Maps видно реальный файл и строку."
+        }
+      ]
+    }
   }
 ];

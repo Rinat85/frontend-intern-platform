@@ -2529,84 +2529,191 @@ export const cssLessons: Lesson[] = [
     "id": "css-14",
     "moduleId": "css",
     "level": 14,
-    "title": "CSS Переменные (Custom Properties)",
-    "subtitle": "Объявление :root, var(), реализация светлой и темной тем",
-    "description": "Динамические стили: объявление переменных в :root, резервные значения var(--name, fallback), темная тема.",
-    "estimatedMinutes": 35,
+    "title": "CSS Переменные (Custom Properties) и Дизайн-системы",
+    "subtitle": ":root, var(), каскад, fallback, переключение тем Dark/Light и управление через JavaScript",
+    "description": "Освойте фундамент современных дизайн-систем — CSS Custom Properties: объявление глобальных дизайн-токенов в :root, локальный каскад и переопределение переменных в дочерних блоках, архитектуру бесшовного переключения тем (Dark / Light / High-Contrast) и реактивное управление стилями через JavaScript в реальном времени.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Variables",
-      "Theming"
+      "css-variables",
+      "custom-properties",
+      "themes",
+      "dark-mode",
+      "design-systems",
+      "tokens",
+      "javascript-css"
     ],
     "theory": {
-      "overview": "CSS-переменные централизуют палитру цветов, скругления и шрифты.",
+      "overview": "CSS Custom Properties (пользовательские свойства, или переменные CSS) — это фундаментальная технология, изменившая подход к стилизации веб-приложений.\n\nВ отличие от статических переменных препроцессоров (Sass/SCSS), которые вычисляются один раз при сборке проекта, **CSS-переменные живут в DOM-дереве браузера в рантайме**! Они подчиняются правилам каскада и наследования, мгновенно реагируют на изменение атрибутов (Dark/Light темы) и могут динамически изменяться из JavaScript с производительностью 60–120 FPS.",
       "sections": [
         {
-          "title": "Объявление и var()",
-          "content": "- `:root { --primary: #4f46e5; }`\n- `color: var(--primary, #000);`\n- Смена темы: переопределение переменных в `body.dark`.",
+          "title": "Синтаксис, объявление в :root и функция var()",
+          "content": "Как устроены CSS-переменные:\n\n1. **Объявление переменных (`--имя-переменной`)**:\n- Имя переменной ВСЕГДА начинается с двух дефисов: `--primary-color: #2dff8a;`.\n- Переменные **чувствительны к регистру** (`--color` и `--Color` — это две разные переменные!).\n- Псевдокласс `:root` представляет корневой элемент документа (`<html>`) и служит глобальным хранилищем дизайн-токенов всего сайта.\n\n2. **Использование через функцию `var()`**:\n- `color: var(--primary-color);`\n- **Fallback (значение по умолчанию)**: второй аргумент `var(--primary-color, #ffffff)` применяется, если переменная не была объявлена.\n- Цепочки fallback: `var(--accent, var(--primary, #2dff8a))`.\n\n3. Почему CSS-переменные превосходят Sass-переменные ($color):\n- Sass-переменные компилируются в фиксированные цвета на этапе сборки.\n- CSS Custom Properties вычисляются браузером в реальном времени и мгновенно перекрашивают интерфейс без перезагрузки CSS!",
+          "image": {
+            "src": "/images/lessons/css-custom-properties-themes.svg",
+            "alt": "CSS Custom Properties: дизайн-токены, переключение тем и управление через JS",
+            "caption": "CSS Custom Properties: токены в :root, переключение тем через data-theme, локальный каскадный оверрайд и динамическое управление из JS"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Смена тем",
-            "code": ":root { --bg: #ffffff; --text: #0f172a; }\nbody.dark { --bg: #0f172a; --text: #ffffff; }\nbody { background: var(--bg); color: var(--text); }",
-            "explanation": "Мгновенная сменяемость темы."
+            "code": "/* Глобальная система дизайн-токенов в :root */\n:root {\n  /* Цветовая палитра */\n  --color-brand: #2dff8a;\n  --color-brand-glow: rgba(45, 255, 138, 0.25);\n  --color-bg-base: #0a0e13;\n  --color-bg-surface: #161b22;\n  --color-text-primary: #e6edf3;\n  --color-text-muted: #8b949e;\n  \n  /* Типографика и сетка */\n  --font-main: 'JetBrains Mono', monospace;\n  --space-unit: 8px;\n  --radius-md: 12px;\n  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);\n}\n\n/* Использование дизайн-токенов в компонентах */\n.btn-primary {\n  background: var(--color-brand);\n  color: var(--color-bg-base);\n  font-family: var(--font-main);\n  padding: calc(var(--space-unit) * 1.5) calc(var(--space-unit) * 3);\n  border-radius: var(--radius-md);\n  transition: box-shadow var(--transition-fast);\n}\n\n.btn-primary:hover {\n  box-shadow: 0 0 20px var(--color-brand-glow);\n}",
+            "title": "Система дизайн-токенов в :root и расчет отступов через calc()",
+            "explanation": "Дизайн-токены в :root стандартизируют отступы, цвета и анимации. Изменение одного токена в :root автоматически обновляет сотни компонентов."
+          }
+        },
+        {
+          "title": "Каскад, область видимости (Scope) и локальное переопределение",
+          "content": "CSS-переменные наследуются дочерними элементами в DOM-дереве:\n\n1. **Локальный оверрайд (Local Override)**:\n- Если объявить переменную внутри класса `.card { --accent: #ffb02e; }`, то для всех вложенных элементов `.card .btn` значение `var(--accent)` будет равно `#ffb02e`, а для всего остального сайта — значением из `:root`!\n\n2. **Устранение дублирования CSS-классов**:\n- Вместо создания десятков классов-модификаторов (`.btn-danger`, `.btn-success`, `.btn-warning` с дублированием всех правил padding/border/hover), мы объявляем ОДИН базовый класс кнопки `.btn { background: var(--btn-color); }`, а модификаторы меняют ТОЛЬКО одну переменную: `.btn-danger { --btn-color: #f85149; }`!",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Базовый компонент кнопки */\n.btn {\n  --btn-bg: var(--color-brand);\n  --btn-text: #0a0e13;\n  \n  background: var(--btn-bg);\n  color: var(--btn-text);\n  border: none;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n}\n\n/* Модификаторы переопределяют ТОЛЬКО значение переменной! */\n.btn-danger  { --btn-bg: #f85149; --btn-text: #ffffff; }\n.btn-warning { --btn-bg: #ffb02e; --btn-text: #0a0e13; }\n.btn-info    { --btn-bg: #29e7ff; --btn-text: #0a0e13; }\n\n/* Карточка с переопределением цвета всех вложенных кнопок */\n.danger-zone {\n  --color-brand: #f85149; /* Все кнопки внутри автоматически станут красными! */\n  border: 1px solid var(--color-brand);\n  padding: 24px;\n}",
+            "title": "Паттерн локального переопределения переменных (Local Scope)",
+            "explanation": "Вместо десятков строк повторяющегося CSS-кода модификаторы состоят из 1 строки переопределения переменной."
+          }
+        },
+        {
+          "title": "Архитектура темной и светлой тем (Theming Engine)",
+          "content": "Как построить промышленную систему переключения тем:\n\n1. **Селекторы тем через Data-атрибуты**:\n- Переключение атрибута `<html data-theme=\"dark\">` на `<html data-theme=\"light\">` мгновенно меняет значения всех переменных.\n\n2. **Поддержка системной темы (`prefers-color-scheme`)**:\n- Медиа-запрос `@media (prefers-color-scheme: dark)` позволяет сайту автоматически повторять выбор пользователя в настройках Windows/macOS/iOS/Android.\n\n3. Цветовые пространства OKLCH и HSL:\n- Использование современных цветовых моделей позволяет генерировать оттенки динамически: `--primary-h: 150; --color-brand: hsl(var(--primary-h), 100%, 50%);`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Светлая тема (дефолтная) */\n:root, [data-theme=\"light\"] {\n  --bg-app: #ffffff;\n  --bg-surface: #f8fafc;\n  --text-main: #0f172a;\n  --text-muted: #64748b;\n  --border-color: #e2e8f0;\n  --color-accent: #2563eb;\n}\n\n/* 2. Тёмная тема */\n[data-theme=\"dark\"] {\n  --bg-app: #0a0e13;\n  --bg-surface: #161b22;\n  --text-main: #e6edf3;\n  --text-muted: #8b949e;\n  --border-color: #30363d;\n  --color-accent: #2dff8a;\n}\n\n/* 3. Автоматическая системная тема при отсутствии явного выбора */\n@media (prefers-color-scheme: dark) {\n  :root:not([data-theme]) {\n    --bg-app: #0a0e13;\n    --bg-surface: #161b22;\n    --text-main: #e6edf3;\n    --text-muted: #8b949e;\n    --border-color: #30363d;\n    --color-accent: #2dff8a;\n  }\n}\n\n/* Все элементы сайта используют ТОЛЬКО переменные */\nbody {\n  background-color: var(--bg-app);\n  color: var(--text-main);\n  transition: background-color 0.3s ease, color 0.3s ease;\n}",
+            "title": "Полноценный Theming Engine с поддержкой data-theme и prefers-color-scheme",
+            "explanation": "При смене data-theme браузер плавно интерполирует цвета благодаря transition на body."
+          }
+        },
+        {
+          "title": "Динамическое управление CSS-переменными через JavaScript",
+          "content": "JavaScript имеет полный доступ к CSS Custom Properties в рантайме:\n\n1. **Установка значения**:\n- `document.documentElement.style.setProperty('--primary-color', '#ff2bd6');` — глобально на всем сайте!\n- `element.style.setProperty('--mouse-x', `${x}px`);` — на конкретном элементе.\n\n2. **Чтение значения**:\n- `getComputedStyle(element).getPropertyValue('--color-brand').trim();`\n\n3. Практические применения связки JS + CSS Variables:\n- **Интерактивное свечение за курсором мыши (Radial Glow Effect)**.\n- **Индикатор прогресса чтения статьи при скролле**.\n- **Кастомные ползунки громкости/яркости**.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Эффект интерактивного неонового свечения карточки за курсором\nconst card = document.querySelector('.interactive-card');\n\ncard.addEventListener('mousemove', (e) => {\n  const rect = card.getBoundingClientRect();\n  const x = e.clientX - rect.left;\n  const y = e.clientY - rect.top;\n  \n  // Передаем точные координаты мыши прямо в CSS переменные элемента!\n  card.style.setProperty('--mouse-x', `${x}px`);\n  card.style.setProperty('--mouse-y', `${y}px`);\n});\n\n/* В CSS карточки используем эти координаты для градиента:\n.interactive-card {\n  background: radial-gradient(\n    600px circle at var(--mouse-x, 0px) var(--mouse-y, 0px),\n    rgba(45, 255, 138, 0.15),\n    transparent 40%\n  ), #161b22;\n}\n*/",
+            "title": "Связка JS и CSS: передача координат мыши в CSS Custom Properties",
+            "explanation": "JavaScript выполняет минимум работы (только обновляет 2 переменные), а отрисовку тяжелого радиального градиента берет на себя GPU браузера."
           }
         }
       ],
       "seniorTips": [
-        "Храните все дизайн-токены в :root."
+        "Стройте архитектуру проекта на CSS Custom Properties с самого первого дня: все цвета, радиусы, шрифты и отступы должны быть дизайн-токенами в `:root`.",
+        "Для переключения тем используйте селектор `[data-theme=\"dark\"]` на элементе `<html>` — это позволяет мгновенно менять тему одной строчкой `document.documentElement.dataset.theme = 'dark'`.",
+        "Вместо создания десятков громоздких классов-модификаторов меняйте только значение переменной: `.btn-danger { --btn-bg: red; }`.",
+        "Для интерактивных визуальных эффектов (параллакс, свечение за мышью) передавайте координаты в CSS-переменные — это разгружает JavaScript и даёт 120 FPS анимацию на GPU."
       ],
       "commonMistakes": [
         {
-          "bad": "Дублировать #4f46e5 в 100 местах",
-          "good": "var(--primary-color)",
-          "reason": "Переменные упрощают редизайн."
+          "bad": "/* Забыт двойной дефис -- при объявлении */\n:root {\n  primary-color: #2dff8a; /* ❌ Браузер проигнорирует это как неизвестное свойство! */\n}",
+          "good": ":root {\n  --primary-color: #2dff8a; /* ✅ С двумя дефисами в начале */\n}",
+          "reason": "Спецификация CSS строго требует, чтобы имя пользовательского свойства начиналось с двух дефисов --."
+        },
+        {
+          "bad": "/* Прямой хардкод цветов в темной теме вместо переопределения переменных */\n[data-theme=\"dark\"] .card { background: #161b22; }\n[data-theme=\"dark\"] .header { background: #0a0e13; } /* ❌ Придется переписать 500 селекторов! */",
+          "good": "/* Меняем только значения переменных в одном месте */\n[data-theme=\"dark\"] {\n  --bg-card: #161b22;\n  --bg-header: #0a0e13;\n}",
+          "reason": "Переопределение переменных в селекторе темы централизует стили. Компонентам вообще не нужно знать о существовании темной темы."
+        },
+        {
+          "bad": "/* Ошибка регистра букв */\n:root { --mainColor: #2dff8a; }\n.text { color: var(--maincolor); /* ❌ undefined! Регистр важен! */ }",
+          "good": ":root { --main-color: #2dff8a; }\n.text { color: var(--main-color); }",
+          "reason": "CSS Custom Properties чувствительны к регистру символов (case-sensitive)."
         }
       ],
       "keyTakeaways": [
-        "Переменные объявляются через --name.",
-        "Смена темы переопределяет токены."
+        "CSS Custom Properties (`--var`) живут в DOM-дереве в рантайме и поддерживают каскад и наследование.",
+        "Функция `var(--name, fallback)` поддерживает безопасные значения по умолчанию.",
+        "Переключение тем реализуется через смену переменных в `[data-theme=\"dark\"]` и `@media (prefers-color-scheme)`.",
+        "JavaScript может читать и записывать CSS-переменные в реальном времени через `setProperty()`.",
+        "Локальное переопределение переменных сокращает объем CSS-кода в разы."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"t-demo\"><p>Управляется переменными</p></div>",
-      "initialCss": ":root { --t-bg: #e0e7ff; --t-color: #3730a3; }\n.t-demo { padding: 24px; background: var(--t-bg); color: var(--t-color); border-radius: 12px; font-weight: bold; text-align: center; }",
-      "initialJs": "console.log('Variables loaded');",
-      "instructions": "Измените --t-bg."
+      "initialHtml": "<div class=\"theme-sandbox\" id=\"sandbox-root\" data-theme=\"dark\">\n  <div class=\"theme-header\">\n    <h3>Дизайн-система на CSS Variables</h3>\n    <button id=\"theme-toggle-btn\" class=\"btn\">Сменить тему (Dark/Light)</button>\n  </div>\n  <div class=\"cards-grid\">\n    <div class=\"card\">\n      <h4>Стандартная карточка</h4>\n      <p>Использует токен --accent-color</p>\n      <button class=\"btn btn-action\">Действие</button>\n    </div>\n    <div class=\"card card-danger\">\n      <h4>Опасная зона</h4>\n      <p>Локальный оверрайд: --accent-color</p>\n      <button class=\"btn btn-action\">Удалить</button>\n    </div>\n  </div>\n</div>",
+      "initialCss": ".theme-sandbox {\n  --bg-app: #ffffff;\n  --bg-card: #f8fafc;\n  --text-main: #0f172a;\n  --text-muted: #64748b;\n  --border: #e2e8f0;\n  --accent-color: #2563eb;\n  --btn-text: #ffffff;\n  \n  padding: 20px;\n  background: var(--bg-app);\n  color: var(--text-main);\n  font-family: monospace;\n  border-radius: 8px;\n  transition: all 0.3s ease;\n}\n\n.theme-sandbox[data-theme=\"dark\"] {\n  --bg-app: #0a0e13;\n  --bg-card: #161b22;\n  --text-main: #e6edf3;\n  --text-muted: #8b949e;\n  --border: #30363d;\n  --accent-color: #2dff8a;\n  --btn-text: #0a0e13;\n}\n\n.theme-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }\n.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }\n.card {\n  background: var(--bg-card);\n  border: 1px solid var(--border);\n  padding: 16px;\n  border-radius: 8px;\n}\n.card p { color: var(--text-muted); font-size: 12px; margin: 8px 0 12px; }\n\n/* Локальный оверрайд */\n.card-danger {\n  --accent-color: #f85149;\n  --btn-text: #ffffff;\n  border-color: var(--accent-color);\n}\n\n.btn {\n  background: var(--accent-color);\n  color: var(--btn-text);\n  border: none;\n  padding: 8px 14px;\n  border-radius: 6px;\n  font-weight: bold;\n  cursor: pointer;\n}",
+      "initialJs": "const root = document.getElementById('sandbox-root');\nconst btn = document.getElementById('theme-toggle-btn');\n\nbtn.onclick = () => {\n  const current = root.getAttribute('data-theme');\n  const next = current === 'dark' ? 'light' : 'dark';\n  root.setAttribute('data-theme', next);\n  btn.textContent = `Текущая: ${next.toUpperCase()}`;\n};",
+      "instructions": "Практика с CSS-переменными:\n1. Нажмите 'Сменить тему' — всё приложение плавно переключится между Dark и Light\n2. Обратите внимание: кнопка в 'Опасной зоне' автоматически красная благодаря локальному оверрайду\n3. Попробуйте добавить третью тему [data-theme='cyberpunk'] с неоновыми цветами"
     },
     "task": {
-      "title": "Дизайн-токены кнопки",
-      "scenario": "Создайте кнопку на CSS-переменных.",
+      "title": "Создание многоуровневой дизайн-системы с темами и интерактивным JS-свечением",
+      "scenario": "Вам необходимо спроектировать дизайн-систему на CSS Custom Properties: объявить палитру в :root, реализовать поддержку тем [data-theme=\"light\"] и [data-theme=\"dark\"], создать компонент интерактивной карточки со свечением за курсором мыши через JS (переменные --mouse-x, --mouse-y) и реализовать локальные модификаторы кнопок.",
       "criteria": [
-        "Определены переменные в :root",
-        "Кнопка использует var()"
+        "Объявлены дизайн-токены в :root и переопределены для [data-theme=\"dark\"]",
+        "Реализованы компоненты карточки и кнопки, использующие исключительно CSS-переменные",
+        "Реализован эффект свечения карточки с динамической передачей координат мыши из JS",
+        "Применен паттерн локального оверрайда для карточки с предупреждением"
       ],
       "starterCode": {
-        "html": "<button class=\"t-btn\">Токены</button>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте систему дизайн-токенов и стили карточек */\n:root {\n}\n[data-theme=\"dark\"] {\n}\n.glow-card {\n}\n.glow-btn {\n}",
+        "js": "// Реализуйте передачу координат мыши в CSS переменные карточки"
       },
       "hints": [
-        "Задайте :root { --btn-bg: #4f46e5; } .t-btn { background: var(--btn-bg); }"
+        "В :root: --bg-page, --bg-card, --text, --accent, --glow-color",
+        "В JS: card.style.setProperty('--mouse-x', `${e.offsetX}px`);",
+        "В CSS свечения: radial-gradient(circle at var(--mouse-x, 0) var(--mouse-y, 0), var(--glow-color), transparent 60%)"
       ],
       "solution": {
-        "html": "<button class=\"t-btn\">Токены</button>",
-        "css": ":root { --btn-bg: #4f46e5; --btn-rad: 8px; }\n.t-btn { padding: 10px 24px; background: var(--btn-bg); color: white; border: none; border-radius: var(--btn-rad); font-weight: bold; cursor: pointer; }",
-        "explanation": "Кнопка на переменных."
+        "css": ":root {\n  --bg-page: #ffffff;\n  --bg-card: #f8fafc;\n  --text-main: #0f172a;\n  --text-muted: #64748b;\n  --accent: #2563eb;\n  --accent-text: #ffffff;\n  --glow: rgba(37, 99, 235, 0.15);\n}\n\n[data-theme=\"dark\"] {\n  --bg-page: #0a0e13;\n  --bg-card: #161b22;\n  --text-main: #e6edf3;\n  --text-muted: #8b949e;\n  --accent: #2dff8a;\n  --accent-text: #0a0e13;\n  --glow: rgba(45, 255, 138, 0.2);\n}\n\n.glow-card {\n  position: relative;\n  background: radial-gradient(\n    400px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),\n    var(--glow),\n    transparent 70%\n  ), var(--bg-card);\n  border: 1px solid var(--accent);\n  border-radius: 12px;\n  padding: 24px;\n  color: var(--text-main);\n  overflow: hidden;\n}\n\n.glow-btn {\n  background: var(--accent);\n  color: var(--accent-text);\n  border: none;\n  padding: 10px 20px;\n  border-radius: 8px;\n  font-weight: bold;\n  cursor: pointer;\n}",
+        "js": "const card = document.querySelector('.glow-card');\nif (card) {\n  card.addEventListener('mousemove', (e) => {\n    const rect = card.getBoundingClientRect();\n    card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);\n    card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);\n  });\n}",
+        "explanation": "Дизайн-система полностью изолирована и масштабируема: смена темы перекрашивает карточку и кнопку, а JS-свечение работает плавно за счет GPU-рендеринга радиального градиента."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c14-q1",
-          "question": "С чего начинается имя переменной в CSS?",
+          "id": "css14-q1",
+          "question": "В чём фундаментальное отличие CSS Custom Properties (--var) от переменных препроцессоров (Sass/SCSS $var)?",
           "options": [
-            "$",
-            "@",
-            "--",
-            "var-"
+            "CSS-переменные работают только с цветами",
+            "Sass-переменные вычисляются один раз при сборке, а CSS Custom Properties живут в DOM-дереве браузера в рантайме, наследуются и динамически меняются через JS",
+            "Sass-переменные поддерживают fallback, а CSS — нет",
+            "Разницы нет"
           ],
-          "correctIndex": 2,
-          "explanation": "Переменные начинаются с двух дефисов --."
+          "correctIndex": 1,
+          "explanation": "CSS Custom Properties работают в браузере в реальном времени, подчиняются каскаду DOM и могут изменяться из JavaScript без пересборки CSS."
+        },
+        {
+          "id": "css14-q2",
+          "question": "Что произойдет при вызове color: var(--brand-color, #2dff8a);, если переменная --brand-color не была объявлена?",
+          "options": [
+            "Свойство color будет проигнорировано",
+            "Применится fallback-значение #2dff8a (второй аргумент функции var)",
+            "Браузер выдаст ошибку в консоль",
+            "Текст станет прозрачным"
+          ],
+          "correctIndex": 1,
+          "explanation": "Второй аргумент функции var() служит запасным значением (fallback), которое применяется при отсутствии объявленной переменной."
+        },
+        {
+          "id": "css14-q3",
+          "question": "Как из JavaScript динамически изменить значение глобальной CSS-переменной на всем сайте?",
+          "options": [
+            "document.style['--color'] = 'red'",
+            "document.documentElement.style.setProperty('--color', 'red')",
+            "window.setCSS('--color', 'red')",
+            "CSS.variables.set('--color', 'red')"
+          ],
+          "correctIndex": 1,
+          "explanation": "Метод document.documentElement.style.setProperty('--name', 'val') устанавливает значение свойства на корневом элементе <html> (:root)."
+        },
+        {
+          "id": "css14-q4",
+          "question": "Какой селектор является стандартом для объявления темы в современных веб-приложениях?",
+          "options": [
+            ".dark-theme-all-elements",
+            "[data-theme=\"dark\"] на корневом теге <html>",
+            "#dark",
+            "@dark"
+          ],
+          "correctIndex": 1,
+          "explanation": "Селектор data-атрибута [data-theme='dark'] на <html> позволяет переключать тему одной строчкой JS без коллизий классов."
+        },
+        {
+          "id": "css14-q5",
+          "question": "Чувствительны ли имена CSS Custom Properties к регистру символов?",
+          "options": [
+            "Нет, регистр не имеет значения",
+            "Да, --primary-color и --Primary-Color — это две совершенно разные переменные",
+            "Только в браузере Safari",
+            "Только если они объявлены в :root"
+          ],
+          "correctIndex": 1,
+          "explanation": "В отличие от обычных CSS-свойств, пользовательские переменные (Custom Properties) строго чувствительны к регистру (case-sensitive)."
         }
       ]
     }

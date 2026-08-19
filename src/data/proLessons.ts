@@ -2518,5 +2518,199 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-14",
+    "moduleId": "pro",
+    "level": 14,
+    "title": "Тестирование Frontend-приложений: Unit, Integration, E2E и TDD",
+    "subtitle": "Пирамида тестирования, Vitest/Jest, React Testing Library, Playwright, MSW и Code Coverage",
+    "description": "Освойте культуру автоматизированного тестирования во фронтенде: классическую пирамиду тестирования, модульные тесты на Vitest/Jest, философию React Testing Library («Тестируй поведение, а не реализацию»), E2E-тестирование на Playwright, мокинг сети через MSW и методологию TDD (Test-Driven Development).",
+    "estimatedMinutes": 70,
+    "difficulty": "advanced",
+    "tags": [
+      "testing",
+      "unit-tests",
+      "integration-tests",
+      "e2e",
+      "vitest",
+      "jest",
+      "react-testing-library",
+      "playwright",
+      "msw",
+      "tdd"
+    ],
+    "theory": {
+      "overview": "Код без автоматических тестов — это технический долг, который с каждым релизом замедляет команду. Страх сломать корзину или авторизацию при добавлении новой кнопки парализует разработку.\n\nВ этом уроке мы разберём современную **пирамиду тестирования (Testing Pyramid)**, философию React Testing Library от Кента Доддса, научимся мокать API через Mock Service Worker (MSW), писать E2E-тесты на Playwright и внедрять культуру TDD.",
+      "sections": [
+        {
+          "title": "Пирамида тестирования: Unit, Integration и E2E",
+          "content": "Классическое распределение тестов по уровням:\n\n1. **Unit-тесты (Модульные — ~60–70% от всех тестов)**:\n- Проверяют изолированные чистые функции, утилиты, хелперы дат, редьюсеры стейта и кастомные хуки.\n- Инструменты: **Vitest** (быстрый, нативный для Vite) или **Jest**.\n- Скорость: тысячи тестов за пару секунд!\n\n2. **Integration-тесты (Интеграционные — ~20–30%)**:\n- Проверяют совместную работу компонентов: форма авторизации с валидацией, фильтрация каталога, оформление заказа.\n- Инструмент: **React Testing Library (RTL)**.\n\n3. **E2E-тесты (End-to-End сквозные — ~10%)**:\n- Запускают реальный браузер (Chromium, Firefox, WebKit) и проходят критические сценарии пользователя от начала до конца (Регистрация → Оплата картой → Получение чека).\n- Инструменты: **Playwright** (современный лидер) или **Cypress**.\n- Медленные и дорогие в поддержке, но дают 100% уверенность в работоспособности ключевого бизнеса.",
+          "image": {
+            "src": "/images/lessons/web-testing-pyramid.svg",
+            "alt": "Пирамида тестирования: Unit, Integration, E2E, React Testing Library и TDD",
+            "caption": "Пирамида тестирования: в основании быстрые Unit-тесты (Vitest), в середине — Integration (RTL + MSW), на вершине — E2E (Playwright)"
+          },
+          "codeExample": {
+            "language": "typescript",
+            "code": "// math.test.ts — классический Unit-тест на Vitest\nimport { describe, it, expect } from 'vitest';\nimport { calculateCartTotal, applyDiscount } from './cartUtils';\n\ndescribe('cartUtils: расчет стоимости корзины', () => {\n  it('должен правильно суммировать товары с учетом скидки', () => {\n    const items = [\n      { id: 1, price: 1000, qty: 2 },\n      { id: 2, price: 500, qty: 1 },\n    ];\n    \n    const total = calculateCartTotal(items); // 2500\n    const withPromo = applyDiscount(total, 10); // Скидка 10%\n    \n    expect(total).toBe(2500);\n    expect(withPromo).toBe(2250);\n  });\n\n  it('должен возвращать 0 для пустой корзины', () => {\n    expect(calculateCartTotal([])).toBe(0);\n  });\n});",
+            "title": "Unit-тестирование чистых функций на Vitest",
+            "explanation": "Unit-тесты проверяют крайние случаи (пустые массивы, нулевые значения, скидки) за миллисекунды."
+          }
+        },
+        {
+          "title": "Философия React Testing Library (RTL): тестирование поведения",
+          "content": "Главный манифест Кента Доддса (создателя RTL):\n> *«Чем больше ваши тесты похожи на то, как используется ваше приложение, тем больше уверенности они могут вам дать.»*\n\n1. **Чего НЕЛЬЗЯ делать в тестах**:\n- ❌ НЕ тестируйте внутренний стейт компонента (`expect(wrapper.state('isOpen')).toBe(true)`).\n- ❌ НЕ тестируйте названия функций и внутренние хендлеры.\n- При рефакторинге внутренняя реализация изменится, и такие хрупкие тесты упадут, хотя для пользователя всё работает!\n\n2. **Что НУЖНО делать**:\n- ✅ Находите элементы так, как их ищет незрячий или зрячий пользователь: по роли (`role=\"button\"`), по тексту на кнопке или по лейблу инпута.\n\n3. **Приоритет поиска элементов в RTL**:\n- 1. `getByRole('button', { name: /войти/i })` — наивысший приоритет (тестирует и доступность a11y!).\n- 2. `getByLabelText('Электронная почта')` — для полей форм.\n- 3. `getByPlaceholderText('Введите пароль')`.\n- 4. `getByText('Успешно сохранено')`.\n- 5. `getByTestId('custom-widget')` — САМЫЙ ПОСЛЕДНИЙ ВЫБОР (когда нет другого семантического способа).",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// LoginForm.test.tsx — интеграционный тест на React Testing Library\nimport { render, screen } from '@testing-library/react';\nimport userEvent from '@testing-library/user-event';\nimport { describe, it, expect, vi } from 'vitest';\nimport { LoginForm } from './LoginForm';\n\ndescribe('<LoginForm />', () => {\n  it('должен вызывать onSubmit с введенными email и паролем при клике на кнопку', async () => {\n    const user = userEvent.setup();\n    const handleSubmit = vi.fn();\n    \n    render(<LoginForm onSubmit={handleSubmit} />);\n    \n    // 1. Находим элементы по их пользовательской роли и лейблам:\n    const emailInput = screen.getByLabelText(/email/i);\n    const passwordInput = screen.getByLabelText(/пароль/i);\n    const submitBtn = screen.getByRole('button', { name: /войти в аккаунт/i });\n    \n    // 2. Симулируем реальные действия пользователя:\n    await user.type(emailInput, 'intern@academy.dev');\n    await user.type(passwordInput, 'SecretPass123!');\n    await user.click(submitBtn);\n    \n    // 3. Проверяем результат:\n    expect(handleSubmit).toHaveBeenCalledTimes(1);\n    expect(handleSubmit).toHaveBeenCalledWith({\n      email: 'intern@academy.dev',\n      password: 'SecretPass123!',\n    });\n  });\n});",
+            "title": "Интеграционный тест формы на React Testing Library с userEvent",
+            "explanation": "Тест полностью имитирует поведение человека: находит инпуты по подписям, вводит текст и нажимает кнопку."
+          }
+        },
+        {
+          "title": "Мокинг сетевых запросов: Mock Service Worker (MSW)",
+          "content": "Почему плохи наивные моки `vi.spyOn(global, 'fetch')`:\n- Вы мокаете реализацию `fetch`, а не реальную сеть. Изменение способа отправки запроса (например, переход на `axios` или `ky`) сломает все тесты!\n\nРеволюционный стандарт: **Mock Service Worker (MSW 2.0)**:\n1. MSW перехватывает HTTP-запросы на уровне **Service Worker браузера** или интерцепторов Node.js.\n2. Компоненты используют настоящий `fetch()` и `TanStack Query`.\n3. Тесты проверяют полный цикл: от нажатия кнопки до отображения спиннера загрузки и отрисовки полученного с сервера ответа.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// mocks/handlers.ts — описание сетевых моков MSW\nimport { http, HttpResponse } from 'msw';\n\nexport const handlers = [\n  // Перехватываем GET /api/user\n  http.get('/api/user', () => {\n    return HttpResponse.json({\n      id: 'usr_101',\n      name: 'Алексей Смирнов',\n      role: 'Frontend Intern',\n    });\n  }),\n  \n  // Перехватываем сбойный сценарий (500 Server Error)\n  http.post('/api/checkout', () => {\n    return new HttpResponse(null, { status: 500, statusText: 'Payment Failed' });\n  }),\n];",
+            "title": "Определение сетевых моков через Mock Service Worker (MSW 2.0)",
+            "explanation": "MSW работает на сетевом уровне, делая тесты независимыми от способа вызова API в коде компонентов."
+          }
+        },
+        {
+          "title": "E2E-тестирование на Playwright и методология TDD",
+          "content": "Сквозные тесты и методология Test-Driven Development:\n\n1. **Playwright E2E**:\n- Запускает реальные изолированные браузеры на движках Chromium, WebKit (Safari) и Firefox.\n- Автоматически ждёт появления элементов (Auto-waiting — никаких искусственных `sleep(5000)`!).\n- Записывает видео и трейсы падений тестов (Playwright Trace Viewer).\n\n2. **Цикл TDD (Test-Driven Development)**:\n- 🔴 **Red (Красный)**: пишем тест на новую фичу ДО написания кода — тест падает.\n- 🟢 **Green (Зелёный)**: пишем минимально необходимый код, чтобы тест прошел.\n- 🔵 **Refactor (Рефакторинг)**: улучшаем архитектуру и чистоту кода, сохраняя зеленые тесты.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// e2e/checkout.spec.ts — Playwright E2E тест оформления заказа\nimport { test, expect } from '@playwright/test';\n\ntest('Пользователь может положить товар в корзину и оформить заказ', async ({ page }) => {\n  // 1. Открываем каталог\n  await page.goto('http://localhost:3000/catalog');\n  \n  // 2. Кликаем «Купить» на первом товаре\n  await page.getByRole('button', { name: /в корзину/i }).first().click();\n  \n  // 3. Переходим в корзину и проверяем бейдж\n  await expect(page.getByTestId('cart-badge')).toHaveText('1');\n  await page.getByRole('link', { name: /корзина/i }).click();\n  \n  // 4. Оформляем заказ\n  await page.getByRole('button', { name: /оформить заказ/i }).click();\n  \n  // 5. Проверяем успешный экран\n  await expect(page.getByRole('heading', { name: /заказ успешно оформлен/i })).toBeVisible();\n});",
+            "title": "Сквозной E2E-тест на Playwright с авто-ожиданием элементов",
+            "explanation": "Playwright автоматически дожидается загрузки страниц, анимаций и ответов сервера без хрупких таймаутов."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Придерживайтесь правила пирамиды тестирования: 70% Unit (Vitest), 20% Integration (RTL + MSW), 10% E2E (Playwright) — это идеальный баланс скорости и надежности.",
+        "В React Testing Library всегда ищите элементы через `getByRole` с именем (`getByRole('button', { name: 'Сохранить' })`) — это гарантирует доступность для скринридеров.",
+        "Используйте `userEvent` вместо устаревшего `fireEvent` — `userEvent` симулирует реальную последовательность событий браузера (hover, focus, keydown, keypress, keyup).",
+        "Внедрите запуск тестов и линтеров в GitHub Actions CI пайплайн — ни один Pull Request не должен мержиться с упавшими тестами."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Хрупкий тест на классы и структуру DOM\nexpect(container.querySelector('.btn-primary.active')).not.toBeNull();",
+          "good": "expect(screen.getByRole('button', { name: /активно/i })).toBeInTheDocument();",
+          "reason": "При смене названий классов в CSS тест упадет, хотя кнопка работает. getByRole тестирует пользовательский контракт."
+        },
+        {
+          "bad": "// Использование устаревшего fireEvent для ввода текста\nfireEvent.change(input, { target: { value: 'test' } }); // Не вызывает focus, keyDown!",
+          "good": "await userEvent.type(input, 'test'); // Полная симуляция набора на клавиатуре",
+          "reason": "userEvent имитирует весь стек событий реального браузера, включая фокус и валидацию по клавишам."
+        },
+        {
+          "bad": "// Искусственные задержки setTimeout в тестах\nawait new Promise(r => setTimeout(r, 2000));",
+          "good": "await waitFor(() => expect(screen.getByText('Готово')).toBeInTheDocument());",
+          "reason": "waitFor периодически опрашивает DOM до появления элемента, завершаясь мгновенно по готовности без лишнего ожидания."
+        }
+      ],
+      "keyTakeaways": [
+        "Пирамида тестирования: Unit (Vitest) → Integration (RTL + MSW) → E2E (Playwright).",
+        "RTL тестирует поведение приложения с точки зрения пользователя, а не детали реализации.",
+        "MSW перехватывает сеть на уровне Service Worker, обеспечивая реалистичные тесты.",
+        "TDD-цикл: Red (падающий тест) → Green (код) → Refactor (чистка).",
+        "Автоматизация тестов в CI/CD конвейере исключает регрессионные баги в продакшене."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"test-runner-app\">\n  <h3>Интерактивный Test Runner (Vitest Simulator)</h3>\n  <button id=\"btn-run-tests\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">▶ Запустить тесты (Vitest)</button>\n  <div id=\"test-results\" style=\"margin-top:12px; font-size:12px; line-height:1.6;\"></div>\n</div>",
+      "initialCss": "#test-runner-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const resultsEl = document.getElementById('test-results');\n\n// Мини-фреймворк для тестирования\nfunction expect(actual) {\n  return {\n    toBe(expected) {\n      if (actual !== expected) throw new Error(`Ожидалось ${expected}, но получено ${actual}`);\n    },\n    toEqual(expected) {\n      if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error(`Объекты не равны!`);\n    }\n  };\n}\n\nconst testSuite = [\n  {\n    name: 'Unit: calculateDiscount(1000, 20) возвращает 800',\n    fn: () => {\n      const discount = (p, d) => p - (p * d) / 100;\n      expect(discount(1000, 20)).toBe(800);\n    }\n  },\n  {\n    name: 'Unit: formatUserName({ first: \"Анна\", last: \"К.\" })',\n    fn: () => {\n      const format = (u) => `${u.first} ${u.last}`;\n      expect(format({ first: 'Анна', last: 'К.' })).toBe('Анна К.');\n    }\n  },\n  {\n    name: 'Integration: Проверка валидации email',\n    fn: () => {\n      const isValidEmail = (e) => /\\S+@\\S+\\.\\S+/.test(e);\n      expect(isValidEmail('intern@academy.dev')).toBe(true);\n      expect(isValidEmail('invalid-email')).toBe(false);\n    }\n  }\n];\n\ndocument.getElementById('btn-run-tests').onclick = () => {\n  resultsEl.innerHTML = '<span style=\"color:#ffb02e;\">⏳ Выполнение тест-сьютов...</span><br/>';\n  setTimeout(() => {\n    resultsEl.innerHTML = '';\n    let passed = 0;\n    testSuite.forEach((t) => {\n      try {\n        t.fn();\n        passed++;\n        resultsEl.innerHTML += `<div style=\"color:#2dff8a;\">✓ PASS: ${t.name} (2ms)</div>`;\n      } catch (err) {\n        resultsEl.innerHTML += `<div style=\"color:#f85149;\">✗ FAIL: ${t.name} — ${err.message}</div>`;\n      }\n    });\n    resultsEl.innerHTML += `<br/><b style=\"color:#2dff8a;\">🎉 Тестов пройдено: ${passed} из ${testSuite.length} (100% SUCCESS)</b>`;\n  }, 400);\n};",
+      "instructions": "Практика с тест-раннером:\n1. Нажмите '▶ Запустить тесты' — мини-раннер Vitest выполнит Unit и Integration тесты\n2. Попробуйте изменить ожидаемое значение в testSuite, чтобы увидеть падающий тест FAIL"
+    },
+    "task": {
+      "title": "Написание интеграционного теста для компонента Корзины с React Testing Library и Vitest",
+      "scenario": "Напишите полный набор тестов для компонента CartWidget: тест отображения пустого состояния, тест добавления товара по клику на кнопку с проверкой обновления счетчика и итоговой суммы, и тест удаления товара.",
+      "criteria": [
+        "Использованы render, screen из @testing-library/react и userEvent",
+        "Поиск элементов осуществляется по роли (getByRole) и тексту",
+        "Проверено добавление и удаление товара с корректным обновлением итоговой суммы",
+        "Тесты не зависят от деталей реализации и имен CSS-классов"
+      ],
+      "starterCode": {
+        "js": "// Напишите тесты для CartWidget\nimport { render, screen } from '@testing-library/react';\nimport userEvent from '@testing-library/user-event';\nimport { describe, it, expect } from 'vitest';\n\ndescribe('<CartWidget />', () => {\n  // Ваш код тестов\n});"
+      },
+      "hints": [
+        "userEvent.setup() перед действиями",
+        "screen.getByRole('button', { name: /добавить/i })",
+        "expect(screen.getByText(/итого: 1 500 ₽/i)).toBeInTheDocument()"
+      ],
+      "solution": {
+        "js": "import { render, screen } from '@testing-library/react';\nimport userEvent from '@testing-library/user-event';\nimport { describe, it, expect } from 'vitest';\nimport { CartWidget } from './CartWidget';\n\ndescribe('<CartWidget /> интеграционное тестирование', () => {\n  it('отображает сообщение о пустой корзине при первом рендере', () => {\n    render(<CartWidget initialItems={[]} />);\n    expect(screen.getByText(/ваша корзина пуста/i)).toBeInTheDocument();\n  });\n\n  it('позволяет добавить товар и пересчитывает общую сумму', async () => {\n    const user = userEvent.setup();\n    render(<CartWidget initialItems={[]} />);\n    \n    // Находим кнопку добавления и кликаем\n    const addBtn = screen.getByRole('button', { name: /добавить курс/i });\n    await user.click(addBtn);\n    \n    // Проверяем, что товар появился в списке и сумма обновилась\n    expect(screen.getByText(/frontend pro курс/i)).toBeInTheDocument();\n    expect(screen.getByText(/итого: 5 000 ₽/i)).toBeInTheDocument();\n  });\n\n  it('удаляет товар из корзины при клике на кнопку удаления', async () => {\n    const user = userEvent.setup();\n    const items = [{ id: '1', name: 'TypeScript Master', price: 3000 }];\n    render(<CartWidget initialItems={items} />);\n    \n    const deleteBtn = screen.getByRole('button', { name: /удалить/i });\n    await user.click(deleteBtn);\n    \n    expect(screen.queryByText(/typescript master/i)).not.toBeInTheDocument();\n    expect(screen.getByText(/ваша корзина пуста/i)).toBeInTheDocument();\n  });\n});",
+        "explanation": "Тест безупречно следует философии RTL: проверяет пользовательские сценарии через роли и текст, гарантируя устойчивость к рефакторингу кода."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro14-q1",
+          "question": "Какое процентное соотношение тестов считается эталоном в пирамиде тестирования (Testing Pyramid)?",
+          "options": [
+            "90% E2E, 10% Unit",
+            "~60–70% Unit (быстрые и дешёвые), ~20–30% Integration, ~10% E2E (сквозные)",
+            "100% ручное тестирование",
+            "Только E2E тесты"
+          ],
+          "correctIndex": 1,
+          "explanation": "Пирамида тестирования опирается на быстрые и легко поддерживаемые Unit-тесты в основании, дополняясь интеграционными и точечными E2E-тестами на вершине."
+        },
+        {
+          "id": "pro14-q2",
+          "question": "Какой селектор поиска элементов имеет НАИВЫСШИЙ приоритет в React Testing Library (RTL)?",
+          "options": [
+            "getByTestId('my-id')",
+            "getByRole('button', { name: /сохранить/i }) — поиск по семантической роли доступности",
+            "container.querySelector('.my-class')",
+            "getByTitle()"
+          ],
+          "correctIndex": 1,
+          "explanation": "getByRole имитирует взаимодействие реального пользователя и скринридера с интерфейсом, проверяя одновременно функциональность и доступность (a11y)."
+        },
+        {
+          "id": "pro14-q3",
+          "question": "В чём преимущество Mock Service Worker (MSW) перед ручным vi.spyOn(global, 'fetch')?",
+          "options": [
+            "MSW работает только на бэкенде",
+            "MSW перехватывает запросы на уровне Service Worker браузера, позволяя компонентам выполнять реальный fetch() без привязки к внутренней реализации сетевого клиента",
+            "MSW запрещает отправку POST запросов",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "MSW работает на сетевом уровне, делая тесты независимыми от способа вызова API (fetch, axios, ky) и приближая окружение к реальному продакшену."
+        },
+        {
+          "id": "pro14-q4",
+          "question": "Что означает цикл Red-Green-Refactor в методологии TDD (Test-Driven Development)?",
+          "options": [
+            "Светофор на дороге",
+            "1. Red: пишем падающий тест → 2. Green: пишем минимальный код для прохождения теста → 3. Refactor: наводим чистоту и оптимизируем архитектуру",
+            "Сборка production-бандла",
+            "Деплой на сервер"
+          ],
+          "correctIndex": 1,
+          "explanation": "TDD заставляет сначала сформулировать требования в виде падающего теста (Red), реализовать их (Green) и затем спокойно рефакторить код с гарантией работоспособности (Refactor)."
+        },
+        {
+          "id": "pro14-q5",
+          "question": "Какое ключевое преимущество Playwright перед устаревшими E2E-инструментами?",
+          "options": [
+            "Работает только в браузере Internet Explorer",
+            "Автоматическое ожидание элементов (Auto-waiting), поддержка всех современных браузерных движков (Chromium, WebKit, Firefox) и трассировка сбоев",
+            "Playwright не требует написания кода",
+            "Playwright заменяет CSS"
+          ],
+          "correctIndex": 1,
+          "explanation": "Playwright автоматически дожидается готовности DOM, видимости элементов и сетевых ответов, избавляя тесты от нестабильности (Flaky tests)."
+        }
+      ]
+    }
   }
 ];

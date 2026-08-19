@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgjo14" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgjo14)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">JS: Web APIs — Хранилища и Observer API</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">localStorage, sessionStorage, IndexedDB, IntersectionObserver, ResizeObserver, Web Workers</text>
+
+  <!-- Left: Client Storage Matrix -->
+  <rect x="20" y="65" width="370" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">Матрица клиентских хранилищ</text>
+
+  <rect x="35" y="98" width="340" height="46" rx="4" fill="#2dff8a22" stroke="#2dff8a"/>
+  <text x="45" y="114" fill="#2dff8a" font-size="8" font-weight="600">localStorage (5 МБ)</text>
+  <text x="45" y="128" fill="#8b949e" font-size="6">Персистентно (бессрочно)  |  Синхронно  |  Ключ-значение (строки)</text>
+  <text x="45" y="138" fill="#e6edf3" font-size="6">Для: настроек тем, токенов, сохраненной корзины</text>
+
+  <rect x="35" y="148" width="340" height="46" rx="4" fill="#29e7ff22" stroke="#29e7ff"/>
+  <text x="45" y="164" fill="#29e7ff" font-size="8" font-weight="600">sessionStorage (5 МБ)</text>
+  <text x="45" y="178" fill="#8b949e" font-size="6">Живет только до закрытия вкладки браузера</text>
+  <text x="45" y="188" fill="#e6edf3" font-size="6">Для: данных шагов многостраничной формы (Wizard)</text>
+
+  <rect x="35" y="198" width="340" height="46" rx="4" fill="#ffb02e22" stroke="#ffb02e"/>
+  <text x="45" y="214" fill="#ffb02e" font-size="8" font-weight="600">Cookies (4 КБ)</text>
+  <text x="45" y="228" fill="#8b949e" font-size="6">Отправляются с КАЖДЫМ HTTP-запросом  |  HttpOnly, SameSite</text>
+  <text x="45" y="238" fill="#e6edf3" font-size="6">Для: сессионных кук бэкенда, защиты от XSS</text>
+
+  <rect x="35" y="248" width="340" height="52" rx="4" fill="#d2a8ff22" stroke="#d2a8ff"/>
+  <text x="45" y="264" fill="#d2a8ff" font-size="8" font-weight="600">IndexedDB (Сотни МБ / ГБ)</text>
+  <text x="45" y="278" fill="#8b949e" font-size="6">Асинхронная NoSQL БД  |  Индексы  |  Транзакции  |  Бинарные данные</text>
+  <text x="45" y="292" fill="#e6edf3" font-size="6">Для: оффлайн PWA, тяжелого кеша файлов</text>
+
+  <!-- Right: Modern Observer APIs -->
+  <rect x="410" y="65" width="370" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Браузерные Observer API</text>
+
+  <rect x="425" y="98" width="340" height="60" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="116" fill="#2dff8a" font-size="8" font-weight="600">1. IntersectionObserver (Видимость в окне):</text>
+  <text x="435" y="132" fill="#e6edf3" font-size="7">Lazy Loading картинок, Infinite Scroll, реклама</text>
+  <text x="435" y="146" fill="#8b949e" font-size="6">В 100 раз быстрее слушателя window.onscroll (без лагов!)</text>
+
+  <rect x="425" y="166" width="340" height="55" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="435" y="184" fill="#29e7ff" font-size="8" font-weight="600">2. ResizeObserver (Размер элемента):</text>
+  <text x="435" y="200" fill="#e6edf3" font-size="7">Реагирует на изменение размеров любого DOM-узла</text>
+  <text x="435" y="212" fill="#8b949e" font-size="6">Для адаптивных графиков, канвасов и виджетов</text>
+
+  <rect x="425" y="228" width="340" height="55" rx="4" fill="#0d1117" stroke="#ff2bd6"/>
+  <text x="435" y="246" fill="#ff2bd6" font-size="8" font-weight="600">3. MutationObserver (Изменение DOM):</text>
+  <text x="435" y="262" fill="#e6edf3" font-size="7">Отслеживает добавление/удаление узлов и атрибутов</text>
+  <text x="435" y="274" fill="#8b949e" font-size="6">Для плагинов, тултипов и сторонних интеграций</text>
+
+  <!-- Bottom -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Финал трека JavaScript: Экосистема браузера на максимум</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• IntersectionObserver заменяет тяжелый скролл-лизинг, экономя заряд батареи и устраняя дергания (Jank)</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• Всегда заворачивайте работу с localStorage в try/catch (QuotaExceededError в инкогнито!)</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• Событие window.addEventListener('storage', ...) позволяет синхронизировать вкладки в реальном времени</text>
+</svg>

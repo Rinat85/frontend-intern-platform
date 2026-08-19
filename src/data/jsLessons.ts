@@ -2527,86 +2527,190 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-14",
     "moduleId": "javascript",
     "level": 14,
-    "title": "WebAPI, localStorage и WebSocket",
-    "subtitle": "LocalStorage, sessionStorage, Geolocation, IntersectionObserver и WebSockets",
-    "description": "Продвинутые браузерные API: сохранение данных в localStorage/sessionStorage, отслеживание видимости элементов через IntersectionObserver и двусторонняя связь WebSocket.",
-    "estimatedMinutes": 40,
+    "title": "Продвинутые Web APIs: Хранилища и Observer API",
+    "subtitle": "localStorage, sessionStorage, IndexedDB, IntersectionObserver, ResizeObserver и Web Workers",
+    "description": "Финальный уровень трека JavaScript: освойте клиентские хранилища (localStorage, sessionStorage, Cookies, IndexedDB), событие storage для межвкладочной синхронизации, высокопроизводительные браузерные Observer APIs (IntersectionObserver для Lazy Loading и бесконечного скролла, ResizeObserver) и многопоточность через Web Workers.",
+    "estimatedMinutes": 70,
     "difficulty": "advanced",
     "tags": [
-      "JavaScript",
-      "WebAPI",
-      "LocalStorage",
-      "WebSocket",
-      "IntersectionObserver"
+      "web-apis",
+      "localstorage",
+      "sessionstorage",
+      "indexeddb",
+      "intersection-observer",
+      "resize-observer",
+      "web-workers",
+      "storage-event"
     ],
     "theory": {
-      "overview": "Современный браузер — это полноценная операционная система с богатым набором Web API для хранения данных, геолокации, ленивой загрузки и сокет-соединений.",
+      "overview": "Поздравляем с выходом на **финальный 14-й уровень трека JavaScript**!\n\nСовременный браузер — это не просто среда для выполнения скриптов, а мощнейшая операционная система со своими базами данных (IndexedDB), многопоточными процессами (Web Workers) и оптимизированными аппаратными сенсорами (Observer API).\n\nВ этом заключительном уроке мы досконально разберём устройство всех 4 клиентских хранилищ, победим лаги скролла через `IntersectionObserver` и научимся синхронизировать вкладки в реальном времени.",
       "sections": [
         {
-          "title": "localStorage и IntersectionObserver",
-          "content": "- **localStorage**: постоянное клиентское хранилище ключ-значение (до 5–10 МБ). Данные сохраняются после перезагрузки браузера.\n  • `localStorage.setItem('theme', 'dark')`\n  • `localStorage.getItem('theme')`\n  • `localStorage.removeItem('theme')`\n- **IntersectionObserver**: высокопроизводительный API для отслеживания момента, когда элемент попадает в зону видимости экрана (идеален для бесконечного скролла и ленивой загрузки картинок без тормозов!).\n- **WebSocket**: протокол постоянного полнодуплексного соединения для онлайн-чатов и котировок (`const ws = new WebSocket('wss://...')`).",
+          "title": "Матрица клиентских хранилищ: localStorage, sessionStorage, Cookies и IndexedDB",
+          "content": "Сравнение 4 способов хранения данных в браузере:\n\n1. **`localStorage` (5 МБ на домен)**:\n- Персистентное хранилище: данные сохраняются бессрочно (даже после перезагрузки компьютера).\n- Синхронный API (блокирует Call Stack при огромных объемах!).\n- Хранит ТОЛЬКО строки: требуется `JSON.stringify()` при записи и `JSON.parse()` при чтении.\n- Для чего: тема оформления, язык, черновики, токен авторизации.\n\n2. **`sessionStorage` (5 МБ на вкладку)**:\n- Живет ТОЛЬКО в пределах текущей вкладки браузера. Закрытие вкладки очищает данные.\n- Для чего: шаги многоэтапной анкеты (Wizard), несохраненный фильтр на время сессии.\n\n3. **`Cookies` (4 КБ)**:\n- Отправляются на сервер с КАЖДЫМ сетевым HTTP-запросом.\n- Флаг `HttpOnly` защищает от кражи через JavaScript (XSS-атаки).\n- Флаг `SameSite=Lax/Strict` защищает от CSRF-атак.\n- Для чего: сессионные токены авторизации от бэкенда.\n\n4. **`IndexedDB` (Сотни мегабайт / Гигабайты)**:\n- Полноценная асинхронная транзакционная NoSQL база данных прямо в браузере!\n- Поддерживает индексы, курсоры, бинарные файлы (Blobs).\n- Для чего: оффлайн-режим (PWA), кеш видео, аудио и тяжелых баз данных.",
+          "image": {
+            "src": "/images/lessons/js-web-apis-observers.svg",
+            "alt": "Web APIs: матрица клиентских хранилищ и браузерные Observer APIs",
+            "caption": "Клиентские хранилища (localStorage, sessionStorage, Cookies, IndexedDB) и Observer API (IntersectionObserver, ResizeObserver, MutationObserver)"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Работа с localStorage для сохранения темы",
-            "code": "// Сохранение объекта в localStorage через JSON\nconst settings = { theme: 'dark', fontSize: 16 };\nlocalStorage.setItem('user_settings', JSON.stringify(settings));\n\n// Чтение с безопасным парсингом\nconst saved = localStorage.getItem('user_settings');\nif (saved) {\n  const parsed = JSON.parse(saved);\n  console.log('Тема:', parsed.theme); // 'dark'\n}",
-            "explanation": "Объекты обязательно сериализуются в JSON-строку перед сохранением в localStorage."
+            "code": "// Безопасный типизированный менеджер localStorage с защитой от QuotaExceededError\nclass SafeStorage {\n  static set(key, value) {\n    try {\n      const serialized = JSON.stringify(value);\n      localStorage.setItem(key, serialized);\n      return true;\n    } catch (error) {\n      // В режиме Инкогнито или при переполнении (5 МБ) бросается QuotaExceededError\n      console.error(`Ошибка записи в localStorage [${key}]:`, error.message);\n      return false;\n    }\n  }\n\n  static get(key, defaultValue = null) {\n    try {\n      const item = localStorage.getItem(key);\n      return item ? JSON.parse(item) : defaultValue;\n    } catch (error) {\n      console.error(`Ошибка парсинга localStorage [${key}]:`, error.message);\n      return defaultValue;\n    }\n  }\n\n  static remove(key) {\n    localStorage.removeItem(key);\n  }\n}\n\n// Использование:\nSafeStorage.set('user_settings', { theme: 'dark', volume: 80 });\nconst settings = SafeStorage.get('user_settings', { theme: 'light' });",
+            "title": "Отказоустойчивый класс SafeStorage с защитой от переполнения квоты",
+            "explanation": "Прямой вызов localStorage.setItem может уронить приложение в инкогнито-режиме или при лимите 5 МБ. SafeStorage гарантирует безопасность через try/catch."
+          }
+        },
+        {
+          "title": "Синхронизация вкладок через событие window.onstorage",
+          "content": "Магический механизм коммуникации между вкладками одного сайта БЕЗ сервера:\n\n1. **Событие `'storage'`**:\n- Срабатывает в окне браузера, когда в ДРУГОЙ вкладке того же домена изменяется `localStorage`!\n- Вкладка, совершившая изменение, событие не получает (получают только соседние вкладки).\n\n2. Свойства события `StorageEvent`:\n- `e.key` — измененный ключ (`'auth_token'`).\n- `e.newValue` — новое значение.\n- `e.oldValue` — старое значение.\n\n3. Практические сценарии:\n- **Синхронный Logout**: пользователь нажал «Выйти» во вкладке А — вкладка Б моментально разлогинивается и редиректит на логин!\n- **Синхронизация корзины**: добавление товара во вкладке А мгновенно обновляет счетчик в шапке во вкладке Б.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Межвкладочный синхронизатор корзины и авторизации\nwindow.addEventListener('storage', (event) => {\n  console.log(`Изменение в соседней вкладке: ключ ${event.key}`);\n  \n  // 1. Если в соседней вкладке разлогинились — разлогиниваемся и тут!\n  if (event.key === 'auth_token' && !event.newValue) {\n    alert('Вы вышли из аккаунта в другой вкладке. Обновляем страницу...');\n    window.location.reload();\n  }\n  \n  // 2. Если в соседней вкладке изменилась тема — синхронизируем UI\n  if (event.key === 'theme' && event.newValue) {\n    document.documentElement.dataset.theme = event.newValue;\n  }\n  \n  // 3. Синхронизация счетчика корзины\n  if (event.key === 'cart_count') {\n    updateCartBadge(Number(event.newValue));\n  }\n});",
+            "title": "Реалтайм синхронизация состояния между вкладками через StorageEvent",
+            "explanation": "Браузер отправляет событие storage всем соседним вкладкам домена при любом изменении localStorage."
+          }
+        },
+        {
+          "title": "IntersectionObserver: Lazy Loading, бесконечный скролл и производительность",
+          "content": "Революционный API для отслеживания видимости элементов на экране:\n\n1. **Проблема классического `window.addEventListener('scroll')`**:\n- Событие scroll стреляет 60–120 раз в секунду.\n- Вызов `el.getBoundingClientRect()` внутри скролла вызывает принудительный синхронный перерасчет геометрии (Forced Synchronous Layout / Layout Thrashing), что приводит к дерганиям (Jank) и греет процессор.\n\n2. **Преимущество `IntersectionObserver`**:\n- Браузер вычисляет пересечение элементов в фоновом потоке композитора GPU!\n- Колбэк вызывается ТОЛЬКО в момент, когда элемент пересекает границу экрана (0% → 10% → 100%).\n\n3. Ключевые опции:\n- `rootMargin: '200px'` — начинает подгружать изображение за 200px ДО того, как пользователь доскроллит до него (абсолютно бесшовный опыт!).\n- `threshold: 0.5` — срабатывает, когда видно 50% элемента.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Промышленный Lazy Loading картинок на IntersectionObserver\nfunction initLazyImages() {\n  const imageObserver = new IntersectionObserver((entries, observer) => {\n    entries.forEach((entry) => {\n      // Если картинка вошла в зону видимости (+200px запас):\n      if (entry.isIntersecting) {\n        const img = entry.target;\n        const realSrc = img.dataset.src;\n        \n        if (realSrc) {\n          img.src = realSrc; // Подгружаем настоящее тяжелое фото\n          img.classList.add('loaded');\n        }\n        \n        // Прекращаем наблюдение за этим элементом (экономим ресурсы!)\n        observer.unobserve(img);\n      }\n    });\n  }, {\n    rootMargin: '200px 0px', // Начинаем загрузку за 200px до экрана!\n    threshold: 0.01,\n  });\n\n  document.querySelectorAll('img[data-src]').forEach((img) => {\n    imageObserver.observe(img);\n  });\n}",
+            "title": "Ленивая загрузка изображений (Lazy Loading) через IntersectionObserver",
+            "explanation": "Картинка начинает загружаться заблаговременно (rootMargin 200px), а unobserve() освобождает память сразу после загрузки."
+          }
+        },
+        {
+          "title": "ResizeObserver и многопоточность через Web Workers",
+          "content": "Продвинутые API для сложных веб-приложений:\n\n1. **`ResizeObserver`**:\n- Отслеживает изменение ширины/высоты КОНКРЕТНОГО DOM-элемента (а не окна `window.resize`!).\n- Идеален для адаптивных графиков, канвасов, ресайзабельных панелей дашборда.\n\n2. **`Web Workers` (Многопоточный JavaScript)**:\n- Позволяют вынести тяжелые CPU-вычисления (криптография, парсинг Excel/CSV файлов на 50 МБ, сжатие изображений, алгоритмы ИИ) в отдельный фоновый поток ОС.\n- **Главный UI-поток не блокируется ни на миллисекунду** — интерфейс сохраняет плавность 120 FPS!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. ResizeObserver: реакция на изменение размеров виджета\nconst chartWidget = document.querySelector('.chart-container');\nconst resizeObserver = new ResizeObserver((entries) => {\n  for (const entry of entries) {\n    const { width, height } = entry.contentRect;\n    console.log(`Размер контейнера графика: ${width}x${height}px`);\n    redrawChart(width, height); // Перерисовка Canvas\n  }\n});\nresizeObserver.observe(chartWidget);\n\n// 2. Web Worker: вынос тяжелых вычислений в фоновый поток\n// worker.js: onmessage = (e) => { const res = heavyCalculation(e.data); postMessage(res); };\nconst worker = new Worker('/workers/cryptoWorker.js');\nworker.postMessage({ largeDataArray });\nworker.onmessage = (e) => {\n  console.log('Результат фоновых вычислений получен:', e.data);\n};",
+            "title": "ResizeObserver для адаптивных виджетов и Web Worker для многопоточности",
+            "explanation": "ResizeObserver точно отслеживает размеры DOM-узла, а Web Worker гарантирует 0% фризов интерфейса при тяжелых расчетах."
           }
         }
       ],
       "seniorTips": [
-        "Всегда используйте `try...catch` вокруг `JSON.parse(localStorage.getItem(...))`, так как поврежденные данные в хранилище вызовут фатальную ошибку приложения."
+        "Всегда оборачивайте обращения к `localStorage` в блок `try/catch` — в режиме Safari Private Browsing или при переполнении 5 МБ выброс `QuotaExceededError` может сломать всё приложение.",
+        "Используйте `IntersectionObserver` вместо слушателей `scroll` для бесконечных списков (Infinite Scroll) и Lazy Loading картинок — это снижает нагрузку на CPU на 90%.",
+        "Не забывайте вызывать `observer.unobserve(target)` или `observer.disconnect()` при размонтировании компонентов в SPA, чтобы предотвратить утечки памяти.",
+        "Слушайте событие `window.addEventListener('storage', ...)` для мгновенной синхронизации выхода из аккаунта (Logout) и корзины между всеми открытыми вкладками."
       ],
       "commonMistakes": [
         {
-          "bad": "localStorage.setItem('user', { id: 1 }); /* Сохранит '[object Object]'! */",
-          "good": "localStorage.setItem('user', JSON.stringify({ id: 1 }));",
-          "reason": "localStorage сохраняет ТОЛЬКО строки. Объекты нужно превращать в JSON."
+          "bad": "// Запись объекта напрямую в localStorage\nlocalStorage.setItem('user', { id: 1, name: 'Анна' });\n// В хранилище запишется '[object Object]'!",
+          "good": "localStorage.setItem('user', JSON.stringify({ id: 1, name: 'Анна' }));",
+          "reason": "localStorage принимает только строки. Несериализованные объекты автоматически преобразуются в строку '[object Object]'."
+        },
+        {
+          "bad": "// Тяжелые расчеты в обработчике scroll\nwindow.addEventListener('scroll', () => {\n  cards.forEach(c => { if (c.getBoundingClientRect().top < window.innerHeight) load(); });\n}); // ❌ Фризы и просадка до 15 FPS!",
+          "good": "const observer = new IntersectionObserver((entries) => { ... });\ncards.forEach(c => observer.observe(c));",
+          "reason": "getBoundingClientRect() внутри scroll вызывает Layout Thrashing. IntersectionObserver работает на GPU без блокировки потока."
+        },
+        {
+          "bad": "// Хранение конфиденциальных JWT-токенов в localStorage при наличии XSS-уязвимости",
+          "good": "// Использование HttpOnly Cookies для сессионных токенов бэкенда",
+          "reason": "К localStorage имеет доступ любой JS-код на странице (включая сторонние вредоносные скрипты). HttpOnly куки недоступны для JS."
         }
       ],
       "keyTakeaways": [
-        "localStorage сохраняет данные навсегда, sessionStorage — до закрытия вкладки.",
-        "IntersectionObserver заменяет тяжелый scroll-слушатель.",
-        "WebSocket обеспечивает связь в реальном времени."
+        "localStorage хранит 5 МБ данных бессрочно, sessionStorage — только до закрытия вкладки.",
+        "Событие `storage` синхронизирует вкладки браузера в реальном времени.",
+        "IntersectionObserver — самый быстрый и энергоэффективный способ реализации Lazy Loading и Infinite Scroll.",
+        "ResizeObserver отслеживает изменения геометрии конкретных DOM-элементов.",
+        "Web Workers обеспечивают истинную многопоточность в JavaScript для тяжелых задач."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"store-demo\"><h3>localStorage Демо</h3><input id=\"store-inp\" placeholder=\"Введите заметку\"><button id=\"btn-store\">Сохранить</button><p id=\"store-val\"></p></div>",
-      "initialCss": ".store-demo { padding: 20px; background: white; border-radius: 12px; }\n#store-inp { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; }\n#btn-store { padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; margin-left: 6px; cursor: pointer; }\n#store-val { margin-top: 10px; font-weight: bold; color: #10b981; }",
-      "initialJs": "const inp = document.getElementById('store-inp');\nconst out = document.getElementById('store-val');\nout.textContent = 'Сохранено: ' + (localStorage.getItem('my_note') || 'пусто');\ndocument.getElementById('btn-store').addEventListener('click', () => {\n  localStorage.setItem('my_note', inp.value);\n  out.textContent = 'Сохранено: ' + inp.value;\n});",
-      "instructions": "Введите текст, нажмите «Сохранить» — данные сохранятся в браузере."
+      "initialHtml": "<div id=\"observer-app\">\n  <h3>IntersectionObserver & Storage Демо</h3>\n  <div style=\"margin-bottom:12px;\">\n    <button id=\"btn-save\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">Сохранить счетчик</button>\n    <span id=\"storage-val\" style=\"margin-left:12px; color:#29e7ff;\">Сохранено: 0</span>\n  </div>\n  <div id=\"scroll-box\" style=\"height:120px; overflow-y:auto; background:#161b22; padding:8px; border:1px solid #30363d;\">\n    <p style=\"color:#8b949e;\">Прокрутите вниз до маяка...</p>\n    <div style=\"height:200px;\"></div>\n    <div id=\"beacon\" style=\"background:#ffb02e; color:#0a0e13; padding:8px; text-align:center; font-weight:bold;\">🎯 МАЯК (Цель для Observer)</div>\n  </div>\n  <div id=\"observer-status\" style=\"margin-top:8px; color:#8b949e; font-size:12px;\">Статус: маяк скрыт</div>\n</div>",
+      "initialCss": "#observer-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "let count = Number(localStorage.getItem('demo_count') || 0);\nconst valEl = document.getElementById('storage-val');\nvalEl.textContent = `Сохранено: ${count}`;\n\ndocument.getElementById('btn-save').onclick = () => {\n  count++;\n  localStorage.setItem('demo_count', String(count));\n  valEl.textContent = `Сохранено: ${count}`;\n};\n\n// IntersectionObserver для маяка внутри контейнера\nconst beacon = document.getElementById('beacon');\nconst statusEl = document.getElementById('observer-status');\nconst scrollBox = document.getElementById('scroll-box');\n\nconst observer = new IntersectionObserver((entries) => {\n  entries.forEach(entry => {\n    if (entry.isIntersecting) {\n      statusEl.style.color = '#2dff8a';\n      statusEl.textContent = '🟢 Статус: Маяк ПОПАЛ в зону видимости! (Триггер загрузки)';\n    } else {\n      statusEl.style.color = '#8b949e';\n      statusEl.textContent = '⚪ Статус: маяк скрыт (прокрутите контейнер вниз)';\n    }\n  });\n}, { root: scrollBox, threshold: 0.5 });\n\nobserver.observe(beacon);",
+      "instructions": "Практика с Web APIs:\n1. Нажмите 'Сохранить счетчик' и перезагрузите страницу — значение сохранилось в localStorage\n2. Прокрутите блок вниз: маяк попадет в видимость, и IntersectionObserver мгновенно сработает\n3. Откройте вторую вкладку для проверки события storage"
     },
     "task": {
-      "title": "Сохранение настроек в localStorage",
-      "scenario": "Напишите функцию saveTheme(themeName), сохраняющую тему в localStorage.",
+      "title": "Разработка модуля бесконечной ленты (Infinite Scroll) с кешированием в IndexedDB/Storage",
+      "scenario": "Создайте класс InfiniteFeedManager: модуль должен использовать IntersectionObserver для отслеживания маяка в конце ленты и автоматической подгрузки следующей порции данных, сохранять прочитанные посты в localStorage с защитой от квот, и синхронизировать лайки между соседними вкладками через событие window.onstorage.",
       "criteria": [
-        "Использован метод localStorage.setItem"
+        "Использован IntersectionObserver для детекции маяка внизу ленты",
+        "Безопасная работа с localStorage через try/catch и JSON-сериализацию",
+        "Подписка на событие window.addEventListener('storage') для синхронизации лайков",
+        "Метод destroy() с вызовом unobserve и снятием обработчиков для предотвращения утечек памяти"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Реализуйте InfiniteFeedManager\nclass InfiniteFeedManager {\n  // Ваш код\n}"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "В конструкторе: this.observer = new IntersectionObserver(this.#handleIntersect.bind(this));",
+        "Навесьте observer.observe(sentinelElement);",
+        "В window.addEventListener('storage', (e) => { if (e.key === 'post_liked') ... });"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "function saveTheme(theme) {\n  localStorage.setItem('app_theme', theme);\n  console.log(`Тема ${theme} сохранена`);\n}\nsaveTheme('dark');",
-        "explanation": "Клиентское сохранение состояния."
+        "js": "class InfiniteFeedManager {\n  #observer = null;\n  #sentinel = null;\n  #storageHandler = null;\n  #isLoading = false;\n  #page = 1;\n\n  constructor(sentinelElement, onFetchMore) {\n    this.#sentinel = sentinelElement;\n    this.onFetchMore = onFetchMore;\n    this.#initObserver();\n    this.#initStorageSync();\n  }\n\n  #initObserver() {\n    this.#observer = new IntersectionObserver(async (entries) => {\n      const [entry] = entries;\n      if (entry.isIntersecting && !this.#isLoading) {\n        this.#isLoading = true;\n        console.log(`Загрузка страницы ${this.#page}...`);\n        try {\n          await this.onFetchMore(this.#page);\n          this.#page++;\n        } finally {\n          this.#isLoading = false;\n        }\n      }\n    }, { rootMargin: '150px' });\n\n    if (this.#sentinel) {\n      this.#observer.observe(this.#sentinel);\n    }\n  }\n\n  #initStorageSync() {\n    this.#storageHandler = (event) => {\n      if (event.key === 'feed_sync_action') {\n        console.log('Синхронизация ленты с соседней вкладкой:', event.newValue);\n      }\n    };\n    window.addEventListener('storage', this.#storageHandler);\n  }\n\n  static saveDraft(key, data) {\n    try {\n      localStorage.setItem(key, JSON.stringify(data));\n      return true;\n    } catch (err) {\n      console.error('Ошибка сохранения драфта:', err);\n      return false;\n    }\n  }\n\n  destroy() {\n    if (this.#observer && this.#sentinel) {\n      this.#observer.unobserve(this.#sentinel);\n      this.#observer.disconnect();\n    }\n    if (this.#storageHandler) {\n      window.removeEventListener('storage', this.#storageHandler);\n    }\n    console.log('InfiniteFeedManager успешно очищен (нет утечек памяти)');\n  }\n}\n\nconsole.log('Финальный модуль трека JS готов к работе!');",
+        "explanation": "InfiniteFeedManager воплощает все стандарты Senior-разработки: энергоэффективный IntersectionObserver с запасом rootMargin 150px, синхронизацию вкладок и полный метод destroy() для очистки ресурсов."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j14-q1",
-          "question": "В каком формате данные сохраняются в localStorage?",
+          "id": "js14-q1",
+          "question": "В каком случае срабатывает событие window.addEventListener('storage', callback)?",
           "options": [
-            "В бинарном",
-            "Исключительно в виде строк (String)",
-            "В виде объектов",
-            "В XML"
+            "При каждом вызове localStorage.setItem в текущей вкладке",
+            "Только в СОСЕДНИХ вкладках того же домена при изменении данных в localStorage (текущая вкладка событие не получает)",
+            "Только при очистке кук",
+            "При закрытии браузера"
           ],
           "correctIndex": 1,
-          "explanation": "localStorage принимает только строковые значения. Объекты преобразуются через JSON.stringify."
+          "explanation": "Событие storage рассылается браузером всем соседним вкладкам домена, позволяя им мгновенно синхронизировать состояние без запросов к серверу."
+        },
+        {
+          "id": "js14-q2",
+          "question": "В чём главное преимущество IntersectionObserver перед слушателем события scroll при создании Lazy Loading картинок?",
+          "options": [
+            "IntersectionObserver работает только в мобильных браузерах",
+            "IntersectionObserver вычисляет пересечения в фоновом потоке GPU без Layout Thrashing, не нагружая CPU и сохраняя стабильные 60–120 FPS",
+            "IntersectionObserver автоматически сжимает картинки",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "Слушатель scroll с getBoundingClientRect() вызывает принудительный перерасчет геометрии. IntersectionObserver асинхронен и оптимизирован браузером на уровне GPU."
+        },
+        {
+          "id": "js14-q3",
+          "question": "Какое клиентское хранилище идеально подходит для хранения больших объемов данных (сотни МБ, оффлайн PWA, файлы)?",
+          "options": [
+            "localStorage (лимит 5 МБ)",
+            "IndexedDB — асинхронная транзакционная NoSQL база данных с поддержкой сотен мегабайт и гигабайт",
+            "Cookies (лимит 4 КБ)",
+            "sessionStorage"
+          ],
+          "correctIndex": 1,
+          "explanation": "IndexedDB предназначена для хранения структурированных данных большого объема, файлов и сложных баз данных для оффлайн PWA-приложений."
+        },
+        {
+          "id": "js14-q4",
+          "question": "Какую задачу решают Web Workers в JavaScript?",
+          "options": [
+            "Стилизуют страницы",
+            "Позволяют выносить тяжелые CPU-расчеты (криптография, парсинг больших файлов) в отдельный фоновый поток ОС без блокировки основного UI-потока",
+            "Управляют базой данных SQL",
+            "Заменяют WebSockets"
+          ],
+          "correctIndex": 1,
+          "explanation": "Web Workers обеспечивают настоящую многопоточность, изолируя тяжелые математические задачи от главного потока рендеринга интерфейса."
+        },
+        {
+          "id": "js14-q5",
+          "question": "Что необходимо сделать при размонтировании компонента, использовавшего IntersectionObserver, для предотвращения утечек памяти?",
+          "options": [
+            "Перезагрузить страницу",
+            "Вызвать observer.unobserve(element) или observer.disconnect()",
+            "Удалить localStorage",
+            "Ничего, сборщик мусора сделает всё сам"
+          ],
+          "correctIndex": 1,
+          "explanation": "Явный вызов unobserve() или disconnect() удаляет ссылки на DOM-элементы из внутреннего реестра браузера, гарантируя освобождение памяти."
         }
       ]
     }

@@ -1,58 +1,52 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
-  <defs><linearGradient id="bgpt8" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
-  <rect width="800" height="440" fill="url(#bgpt8)" rx="12"/>
-  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Pro: Пирамида Тестирования и Автотесты</text>
-  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">Unit (Vitest), Integration (Testing Library), E2E (Playwright), TDD и Mocking</text>
+  <defs><linearGradient id="bgwt14" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgwt14)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Pro: Пирамида тестирования и TDD</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">Unit-тесты (Vitest/Jest), Integration (React Testing Library), E2E (Playwright), MSW и Code Coverage</text>
 
   <!-- Left: Testing Pyramid -->
-  <rect x="20" y="65" width="460" height="260" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
-  <text x="250" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">Пирамида тестирования (Testing Pyramid)</text>
-  
-  <!-- E2E Tier -->
-  <polygon points="250,105 320,150 180,150" fill="#0d1117" stroke="#f85149" stroke-width="1.5"/>
-  <text x="250" y="135" fill="#f85149" font-size="9" font-weight="700" text-anchor="middle">E2E (10%)</text>
-  <text x="375" y="132" fill="#e6edf3" font-size="8">Playwright / Cypress</text>
-  <text x="375" y="144" fill="#8b949e" font-size="7">Реальный браузер, оплата, сценарии</text>
+  <rect x="20" y="65" width="370" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">Пирамида тестирования (Testing Pyramid)</text>
 
-  <!-- Integration Tier -->
-  <polygon points="175,155 325,155 365,210 135,210" fill="#0d1117" stroke="#ffb02e" stroke-width="1.5"/>
-  <text x="250" y="188" fill="#ffb02e" font-size="10" font-weight="700" text-anchor="middle">Integration (20%)</text>
-  <text x="385" y="180" fill="#e6edf3" font-size="8">Testing Library + MSW</text>
-  <text x="385" y="194" fill="#8b949e" font-size="7">Компоненты со стейтом и API</text>
+  <!-- Top: E2E (10%) -->
+  <polygon points="205,100 280,145 130,145" fill="#f8514933" stroke="#f85149" stroke-width="1.5"/>
+  <text x="205" y="132" fill="#f85149" font-size="7" font-weight="600" text-anchor="middle">E2E (~10%)</text>
 
-  <!-- Unit Tier -->
-  <polygon points="130,215 370,215 410,280 90,280" fill="#0d1117" stroke="#2dff8a" stroke-width="1.5"/>
-  <text x="250" y="252" fill="#2dff8a" font-size="11" font-weight="700" text-anchor="middle">Unit Tests (70%)</text>
-  <text x="250" y="268" fill="#8b949e" font-size="7" text-anchor="middle">Vitest / Jest: чистые функции, утилиты, редьюсеры</text>
-  <text x="425" y="248" fill="#2dff8a" font-size="8">Быстрые (&lt;10мс)</text>
-  <text x="425" y="262" fill="#8b949e" font-size="7">Легко писать и чинить</text>
+  <!-- Mid: Integration (20%) -->
+  <polygon points="130,150 280,150 320,205 90,205" fill="#ffb02e33" stroke="#ffb02e" stroke-width="1.5"/>
+  <text x="205" y="180" fill="#ffb02e" font-size="8" font-weight="600" text-anchor="middle">Integration (~20–30%)</text>
+  <text x="205" y="196" fill="#e6edf3" font-size="6" text-anchor="middle">React Testing Library + MSW</text>
 
-  <text x="250" y="308" fill="#8b949e" font-size="8" text-anchor="middle">Основание пирамиды = максимальная скорость и стабильность CI/CD</text>
+  <!-- Bottom: Unit (70%) -->
+  <polygon points="90,210 320,210 355,270 55,270" fill="#2dff8a33" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="205" y="238" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">Unit Tests (~60–70%)</text>
+  <text x="205" y="254" fill="#e6edf3" font-size="7" text-anchor="middle">Vitest / Jest: чистые функции, хуки, утилиты</text>
 
-  <!-- Right: AAA &amp; RTL Rules -->
-  <rect x="500" y="65" width="280" height="260" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
-  <text x="640" y="85" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Паттерн AAA &amp; Testing Library</text>
-  
-  <rect x="515" y="98" width="250" height="75" rx="4" fill="#0d1117" stroke="#30363d"/>
-  <text x="525" y="114" fill="#29e7ff" font-size="9" font-weight="600">Структура теста AAA:</text>
-  <text x="525" y="130" fill="#e6edf3" font-size="8">1. Arrange: подготовка данных и моков</text>
-  <text x="525" y="146" fill="#e6edf3" font-size="8">2. Act: вызов тестируемой функции</text>
-  <text x="525" y="162" fill="#2dff8a" font-size="8">3. Assert: expect(result).toBe(42)</text>
+  <text x="205" y="294" fill="#8b949e" font-size="7" text-anchor="middle">Внизу — быстрые и дешёвые. Вверху — медленные и дорогие.</text>
 
-  <rect x="515" y="180" width="250" height="75" rx="4" fill="#0d1117" stroke="#2dff8a"/>
-  <text x="525" y="196" fill="#2dff8a" font-size="9" font-weight="600">Правило Testing Library:</text>
-  <text x="525" y="210" fill="#e6edf3" font-size="7">Ищите по доступным ролям:</text>
-  <text x="525" y="224" fill="#29e7ff" font-size="7">screen.getByRole('button', { name: /войти/i })</text>
-  <text x="525" y="238" fill="#f85149" font-size="7">❌ Не ищите по селекторам классов (.btn)!</text>
+  <!-- Right: Guiding Principles -->
+  <rect x="410" y="65" width="370" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Золотые правила тестирования</text>
 
-  <rect x="515" y="262" width="250" height="50" rx="4" fill="#0d1117" stroke="#ffb02e"/>
-  <text x="640" y="280" fill="#ffb02e" font-size="8" font-weight="600" text-anchor="middle">TDD: Red → Green → Refactor</text>
-  <text x="640" y="296" fill="#8b949e" font-size="7" text-anchor="middle">Падающий тест → Код → Рефакторинг</text>
+  <rect x="425" y="98" width="340" height="55" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="116" fill="#2dff8a" font-size="8" font-weight="600">1. Принцип Кента Доддса (RTL):</text>
+  <text x="435" y="132" fill="#e6edf3" font-size="7">«Тестируйте так, как вашим приложением</text>
+  <text x="435" y="144" fill="#e6edf3" font-size="7">пользуется реальный пользователь, а не код»</text>
 
-  <!-- Bottom: Summary -->
+  <rect x="425" y="160" width="340" height="55" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="435" y="178" fill="#29e7ff" font-size="8" font-weight="600">2. Приоритет поиска элементов в RTL:</text>
+  <text x="435" y="194" fill="#e6edf3" font-size="7">getByRole('button') → getByLabelText('Email')</text>
+  <text x="435" y="206" fill="#8b949e" font-size="6">❌ Избегайте getByTestId, если элемент доступен по роли!</text>
+
+  <rect x="425" y="222" width="340" height="55" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="435" y="240" fill="#ffb02e" font-size="8" font-weight="600">3. Mock Service Worker (MSW):</text>
+  <text x="435" y="256" fill="#e6edf3" font-size="7">Перехват сетевых запросов на уровне Service Worker</text>
+  <text x="435" y="268" fill="#8b949e" font-size="6">Тесты работают с реальным fetch() без запуска бэкенда!</text>
+
+  <!-- Bottom -->
   <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
-  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Совет Senior: Не тестируйте детали реализации</text>
-  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• Тестируйте поведение, видимое пользователю (кликнул кнопку -> появился текст успеха)</text>
-  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• Мокируйте сетевой слой через MSW (Mock Service Worker) на уровне перехвата Service Worker</text>
-  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• 100% покрытие кода не гарантирует отсутствие багов — тестируйте граничные случаи (Boundary Cases)</text>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Почему тесты экономят миллионы рублей бизнесу</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• Регрессионное тестирование: спокойный деплой по пятницам — тесты гарантируют, что новая фича не сломала корзину</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• TDD (Test-Driven Development): сначала пишем падающий тест (Red) → пишем код (Green) → рефакторим (Refactor)</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• Покрытие (Code Coverage) 80%+ защищает ключевые бизнес-флоу в CI/CD пайплайне</text>
 </svg>

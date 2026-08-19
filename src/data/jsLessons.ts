@@ -401,83 +401,191 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-3",
     "moduleId": "javascript",
     "level": 3,
-    "title": "Управляющие конструкции",
-    "subtitle": "If/else, тернарный оператор ? :, switch/case и циклы for/while/for..of",
-    "description": "Логика и алгоритмы: ветвление if/else, тернарный оператор для условий, switch/case, циклы for, while и современный for..of.",
-    "estimatedMinutes": 35,
+    "title": "Управляющие конструкции, циклы и итераторы",
+    "subtitle": "Ветвления if/else, Guard Clauses, switch-case, циклы for/while/for..of/for..in и протокол итерации",
+    "description": "Освойте управление потоком выполнения в JavaScript: логические ветвления, паттерн Guard Clauses против глубокой вложенности, устройство switch/case, сравнение for..of и for..in, а также протокол итерации Symbol.iterator.",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "JavaScript",
-      "Logic",
-      "Loops"
+      "control-flow",
+      "loops",
+      "iterables",
+      "guard-clauses",
+      "switch-case",
+      "for-of",
+      "for-in"
     ],
     "theory": {
-      "overview": "Управляющие конструкции задают порядок выполнения инструкций и обрабатывают наборы данных в циклах.",
+      "overview": "Управляющие конструкции (Control Flow) определяют порядок и условия выполнения инструкций в программе. Без них код выполнялся бы строго линейно сверху вниз. В реальных frontend-приложениях логика ветвления пронизывает всё: проверку авторизации, обработку состояний загрузки/ошибки от API, фильтрацию списков и роутинг.\n\nВ этом уроке мы не просто повторим базовый синтаксис `if` и `for`, а разберём архитектурные паттерны чистого кода (Guard Clauses, Lookup Tables), особенности работы движка V8 с циклами и протокол итерации ES6.",
       "sections": [
         {
-          "title": "Ветвление и циклы",
-          "content": "- `if/else`, тернарный `const status = ok ? 'Да' : 'Нет';`.\n- `for..of`: лучший цикл для обхода массивов.",
+          "title": "Ветвления и паттерн Guard Clauses (Ранний возврат)",
+          "content": "Традиционная условная конструкция `if...else` проверяет условие на истинность (truthy/falsy).\n\nАнтипаттерн «Вложенная пирамида условий» (Arrow Anti-pattern / Pyramid of Doom):\nКогда внутри `if` пишется ещё один `if`, а внутри третий — код смещается вправо, становится трудным для чтения, тестирования и рефакторинга.\n\nПаттерн Guard Clauses (Защитные условия / Ранний возврат):\nСуть паттерна: сначала проверяем все граничные случаи, ошибки и условия невозможности выполнения — и сразу делаем `return`, `throw` или `continue`. Основная бизнес-логика остаётся на верхнем (нулевом) уровне вложенности функции.\n\nТернарный оператор (`условие ? выражение1 : выражение2`):\nЛаконичный способ условного присвоения. Правило Senior: используйте тернарник ТОЛЬКО для простых выражений из одной строки. Вложенные тернарники (`a ? b : c ? d : e`) — строгий антипаттерн на код-ревью!\n\nКороткое замыкание (Short-Circuit Evaluation):\n- `A && B` — возвращает A (если A falsy) или B (если A truthy). Используется для условного выполнения: `isLoggedIn && renderDashboard()`.\n- `A || B` — возвращает первое truthy значение или последнее: `const port = process.env.PORT || 3000`.\n- `A ?? B` — Nullish Coalescing: возвращает B ТОЛЬКО при `null` или `undefined`. Безопасен для чисел `0` и пустых строк `''`.",
           "codeExample": {
             "language": "javascript",
-            "title": "Тернарный оператор и for..of",
-            "code": "const role = 'admin';\nconst access = role === 'admin' ? 'Полный' : 'Чтение';\nconst skills = ['HTML', 'CSS', 'JS'];\nfor (const s of skills) console.log(s);",
-            "explanation": "for..of обходит массив."
+            "code": "// ❌ Плохо: 'Пирамида условий' с глубокой вложенностью\nfunction processPaymentBad(user, amount) {\n  if (user) {\n    if (user.isActive) {\n      if (user.balance >= amount) {\n        user.balance -= amount;\n        return { success: true, balance: user.balance };\n      } else {\n        return { error: 'Недостаточно средств' };\n      }\n    } else {\n      return { error: 'Аккаунт заблокирован' };\n    }\n  } else {\n    return { error: 'Пользователь не найден' };\n  }\n}\n\n// ✅ Хорошо: Чистый код с Guard Clauses (Ранний возврат)\nfunction processPaymentGood(user, amount) {\n  if (!user) return { error: 'Пользователь не найден' };\n  if (!user.isActive) return { error: 'Аккаунт заблокирован' };\n  if (user.balance < amount) return { error: 'Недостаточно средств' };\n\n  // Основная логика на чистом 0-м уровне отступа:\n  user.balance -= amount;\n  return { success: true, balance: user.balance };\n}",
+            "title": "Рефакторинг: вложенный if-else в элегантные Guard Clauses",
+            "explanation": "Guard Clauses проверяют все ошибки на входе и немедленно выходят. Код читается линейно сверху вниз без смещения вправо."
+          }
+        },
+        {
+          "title": "switch...case и паттерн Lookup Table (Объектные словари)",
+          "content": "Конструкция `switch...case` сравнивает значение выражения с кандидатами по строгому равенству (`===`).\n\nОсобенности switch:\n- `break` обязателен! Без `break` управление проваливается в следующий кейс (Fall-through), даже если условие не совпало.\n- Секция `default` выполняется, если ни один case не подошёл.\n- Группировка кейсов: несколько case подряд перед одним телом выполняют общий блок кода.\n\nПаттерн Lookup Table (Словарь обработчиков):\nВ современном JS громоздкие конструкции `switch` с десятками case часто заменяют на объекты-словари (Lookup Table) или коллекции `Map`. Это делает код расширяемым (принцип Open/Closed из SOLID), позволяет легко выносить логику в отдельные модули и избавляет от ошибок с забытым `break`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Паттерн Lookup Table вместо switch\nconst NOTIFICATION_HANDLERS = {\n  email: (user, msg) => `Email отправлен на ${user.email}: ${msg}`,\n  sms: (user, msg) => `SMS отправлено на ${user.phone}: ${msg}`,\n  push: (user, msg) => `Push-уведомление для ${user.name}: ${msg}`,\n  telegram: (user, msg) => `Telegram бот оповестил @${user.tg}: ${msg}`\n};\n\nfunction sendNotification(type, user, message) {\n  const handler = NOTIFICATION_HANDLERS[type];\n  if (!handler) {\n    throw new Error(`Неизвестный тип уведомления: ${type}`);\n  }\n  return handler(user, message);\n}\n\nconst user = { name: 'Алексей', email: 'alex@dev.ru', phone: '+79991234567' };\nsendNotification('email', user, 'Урок 3 успешно пройден!');",
+            "title": "Паттерн Lookup Table для масштабируемых обработчиков",
+            "explanation": "Lookup Table имеет сложность доступа O(1), легко масштабируется добавлением новых ключей и исключает баги с fall-through."
+          }
+        },
+        {
+          "title": "Циклы в JavaScript: for, while, for...of vs for...in",
+          "content": "Циклы позволяют повторять блок кода заданное число раз или пока истинно условие.\n\nВиды циклов в JavaScript:\n\n1. Классический `for (let i = 0; i < len; i++)` — максимальная скорость и контроль над шагом индекса.\n2. `while (condition)` — цикл с предусловием: повторяет, пока условие истинно.\n3. `do...while (condition)` — цикл с постусловием: гарантированно выполнится минимум один раз!\n4. `for...of` (ES6+) — цикл по ЗНАЧЕНИЯМ итерируемых объектов (Iterables: массивы, строки, Map, Set, NodeList). Поддерживает `break`, `continue`, `return` и работу с `await`.\n5. `for...in` — цикл по КЛЮЧАМ (именам свойств) объекта. Внимание: перебирает свойства не только самого объекта, но и всей его прототипной цепочки! Строго НЕ рекомендуется использовать для массивов (индексы возвращаются как строки, порядок не гарантирован).\n\nУправление циклом:\n- `break` — немедленно прерывает выполнение цикла и передаёт управление следующей за циклом инструкции.\n- `continue` — немедленно завершает текущую итерацию и переходит к следующей.\n- Метки циклов (`outerLoop: for (...)`) — позволяют прерывать внешний вложенный цикл из внутреннего.",
+          "image": {
+            "src": "/images/lessons/js-control-flow.svg",
+            "alt": "Сравнение циклов JavaScript: for...of по значениям против for...in по ключам",
+            "caption": "for...of перебирает значения итерируемых коллекций. for...in перебирает строковые ключи объектов"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Сравнение for...of и for...in\nconst technologies = ['HTML5', 'CSS3', 'JavaScript'];\ntechnologies.customProperty = 'Не элемент массива';\n\n// 1. for...of — чистый перебор значений элементов:\nfor (const tech of technologies) {\n  console.log(tech); // 'HTML5', 'CSS3', 'JavaScript'\n}\n\n// 2. for...in — обход всех ключей + прототипных свойств:\nfor (const key in technologies) {\n  console.log(key, typeof key); // '0' (string), '1', '2', 'customProperty'\n}\n\n// 3. Быстрый и безопасный обход объектов:\nconst stats = { views: 1250, likes: 340, shares: 89 };\nfor (const [metric, value] of Object.entries(stats)) {\n  console.log(`${metric}: ${value}`);\n}",
+            "title": "for...of vs for...in на практическом примере",
+            "explanation": "for...of игнорирует кастомные свойства и возвращает значения. for...in возвращает все строковые ключи. Для объектов используйте Object.entries() с for...of."
+          }
+        },
+        {
+          "title": "Протокол итерации (Iteration Protocols) и Symbol.iterator",
+          "content": "В ES6 введён официальный протокол итерации, определяющий, как любой объект в JavaScript может стать итерируемым (Iterable).\n\nОбъект является Iterable, если у него реализован метод с ключом `[Symbol.iterator]`.\nЭтот метод должен возвращать Iterator — объект с методом `next()`, возвращающим объект формата:\n`{ value: любое_значение, done: boolean }`.\n\nКогда цикл `for...of` начинает работу, он:\n1. Вызывает метод `[Symbol.iterator]()` у коллекции.\n2. В цикле вызывает `.next()` до тех пор, пока `done !== true`.\n3. Извлекает поле `value` на каждой итерации.\n\nГде работают Iterables:\n- Цикл `for...of`\n- Spread-оператор: `[...iterable]`\n- Деструктуризация: `const [a, b] = iterable`\n- `Array.from(iterable)`\n- Конструкторы `new Set(iterable)`, `new Map(iterable)`\n- `Promise.all(iterable)`",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Создание собственного итерируемого диапазона чисел (Range Iterable)\nconst range = (from, to) => ({\n  from,\n  to,\n  [Symbol.iterator]() {\n    let current = this.from;\n    const last = this.to;\n    return {\n      next() {\n        if (current <= last) {\n          return { value: current++, done: false };\n        } else {\n          return { done: true };\n        }\n      }\n    };\n  }\n});\n\n// Теперь наш range работает во всех конструкциях ES6:\nfor (const num of range(1, 5)) {\n  console.log(num); // 1, 2, 3, 4, 5\n}\n\nconst numbersArray = [...range(10, 14)];\nconsole.log(numbersArray); // [10, 11, 12, 13, 14]",
+            "title": "Реализация протокола Symbol.iterator для числового диапазона",
+            "explanation": "Реализовав [Symbol.iterator], объект range() стал полноценным Iterable и может использоваться в for...of, spread-операторе и Array.from()."
           }
         }
       ],
       "seniorTips": [
-        "Используйте for..of для перебора массивов."
+        "Применяйте Guard Clauses в начале функций: это сокращает вложенность кода до 1 уровня и делает функции кристально чистыми для чтения.",
+        "Никогда не используйте `for...in` для итерации по массивам. Для массивов используйте `for...of` или методы `.map()`, `.filter()`, `.reduce()`.",
+        "Для ветвлений с большим количеством условий предпочитайте Lookup Tables (словари на объектах или `Map`), а не 10 блоков `else if` или `switch`.",
+        "Избегайте создания функций внутри классических циклов `for` — на каждой итерации выделяется новый контекст памяти. Выносите колбэки наружу."
       ],
       "commonMistakes": [
         {
-          "bad": "let msg; if (ok) msg = 'Да'; else msg = 'Нет';",
-          "good": "const msg = ok ? 'Да' : 'Нет';",
-          "reason": "Тернарный оператор позволяет объявить const."
+          "bad": "const status = isAuth ? hasAccess ? 'admin' : 'user' : 'guest';",
+          "good": "function getStatus(isAuth, hasAccess) {\n  if (!isAuth) return 'guest';\n  return hasAccess ? 'admin' : 'user';\n}",
+          "reason": "Вложенные тернарные операторы нечитаемы и вызывают ошибки на код-ревью. Выносите сложную логику условий в понятные функции с Guard Clauses."
+        },
+        {
+          "bad": "switch(type) {\n  case 'A':\n    handleA();\n    // Забыт break! Провалится в case 'B'!\n  case 'B':\n    handleB();\n    break;\n}",
+          "good": "switch(type) {\n  case 'A':\n    handleA();\n    break;\n  case 'B':\n    handleB();\n    break;\n}",
+          "reason": "Забытый break вызывает эффект Fall-through: код следующего кейса выполнится непреднамеренно. Используйте eslint правило no-fallthrough."
+        },
+        {
+          "bad": "for (const key in arr) {\n  // key является строкой ('0', '1', '2')\n  console.log(key + 1); // '01', '11', '21' — конкатенация строк!\n}",
+          "good": "for (const item of arr) {\n  console.log(item);\n}",
+          "reason": "Цикл for...in возвращает строковые имена ключей, а не числовые индексы. Сложение строк с числами приводит к багам конкатенации."
         }
       ],
       "keyTakeaways": [
-        "Тернарный оператор компактно вычисляет значение.",
-        "for..of перебирает элементы массива."
+        "Guard Clauses (ранний возврат) устраняют глубокую вложенность `if...else` и делают код плоским и читаемым.",
+        "Тернарный оператор `? :` предназначен исключительно для простых однострочных выражений. Вложенные тернарники запрещены.",
+        "Паттерн Lookup Table (объектные словари) заменяет громоздкие конструкции `switch` и масштабируется со сложностью доступа `O(1)`.",
+        "`for...of` перебирает значения коллекций с `[Symbol.iterator]`. `for...in` перебирает строковые ключи свойств объекта.",
+        "Любой объект можно сделать итерируемым, реализовав метод `[Symbol.iterator]()`, возвращающий итератор с методом `.next()`."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"loop-demo\"><h3>Список</h3><ul id=\"skill-ul\"></ul></div>",
-      "initialCss": ".loop-demo { padding: 20px; background: white; border-radius: 12px; }\n#skill-ul li { color: #4f46e5; font-weight: bold; }",
-      "initialJs": "const list = document.getElementById('skill-ul');\nfor (const item of ['HTML5', 'CSS3', 'JavaScript']) {\n  const li = document.createElement('li');\n  li.textContent = item;\n  list.appendChild(li);\n}",
-      "instructions": "Посмотрите добавление элементов через for..of."
+      "initialHtml": "<div id=\"js-output\"></div>",
+      "initialCss": "#js-output {\n  font-family: 'JetBrains Mono', monospace;\n  background: #0a0e13;\n  color: #2dff8a;\n  padding: 16px;\n  border-radius: 8px;\n  border: 1px solid #30363d;\n  min-height: 220px;\n  white-space: pre-wrap;\n}",
+      "initialJs": "const out = document.getElementById('js-output');\nconst log = (text) => out.textContent += text + '\\n';\n\n// Задание: реализуйте генератор диапазона чисел с Symbol.iterator\nconst range = (start, end) => ({\n  [Symbol.iterator]() {\n    let current = start;\n    return {\n      next() {\n        return current <= end\n          ? { value: current++, done: false }\n          : { done: true };\n      }\n    };\n  }\n});\n\nlog('Итерация range(1, 5) через for...of:');\nfor (const n of range(1, 5)) {\n  log(`> Число: ${n}`);\n}\n\nlog('\\nПревращение в массив через spread: ' + JSON.stringify([...range(10, 15)]));",
+      "instructions": "Практика управляющих конструкций:\n1. Запустите код и посмотрите, как работает Symbol.iterator с for...of и spread-оператором\n2. Напишите функцию classifyScore(score) с Guard Clauses: если score < 0 или > 100 — ошибка, >= 90 — 'Отлично', >= 75 — 'Хорошо', иначе 'Требуется доработка'\n3. Реализуйте функцию через Lookup Table и вызовите для тестовых значений"
     },
     "task": {
-      "title": "Фильтрация чисел через цикл",
-      "scenario": "Напишите цикл for..of, суммирующий положительные числа.",
+      "title": "Пайплайн валидации и фильтрации данных пользователей",
+      "scenario": "Вы разрабатываете модуль фильтрации пользователей для административной панели. Модуль должен принимать массив профилей, валидировать поля через Guard Clauses, применять фильтры по статусам через Lookup Table и возвращать итерируемый результат с постраничной пагинацией.",
       "criteria": [
-        "Использован цикл for..of"
+        "Функция validateUser(user) использует Guard Clauses для валидации",
+        "Фильтрация по ролям ('admin', 'mentor', 'intern') реализована через Lookup Table",
+        "Функция paginate(items, pageSize) возвращает кастомный Iterable объект с [Symbol.iterator]",
+        "Каждая страница итератора возвращает срез массива { pageNumber, data }",
+        "Использовать for...of и деструктуризацию параметров",
+        "Обработать некорректные входные данные без падения программы"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Реализуйте модуль обработки данных\nfunction createDataPipeline(users) {\n  // Ваш код здесь\n}"
       },
       "hints": [
-        "Используйте современные стандарты ES6+."
+        "Используйте Guard Clauses: if (!user || typeof user !== 'object') return false;",
+        "Lookup Table ролей: const ROLE_FILTERS = { admin: u => u.role === 'admin', ... }",
+        "Для paginate создайте объект с [Symbol.iterator], который вычисляет срезы items.slice(start, end)"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const numbers = [10, -5, 20, -30, 15];\nlet sum = 0;\nfor (const num of numbers) {\n  if (num > 0) sum += num;\n}\nconsole.log('Сумма:', sum); // 45",
-        "explanation": "Корректный обход и агрегация данных."
+        "js": "function createDataPipeline(users = []) {\n  const ROLE_FILTERS = {\n    admin: (u) => u.role === 'admin',\n    mentor: (u) => u.role === 'mentor',\n    intern: (u) => u.role === 'intern',\n    all: () => true\n  };\n\n  const validateUser = (user) => {\n    if (!user || typeof user !== 'object') return false;\n    if (!user.id || typeof user.name !== 'string') return false;\n    if (user.age !== undefined && user.age < 18) return false;\n    return true;\n  };\n\n  return {\n    filterByRole(role = 'all') {\n      const filterFn = ROLE_FILTERS[role] || ROLE_FILTERS.all;\n      const validUsers = users.filter(validateUser);\n      return validUsers.filter(filterFn);\n    },\n    paginate(items, pageSize = 2) {\n      return {\n        [Symbol.iterator]() {\n          let page = 0;\n          const totalPages = Math.ceil(items.length / pageSize);\n          return {\n            next() {\n              if (page < totalPages) {\n                const start = page * pageSize;\n                const data = items.slice(start, start + pageSize);\n                page++;\n                return { value: { pageNumber: page, totalPages, data }, done: false };\n              }\n              return { done: true };\n            }\n          };\n        }\n      };\n    }\n  };\n}",
+        "explanation": "Код использует Guard Clauses для валидации пользователей, Lookup Table для фильтрации ролей O(1) и кастомный протокол Symbol.iterator для итерации по страницам данных."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j3-q1",
-          "question": "Какой цикл рекомендуется для обхода массива?",
+          "id": "js3-q1",
+          "question": "В чём заключается ключевое преимущество паттерна Guard Clauses перед вложенными конструкциями if-else?",
           "options": [
-            "for..in",
-            "for..of",
-            "goto",
-            "loop"
+            "Guard Clauses ускоряют загрузку скрипта по сети",
+            "Guard Clauses проверяют граничные условия и ошибки в начале функции с ранним возвратом, устраняя вложенность кода",
+            "Guard Clauses автоматически превращают функцию в асинхронную",
+            "Guard Clauses запрещают использование оператора return"
           ],
           "correctIndex": 1,
-          "explanation": "for..of перебирает значения элементов массива."
+          "explanation": "Паттерн Guard Clauses (защитные условия / ранний возврат) позволяет обработать невалидные параметры и ошибки на входе в функцию с немедленным выходом (return / throw). Это сохраняет основную бизнес-логику на нулевом уровне отступа и делает код плоским и читаемым."
+        },
+        {
+          "id": "js3-q2",
+          "question": "Что произойдёт при выполнении цикла: for (const key in ['HTML', 'CSS']) { console.log(key); }?",
+          "options": [
+            "Выведет: 'HTML', 'CSS'",
+            "Выведет строковые индексы: '0', '1'",
+            "Произойдет ошибка TypeError",
+            "Выведет: undefined, undefined"
+          ],
+          "correctIndex": 1,
+          "explanation": "Цикл for...in перебирает имена перечисляемых свойств (ключей) объекта. Для массива ключами являются строковые индексы ('0', '1'). Чтобы перебирать значения элементов массива, необходимо использовать for...of."
+        },
+        {
+          "id": "js3-q3",
+          "question": "Что необходимо реализовать в объекте, чтобы он стал итерируемым (Iterable) и поддерживал цикл for...of и spread-оператор?",
+          "options": [
+            "Метод .forEach()",
+            "Метод [Symbol.iterator](), возвращающий объект с функцией .next()",
+            "Свойство length",
+            "Метод .toString()"
+          ],
+          "correctIndex": 1,
+          "explanation": "Согласно спецификации ECMAScript, объект считается итерируемым (Iterable), если он имеет метод с системным символьным ключом [Symbol.iterator](), который возвращает итератор с методом next() -> { value, done }."
+        },
+        {
+          "id": "js3-q4",
+          "question": "Что вернет выражение: false ?? 'По умолчанию' и false || 'По умолчанию'?",
+          "options": [
+            "Оба вернут false",
+            "?? вернет false, а || вернет 'По умолчанию'",
+            "Оба вернут 'По умолчанию'",
+            "?? вернет 'По умолчанию', а || вернет false"
+          ],
+          "correctIndex": 1,
+          "explanation": "Оператор ?? (Nullish Coalescing) проверяет значение исключительно на null и undefined. Поскольку false не является null/undefined, ?? возвращает false. Оператор || проверяет на любое falsy значение (false, 0, '', null, undefined), поэтому возвращает правую часть 'По умолчанию'."
+        },
+        {
+          "id": "js3-q5",
+          "question": "Какая алгоритмическая сложность поиска обработчика в паттерне Lookup Table по сравнению с цепочкой из N условий else-if?",
+          "options": [
+            "O(N) против O(1)",
+            "O(1) против O(N)",
+            "O(log N) против O(N^2)",
+            "Одинаковая сложность"
+          ],
+          "correctIndex": 1,
+          "explanation": "В паттерне Lookup Table доступ к обработчику по ключу объекта (хэш-таблице) выполняется за константное время O(1), в то время как длинная цепочка if-else / switch в худшем случае последовательно проверяет все N условий со сложностью O(N)."
         }
       ]
     }

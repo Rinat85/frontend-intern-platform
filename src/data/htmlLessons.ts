@@ -405,98 +405,193 @@ export const htmlLessons: Lesson[] = [
     "id": "html-3",
     "moduleId": "html",
     "level": 3,
-    "title": "Frontend IDE и окружение разработчика",
-    "subtitle": "VS Code, расширения, Emmet и инструменты Chrome DevTools",
-    "description": "Профессиональная настройка редактора кода, плагины для ускорения верстки, сниппеты Emmet и отладка верстки в панели разработчика браузера.",
-    "estimatedMinutes": 30,
+    "title": "Frontend IDE, Emmet и Chrome DevTools",
+    "subtitle": "VS Code, скоростная верстка с Emmet, DOM & a11y инспекция, консоль и Lighthouse",
+    "description": "Освойте профессиональный инструментарий фронтенд-инженера: настройку VS Code, скоростную генерацию HTML с помощью Emmet, отладку стилей и DOM-дерева в Chrome DevTools и проведение аудита доступности и производительности.",
+    "estimatedMinutes": 55,
     "difficulty": "beginner",
     "tags": [
-      "IDE",
-      "VSCode",
-      "Emmet",
-      "DevTools",
-      "Tools"
+      "ide",
+      "vscode",
+      "emmet",
+      "devtools",
+      "debugging",
+      "lighthouse",
+      "performance"
     ],
     "theory": {
-      "overview": "Эффективность фронтенд-инженера напрямую зависит от владения инструментами разработки. Современная среда — это не просто блокнот, а мощная экосистема:\n\n- **VS Code**: де-факто мировой стандарт редактора кода для фронтенда с поддержкой TypeScript, автодополнения и Git.\n- **Emmet**: встроенный синтаксис сокращений, ускоряющий написание разметки в 5–10 раз.\n- **Chrome / Firefox DevTools**: встроенная в браузер панель инспекции элементов, отладки скриптов и профилирования сетевых запросов.",
+      "overview": "Профессионализм frontend-разработчика определяется не только знанием синтаксиса тегов, но и скоростью и качеством работы в инструментах разработки. В этом уроке мы детально разберём рабочее окружение современного инженера: редактор кода Visual Studio Code, синтаксис Emmet для мгновенной генерации комплексной разметки, и панель Chrome DevTools — главный инструмент отладки, профилирования и инспекции DOM/CSS.\n\nУмение читать стили в DevTools, использовать Live Expressions в консоли, переключать состояния псевдоклассов (`:hover`, `:active`, `:focus-visible`) и находить утечки производительности через Lighthouse — базовые требования на позиции стажёра и джуниора.",
       "sections": [
         {
-          "title": "Сниппеты Emmet: Как писать HTML со скоростью мысли",
-          "content": "Emmet преобразует простые CSS-подобные селекторы в полноценную HTML-разметку по нажатию клавиши Tab:\n- `!` -> генерирует полный базовый HTML5-скелет страницы.\n- `div.card` -> `<div class=\"card\"></div>`\n- `h1#title` -> `<h1 id=\"title\"></h1>`\n- `ul>li*3` -> список `<ul>` с тремя элементами `<li>` внутри (оператор `>` — вложенность, `*` — умножение).\n- `h2+p` -> заголовок и следующий за ним параграф (оператор `+` — соседи).\n- `a[href=\"https://google.com\"]{Поиск}` -> ссылка с атрибутом и текстом внутри фигурных скобок `{}`.\n- `.item-$*3` -> создаст `.item-1`, `.item-2`, `.item-3` (оператор `$` — счетчик).",
+          "title": "VS Code для Frontend-разработчика: расширения, шорткаты и профили",
+          "content": "Visual Studio Code (VS Code) — де-факто индустриальный стандарт IDE для фронтенда (более 75% разработчиков по опросам State of JS и StackOverflow).\n\nКлючевые расширения для ежедневной работы:\n\n1. ESLint — статический анализ JS/TS кода в реальном времени, подсветка ошибок и подсказки по лучшим практикам.\n2. Prettier — автоматическое форматирование кода при сохранении (`editor.formatOnSave: true`).\n3. Auto Rename Tag — синхронное переименование парных HTML-тегов: меняете открывающий тег — закрывающий обновляется мгновенно.\n4. Color Highlight / Tailwind CSS IntelliSense — визуальное отображение HEX/RGB цветов прямо в коде и подсказки классов.\n5. Error Lens — вывод текста ошибок компилятора TypeScript и линтера прямо в строке кода без наведения курсора.\n\nТоп шорткатов для максимальной скорости:\n\n`Ctrl + P` (Cmd+P на Mac) — быстрый поиск и открытие любого файла по названию (Fuzzy Search).\n`Ctrl + Shift + P` — командная палитра (Command Palette) — доступ ко всем командам и настройкам редактора.\n`Alt + Up / Down` — перемещение текущей строки или выделенного блока вверх/вниз.\n`Shift + Alt + Down / Up` — дублирование строки вверх/вниз.\n`Ctrl + D` — мультивыделение следующего совпадения текущего слова (супер-быстрый локальный рефакторинг).\n`Alt + Click` — установка нескольких курсоров для параллельного редактирования в разных местах.\n`Ctrl + /` — закомментировать/раскомментировать строку или выделенный блок.",
           "codeExample": {
-            "language": "html",
-            "title": "Пример сокращения Emmet",
-            "code": "<!-- Введите в VS Code: header.header>nav.nav>ul.menu>li.menu-item*3>a[href=\"#\"]{Пункт $} -->\n\n<!-- Результат по нажатию Tab: -->\n<header class=\"header\">\n  <nav class=\"nav\">\n    <ul class=\"menu\">\n      <li class=\"menu-item\"><a href=\"#\">Пункт 1</a></li>\n      <li class=\"menu-item\"><a href=\"#\">Пункт 2</a></li>\n      <li class=\"menu-item\"><a href=\"#\">Пункт 3</a></li>\n    </ul>\n  </nav>\n</header>",
-            "explanation": "Одна строчка Emmet мгновенно разворачивается в 10 строк валидной семантической верстки."
+            "language": "javascript",
+            "code": "// .vscode/settings.json — рекомендуемый конфиг для проекта\n{\n  \"editor.formatOnSave\": true,\n  \"editor.defaultFormatter\": \"esbenp.prettier-vscode\",\n  \"editor.tabSize\": 2,\n  \"editor.insertSpaces\": true,\n  \"editor.linkedEditing\": true,\n  \"editor.bracketPairColorization.enabled\": true,\n  \"editor.guides.bracketPairs\": \"active\",\n  \"files.autoSave\": \"onFocusChange\",\n  \"emmet.includeLanguages\": {\n    \"javascript\": \"javascriptreact\",\n    \"typescript\": \"typescriptreact\"\n  }\n}",
+            "title": "Профессиональная конфигурация .vscode/settings.json",
+            "explanation": "linkedEditing автоматически синхронизирует переименование парных тегов. bracketPairColorization подсвечивает вложенные скобки цветом. emmet.includeLanguages включает поддержку Emmet в JSX/TSX."
           }
         },
         {
-          "title": "Chrome DevTools: Инспекция и отладка верстки",
-          "content": "Горячие клавиши для вызова: `F12` или `Ctrl + Shift + I` (на Mac: `Cmd + Option + I`):\n- **Вкладка Elements (Инспектор DOM)**: показывает живое DOM-дерево. Вы можете на лету редактировать текст, добавлять атрибуты, менять стили в панели Styles.\n- **Панель Computed**: показывает итоговые вычисленные размеры (margin, border, padding, width, height) элемента.\n- **Device Mode (`Ctrl + Shift + M`)**: эмуляция экранов мобильных телефонов (iPhone, Pixel, iPad) для проверки адаптивности.\n- **Console**: вывод сообщений console.log, ошибок JS и выполнение произвольного кода.",
+          "title": "Emmet: Скоростная генерация сложной разметки",
+          "content": "Emmet — встроенный в VS Code движок аббревиатур, трансформирующий короткие CSS-подобные выражения в полноценные блоки HTML-разметки при нажатии клавиши `Tab` или `Enter`.\n\nБазовый синтаксис операторов Emmet:\n\n1. Вложенность `>` (дочерний элемент):\n`nav>ul>li` → `<nav><ul><li></li></ul></nav>`\n\n2. Соседство `+` (сиблинг):\n`header+main+footer` → три последовательных блока на одном уровне\n\n3. Подъем на уровень вверх `^`:\n`div>p>span^a` → span внутри p, а ссылка `<a>` на уровне p внутри div\n\n4. Умножение `*` (тиражирование):\n`ul>li*4` → список с четырьмя элементами `<li>`\n\n5. Нумерация `$`, `$$` (инкремент чисел):\n`ul>li.item-$*3` → `<li class=\"item-1\">`, `<li class=\"item-2\">`, `<li class=\"item-3\">`\n\n6. Классы `.` и Идентификаторы `#`:\n`article#post-1.card.card--featured` → `<article id=\"post-1\" class=\"card card--featured\"></article>`\n\n7. Пользовательские атрибуты `[...]`:\n`input[type=\"email\" required name=\"user_email\" placeholder=\"Email\"]`\n\n8. Текстовое содержимое `{...}`:\n`a[href=\"/about\"]{Подробнее о курсе}` → `<a href=\"/about\">Подробнее о курсе</a>`\n\n9. Группировка `(...)`:\n`div>(header>h1)+main+footer` — создание сложных комбинированных поддеревьев.",
           "codeExample": {
-            "language": "bash",
-            "title": "Полезные шорткаты DevTools",
-            "code": "Ctrl + Shift + C  # Режим выбора элемента со страницы кликом мыши\nCtrl + Shift + M  # Включение мобильного режима (Device Toolbar)\nEsc               # Открыть/закрыть встроенную консоль на любой вкладке",
-            "explanation": "Использование горячих клавиш экономит часы времени при верстке и поиске багов."
+            "language": "html",
+            "code": "<!-- Аббревиатура Emmet: -->\n<!-- main.catalog>h1{Каталог товаров}+div.grid>(article.card>img[src=\"img/$.jpg\" alt=\"Товар $\"]+h2{Товар $}+p.price{$$$ руб.}+button[type=\"button\"]{Купить})*3 -->\n\n<!-- Результат после нажатия Tab: -->\n<main class=\"catalog\">\n  <h1>Каталог товаров</h1>\n  <div class=\"grid\">\n    <article class=\"card\">\n      <img src=\"img/1.jpg\" alt=\"Товар 1\" />\n      <h2>Товар 1</h2>\n      <p class=\"price\">001 руб.</p>\n      <button type=\"button\">Купить</button>\n    </article>\n    <article class=\"card\">\n      <img src=\"img/2.jpg\" alt=\"Товар 2\" />\n      <h2>Товар 2</h2>\n      <p class=\"price\">002 руб.</p>\n      <button type=\"button\">Купить</button>\n    </article>\n    <article class=\"card\">\n      <img src=\"img/3.jpg\" alt=\"Товар 3\" />\n      <h2>Товар 3</h2>\n      <p class=\"price\">003 руб.</p>\n      <button type=\"button\">Купить</button>\n    </article>\n  </div>\n</main>",
+            "title": "Генерация каталога карточек в одну строчку Emmet",
+            "explanation": "Всего одна строка Emmet-кода мгновенно генерирует 25 строк семантического HTML с классами, атрибутами, путями к изображениям, ценниками и кнопками."
+          }
+        },
+        {
+          "title": "Chrome DevTools: Инспекция DOM, принудительные состояния и Box Model",
+          "content": "Chrome DevTools (вызывается по `F12` или `Ctrl + Shift + I`) — это швейцарский нож фронтендера, работающий напрямую с живым представлением страницы в движке Chromium.\n\nВкладка Elements:\n- Инспекция DOM-дерева: наведите курсор со стрелкой инспектора (`Ctrl + Shift + C`) на любой элемент страницы для мгновенного перехода к нему в кодовой иерархии.\n- Live Editing: двойной клик по тегу или атрибуту позволяет менять разметку на лету без перезагрузки страницы.\n- Break on... (DOM Breakpoints): правый клик по элементу → Break on subtree modifications/attribute modifications — остановит выполнение JavaScript ровно в тот момент, когда скрипт попытается изменить выбранный DOM-узел.\n\nВкладка Styles и Computed:\n- Force element state (`:hov`): принудительное включение псевдоклассов `:hover`, `:active`, `:focus`, `:focus-visible`, `:visited` — незаменимо для отладки интерактивных состояний кнопок, меню и ссылок.\n- Box Model Diagram: интерактивная схема внизу вкладки Styles, показывающая точные вычисленные размеры margin, border, padding и content в пикселях.\n- Computed tab: алфавитный список финальных стилей, применённых к элементу после разрешения всех каскадных правил, специфичности и наследования.\n\nAccessibility Inspector:\n- Вкладка Accessibility в боковой панели Elements отображает полное Accessibility Tree (дерево доступности), вычисленное имя (Accessible Name), роль (Role) и свойства элемента для скринридеров.",
+          "image": {
+            "src": "/images/lessons/devtools-inspection-flow.jpg",
+            "alt": "Архитектура Chrome DevTools: Elements DOM Tree, Styles, Computed Box Model и Console",
+            "caption": "Chrome DevTools: полная инспекция DOM, каскада CSS, вычисленных отступов Box Model и консоли"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Продвинутые приёмы работы с Chrome DevTools Console API:\n\n// 1. $0 — быстрый доступ к текущему выбранному элементу в Elements panel\nconsole.log($0); // возвращает выбранный DOM-узел\n$0.style.border = '2px solid red'; // подсветить на экране\n\n// 2. Красивый вывод массивов и объектов таблицей\nconst users = [\n  { id: 1, name: 'Анна', role: 'Team Lead', score: 98 },\n  { id: 2, name: 'Олег', role: 'Senior Frontend', score: 94 },\n  { id: 3, name: 'Иван', role: 'Intern', score: 85 }\n];\nconsole.table(users, ['name', 'role', 'score']);\n\n// 3. Замер производительности участков кода\nconsole.time('DOM-Render-Timer');\n// выполнение тяжелой операции...\nconsole.timeEnd('DOM-Render-Timer'); // DOM-Render-Timer: 4.28ms",
+            "title": "Chrome DevTools Console API: $0, console.table и таймеры",
+            "explanation": "Переменная $0 ссылается на выделенный в инспекторе узел. console.table делает анализ массивов мгновенно читаемым. console.time/timeEnd позволяют точно измерять время исполнения участков кода."
+          }
+        },
+        {
+          "title": "Network Waterfall, throttling и аудит Lighthouse",
+          "content": "Для создания быстрого и доступного продукта стажёр обязан понимать, как страница загружается по сети и как браузер распределяет ресурсы.\n\nВкладка Network:\n- Waterfall (водопад загрузки): графическая шкала времени загрузки каждого ресурса. Ключевые фазы:\n  - Queueing / Stalled — ожидание в очереди браузера (лимит 6 одновременных TCP-соединений на хост в HTTP/1.1)\n  - DNS Lookup — резолвинг IP-адреса\n  - Initial Connection + SSL Handshake — установка защищённого соединения\n  - TTFB (Time to First Byte) — время ожидания первого байта от сервера (критичный серверный показатель, норма < 200ms)\n  - Content Download — передача тела ответа по каналу связи\n\n- Network Throttling: симуляция медленного интернета ('Fast 3G', 'Slow 3G', 'Offline') для проверки поведения лоадеров, скелетонов и обработки ошибок сети.\n- Disable Cache: отключение кэша при открытом DevTools для тестирования «холодного старта» первого визита.\n\nВкладка Lighthouse:\nLighthouse — автоматизированный инструмент Google для оценки качества страницы по 5 метрикам:\n1. Performance (FCP, LCP, CLS, TBT, Speed Index)\n2. Accessibility (контрастность текста, ARIA-метки, heading hierarchy, alt у картинок)\n3. Best Practices (HTTPS, современные форматы изображений, отсутствие устаревших API)\n4. SEO (наличие `<title>`, `<meta name=\"description\">`, тегов Open Graph, читаемые URL)\n5. PWA (манифест, Service Worker, адаптивность под мобильные экраны)",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Оптимальный <head> для 100/100 в Lighthouse SEO & Accessibility -->\n<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>Frontend Academy — Платформа для стажёров</title>\n  <meta\n    name=\"description\"\n    content=\"Интерактивная образовательная платформа для стажёров frontend-разработки: HTML, CSS, JavaScript и Git.\"\n  />\n  <!-- Open Graph для красивых превью в соцсетях -->\n  <meta property=\"og:title\" content=\"Frontend Academy\" />\n  <meta property=\"og:description\" content=\"Интерактивные курсы и тренажёры\" />\n  <meta property=\"og:image\" content=\"https://intern.dev/og.png\" />\n  <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"any\" />\n  <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\" />\n</head>\n<body>\n  <main>\n    <h1>Frontend Intern Academy</h1>\n    <p>Добро пожаловать в систему практического обучения.</p>\n  </main>\n</body>\n</html>",
+            "title": "Метаданные для идеального скоринга Lighthouse",
+            "explanation": "Обязательные метатеги charset, viewport, description и title, а также Open Graph атрибуты для социальных сетей гарантируют прохождение тестов Lighthouse SEO на высший балл."
           }
         }
       ],
       "seniorTips": [
-        "Обязательно установите расширение Prettier в VS Code и включите настройку Editor: Format On Save — ваш код всегда будет идеально отформатирован.",
-        "Изучите вкладку Network в DevTools: она показывает, какие картинки или шрифты грузятся слишком долго и тормозят сайт."
+        "Используйте `console.table()` вместо бесконечных `console.log()` для анализа массивов объектов — это экономит часы времени при дебаггинге данных от API.",
+        "Включайте `Coverage` (Command Palette в DevTools → Show Coverage) для поиска неиспользуемого CSS и JavaScript кода, раздувающего размер бандла.",
+        "Для отладки верстки без мышки используйте клавишу `Tab` прямо в браузере: если фокус пропадает или перескакивает в нелогичном порядке — вы нарушили порядок DOM или сломали доступность.",
+        "Никогда не коммитьте `debugger;` и отладочные `console.log` в ветку `main`. Настройте правило ESLint `no-debugger` и `no-console: warn`."
       ],
       "commonMistakes": [
         {
-          "bad": "Писать все HTML-теги вручную символ за символом",
-          "good": "Использовать сокращения Emmet (nav>ul>li*4>a)",
-          "reason": "Ручной набор медленный и приводит к случайным опечаткам в именах тегов и незакрытым скобкам."
+          "bad": "<!-- Набор HTML вручную с опечатками -->\n<div class=\"nav\">\n  <div class=\"item\">1</div>\n  <div class=\"item\">2</div>\n</div>",
+          "good": "<!-- Сниппет Emmet: nav.nav>ul>li.item{$$}*2 -->\n<nav class=\"nav\">\n  <ul>\n    <li class=\"item\">01</li>\n    <li class=\"item\">02</li>\n  </ul>\n</nav>",
+          "reason": "Ручной набор разметки занимает в 10 раз больше времени и часто приводит к div-супу. Emmet автоматически генерирует семантически корректные теги с правильной вложенностью за доли секунды."
+        },
+        {
+          "bad": "/* Тестирование hover-состояний через наведение мышки */\n.button:hover {\n  /* не удаётся рассмотреть стили в DevTools, */\n  /* так как курсор уходит с кнопки */\n}",
+          "good": "/* Использование Force element state (:hov) в DevTools */\n/* Ставим галочку :hover прямо в панели Styles */\n/* Состояние зафиксировано навсегда для инспекции */",
+          "reason": "Попытки поймать hover-эффекты и тултипы курсором мыши приводят к потере фокуса. Кнопка ':hov' в Chrome DevTools принудительно фиксирует псевдокласс на выбранном элементе."
+        },
+        {
+          "bad": "<head>\n  <!-- Отсутствует viewport и description -->\n  <title>Мой сайт</title>\n</head>",
+          "good": "<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>Каталог курсов — Frontend Academy</title>\n  <meta name=\"description\" content=\"Интерактивное обучение фронтенду с нуля.\" />\n</head>",
+          "reason": "Без тега meta viewport мобильные браузеры отрендерят страницу в десктопном масштабе 980px с микроскопическим шрифтом. Без description страница получит штраф в Lighthouse SEO."
         }
       ],
       "keyTakeaways": [
-        "VS Code + Emmet — базовый стандарт скорости и комфорта веб-разработчика.",
-        "DevTools позволяет исследовать DOM любого сайта в интернете и тестировать стили на лету."
+        "VS Code с расширениями ESLint, Prettier и Auto Rename Tag обеспечивает автоматическое форматирование и подсветку синтаксических ошибок на лету.",
+        "Синтаксис Emmet (`>`, `+`, `*`, `$`, `.`, `#`, `[]`, `{}`) позволяет собирать масштабные семантические структуры за 1 секунду по нажатию `Tab`.",
+        "Chrome DevTools (Elements, Styles, Computed, Accessibility) предоставляет инструменты инспекции каскада стилей, отладки Box Model и принудительной фиксации псевдоклассов (`:hov`).",
+        "Вкладка Network и шкала Waterfall позволяют диагностировать сетевые задержки (TTFB, Stalled, Content Download) и эмулировать медленное соединение через Throttling.",
+        "Lighthouse — стандарт комплексного аудита качества веб-приложения по метрикам Performance, Accessibility, Best Practices и SEO."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"devtools-playground\">\n  <h2>Песочница для тренировки</h2>\n  <p class=\"hint\">Попробуйте поменять классы и структуру прямо в этом редакторе.</p>\n  <ul class=\"features-list\">\n    <li class=\"feature\">Быстрый ввод через Emmet</li>\n    <li class=\"feature\">Live Reload сервер</li>\n    <li class=\"feature\">Инспекция в DevTools</li>\n  </ul>\n</div>",
-      "initialCss": ".devtools-playground {\n  padding: 20px;\n  background: #1e1e2e;\n  color: #cdd6f4;\n  border-radius: 10px;\n  font-family: monospace;\n}\nh2 { color: #89b4fa; font-size: 18px; }\n.features-list { padding-left: 20px; }\n.feature { color: #a6e3a1; margin-bottom: 6px; }",
-      "initialJs": "console.log('IDE Tools Sandbox loaded!');",
-      "instructions": "Добавьте еще один элемент <li> в список и проверьте результат."
+      "initialHtml": "<!-- Потренируйтесь в Emmet-генерации: -->\n<!-- Напишите структуру статьи блога с автором, датой, тегами и кнопкой 'Поделиться' -->\n<div id=\"sandbox-preview\">\n  \n</div>",
+      "initialCss": "#sandbox-preview {\n  font-family: system-ui, -apple-system, sans-serif;\n  max-width: 600px;\n  margin: 0 auto;\n  padding: 20px;\n  background: #0d1117;\n  border: 1px solid #30363d;\n  border-radius: 8px;\n  color: #e6edf3;\n}\n\n.card-author {\n  color: #2dff8a;\n  font-weight: bold;\n}\n\n.tag {\n  display: inline-block;\n  padding: 2px 8px;\n  background: #161b22;\n  border: 1px solid #29e7ff;\n  border-radius: 4px;\n  font-size: 12px;\n  margin-right: 6px;\n}",
+      "initialJs": "// Консоль песочницы:\nconsole.log('Песочница Emmet & DevTools готова к работе!');\nconsole.table([\n  { shortcut: 'Ctrl + P', action: 'Быстрый поиск файла' },\n  { shortcut: 'Ctrl + D', action: 'Мультивыделение совпадений' },\n  { shortcut: '$0', action: 'Выделенный узел в Chrome DevTools' }\n]);",
+      "instructions": "Практика работы с разметкой:\n1. Сформируйте внутри #sandbox-preview семантическую карточку статьи <article class=\"article-card\">\n2. Добавьте заголовок <h2>, метаданные автора (<span class=\"card-author\">) и дату (<time>)\n3. Добавьте список тегов (<div class=\"tags\"><span class=\"tag\">HTML</span><span class=\"tag\">DevTools</span></div>)\n4. Добавьте кнопку <button type=\"button\">Поделиться</button>\n5. Откройте вкладку консоли и изучите вывод console.table()"
     },
     "task": {
-      "title": "Разметка навигационного меню через Emmet",
-      "scenario": "Создайте шапку сайта с логотипом и навигацией из 4 ссылок (Главная, О нас, Услуги, Контакты).",
+      "title": "Оптимизация доступности и SEO карточки товара",
+      "scenario": "Вы получили вёрстку карточки товара интернет-магазина, созданную начинающим стажёром. Аудит Lighthouse показывает 45/100 по Accessibility и 50/100 по SEO из-за отсутствия семантики, отсутствия alt, неправильных тегов заголовков и плохой доступности для скринридеров. Вам необходимо полностью переписать карточку по стандартам WCAG 2.1 и лучшим практикам.",
       "criteria": [
-        "Использован тег <header>",
-        "Внутри находится логотип в виде ссылки",
-        "Использован тег <nav> со списком <ul> из 4 ссылок <a>"
+        "Обернуть карточку в семантический тег <article> с aria-labelledby",
+        "Изображение товара имеет подробный alt, атрибуты width, height и loading='lazy'",
+        "Заголовок оформлен тегом <h2> с уникальным id",
+        "Цена выделена тегом <data> или <strong class='price'> с указанием валюты",
+        "Характеристики товара оформлены списком определений <dl> (<dt>, <dd>)",
+        "Кнопка 'Купить' имеет четкий aria-label с названием товара",
+        "Все интерактивные элементы доступны для фокуса с клавиатуры"
       ],
       "starterCode": {
-        "html": "<!-- Создайте header с навигацией -->\n",
-        "css": "/* Стили задания */\n"
+        "html": "<!-- Исходный несемантичный код -->\n<div class=\"item\">\n  <img src=\"/headphones.jpg\">\n  <div class=\"title\">Беспроводные наушники Sony WH-1000XM5</div>\n  <div class=\"cost\">29990</div>\n  <div class=\"specs\">Автономность: 30 часов, Шумоподавление: активное</div>\n  <div class=\"btn\" onclick=\"buy()\">Купить</div>\n</div>"
       },
       "hints": [
-        "Используйте структуру header>a.logo+nav>ul>li*4>a."
+        "Замените внешний <div> на <article aria-labelledby='item-title'>",
+        "Замените <div class='title'> на <h2 id='item-title'>",
+        "Используйте <dl> для характеристик: <dt>Автономность:</dt><dd>30 часов</dd>",
+        "Замените <div class='btn'> на настоящий доступный тег <button type='button'>"
       ],
       "solution": {
-        "html": "<header class=\"site-header\">\n  <a href=\"/\" class=\"logo\">MyCompany</a>\n  <nav class=\"main-nav\">\n    <ul>\n      <li><a href=\"/\">Главная</a></li>\n      <li><a href=\"/about\">О нас</a></li>\n      <li><a href=\"/services\">Услуги</a></li>\n      <li><a href=\"/contact\">Контакты</a></li>\n    </ul>\n  </nav>\n</header>",
-        "css": "/* Решение */\n",
-        "explanation": "Идеальная семантическая структура для шапки любого коммерческого сайта."
+        "html": "<article class=\"product-card\" aria-labelledby=\"prod-101\">\n  <img\n    src=\"/headphones.jpg\"\n    alt=\"Беспроводные полноразмерные наушники Sony WH-1000XM5 черного цвета\"\n    width=\"360\"\n    height=\"270\"\n    loading=\"lazy\"\n  />\n  <h2 id=\"prod-101\">Беспроводные наушники Sony WH-1000XM5</h2>\n  <p class=\"product-price\"><data value=\"29990\">29 990 ₽</data></p>\n  <dl class=\"product-specs\">\n    <dt>Автономность:</dt>\n    <dd>до 30 часов</dd>\n    <dt>Шумоподавление:</dt>\n    <dd>Активное цифровое (ANC)</dd>\n  </dl>\n  <button\n    type=\"button\"\n    class=\"btn-buy\"\n    aria-label=\"Добавить наушники Sony WH-1000XM5 в корзину за 29 990 рублей\"\n  >\n    Купить\n  </button>\n</article>",
+        "explanation": "Код полностью соответствует стандартам WCAG: article с aria-labelledby связывает карточку с h2; img содержит подробное описание alt и размеры; dl/dt/dd структурирует свойства; настоящий button с детальным aria-label гарантирует доступность для скринридеров."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h3-q1",
-          "question": "Какая клавиша развернет сокращение Emmet в VS Code?",
+          "id": "html3-q1",
+          "question": "Какое сокращение Emmet сгенерирует ненумерованный список из трёх элементов с классом menu-item и текстом Ссылка 1, Ссылка 2, Ссылка 3?",
           "options": [
-            "Tab или Enter",
-            "Ctrl + Shift + P",
-            "Alt + F4",
-            "Shift + Space"
+            "ul>li.menu-item{Ссылка $}*3",
+            "ul+li.menu-item*3{Ссылка $}",
+            "ul.menu-item>li*3{Ссылка}",
+            "ul*(li.menu-item$3)"
           ],
           "correctIndex": 0,
-          "explanation": "Клавиша Tab или Enter разворачивает аббревиатуру Emmet в HTML-код."
+          "explanation": "Синтаксис 'ul>li.menu-item{Ссылка $}*3' означает: создать тег <ul>, внутри него '>' 3 элемента <li> '*' 3 с классом '.menu-item' и текстом '{}', в котором '$' автоматически заменяется на порядковый номер (1, 2, 3)."
+        },
+        {
+          "id": "html3-q2",
+          "question": "Что позволяет сделать панель ':hov' (Force element state) во вкладке Styles панели Chrome DevTools?",
+          "options": [
+            "Удалить все стили элемента",
+            "Принудительно зафиксировать псевдоклассы (:hover, :active, :focus, :focus-visible) на выбранном узле",
+            "Замедлить рендеринг страницы в 10 раз",
+            "Автоматически перевести CSS-стили в SASS"
+          ],
+          "correctIndex": 1,
+          "explanation": "Функция ':hov' (Toggle Element State) позволяет принудительно включить псевдоклассы (:hover, :active, :focus, :focus-visible, :visited), что даёт возможность спокойно отлаживать выпадающие меню, анимации кнопок и фокусные рамки без необходимости держать мышь на элементе."
+        },
+        {
+          "id": "html3-q3",
+          "question": "Что означает показатель TTFB (Time to First Byte) в шкале Network Waterfall браузера?",
+          "options": [
+            "Общее время полной загрузки всего сайта",
+            "Время от момента отправки запроса клиентом до получения первого байта ответа от веб-сервера",
+            "Скорость рендеринга CSS-анимации",
+            "Время компиляции JavaScript в байт-код"
+          ],
+          "correctIndex": 1,
+          "explanation": "TTFB (Time to First Byte) измеряет время, которое проходит от отправки HTTP-запроса браузером до прихода первого байта данных от сервера. Высокий TTFB указывает на медленную обработку на бэкенде или задержки в сетевом канале."
+        },
+        {
+          "id": "html3-q4",
+          "question": "Какая команда консоли Chrome DevTools позволяет быстро обратиться к DOM-узлу, который прямо сейчас выделен в дереве Elements?",
+          "options": [
+            "$$('current')",
+            "$0",
+            "document.selected",
+            "this.node"
+          ],
+          "correctIndex": 1,
+          "explanation": "Специальная переменная $0 в консоли Chrome DevTools всегда ссылается на текущий DOM-элемент, выбранный курсором в панели Elements ($1, $2, $3 ссылаются на ранее выбранные элементы)."
+        },
+        {
+          "id": "html3-q5",
+          "question": "Для чего используется инструмент Google Lighthouse в Chrome DevTools?",
+          "options": [
+            "Только для проверки орфографии текста на странице",
+            "Для автоматизированного комплексного аудита производительности (Performance), доступности (Accessibility), SEO и лучших практик",
+            "Для генерации паролей пользователей",
+            "Для блокировки рекламных баннеров"
+          ],
+          "correctIndex": 1,
+          "explanation": "Google Lighthouse проводит автоматизированный аудит качества страницы по 5 категориям: производительность (Core Web Vitals), доступность (WCAG a11y), SEO-оптимизация, соблюдение Best Practices и PWA."
         }
       ]
     }

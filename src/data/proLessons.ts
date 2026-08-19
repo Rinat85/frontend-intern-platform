@@ -397,5 +397,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-3",
+    "moduleId": "pro",
+    "level": 3,
+    "title": "Code Review, Архитектура проекта и Чистый код",
+    "subtitle": "Культура Code Review, принципы SOLID/DRY/KISS, слои Feature-Sliced Design и автотесты",
+    "description": "Освойте инженерные стандарты разработки: правила проведения и прохождения Code Review, принципы чистого кода во фронтенде, архитектурную методологию Feature-Sliced Design (FSD) и пирамиду автоматизированного тестирования с Vitest.",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "code-review",
+      "architecture",
+      "fsd",
+      "clean-code",
+      "solid",
+      "vitest",
+      "testing"
+    ],
+    "theory": {
+      "overview": "Написание работающего кода — лишь половина работы инженера. Вторая половина — сделать так, чтобы этот код был понятен коллегам, легко модифицировался через полгода и не ломал смежные части системы. В крупных продуктовых компаниях (Яндекс, VK, Т-Банк, Авито) код проходит строгие фильтры: автоматические тесты, линтеры и обязательный этап Code Review двумя сеньор-инженерами.\n\nВ этом уроке мы разберём, как организовать архитектуру frontend-приложения по методологии Feature-Sliced Design (FSD), как применять принципы SOLID и DRY без оверинжиниринга, и как писать поддерживаемые unit-тесты.",
+      "sections": [
+        {
+          "title": "Культура и процесс Code Review в продуктовой команде",
+          "content": "Code Review (ревью кода) — процесс проверки исходного кода Pull Request (PR) одним или несколькими разработчиками перед вливанием в основную ветку.\n\nЗачем нужно Code Review:\n1. Предотвращение попадания багов и уязвимостей в продакшен.\n2. Обмен знаниями: команда узнаёт о новых модулях, стажёры перенимают паттерны сеньоров.\n3. Поддержание единого архитектурного стиля и стандартов кодовой базы.\n\nПравила подготовки идеального Pull Request:\n- Атомарность: один PR решает ровно одну задачу (не более 200–300 строк изменений). Огромные PR на 2000 строк никто не читает внимательно.\n- Понятное описание: приложите ссылку на таску в Jira/YouTrack, опишите ЧТО изменилось и ПОЧЕМУ выбрано именно это решение.\n- Скриншоты и GIF: для UI-изменений всегда прикрепляйте визуальные подтверждения «До» и «После».\n- Саморевью: перед отправкой PR проверьте собственный diff на GitHub — удалите забытые console.log, временные комментарии и неиспользуемый код.\n\nЧеклист ревьюера (Reviewer Checklist):\n1. Архитектура: соблюдены ли границы слоев и модулей? Нет ли циклических зависимостей?\n2. Читаемость и чистота: понятны ли имена переменных и функций? Нет ли дублирования?\n3. Производительность: нет ли лишних ререндеров, утечек памяти в useEffect, неоптимизированных циклов?\n4. Безопасность: экранируются ли пользовательские данные (защита от XSS)?\n5. Тесты: покрыта ли новая бизнес-логика unit-тестами?",
+          "codeExample": {
+            "language": "bash",
+            "code": "# Пример идеального описания Pull Request в GitHub / GitLab:\n\n## 📋 Задача\nCloses #PROJ-142: Добавление валидации формы оформления заказа\n\n## 🛠 Что сделано:\n- Создан модуль валидации `features/order-checkout/model/validation.ts`\n- Добавлены проверки: корректность email, маска телефона, проверка минимальной суммы корзины\n- Покрыта тестами чистая функция валидации (8 unit-тестов в Vitest)\n- Обновлены типы в `entities/order/model/types.ts`\n\n## 📸 Скриншоты UI:\n| До изменений | После (с валидацией) |\n|---|---|\n| [img-before.png] | [img-after.png] |\n\n## 🧪 Как протестировать:\n1. Перейти на страницу `/checkout`\n2. Нажать 'Оформить' с пустыми полями -> должны появиться красные подсказки\n3. Ввести корректные данные -> форма успешно отправляется",
+            "title": "Шаблон идеального описания Pull Request",
+            "explanation": "Чёткая структура PR с описанием контекста, списком изменений, скриншотами и инструкцией по тестированию ускоряет аппрув ревьюерами в 3 раза."
+          }
+        },
+        {
+          "title": "Принципы чистого кода во фронтенде (SOLID, DRY, KISS, YAGNI)",
+          "content": "Фундаментальные принципы разработки программного обеспечения, адаптированные под современный Frontend:\n\n1. Single Responsibility Principle (SRP — Единственная ответственность):\nОдин модуль/компонент/функция должен отвечать ровно за одну вещь. Если компонент `<UserProfile />` одновременно делает fetch-запрос к API, парсит дату, валидирует форму и рендерит модалку — разделите его на кастомный хук `useUserData()`, утилиту `formatDate()` и презентационные компоненты.\n\n2. Open/Closed Principle (OCP — Открытость/Закрытость):\nКомпоненты должны быть открыты для расширения, но закрыты для модификации. Используйте паттерн композиции: передавайте компоненты через `children` или слоты, а не создавайте 20 булевых пропсов (`isModal`, `isDropdown`, `isCompact`, `withIcon`) внутри одного монструозного компонента.\n\n3. DRY (Don't Repeat Yourself — Не повторяйся):\nДублирующаяся логика выносится в утилиты и хуки. Однако помните правило Senior: «Небольшое дублирование лучше, чем неправильная абстракция» (Wrong Abstraction).\n\n4. KISS (Keep It Simple, Stupid — Делай проще):\nПишите самый простой и очевидный код, решающий задачу. Избегайте преждевременных паттернов проектирования там, где достаточно 5 строк чистого кода.\n\n5. YAGNI (You Aren't Gonna Need It — Вам это не понадобится):\nНе пишите код «на будущее» и не создавайте конфигурации для сценариев, которых ещё нет в требованиях бизнеса.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// ❌ Нарушение SRP: спагетти-функция делает всё сразу\nfunction handleUserSubmitBad(e) {\n  e.preventDefault();\n  const email = e.target.email.value;\n  if (!email.includes('@')) {\n    alert('Неверный email');\n    return;\n  }\n  fetch('/api/users', { method: 'POST', body: JSON.stringify({ email }) })\n    .then(r => r.json())\n    .then(data => {\n      localStorage.setItem('token', data.token);\n      window.location.href = '/dashboard';\n    });\n}\n\n// ✅ Соблюдение SRP: разделение на изолированные функции\nconst validateEmail = (email) => email.includes('@');\nconst authService = {\n  login: async (email) => (await fetch('/api/users', { method: 'POST', body: JSON.stringify({ email }) })).json()\n};\nconst tokenStorage = {\n  save: (token) => localStorage.setItem('token', token)\n};",
+            "title": "Применение принципа Single Responsibility во фронтенде",
+            "explanation": "Разделение валидации, сетевого слоя и работы с хранилищем позволяет независимо тестировать и переиспользовать каждую часть."
+          }
+        },
+        {
+          "title": "Архитектура Feature-Sliced Design (FSD)",
+          "content": "Feature-Sliced Design (FSD) — передовая архитектурная методология для масштабируемых фронтенд-приложений, ставшая стандартом в русскоязычном и мировом комьюнити.\n\nИерархия слоёв FSD (строго сверху вниз):\n\n1. `app/` — инициализация приложения: глобальные стили, роутинг, сторы, корневые провайдеры (React Query, ThemeProvider).\n2. `pages/` — композиция страниц приложения (компоненты роутера: `HomePage`, `LessonPage`, `ProfilePage`).\n3. `widgets/` — крупные самостоятельные UI-блоки, объединяющие несколько фичей (Header, Sidebar, UserCatalog, LessonView).\n4. `features/` — пользовательские интерактивные сценарии, несущие бизнес-ценность (AuthByEmail, AddToCart, FilterLessons, BookmarkTask).\n5. `entities/` — бизнес-сущности предметной области (User, Lesson, Course, Order) — содержат модели данных, типы, API-запросы и базовые карточки.\n6. `shared/` — переиспользуемый фундамент без привязки к бизнес-логике: UI Kit (Button, Input, Modal), API-клиент, хелперы, типы.\n\nЗолотое правило FSD:\nМодуль из конкретного слоя может импортировать код ТОЛЬКО из нижележащих слоёв! Запрещены циклические импорты и импорты между соседними слайсами одного слоя.",
+          "image": {
+            "src": "/images/lessons/code-review-architecture.svg",
+            "alt": "Архитектура Feature-Sliced Design слои и пирамида тестирования Vitest",
+            "caption": "Слои FSD: app -> pages -> widgets -> features -> entities -> shared. Импорты строго сверху вниз"
+          },
+          "codeExample": {
+            "language": "bash",
+            "code": "# Структура проекта по методологии Feature-Sliced Design (FSD):\nsrc/\n├── app/                 # Инициализация приложения, провайдеры, глобальные стили\n│   ├── providers/\n│   └── styles/index.css\n├── pages/               # Страницы приложения\n│   ├── LessonPage/\n│   └── DashboardPage/\n├── widgets/             # Крупные UI-блоки (Header, Sidebar)\n│   ├── Header/ui/Header.tsx\n│   └── CurriculumSidebar/\n├── features/            # Пользовательские фичи (сценарии)\n│   ├── AuthByEmail/\n│   └── RunCodeSandbox/\n├── entities/            # Бизнес-сущности (User, Lesson)\n│   ├── lesson/model/types.ts\n│   └── user/api/userApi.ts\n└── shared/              # Переиспользуемый базис (UI Kit, lib, api)\n    ├── ui/Button/\n    ├── api/httpClient.ts\n    └── lib/formatDate.ts",
+            "title": "Файловая структура проекта на Feature-Sliced Design (FSD)",
+            "explanation": "Чёткая изоляция слоёв гарантирует, что изменение одной фичи никогда случайно не сломает другую часть кодовой базы."
+          }
+        },
+        {
+          "title": "Пирамида автоматизированного тестирования с Vitest",
+          "content": "Автоматизированное тестирование гарантирует, что написанный код работает корректно и защищён от регрессий при будущих изменениях.\n\nПирамида тестирования:\n\n1. Unit Tests (Модульные тесты — 70% объема):\n- Тестируют изолированные чистые функции, утилиты, парсеры, кастомные хуки и модели данных.\n- Быстрые (выполняются за миллисекунды), дешёвые в написании.\n- Инструменты: Vitest (быстрый аналог Jest на движке Vite), Jest.\n\n2. Integration Tests (Интеграционные тесты — 20% объема):\n- Тестируют совместную работу нескольких компонентов (форма + валидация + кнопка submit).\n- Инструменты: React Testing Library, Vitest.\n\n3. E2E Tests (End-to-End сквозные тесты — 10% объема):\n- Запускают настоящий браузер (Chromium/Firefox) и симулируют действия живого пользователя от клика до базы данных.\n- Медленные, дорогие в поддержке, но дают максимальную уверенность.\n- Инструменты: Playwright, Cypress.\n\nПаттерн AAA в написании тестов:\n- Arrange (Подготовка): инициализируем входные данные и моки.\n- Act (Действие): вызываем тестируемую функцию или рендерим компонент.\n- Assert (Проверка): проверяем, что результат совпадает с ожидаемым (`expect(result).toBe(expected)`).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// src/shared/lib/math.test.ts — модульное тестирование на Vitest\nimport { describe, it, expect } from 'vitest';\n\n// Чистая функция расчета прогресса стажёра\nexport function calculateProgress(completedCount, totalCount) {\n  if (totalCount <= 0) return 0;\n  if (completedCount <= 0) return 0;\n  const percentage = Math.round((completedCount / totalCount) * 100);\n  return Math.min(percentage, 100);\n}\n\n// Тестовый набор (Test Suite):\ndescribe('calculateProgress()', () => {\n  it('корректно рассчитывает процент завершения', () => {\n    // Arrange & Act\n    const result = calculateProgress(3, 10);\n    // Assert\n    expect(result).toBe(30);\n  });\n\n  it('возвращает 0 при нулевом общем количестве', () => {\n    expect(calculateProgress(5, 0)).toBe(0);\n  });\n\n  it('ограничивает максимальный прогресс 100%', () => {\n    expect(calculateProgress(15, 10)).toBe(100);\n  });\n});",
+            "title": "Unit-тестирование чистой функции с помощью Vitest",
+            "explanation": "Тесты по шаблону Arrange-Act-Assert проверяют как стандартные сценарии (3 из 10 = 30%), так и граничные случаи (деление на 0, переполнение)."
+          }
+        }
+      ],
+      "seniorTips": [
+        "При проведении Code Review оставляйте комментарии в формате: `[Nitpick]` (мелкая придирка, не блокирующая мерж), `[Question]` (вопрос по логике) или `[Blocker]` (критический баг).",
+        "Пишите Unit-тесты в первую очередь для сложной бизнес-логики (расчет скидок, валидаторы, парсеры данных). Тестировать простые UI-компоненты-обёртки не имеет смысла.",
+        "Следуйте правилу бойскаута: «Оставь кодовую базу чище, чем она была до тебя». При правке бага отрефакторьте окружающий код, если он написан грязно.",
+        "В архитектуре FSD никогда не импортируйте код из соседних модулей того же слоя напрямую — используйте публичный интерфейс `index.ts` (Public API)."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Создание PR размером в 3500 строк с сообщением 'update project'",
+          "good": "// Разбиение крупной фичи на 4 последовательных атомарных PR по 200 строк с понятным описанием",
+          "reason": "Гигантские PR физически невозможно качественно отрецензировать. Ревьюер проглядит критические баги и архитектурные нарушения."
+        },
+        {
+          "bad": "// Импорт из вышележащего слоя в FSD:\n// Внутри entities/user/model.ts:\nimport { OrderWidget } from 'widgets/OrderWidget'; // ❌ Цикл!",
+          "good": "// Соблюдение правила однонаправленного потока:\n// Внутри widgets/OrderWidget.tsx:\nimport { UserCard } from 'entities/user'; // ✅ Сверху вниз",
+          "reason": "Импорт из вышележащего слоя создаёт жесткую циклическую связность (Spaghetti Code), делая модуль entities непригодным для повторного использования."
+        },
+        {
+          "bad": "// Тестирование внутренних деталей реализации:\nexpect(component.state.count).toBe(1);",
+          "good": "// Тестирование поведения с точки зрения пользователя:\nexpect(screen.getByRole('button')).toHaveTextContent('1');",
+          "reason": "Тестирование деталей реализации делает тесты хрупкими: при смене внутреннего состояния без изменения поведения тест сломается."
+        }
+      ],
+      "keyTakeaways": [
+        "Code Review — инструмент обмена знаниями и защиты кодовой базы от багов. Идеальный PR: атомарный (до 300 строк), с описанием и скриншотами.",
+        "Принцип Single Responsibility (SRP) требует, чтобы каждый модуль и компонент решал строго одну задачу.",
+        "Feature-Sliced Design (FSD) структурирует проект по слоям `app` → `pages` → `widgets` → `features` → `entities` → `shared` с импортами строго сверху вниз.",
+        "Пирамида тестирования состоит из быстрых Unit-тестов (70%), интеграционных тестов (20%) и сквозных E2E (10%).",
+        "Тесты строятся по паттерну AAA (Arrange — Act — Assert) и проверяют поведение программы, а не внутренние детали реализации."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"test-runner\"></div>",
+      "initialCss": "#test-runner {\n  font-family: 'JetBrains Mono', monospace;\n  background: #0a0e13;\n  color: #2dff8a;\n  padding: 16px;\n  border-radius: 8px;\n  border: 1px solid #30363d;\n  min-height: 220px;\n  white-space: pre-wrap;\n}",
+      "initialJs": "const runner = document.getElementById('test-runner');\nconst log = (msg) => runner.textContent += msg + '\\n';\n\n// Мини-тест раннер в стиле Vitest:\nfunction test(name, fn) {\n  try {\n    fn();\n    log(`✔ PASS: ${name}`);\n  } catch (err) {\n    log(`✖ FAIL: ${name} -> ${err.message}`);\n  }\n}\n\nfunction expect(actual) {\n  return {\n    toBe(expected) {\n      if (actual !== expected) {\n        throw new Error(`Ожидалось ${expected}, получено ${actual}`);\n      }\n    }\n  };\n}\n\n// Тестируемая функция расчета скидки\nfunction getDiscountedPrice(price, discountPercent) {\n  if (price < 0 || discountPercent < 0) return 0;\n  if (discountPercent >= 100) return 0;\n  return price - (price * discountPercent) / 100;\n}\n\nlog('Запуск тестового набора Vitest:');\ntest('корректно вычисляет скидку 20% от 1000', () => {\n  expect(getDiscountedPrice(1000, 20)).toBe(800);\n});\ntest('возвращает 0 при скидке 100%', () => {\n  expect(getDiscountedPrice(500, 100)).toBe(0);\n});\ntest('корректно обрабатывает отрицательную цену', () => {\n  expect(getDiscountedPrice(-100, 10)).toBe(0);\n});",
+      "instructions": "Практика тестирования и чистого кода:\n1. Изучите вывод мини-раннера Vitest в окне консоли\n2. Напишите функцию formatCurrency(amount, currency = 'RUB'), форматирующую число в вид '1 000 ₽'\n3. Напишите для неё 3 unit-теста с помощью функций test() и expect()"
+    },
+    "task": {
+      "title": "Рефакторинг спагетти-модуля корзины и написание unit-тестов",
+      "scenario": "Вы проводите рефакторинг интернет-магазина. Старый модуль корзины представлял собой гигантскую функцию, смешивающую UI, сетевые запросы и расчёты. Вам нужно разбить код по принципу Single Responsibility (SRP), выделить чистые функции расчёта стоимости и скидок и покрыть их тестами.",
+      "criteria": [
+        "Выделить чистую функцию calculateCartTotal(items, discountCode, promoMap)",
+        "Функция должна обрабатывать скидки в процентах и фиксированные суммы",
+        "Применить Guard Clauses для валидации входных данных (пустая корзина, некорректный промокод)",
+        "Соблюдать неизменяемость (Immutability) — не мутировать исходный массив items",
+        "Написать тестовый набор из 4 сценариев (обычный расчет, промокод, пустая корзина, переполнение скидки)",
+        "Архитектурно разделить типы, сервис и расчетные функции"
+      ],
+      "starterCode": {
+        "js": "// Исходный спагетти-код корзины для рефакторинга\nfunction calculateCartTotal(items, promoCode, promoMap) {\n  // Ваш чистый код здесь\n}"
+      },
+      "hints": [
+        "Используйте Guard Clauses: if (!Array.isArray(items) || items.length === 0) return { subtotal: 0, discount: 0, total: 0 };",
+        "Используйте items.reduce() для подсчета суммы: subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);",
+        "Промокоды в promoMap: { 'SAVE10': { type: 'percent', value: 10 }, 'MINUS500': { type: 'fixed', value: 500 } }"
+      ],
+      "solution": {
+        "js": "function calculateCartTotal(items = [], promoCode = '', promoMap = {}) {\n  if (!Array.isArray(items) || items.length === 0) {\n    return { subtotal: 0, discount: 0, total: 0 };\n  }\n\n  const subtotal = items.reduce((acc, item) => {\n    const price = Number(item.price) || 0;\n    const quantity = Number(item.quantity) || 1;\n    return acc + price * quantity;\n  }, 0);\n\n  let discount = 0;\n  const promo = promoMap[promoCode?.trim().toUpperCase()];\n\n  if (promo) {\n    if (promo.type === 'percent') {\n      discount = (subtotal * promo.value) / 100;\n    } else if (promo.type === 'fixed') {\n      discount = promo.value;\n    }\n  }\n\n  discount = Math.min(discount, subtotal);\n  const total = Math.max(0, subtotal - discount);\n\n  return {\n    subtotal: Math.round(subtotal),\n    discount: Math.round(discount),\n    total: Math.round(total)\n  };\n}",
+        "explanation": "Функция написана по принципу SRP и чистых функций: использует Guard Clauses, не мутирует аргументы, поддерживает различные типы промокодов и гарантирует, что итоговая сумма не станет отрицательной."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro3-q1",
+          "question": "Какое главное правило взаимодействия слоев в архитектурной методологии Feature-Sliced Design (FSD)?",
+          "options": [
+            "Любой модуль может импортировать любой другой модуль",
+            "Модули могут импортировать код только из нижележащих слоев (однонаправленный поток сверху вниз)",
+            "Все компоненты должны лежать в одной папке components/",
+            "Слои features и widgets должны быть объединены"
+          ],
+          "correctIndex": 1,
+          "explanation": "В Feature-Sliced Design строго действует правило однонаправленного потока импортов: вышележащие слои могут импортировать нижележащие (app -> pages -> widgets -> features -> entities -> shared), но никогда наоборот. Это исключает циклические зависимости и спагетти-код."
+        },
+        {
+          "id": "pro3-q2",
+          "question": "В чём заключается принцип Single Responsibility Principle (SRP) из SOLID применительно к фронтенду?",
+          "options": [
+            "Каждый файл должен содержать не более 10 строк кода",
+            "Каждый компонент или модуль должен отвечать ровно за одну задачу или обязанность",
+            "В проекте должен быть только один разработчик",
+            "Все функции должны возвращать только один тип данных"
+          ],
+          "correctIndex": 1,
+          "explanation": "Принцип единственной ответственности (SRP) требует, чтобы у модуля/компонента была ровно одна причина для изменения. Разделение бизнес-логики, UI-рендеринга и сетевых запросов делает кодовую базу модульной и тестируемой."
+        },
+        {
+          "id": "pro3-q3",
+          "question": "Какую долю в классической пирамиде автоматизированного тестирования должны занимать быстрые модульные Unit-тесты?",
+          "options": [
+            "Около 10%",
+            "Около 70%",
+            "0% — достаточно только ручного тестирования",
+            "100% — другие виды тестов не нужны"
+          ],
+          "correctIndex": 1,
+          "explanation": "В пирамиде тестирования Unit-тесты составляют основание (около 70% от всех тестов). Они проверяют чистые функции, утилиты и хуки за миллисекунды, обеспечивая быструю обратную связь при разработке."
+        },
+        {
+          "id": "pro3-q4",
+          "question": "Что означает аббревиатура AAA в методологии написания тестов?",
+          "options": [
+            "Always Async Await",
+            "Arrange (Подготовка) — Act (Действие) — Assert (Проверка)",
+            "Automate All Apps",
+            "Action Authentication Authorization"
+          ],
+          "correctIndex": 1,
+          "explanation": "Паттерн AAA (Arrange — Act — Assert) — стандартизированная структура модульного теста: сначала подготавливаем тестовые данные (Arrange), затем вызываем тестируемую функцию (Act), и в конце проверяем результат через expect (Assert)."
+        },
+        {
+          "id": "pro3-q5",
+          "question": "Что из перечисленного является антипаттерном при подготовке Pull Request на Code Review?",
+          "options": [
+            "Добавление скриншотов до/после для UI-изменений",
+            "Создание гигантского PR на 3000 строк изменений, объединяющего 5 несвязанных фичей и рефакторинг",
+            "Прикрепление ссылки на задачу в трекере",
+            "Предварительное проведение саморевью собственного diff"
+          ],
+          "correctIndex": 1,
+          "explanation": "Создание гигантских неатомарных PR на тысячи строк — грубейший антипаттерн командной разработки. Такие PR невозможно качественно проверить, и они неизбежно приводят к конфликтам мержа и пропускам багов."
+        }
+      ]
+    }
   }
 ];

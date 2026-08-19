@@ -404,84 +404,193 @@ export const cssLessons: Lesson[] = [
     "id": "css-3",
     "moduleId": "css",
     "level": 3,
-    "title": "Блочная модель (Box Model)",
-    "subtitle": "Content, padding, border, margin и box-sizing",
-    "description": "Фундамент геометрии в CSS: почему стандартная модель ломает верстку, как работает box-sizing: border-box, схлопывание отступов margin collapse и правильный расчет ширины.",
-    "estimatedMinutes": 35,
+    "title": "Блочная модель (Box Model) и управление геометрией",
+    "subtitle": "Content, Padding, Border, Margin, схлопывание отступов и Block Formatting Context",
+    "description": "Изучите фундаментальную блочную модель CSS: математику слоев content/padding/border/margin, влияние свойства box-sizing, тонкости схлопывания вертикальных отступов (Margin Collapse) и изоляцию макетов через BFC.",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "CSS",
-      "BoxModel",
-      "Geometry"
+      "box-model",
+      "margin-collapse",
+      "bfc",
+      "box-sizing",
+      "layout",
+      "padding",
+      "margin"
     ],
     "theory": {
-      "overview": "Каждый элемент на странице — это прямоугольник из 4 слоев: Content, Padding, Border, Margin.",
+      "overview": "Каждый элемент на веб-странице — это прямоугольный бокс. Даже если кнопка выглядит как круг (`border-radius: 50%`), браузер рассчитывает её геометрию и положение как прямоугольник. Модель Box Model определяет, как эти прямоугольники формируются, как вычисляются их итоговые физические размеры и как элементы взаимодействуют друг с другом в нормальном потоке документа (Normal Flow).\n\nПонимание Box Model, природы схлопывания внешних отступов (Margin Collapsing) и контекста форматирования блока (Block Formatting Context / BFC) позволяет избегать 90% непредсказуемых багов в верстке.",
       "sections": [
         {
-          "title": "border-box",
-          "content": "- `border-box` включает padding и border в общую ширину width.\n- Сброс: `* { box-sizing: border-box; }`.",
+          "title": "Анатомия Box Model: 4 слоя элемента и глобальный box-sizing",
+          "content": "Блочная модель CSS состоит из 4 концентрических слоёв (изнутри наружу):\n\n1. Content Box (Область контента) — ядро элемента, где отображается текст, дочерние узлы или медиа (`<img>`, `<video>`). Размеры задаются через `width`, `height`, `min-width`, `max-width`.\n\n2. Padding Box (Внутренние отступы) — прозрачное пространство вокруг контента внутри рамки. Фон элемента (`background-color`, `background-image`) распространяется на Content и Padding! Задаётся через `padding: 10px 20px;`.\n\n3. Border Box (Рамка элемента) — видимая или прозрачная граница, обрамляющая padding. Задаётся через `border: 2px solid #2dff8a;`.\n\n4. Margin Box (Внешние отступы) — прозрачное пространство вокруг рамки для создания дистанции до соседних элементов. Margin ВСЕГДА прозрачен (через него просвечивает фон родителя). Задаётся через `margin: 16px;`.\n\nРазница режимов `box-sizing`:\n\n`box-sizing: content-box` (по умолчанию в браузерах):\nШирина (`width`) задаёт размер ТОЛЬКО content-области. Итоговая ширина = `width + padding-left + padding-right + border-left + border-right`. Если у блока `width: 300px; padding: 20px; border: 2px solid red;` — его реальный размер составит `344px`!\n\n`box-sizing: border-box` (индустриальный стандарт):\nШирина (`width`) включает в себя `content + padding + border`. Если задано `width: 300px`, блок всегда останется ровно `300px`, а браузер сам сожмёт внутренний контент. Это делает верстку на 100% предсказуемой.",
           "codeExample": {
             "language": "css",
-            "title": "border-box",
-            "code": "* { box-sizing: border-box; }\n.box { width: 300px; padding: 20px; border: 2px solid blue; /* Итого 300px */ }",
-            "explanation": "Размер блока строго 300px."
+            "code": "/* Золотое правило современного CSS — глобальный border-box */\nhtml {\n  box-sizing: border-box;\n}\n\n*, *::before, *::after {\n  box-sizing: inherit;\n}\n\n/* Демонстрация предсказуемой геометрии */\n.card {\n  width: 320px;             /* Финальная ширина блока ровно 320px */\n  padding: 24px;            /* Внутренние отступы */\n  border: 2px solid #2dff8a; /* Рамка */\n  margin: 16px auto;        /* Внешний отступ и центрирование */\n  background: #0d1117;\n}",
+            "title": "Глобальный сброс box-sizing через inherit",
+            "explanation": "Паттерн box-sizing: inherit на * позволяет легко переопределять box-sizing у сторонних UI-виджетов, сохраняя border-box для всего остального приложения."
+          }
+        },
+        {
+          "title": "Схлопывание внешних отступов (Margin Collapsing) во всех деталях",
+          "content": "Схлопывание внешних отступов (Margin Collapsing) — это поведение нормального потока CSS, при котором соседние вертикальные margin объединяются в один единственный отступ, равный максимальному из них.\n\nГоризонтальные отступы (`margin-left`, `margin-right`) НИКОГДА не схлопываются!\n\nТри сценария схлопывания вертикальных margin:\n\n1. Смежные элементы-соседи (Adjacent Siblings):\nЕсли у верхнего абзаца `<p>` задан `margin-bottom: 30px`, а у нижнего `margin-top: 20px` — расстояние между ними составит `30px` (Max(30, 20)), а НЕ `50px`.\n\n2. Родитель и первый/последний дочерний элемент (Parent & Child):\nЕсли у родителя нет `border-top`, `padding-top` или `inline-контента`, то `margin-top` его первого дочернего элемента «вываливается» наружу и объединяется с `margin-top` родителя!\n\n3. Пустые блоки (Empty Blocks):\nЕсли элемент не имеет высоты, контента, padding и border, его собственные `margin-top` и `margin-bottom` схлопываются между собой в один отступ.\n\nКак рассчитывается схлопывание с отрицательными margin:\n- Два положительных: `Max(A, B)` → `Max(30, 20) = 30px`\n- Положительный и отрицательный: `A + B` → `30px + (-10px) = 20px`\n- Два отрицательных: `Min(A, B)` (наибольший по модулю) → `Min(-20, -10) = -20px`",
+          "image": {
+            "src": "/images/lessons/css-margin-collapse.jpg",
+            "alt": "Сравнение схлопывания Margin Collapse и предотвращения через BFC",
+            "caption": "Margin Collapse объединяет вертикальные отступы в один. BFC и display: flow-root изолируют геометрию"
+          },
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Проблема: margin-top у h1 вываливается за пределы header -->\n<header class=\"problematic-header\">\n  <h1 style=\"margin-top: 40px;\">Заголовок страницы</h1>\n</header>\n\n<style>\n  /* ❌ Ошибка: header сместится вниз вместе с h1 */\n  .problematic-header {\n    background: #161b22;\n  }\n\n  /* ✅ Решение 1: display: flow-root (создание BFC) */\n  .fixed-header-1 {\n    display: flow-root;\n    background: #161b22;\n  }\n\n  /* ✅ Решение 2: добавить минимальный padding */\n  .fixed-header-2 {\n    padding-top: 1px;\n    background: #161b22;\n  }\n</style>",
+            "title": "Проблема выпадающего margin и решения через BFC / padding",
+            "explanation": "Без изоляции margin первого ребенка смещает весь родительский блок. display: flow-root создаёт Block Formatting Context и предотвращает вываливание margin наружу."
+          }
+        },
+        {
+          "title": "Block Formatting Context (BFC): Изоляция геометрии элементов",
+          "content": "Block Formatting Context (BFC) — это независимая область страницы, внутри которой элементы позиционируются по правилам блочной раскладки и изолированы от внешнего мира.\n\nЗачем нужен BFC:\n1. Предотвращает схлопывание вертикальных margin между родителем и детьми.\n2. Содержит внутри себя плавающие элементы (`float`) — решает классическую проблему схлопывания высоты родителя (замена устаревшему `.clearfix`).\n3. Предотвращает обтекание плавающих элементов соседними блоками.\n\nКак активировать BFC в современном CSS:\n\n1. `display: flow-root` — современный, чистый и семантически нейтральный способ создания BFC без побочных эффектов!\n2. `overflow: hidden` / `overflow: auto` (традиционный способ, но может обрезать выпадающие меню и тени).\n3. `display: flex` / `display: grid` (дочерние элементы flex/grid контейнера никогда не подвергаются margin-collapsing!).\n4. `position: absolute` / `position: fixed`.\n5. `contain: layout` / `contain: paint`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Современный контейнер с гарантированной изоляцией BFC */\n.isolated-container {\n  display: flow-root; /* Создает BFC без обрезки теней и меню */\n  background: #0d1117;\n  border: 1px solid #30363d;\n  border-radius: 8px;\n  padding: 16px;\n}\n\n/* Flex/Grid контейнеры автоматически отключают margin collapsing */\n.flex-list {\n  display: flex;\n  flex-direction: column;\n  gap: 16px; /* gap полностью заменяет непредсказуемые margin! */\n}",
+            "title": "Создание BFC через display: flow-root и flex gap",
+            "explanation": "display: flow-root — стандарт создания BFC. В современных раскладках (Flex/Grid) свойство gap полностью исключает необходимость манипулировать сложными вертикальными margin."
+          }
+        },
+        {
+          "title": "Логические свойства (Logical Properties) и отрицательные Margin",
+          "content": "В современном CSS физические направления (`top`, `bottom`, `left`, `right`) вытесняются логическими свойствами, зависящими от направления письма (LTR, RTL, вертикальное письмо).\n\nТаблица соответствия:\n- `margin-left` / `margin-right` → `margin-inline-start` / `margin-inline-end`\n- `margin-left + margin-right` → `margin-inline: auto;` (горизонтальное центрирование)\n- `margin-top + margin-bottom` → `margin-block: 24px;`\n- `padding-left + padding-right` → `padding-inline: 16px;`\n- `padding-top + padding-bottom` → `padding-block: 12px;`\n- `width` / `height` → `inline-size` / `block-size`\n\nОтрицательные Margin (Negative Margins):\nЗадание отрицательного margin (`margin-top: -20px;` или `margin-inline: -16px;`) сдвигает элемент в противоположную сторону или «затягивает» следующие за ним элементы на себя.\nПрименение:\n- «Вынос» изображения на всю ширину карточки вопреки padding родителя: `margin-inline: -24px;`.\n- Наложение карточек внахлёст для дизайнерских эффектов.\n\n`Outline` vs `Border`:\n- `border` занимает физическое место в Box Model и влияет на раскладку.\n- `outline` рисуется поверх элемента, НЕ занимает места в Box Model и не вызывает перерисовку геометрии (Reflow) — идеален для фокусных колец a11y (`outline: 2px solid #2dff8a; outline-offset: 4px;`).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Карточка с выносом картинки на полную ширину через negative margin */\n.article-card {\n  padding: 24px;\n  background: #0d1117;\n  border-radius: 12px;\n}\n\n.article-card-img {\n  /* Отрицательный margin растягивает картинку в края карточки */\n  margin-inline: -24px;\n  margin-block-start: -24px;\n  margin-block-end: 16px;\n  width: calc(100% + 48px);\n  display: block;\n  border-radius: 12px 12px 0 0;\n}\n\n/* Доступное кольцо фокуса без искажения геометрии */\n.btn:focus-visible {\n  outline: 2px solid #2dff8a;\n  outline-offset: 3px; /* Зазор между кнопкой и рамкой */\n}",
+            "title": "Логические свойства, отрицательный margin и outline-offset",
+            "explanation": "margin-inline: -24px компенсирует padding карточки. outline-offset создаёт элегантный зазор для фокусного кольца клавиатурной навигации без сдвига верстки."
           }
         }
       ],
       "seniorTips": [
-        "Всегда задавайте box-sizing: border-box глобально."
+        "Всегда используйте `*, *::before, *::after { box-sizing: border-box; }` во всех проектах. Это предотвращает 99% проблем с вылезанием блоков за пределы 100% ширины.",
+        "Вместо вертикальных `margin-bottom` между карточками используйте Flexbox/Grid и свойство `gap` — оно не схлопывается и не требует зануления у `:last-child`.",
+        "Для центрирования блока по горизонтали пишите `margin-inline: auto;` вместо устаревшего `margin: 0 auto;` — это сохраняет вертикальные отступы нетронутыми.",
+        "Для фокуса всегда используйте `outline` или `box-shadow`, а не `border`. Добавление border при фокусе сдвигает соседний контент на 1-2 пикселя (layout shift)."
       ],
       "commonMistakes": [
         {
-          "bad": "* { box-sizing: content-box; }",
-          "good": "* { box-sizing: border-box; }",
-          "reason": "content-box распирает ширину блоков."
+          "bad": ".box {\n  width: 100%;\n  padding: 20px;\n  /* content-box по умолчанию */\n  /* Итог: 100% + 40px -> горизонтальный скролл! */\n}",
+          "good": ".box {\n  box-sizing: border-box;\n  width: 100%;\n  padding: 20px;\n  /* Итог: ровно 100%, контент сжат внутрь */\n}",
+          "reason": "При content-box добавление padding к width: 100% увеличивает суммарную ширину блока за пределы родителя, вызывая появление нежелательного горизонтального скроллбара."
+        },
+        {
+          "bad": "/* Попытка добавить горизонтальный отступ к <span> */\nspan.badge {\n  margin-top: 20px;\n  margin-bottom: 20px;\n  /* Не работает! */\n}",
+          "good": "span.badge {\n  display: inline-block; /* или inline-flex */\n  margin-block: 20px;\n  /* Теперь вертикальные отступы работают */\n}",
+          "reason": "Строчные элементы (display: inline) игнорируют вертикальные margin и padding при расчёте положения строк в потоке текста. Требуется display: inline-block или block."
+        },
+        {
+          "bad": "/* Сброс фокуса без замены */\nbutton:focus {\n  outline: none; /* Грубейшее нарушение a11y! */\n}",
+          "good": "button:focus-visible {\n  outline: 2px solid #2dff8a;\n  outline-offset: 2px;\n}",
+          "reason": "Удаление outline: none делает сайт абсолютно непригодным для людей, управляющих компьютером с клавиатуры. Используйте :focus-visible с красивым кастомным outline."
         }
       ],
       "keyTakeaways": [
-        "border-box включает padding и border в ширину.",
-        "Вертикальные margin схлопываются."
+        "Box Model состоит из 4 концентрических слоёв: `content` → `padding` (с фоном) → `border` → `margin` (прозрачный зазор).",
+        "`box-sizing: border-box` фиксирует суммарную геометрию блока (`width` = `content + padding + border`), предотвращая выталкивание элементов.",
+        "Margin Collapse объединяет вертикальные отступы соседних элементов в один `Max(A, B)`. Горизонтальные марджины никогда не схлопываются.",
+        "Block Formatting Context (BFC) создаётся через `display: flow-root`, `flex`, `grid` или `overflow: hidden` и полностью изолирует внутреннюю геометрию блока.",
+        "Логические свойства (`margin-inline`, `padding-block`) делают код интернациональным и чистым, а `outline` обеспечивает доступный фокус без сдвига макета."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"box-demo\"><p>Ширина 250px с padding 20px</p></div>",
-      "initialCss": ".box-demo { width: 250px; padding: 20px; border: 4px solid #4f46e5; background: #e0e7ff; box-sizing: border-box; border-radius: 8px; font-weight: bold; text-align: center; }",
-      "initialJs": "console.log('Box loaded');",
-      "instructions": "Попробуйте изменить padding."
+      "initialHtml": "<div class=\"box-demo\">\n  <div class=\"box content-box\">\n    <span>content-box (200px + padding + border)</span>\n  </div>\n  <div class=\"box border-box\">\n    <span>border-box (ровно 200px)</span>\n  </div>\n</div>",
+      "initialCss": ".box-demo {\n  display: flex;\n  flex-direction: column;\n  gap: 24px;\n  padding: 20px;\n  background: #0a0e13;\n}\n\n.box {\n  width: 200px;\n  padding: 20px;\n  border: 4px solid #2dff8a;\n  background: #161b22;\n  color: #e6edf3;\n  font-family: monospace;\n  font-size: 13px;\n}\n\n.content-box {\n  box-sizing: content-box;\n  /* Реальная ширина: 200 + 40 + 8 = 248px */\n}\n\n.border-box {\n  box-sizing: border-box;\n  /* Реальная ширина: ровно 200px */\n  border-color: #29e7ff;\n}",
+      "initialJs": "// Интерактивный замер реальных физических размеров элементов в DOM:\nconst boxes = document.querySelectorAll('.box');\nboxes.forEach((box) => {\n  const rect = box.getBoundingClientRect();\n  console.log(`${box.className}: итоговая ширина в DOM = ${rect.width}px`);\n});",
+      "instructions": "Интерактивная песочница Box Model:\n1. Изучите визуальную разницу между .content-box и .border-box в окне предпросмотра\n2. Добавьте к .box свойство margin-block: 16px и margin-inline: auto\n3. Добавьте hover-эффект с увеличением outline (outline: 2px solid #ffb02e, outline-offset: 4px)\n4. Посмотрите консоль — getBoundingClientRect() наглядно подтверждает математику вычисления размеров"
     },
     "task": {
-      "title": "Фиксированная карточка",
-      "scenario": "Создайте карточку шириной 300px с padding 24px.",
+      "title": "Верстка виджета профиля с точной геометрией Box Model",
+      "scenario": "Вам необходимо сверстать компактный UI-виджет профиля разработчика с фото-обложкой, аватаркой внахлёст (отрицательный margin), тегами навыков и кнопкой действия. Вёрстка должна быть строго устойчива к переполнению контента и построена на принципах BFC и box-sizing: border-box.",
       "criteria": [
-        "Использован border-box",
-        "Задана ширина 300px"
+        "Глобальный box-sizing: border-box для виджета и всех его потомков",
+        "Контейнер виджета изолирован через BFC (display: flow-root)",
+        "Обложка вынесена в края карточки через логические отрицательные отступы (margin-inline, margin-block-start)",
+        "Аватарка наложена на обложку внахлёст с помощью отрицательного margin-block-start",
+        "Отступы между блоками информации заданы через логические свойства (margin-block)",
+        "Кнопка 'Связаться' имеет доступный :focus-visible с outline-offset"
       ],
       "starterCode": {
-        "html": "<div class=\"user-card\"><h3>Профиль</h3></div>",
-        "css": "/* Стили */\n"
+        "html": "<div class=\"user-widget\">\n  <img class=\"cover-img\" src=\"/cover.jpg\" alt=\"Обложка профиля\" />\n  <img class=\"avatar-img\" src=\"/avatar.jpg\" alt=\"Аватар разработчика\" />\n  <h3 class=\"user-name\">Алексей Смирнов</h3>\n  <p class=\"user-bio\">Frontend Engineer & UI Architect</p>\n  <button type=\"button\" class=\"btn-contact\">Связаться</button>\n</div>",
+        "css": "/* Реализуйте стилизацию Box Model */\n.user-widget {\n  max-width: 320px;\n}"
       },
       "hints": [
-        "Задайте width: 300px; padding: 24px; box-sizing: border-box;"
+        "Задайте .user-widget: display: flow-root, padding: 20px, background, border-radius",
+        "Для .cover-img: margin-inline: -20px, margin-block-start: -20px, width: calc(100% + 40px)",
+        "Для .avatar-img: margin-block-start: -40px, border: 4px solid #bg, border-radius: 50%",
+        "Используйте outline: 2px solid #neon и outline-offset: 3px для :focus-visible кнопки"
       ],
       "solution": {
-        "html": "<div class=\"user-card\"><h3>Профиль</h3></div>",
-        "css": ".user-card { box-sizing: border-box; width: 300px; padding: 24px; border: 1px solid #cbd5e1; border-radius: 12px; background: white; }",
-        "explanation": "Идеальный блок."
+        "css": ".user-widget {\n  box-sizing: border-box;\n  display: flow-root;\n  max-width: 320px;\n  padding: 20px;\n  background: #0d1117;\n  border: 1px solid #30363d;\n  border-radius: 12px;\n  text-align: center;\n  color: #e6edf3;\n}\n.user-widget * {\n  box-sizing: border-box;\n}\n.cover-img {\n  display: block;\n  width: calc(100% + 40px);\n  height: 100px;\n  object-fit: cover;\n  margin-inline: -20px;\n  margin-block-start: -20px;\n  margin-block-end: 0;\n  border-radius: 12px 12px 0 0;\n}\n.avatar-img {\n  width: 72px;\n  height: 72px;\n  border-radius: 50%;\n  border: 3px solid #0d1117;\n  margin-block-start: -36px;\n  position: relative;\n  display: inline-block;\n}\n.user-name {\n  margin-block: 12px 4px;\n  font-size: 1.25rem;\n}\n.user-bio {\n  margin-block: 0 16px;\n  color: #8b949e;\n  font-size: 0.875rem;\n}\n.btn-contact {\n  width: 100%;\n  padding-block: 10px;\n  background: #2dff8a;\n  color: #0a0e13;\n  border: none;\n  border-radius: 6px;\n  font-weight: bold;\n  cursor: pointer;\n}\n.btn-contact:focus-visible {\n  outline: 2px solid #29e7ff;\n  outline-offset: 3px;\n}",
+        "explanation": "Виджет использует display: flow-root (BFC), отрицательные margin-inline компенсируют padding родителя для обложки, аватарка изящно наложена на обложку через margin-block-start: -36px, кнопка защищена стилями a11y."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c3-q1",
-          "question": "Что делает box-sizing: border-box?",
+          "id": "css3-q1",
+          "question": "Какова будет реальная ширина элемента в DOM, если ему задано: width: 300px; padding: 25px; border: 5px solid red; box-sizing: content-box?",
           "options": [
-            "Удаляет рамку",
-            "Включает padding и border в width",
-            "Увеличивает margin",
-            "Ничего"
+            "300px",
+            "330px",
+            "360px",
+            "270px"
+          ],
+          "correctIndex": 2,
+          "explanation": "При content-box итоговая ширина вычисляется по формуле: width + padding-left + padding-right + border-left + border-right = 300 + 25 + 25 + 5 + 5 = 360px."
+        },
+        {
+          "id": "css3-q2",
+          "question": "Какое расстояние будет между двумя соседними блоками, если у верхнего margin-bottom: 40px, а у нижнего margin-top: 25px в нормальном потоке документа?",
+          "options": [
+            "65px",
+            "40px",
+            "15px",
+            "25px"
           ],
           "correctIndex": 1,
-          "explanation": "border-box включает padding и border в общую ширину."
+          "explanation": "В CSS вертикальные внешние отступы соседних элементов схлопываются (Margin Collapse) в один общий отступ, равный наибольшему из них: Max(40px, 25px) = 40px."
+        },
+        {
+          "id": "css3-q3",
+          "question": "Какой современный метод позволяет создать Block Formatting Context (BFC) без обрезки выпадающих теней и меню?",
+          "options": [
+            "overflow: hidden",
+            "display: flow-root",
+            "clear: both",
+            "float: left"
+          ],
+          "correctIndex": 1,
+          "explanation": "display: flow-root — стандартное современное свойство CSS, специально созданное для активации Block Formatting Context без побочных эффектов обрезки контента (как у overflow: hidden)."
+        },
+        {
+          "id": "css3-q4",
+          "question": "В чём ключевое различие между свойствами border и outline?",
+          "options": [
+            "border не поддерживает цвет",
+            "border занимает физическое место в Box Model и влияет на раскладку, а outline рисуется поверх без изменения геометрии",
+            "outline работает только на ссылках",
+            "Нет разницы — это синонимы"
+          ],
+          "correctIndex": 1,
+          "explanation": "Border является неотъемлемой частью Box Model и при динамическом изменении сдвигает соседние элементы (вызывает Layout/Reflow). Outline рисуется над элементом без изменения геометрии, что делает его идеальным для индикаторов фокуса."
+        },
+        {
+          "id": "css3-q5",
+          "question": "Что делает логическое свойство margin-inline: auto?",
+          "options": [
+            "Центрирует элемент по вертикали",
+            "Центрирует элемент по горизонтали, устанавливая margin-inline-start и margin-inline-end в auto",
+            "Удаляет все внешние отступы",
+            "Делает элемент плавающим"
+          ],
+          "correctIndex": 1,
+          "explanation": "margin-inline: auto является современным логическим аналогом margin-left: auto; margin-right: auto; и центрирует блочный элемент по горизонтальной оси, не затрагивая вертикальные отступы margin-block."
         }
       ]
     }

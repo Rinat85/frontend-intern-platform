@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="100%" height="100%" style="background:#0a0e13; font-family:'JetBrains Mono', Consolas, monospace;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Title -->
+  <text x="500" y="45" fill="#2dff8a" font-size="24" font-weight="bold" text-anchor="middle" letter-spacing="1">Frontend Архитектура &amp; Code Review</text>
+  <text x="500" y="72" fill="#8b949e" font-size="13" text-anchor="middle">Feature-Sliced Design (FSD) слои + Пирамида автоматизированного тестирования</text>
+
+  <!-- Left Side: Feature-Sliced Design Layers -->
+  <g transform="translate(40, 95)" filter="url(#shadow)">
+    <rect width="440" height="440" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#161b22"/>
+    <text x="20" y="25" fill="#29e7ff" font-size="15" font-weight="bold">Feature-Sliced Design (FSD Слои)</text>
+    <text x="350" y="24" fill="#8b949e" font-size="11">Сверху вниз ↓</text>
+
+    <!-- App Layer -->
+    <g transform="translate(20, 50)">
+      <rect width="400" height="48" rx="6" fill="#1f1838" stroke="#a371f7" stroke-width="1.5"/>
+      <text x="15" y="24" fill="#d2a8ff" font-size="13" font-weight="bold">1. app/</text>
+      <text x="90" y="24" fill="#e6edf3" font-size="12">— Инициализация, провайдеры, роутер, стили</text>
+      <text x="15" y="40" fill="#8b949e" font-size="10">Импортирует из всех нижележащих слоев</text>
+    </g>
+
+    <!-- Pages Layer -->
+    <g transform="translate(20, 108)">
+      <rect width="400" height="48" rx="6" fill="#162638" stroke="#58a6ff" stroke-width="1.5"/>
+      <text x="15" y="24" fill="#79c0ff" font-size="13" font-weight="bold">2. pages/</text>
+      <text x="100" y="24" fill="#e6edf3" font-size="12">— Композиция страниц приложения</text>
+      <text x="15" y="40" fill="#8b949e" font-size="10">Собирает widgets и features в готовые экраны</text>
+    </g>
+
+    <!-- Widgets Layer -->
+    <g transform="translate(20, 166)">
+      <rect width="400" height="48" rx="6" fill="#0d2b26" stroke="#2dff8a" stroke-width="1.5"/>
+      <text x="15" y="24" fill="#2dff8a" font-size="13" font-weight="bold">3. widgets/</text>
+      <text x="110" y="24" fill="#e6edf3" font-size="12">— Крупные блоки интерфейса (Header, Sidebar)</text>
+      <text x="15" y="40" fill="#8b949e" font-size="10">Самостоятельные визуальные блоки с бизнес-логикой</text>
+    </g>
+
+    <!-- Features Layer -->
+    <g transform="translate(20, 224)">
+      <rect width="400" height="48" rx="6" fill="#2d2814" stroke="#ffb02e" stroke-width="1.5"/>
+      <text x="15" y="24" fill="#ffb02e" font-size="13" font-weight="bold">4. features/</text>
+      <text x="115" y="24" fill="#e6edf3" font-size="12">— Пользовательские сценарии (AuthByEmail)</text>
+      <text x="15" y="40" fill="#8b949e" font-size="10">Бизнес-ценность для пользователя (кнопка 'лайк', корзина)</text>
+    </g>
+
+    <!-- Entities Layer -->
+    <g transform="translate(20, 282)">
+      <rect width="400" height="48" rx="6" fill="#2d1624" stroke="#ff2bd6" stroke-width="1.5"/>
+      <text x="15" y="24" fill="#ff2bd6" font-size="13" font-weight="bold">5. entities/</text>
+      <text x="115" y="24" fill="#e6edf3" font-size="12">— Бизнес-сущности (User, Product, Order)</text>
+      <text x="15" y="40" fill="#8b949e" font-size="10">Модели данных, типы, API запросы и UI-карточки</text>
+    </g>
+
+    <!-- Shared Layer -->
+    <g transform="translate(20, 340)">
+      <rect width="400" height="48" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1.5"/>
+      <text x="15" y="24" fill="#e6edf3" font-size="13" font-weight="bold">6. shared/</text>
+      <text x="100" y="24" fill="#e6edf3" font-size="12">— Переиспользуемый базис (UI Kit, helpers, api)</text>
+      <text x="15" y="40" fill="#8b949e" font-size="10">Не содержит бизнес-логики! Импортируется везде</text>
+    </g>
+
+    <text x="220" y="420" fill="#2dff8a" font-size="12" text-anchor="middle">Правило: слой может импортировать ТОЛЬКО нижележащие слои</text>
+  </g>
+
+  <!-- Right Side: Testing Pyramid & Review Matrix -->
+  <g transform="translate(520, 95)" filter="url(#shadow)">
+    <rect width="440" height="440" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#161b22"/>
+    <text x="20" y="25" fill="#2dff8a" font-size="15" font-weight="bold">Пирамида тестирования &amp; Code Review</text>
+
+    <!-- Testing Pyramid Graphic -->
+    <g transform="translate(20, 50)">
+      <!-- E2E Top -->
+      <polygon points="200,10 260,65 140,65" fill="rgba(255,43,214,0.3)" stroke="#ff2bd6" stroke-width="1.5"/>
+      <text x="200" y="50" fill="#ff2bd6" font-size="11" font-weight="bold" text-anchor="middle">E2E (Playwright)</text>
+
+      <!-- Integration Middle -->
+      <polygon points="135,70 265,70 310,125 90,125" fill="rgba(255,176,46,0.3)" stroke="#ffb02e" stroke-width="1.5"/>
+      <text x="200" y="105" fill="#ffb02e" font-size="12" font-weight="bold" text-anchor="middle">Integration (Testing Lib)</text>
+
+      <!-- Unit Bottom -->
+      <polygon points="85,130 315,130 365,190 35,190" fill="rgba(45,255,138,0.3)" stroke="#2dff8a" stroke-width="1.5"/>
+      <text x="200" y="165" fill="#2dff8a" font-size="13" font-weight="bold" text-anchor="middle">Unit Tests (Vitest / Jest)</text>
+      <text x="200" y="182" fill="#e6edf3" font-size="10" text-anchor="middle">70% покрытия — чистые функции, хуки, утилиты</text>
+    </g>
+
+    <!-- Code Review Checklist -->
+    <g transform="translate(20, 260)">
+      <rect width="400" height="155" rx="6" fill="#161b22" stroke="#30363d"/>
+      <text x="15" y="25" fill="#29e7ff" font-size="13" font-weight="bold">Чеклист проведения Code Review:</text>
+      <text x="15" y="50" fill="#7ee787" font-size="11">✔ Архитектура: соблюдены ли границы слоев FSD?</text>
+      <text x="15" y="72" fill="#7ee787" font-size="11">✔ Производительность: нет ли лишних ререндеров?</text>
+      <text x="15" y="94" fill="#7ee787" font-size="11">✔ Безопасность: XSS, экранирование, CSRF-токены</text>
+      <text x="15" y="116" fill="#7ee787" font-size="11">✔ Тесты: покрыты ли критические сценарии unit-тестами?</text>
+      <text x="15" y="138" fill="#7ee787" font-size="11">✔ Доступность: a11y, semantic HTML, клавиатурный фокус</text>
+    </g>
+  </g>
+</svg>

@@ -3,7 +3,7 @@ export type ModuleId = 'html' | 'css' | 'javascript' | 'pro';
 export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
 
 export interface CodeExample {
-  language: 'html' | 'css' | 'javascript' | 'typescript' | 'bash';
+  language: 'html' | 'css' | 'javascript' | 'typescript' | 'bash' | 'json';
   code: string;
   title?: string;
   explanation?: string;

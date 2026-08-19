@@ -36,7 +36,7 @@
     </g>
   </g>
 
-  <!-- Right: CSRF & CORS -->
+  <!-- Right: CSRF &amp; CORS -->
   <g transform="translate(520, 95)" filter="url(#shadow)">
     <rect width="440" height="435" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="2"/>
     <rect width="440" height="38" rx="8" fill="#161b22"/>

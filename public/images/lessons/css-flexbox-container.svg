@@ -50,7 +50,7 @@
   <rect x="515" y="226" width="250" height="22" rx="3" fill="#0d1117" stroke="#30363d"/>
   <text x="525" y="241" fill="#e6edf3" font-size="8">space-evenly</text><text x="680" y="241" fill="#8b949e" font-size="7">|  ▪  ▪  ▪  |</text>
 
-  <!-- Bottom: align-items & flex-wrap & gap -->
+  <!-- Bottom: align-items &amp; flex-wrap &amp; gap -->
   <rect x="20" y="270" width="370" height="155" rx="8" fill="#0d1117" stroke="#ffb02e" stroke-width="1.5"/>
   <text x="205" y="290" fill="#ffb02e" font-size="11" font-weight="600" text-anchor="middle">align-items (Cross Axis)</text>
   <rect x="35" y="300" width="340" height="22" rx="3" fill="#161b22" stroke="#30363d"/>

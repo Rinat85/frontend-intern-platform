@@ -37,7 +37,7 @@
   <rect x="425" y="204" width="340" height="26" rx="3" fill="#0d1117" stroke="#ffb02e"/>
   <text x="595" y="221" fill="#ffb02e" font-size="8" text-anchor="middle">&lt;tfoot&gt; &lt;tr&gt; &lt;td&gt;Итого: 450 000 ₽&lt;/td&gt; ... &lt;/tfoot&gt;</text>
 
-  <!-- Bottom: Table Accessibility & Responsive -->
+  <!-- Bottom: Table Accessibility &amp; Responsive -->
   <rect x="20" y="250" width="760" height="95" rx="8" fill="#0d1117" stroke="#30363d"/>
   <text x="400" y="270" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Правила доступности (a11y) и Адаптивность таблиц</text>
   

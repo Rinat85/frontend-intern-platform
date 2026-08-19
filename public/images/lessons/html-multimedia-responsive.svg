@@ -25,7 +25,7 @@
   <text x="45" y="278" fill="#e6edf3" font-size="8">4. Обязательный fallback &lt;img&gt; с размерами (CLS защита)</text>
   <text x="45" y="292" fill="#2dff8a" font-size="7">fetchpriority="high" (для LCP) | loading="lazy" (для нижних)</text>
 
-  <!-- Right: Video & Performance -->
+  <!-- Right: Video &amp; Performance -->
   <rect x="500" y="65" width="280" height="260" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
   <text x="640" y="85" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Видео &lt;video&gt; на мобилках</text>
   
@@ -44,7 +44,7 @@
   <text x="640" y="290" fill="#2dff8a" font-size="8" text-anchor="middle">• Декоративная иконка: alt="" (пустой!)</text>
   <text x="640" y="302" fill="#f85149" font-size="7" text-anchor="middle">❌ Без alt скринридер читает имя файла</text>
 
-  <!-- Bottom: srcset & sizes summary -->
+  <!-- Bottom: srcset &amp; sizes summary -->
   <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
   <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Формула srcset &amp; sizes для адаптивной сетки</text>
   <text x="400" y="375" fill="#29e7ff" font-size="9" text-anchor="middle">srcset="card-400.jpg 400w, card-800.jpg 800w, card-1200.jpg 1200w"</text>

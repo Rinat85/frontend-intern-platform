@@ -19,7 +19,7 @@
   <text x="45" y="204" fill="#e6edf3" font-size="8">SVG-иконки или стрелочки тултипа ::after!</text>
   <text x="45" y="218" fill="#8b949e" font-size="7">Незаменим для сложных непрямоугольных фигур</text>
 
-  <!-- Right: Glassmorphism & Focus -->
+  <!-- Right: Glassmorphism &amp; Focus -->
   <rect x="410" y="65" width="370" height="175" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
   <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Glassmorphism &amp; Доступный фокус</text>
   

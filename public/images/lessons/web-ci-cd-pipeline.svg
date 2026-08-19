@@ -54,9 +54,9 @@
   <text x="65" y="292" fill="#e6edf3" font-size="7">    steps:</text>
   <text x="75" y="304" fill="#29e7ff" font-size="7">      - run: npm ci</text>
   <text x="75" y="316" fill="#29e7ff" font-size="7">      - run: npm run lint</text>
-  <text x="75" y="328" fill="#29e7ff" font-size="7">      - run: npm test && npm run build</text>
+  <text x="75" y="328" fill="#29e7ff" font-size="7">      - run: npm test &amp;&amp; npm run build</text>
 
-  <!-- Right: Environments & Strategies -->
+  <!-- Right: Environments &amp; Strategies -->
   <rect x="410" y="185" width="370" height="170" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
   <text x="595" y="205" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Среды и стратегии деплоя</text>
 

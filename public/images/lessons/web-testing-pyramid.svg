@@ -29,7 +29,7 @@
 
   <text x="250" y="308" fill="#8b949e" font-size="8" text-anchor="middle">Основание пирамиды = максимальная скорость и стабильность CI/CD</text>
 
-  <!-- Right: AAA & RTL Rules -->
+  <!-- Right: AAA &amp; RTL Rules -->
   <rect x="500" y="65" width="280" height="260" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
   <text x="640" y="85" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Паттерн AAA &amp; Testing Library</text>
   

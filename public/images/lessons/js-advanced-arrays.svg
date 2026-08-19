@@ -30,7 +30,7 @@
   <text x="400" y="194" fill="#8b949e" font-size="7" text-anchor="middle">• Группировка объектов по ключу (Group By)</text>
   <text x="400" y="206" fill="#8b949e" font-size="7" text-anchor="middle">• Построение дерева из плоского списка</text>
 
-  <!-- Right: Search & ES2023 -->
+  <!-- Right: Search &amp; ES2023 -->
   <rect x="536" y="65" width="245" height="160" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
   <text x="658" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">Поиск и новинки ES2023</text>
   <rect x="551" y="96" width="215" height="34" rx="4" fill="#0d1117" stroke="#30363d"/>

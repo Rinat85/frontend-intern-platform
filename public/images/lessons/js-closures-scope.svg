@@ -47,7 +47,7 @@
   <text x="595" y="265" fill="#ffb02e" font-size="8" font-weight="600" text-anchor="middle">даже после завершения вызова createCounter!</text>
   <text x="595" y="282" fill="#8b949e" font-size="7" text-anchor="middle">inc(); → 1, inc(); → 2, inc(); → 3 (count жив!)</text>
 
-  <!-- Bottom: var vs let vs const & TDZ -->
+  <!-- Bottom: var vs let vs const &amp; TDZ -->
   <rect x="20" y="315" width="760" height="110" rx="8" fill="#0d1117" stroke="#30363d"/>
   <text x="400" y="335" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">var vs let vs const и TDZ (Temporal Dead Zone)</text>
 

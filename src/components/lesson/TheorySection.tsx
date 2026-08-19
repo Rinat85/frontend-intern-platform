@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { LessonTheory } from '../../types/curriculum';
 import { CodeBlock, CodeSnippet } from './CodeBlock';
 import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2, ZoomIn, X } from 'lucide-react';
@@ -10,6 +10,28 @@ interface TheorySectionProps {
 
 export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
   const [zoomedImage, setZoomedImage] = React.useState<{ src: string; alt: string; caption?: string } | null>(null);
+
+  // Handle ESC key and prevent body scroll when modal is open
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setZoomedImage(null);
+      }
+    };
+
+    if (zoomedImage) {
+      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
+  }, [zoomedImage]);
+
   const renderParagraphs = (text: string) => {
     return text.split('\n\n').map((para, i) => {
       const trimmed = para.trim();
@@ -70,7 +92,11 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
             </div>
 
             {section.image && (
-              <figure className="theory-section-figure" onClick={() => setZoomedImage(section.image || null)}>
+              <figure
+                className="theory-section-figure"
+                onClick={() => setZoomedImage(section.image || null)}
+                title="Нажмите, чтобы увеличить схему"
+              >
                 <div className="theory-image-wrapper">
                   <img
                     src={section.image.src}
@@ -170,6 +196,33 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
               <li key={idx}>{formatInlineCode(k)}</li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* Image Zoom Modal */}
+      {zoomedImage && (
+        <div
+          className="image-zoom-modal"
+          onClick={() => setZoomedImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Увеличенное изображение"
+        >
+          <div className="image-zoom-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="image-zoom-close"
+              onClick={() => setZoomedImage(null)}
+              title="Закрыть (Escape)"
+              aria-label="Закрыть модальное окно"
+            >
+              <X size={20} />
+            </button>
+            <img src={zoomedImage.src} alt={zoomedImage.alt} className="image-zoom-img" />
+            {zoomedImage.caption && (
+              <div className="image-zoom-caption">{zoomedImage.caption}</div>
+            )}
+          </div>
         </div>
       )}
     </div>

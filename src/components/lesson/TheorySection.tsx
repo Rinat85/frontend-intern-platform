@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import { LessonTheory } from '../../types/curriculum';
-import { CodeBlock } from './CodeBlock';
+import { CodeBlock, CodeSnippet } from './CodeBlock';
 import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2 } from 'lucide-react';
 import { formatInlineCode } from '../../utils/formatText';
 
@@ -123,11 +123,11 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
               <div key={idx} className="mistake-item">
                 <div className="mistake-bad">
                   <span className="mistake-badge badge-bad">❌ Как не надо делать</span>
-                  <code>{m.bad}</code>
+                  <CodeSnippet code={m.bad} className="mistake-code-bad" />
                 </div>
                 <div className="mistake-good">
                   <span className="mistake-badge badge-good">✅ Как правильно</span>
-                  <code>{m.good}</code>
+                  <CodeSnippet code={m.good} className="mistake-code-good" />
                 </div>
                 <div className="mistake-reason">
                   <strong>Почему это важно:</strong> {formatInlineCode(m.reason)}

@@ -12,8 +12,25 @@ interface Token {
   text: string;
 }
 
-function tokenizeCode(rawCode: string, lang: string): Token[][] {
-  const normalizedLang = (lang || 'html').toLowerCase();
+export function detectLanguage(code: string): string {
+  const trimmed = code.trim();
+  if (trimmed.startsWith('<!DOCTYPE') || trimmed.startsWith('<!--') || (trimmed.includes('<') && (trimmed.includes('>') || trimmed.includes('</')))) {
+    return 'html';
+  }
+  if (/^[.#@a-zA-Z0-9_-]+\s*\{/m.test(trimmed) || /:\s*[^;{}]+;/.test(trimmed)) {
+    return 'css';
+  }
+  if (/\b(const|let|var|function|return|import|export|typeof|console|new|class|=>)\b/.test(trimmed)) {
+    return 'javascript';
+  }
+  if (/^(git|npm|yarn|pnpm|npx|cd|ls|mkdir)\b/m.test(trimmed) || trimmed.startsWith('#') || trimmed.startsWith('[x]')) {
+    return 'bash';
+  }
+  return 'html';
+}
+
+export function tokenizeCode(rawCode: string, lang: string): Token[][] {
+  const normalizedLang = (lang || detectLanguage(rawCode)).toLowerCase();
   const tokens: Token[] = [];
 
   if (normalizedLang === 'html' || normalizedLang === 'xml') {
@@ -128,6 +145,32 @@ function tokenizeCode(rawCode: string, lang: string): Token[][] {
 
   return lines;
 }
+
+/**
+ * Compact Code Snippet for inline blocks and mistake examples
+ */
+export const CodeSnippet: React.FC<{ code: string; language?: string; className?: string }> = ({
+  code,
+  language,
+  className
+}) => {
+  const lang = language || detectLanguage(code);
+  const lines = tokenizeCode(code, lang);
+
+  return (
+    <pre className={`code-snippet ${className || ''}`}>
+      {lines.map((lineTokens, lineIdx) => (
+        <div key={lineIdx} className="code-snippet-line">
+          {lineTokens.map((t, tokenIdx) => (
+            <span key={tokenIdx} className={t.type}>
+              {t.text}
+            </span>
+          ))}
+        </div>
+      ))}
+    </pre>
+  );
+};
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'html', title }) => {
   const [copied, setCopied] = useState(false);

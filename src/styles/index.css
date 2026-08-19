@@ -496,21 +496,7 @@ a:hover { color: var(--cyan); }
 .comparison-table td { border: 1px solid var(--line); padding: 8px 12px; font-size: 13px; color: var(--fg-1); }
 .mistake-item { padding: 14px; background: var(--bg-2); border: 1px solid var(--line); border-left: 2px solid var(--red); }
 
-.code-block { overflow: hidden; border: 1px solid var(--line); }
-.code-block-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 14px; background: var(--bg-2); border-bottom: 1px solid var(--line);
-  font-family: var(--font-mono); font-size: 11px; color: var(--fg-2);
-  letter-spacing: 0.06em; text-transform: uppercase;
-}
-.code-block-body { position: relative; }
-.code-block-body pre { padding: 16px; margin: 0; overflow-x: auto; font-family: var(--font-code); font-size: 13px; line-height: 1.6; background: var(--void); color: var(--fg-0); tab-size: 2; }
-.code-block-copy {
-  position: absolute; top: 8px; right: 8px; background: var(--bg-2); border: 1px solid var(--line-2);
-  color: var(--fg-2); font-size: 11px; padding: 3px 8px; cursor: pointer; font-family: var(--font-mono);
-  transition: all var(--transition-fast);
-}
-.code-block-copy:hover { border-color: var(--neon); color: var(--neon); }
+/* code-block: see consolidated block below */
 
 /* ═══════════════════════════════════════════════════════════════
    SANDBOX & LIVE EDITOR
@@ -1255,69 +1241,194 @@ a:hover { color: var(--cyan); }
 }
 
 
+
+
 /* ==========================================================================
-   INLINE CODE & KEYWORD HIGHLIGHTING (Spreadis Terminal Aesthetic)
+   CODE BLOCK & SYNTAX HIGHLIGHTING (Spreadis Terminal Aesthetic)
    ========================================================================== */
-code, kbd {
-  font-family: var(--font-code);
+.code-block {
+  border: 1px solid var(--line);
+  background: var(--void);
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 16px 0;
 }
 
-.inline-code,
-p code,
-li code,
-span code,
-div code,
-.theory-code-expl code,
-.solution-explanation code,
-.quiz-explanation code {
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.code-block-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-block-lang {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--fg-2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.code-block-copy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-3);
+  border: 1px solid var(--line-2);
+  color: var(--fg-2);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+}
+
+.code-block-copy:hover {
+  border-color: var(--neon);
+  color: var(--neon);
+  background: rgba(45, 255, 138, 0.08);
+}
+
+.code-block-body {
+  background: var(--void);
+  padding: 14px 16px;
+  overflow-x: auto;
+}
+
+.code-block-pre {
+  margin: 0;
+  padding: 0;
+  background: transparent !important;
+  border: none !important;
+  font-family: var(--font-code);
+  font-size: 13px;
+  line-height: 1.65;
+  tab-size: 2;
+  white-space: pre;
+}
+
+.code-block-line {
+  display: flex;
+  align-items: flex-start;
+  min-height: 22px;
+}
+
+.code-block-line-num {
+  width: 28px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-3);
+  user-select: none;
+  text-align: right;
+  padding-right: 14px;
+  line-height: 22px;
+}
+
+.code-block-line-text {
+  flex: 1;
+  color: var(--fg-0);
+  font-family: var(--font-code);
+  line-height: 22px;
+}
+
+/* Syntax Tokens */
+.syn-tag { color: var(--cyan); font-weight: 500; }
+.syn-bracket { color: var(--fg-2); }
+.syn-attr { color: var(--neon); }
+.syn-string { color: var(--amber); }
+.syn-operator { color: var(--fg-2); }
+.syn-comment { color: #527163; font-style: italic; }
+.syn-doctype { color: var(--magenta); font-weight: 600; }
+.syn-keyword { color: var(--magenta); font-weight: 600; }
+.syn-text { color: var(--fg-0); }
+.syn-tag-wrapper { display: inline; }
+
+/* RESET pre and code elements inside code blocks so they NEVER get chip styles */
+pre code,
+.code-block code,
+.code-block-body code,
+.code-pre code {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+  box-shadow: none !important;
+  display: inline !important;
+}
+
+/* Inline code chips in paragraphs & text */
+.inline-code {
+  display: inline-block;
   font-family: var(--font-code);
   font-size: 0.88em;
   color: var(--neon);
   background: rgba(45, 255, 138, 0.08);
   border: 1px solid rgba(45, 255, 138, 0.22);
   padding: 1px 6px;
+  margin: 0 3px;
   border-radius: 3px;
   font-weight: 500;
   vertical-align: baseline;
   letter-spacing: -0.01em;
-  word-break: break-word;
+  white-space: nowrap;
 }
 
-h1 code, h2 code, h3 code, h4 code {
-  font-size: 0.85em;
-  color: var(--cyan);
-  background: rgba(41, 231, 255, 0.08);
-  border-color: rgba(41, 231, 255, 0.25);
+/* Theory Code Example & Explanation Box */
+.theory-code-example {
+  margin: 24px 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--void);
 }
 
-/* ---- THEORY CODE EXPLANATION (consolidated) ---- */
+.theory-code-example .code-block {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+}
+
 .theory-code-expl {
   font-size: 13px;
   line-height: 1.8;
   color: var(--fg-1);
-  margin-top: 0;
-  padding: 16px 20px;
-  background: var(--bg-2);
-  border-left: 3px solid var(--neon);
+  margin: 0;
+  padding: 14px 18px;
+  background: var(--bg-1);
   border-top: 1px solid var(--line);
-  border-radius: 0 0 4px 4px;
+  border-left: 3px solid var(--neon);
   word-wrap: break-word;
   overflow-wrap: break-word;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
 }
 
-.theory-code-expl strong {
+.theory-code-expl-label {
   color: var(--fg-0);
   font-weight: 700;
-  margin-right: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
+  padding-top: 3px;
+  flex-shrink: 0;
 }
 
-/* Inline code chips: breathing room */
-.inline-code {
-  margin: 0 2px;
-  white-space: nowrap;
-}
-
-.theory-code-expl .inline-code {
-  margin: 0 3px;
+.theory-code-expl-text {
+  flex: 1;
+  line-height: 1.8;
 }

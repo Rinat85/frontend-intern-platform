@@ -77,7 +77,8 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
                 />
                 {section.codeExample.explanation && (
                   <div className="theory-code-expl">
-                    <strong>Разбор кода:</strong> {formatInlineCode(section.codeExample.explanation)}
+                    <span className="theory-code-expl-label">Разбор кода:</span>
+                    <span className="theory-code-expl-text">{formatInlineCode(section.codeExample.explanation)}</span>
                   </div>
                 )}
               </div>
@@ -151,4 +152,3 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
     </div>
   );
 };
- 

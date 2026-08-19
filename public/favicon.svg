@@ -1,4 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#6366f1"/>
-  <text x="32" y="44" font-size="38" font-weight="bold" text-anchor="middle" font-family="sans-serif" fill="white">F</text>
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#06090d" stroke="#2dff8a" stroke-width="3"/>
+  <path d="M18 24 L28 32 L18 40" fill="none" stroke="#2dff8a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="32" y1="40" x2="46" y2="40" stroke="#29e7ff" stroke-width="4" stroke-linecap="round"/>
 </svg>

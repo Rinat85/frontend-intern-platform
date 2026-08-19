@@ -981,84 +981,191 @@ export const jsLessons: Lesson[] = [
     "moduleId": "javascript",
     "level": 6,
     "title": "Продвинутая работа с массивами",
-    "subtitle": "Функциональные методы map, filter, reduce, find, some, every и sort",
-    "description": "Сердце современного JS: трансформация через map, фильтрация через filter, агрегация через reduce, поиск find, проверка условий some/every и сортировка sort.",
-    "estimatedMinutes": 40,
+    "subtitle": "map, filter, reduce, flatMap, findLast, Group By и оптимизация производительности",
+    "description": "Освойте высший пилотаж работы с массивами в JavaScript: продвинутые паттерны метода reduce (Group By, Frequency Map), метод flatMap, новинки ES2023 findLast/findLastIndex и оптимизацию цепочек методов на больших объемах данных.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "JavaScript",
-      "Arrays",
-      "FunctionalProgramming",
-      "MapFilterReduce"
+      "arrays",
+      "map",
+      "filter",
+      "reduce",
+      "flatMap",
+      "findLast",
+      "groupBy",
+      "performance",
+      "es2023"
     ],
     "theory": {
-      "overview": "Методы высшего порядка (map, filter, reduce) позволяют обрабатывать списки данных декларативно.",
+      "overview": "Массивы в JavaScript — один из самых мощных и часто используемых инструментов. 80% задач фронтенд-инженера связаны с получением данных от API, их фильтрацией, сортировкой, группировкой и трансформацией в элементы пользовательского интерфейса.\n\nВ этом уроке мы досконально разберём метод `reduce` (швейцарский нож функционального JS), изучим метод `flatMap`, освоим новинки стандарта ES2023 (`findLast`, `findLastIndex`) и научимся избегать скрытых утечек памяти при работе с цепочками методов на больших массивах.",
       "sections": [
         {
-          "title": "map, filter и reduce",
-          "content": "- `map(fn)`: возвращает новый массив той же длины.\n- `filter(fn)`: фильтрует по условию true/false.\n- `reduce(fn, initVal)`: сворачивает массив в единое значение.",
+          "title": "Итераторы и трансформации: map, filter, forEach, find и findLast",
+          "content": "Сравнение методов обхода массивов:\n\n1. `forEach(fn)` vs `map(fn)`:\n- `forEach` выполняет колбэк для каждого элемента ради ПОБОЧНЫХ ЭФФЕКТОВ (логирование, мутация DOM). Всегда возвращает `undefined`. Нельзя прервать ключевым словом `break`!\n- `map` — чистая трансформация «1-в-1». Создаёт и возвращает НОВЫЙ массив той же длины, где каждый элемент трансформирован колбэком.\n\n2. `filter(predicate)`:\n- Возвращает новый массив, содержащий только те элементы, для которых колбэк вернул `true`.\n\n3. Поиск элементов: `find`, `findIndex`, `findLast`, `findLastIndex`:\n- `find(fn)` — возвращает ПЕРВЫЙ элемент, удовлетворяющий условию, или `undefined`.\n- `findIndex(fn)` — возвращает индекс первого совпадения или `-1`.\n- `findLast(fn)` и `findLastIndex(fn)` (стандарт ES2023) — ищут элемент С КОНЦА массива! Больше не нужно делать опасный `arr.reverse().find()`!\n\n4. Проверки `some()` и `every()` (Short-Circuiting):\n- `some(fn)` — возвращает `true`, если ХОТЯ БЫ ОДИН элемент подошел (останавливает цикл сразу после первого `true`).\n- `every(fn)` — возвращает `true`, если ВСЕ элементы подошли (останавливает цикл сразу при первом `false`).",
+          "image": {
+            "src": "/images/lessons/js-advanced-arrays.svg",
+            "alt": "Продвинутые методы работы с массивами в JavaScript: reduce, flatMap, findLast",
+            "caption": "map и filter трансформируют данные, reduce агрегирует в любые структуры, flatMap объединяет маппинг с уплощением"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Цепочка методов",
-            "code": "const items = [{ price: 100 }, { price: 200 }];\nconst total = items.map(i => i.price).reduce((a, b) => a + b, 0);\nconsole.log(total); // 300",
-            "explanation": "Трансформация и суммирование."
+            "code": "const transactions = [\n  { id: 1, type: 'pay', amount: 1500, status: 'ok' },\n  { id: 2, type: 'refund', amount: 500, status: 'ok' },\n  { id: 3, type: 'pay', amount: 3200, status: 'failed' },\n  { id: 4, type: 'pay', amount: 4100, status: 'ok' }\n];\n\n// 1. Поиск последней успешной оплаты с конца (ES2023 findLast)\nconst lastSuccessPay = transactions.findLast(\n  (t) => t.type === 'pay' && t.status === 'ok'\n);\nconsole.log(lastSuccessPay); // { id: 4, amount: 4100 }\n\n// 2. Проверка: есть ли хоть одна упавшая транзакция (some)\nconst hasFailures = transactions.some((t) => t.status === 'failed');\nconsole.log('Есть ошибки:', hasFailures); // true",
+            "title": "Использование findLast и short-circuit проверки some",
+            "explanation": "findLast находит последнюю оплату без мутации исходного массива. some останавливает проверку на элементе с id: 3."
+          }
+        },
+        {
+          "title": "Метод reduce: Швейцарский нож функционального JavaScript",
+          "content": "Метод `reduce` агрегирует массив любой длины в ЕДИНОЕ результирующее значение (число, строку, объект, новый массив или Map).\n\nСигнатура метода:\n`arr.reduce((accumulator, currentValue, index, array) => { ... }, initialValue)`\n\nЗолотое правило: ВСЕГДА явно передавайте `initialValue`!\nЕсли не передать `initialValue`, то первым аккумулятором станет нулевой элемент массива `arr[0]`, а итерация начнется с 1-го индекса. Если массив окажется пустым `[]`, то вызов `[].reduce((a, b) => a + b)` вызовет фатальное падение: `TypeError: Reduce of empty array with no initial value`!\n\nКлючевые паттерны на `reduce`:\n1. Подсчет статистики и сумм.\n2. Frequency Map (подсчет частоты встречаемости элементов).\n3. Группировка объектов по ключу (Group By).\n4. Разворачивание сложных деревьев в плоский список.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const orders = [\n  { id: 'o1', category: 'electronics', price: 12000 },\n  { id: 'o2', category: 'books', price: 1500 },\n  { id: 'o3', category: 'electronics', price: 45000 },\n  { id: 'o4', category: 'books', price: 800 }\n];\n\n// Паттерн Group By на reduce:\nconst ordersByCategory = orders.reduce((groups, order) => {\n  const cat = order.category;\n  if (!groups[cat]) groups[cat] = [];\n  groups[cat].push(order);\n  return groups;\n}, {});\n\nconsole.log(ordersByCategory);\n// {\n//   electronics: [ { id: 'o1', ... }, { id: 'o3', ... } ],\n//   books: [ { id: 'o2', ... }, { id: 'o4', ... } ]\n// }",
+            "title": "Паттерн Group By на методе reduce",
+            "explanation": "reduce группирует заказы по категориям в единый объект. Пустой объект {} в конце служит обязательным initialValue."
+          }
+        },
+        {
+          "title": "Вложенные массивы: flat и flatMap",
+          "content": "Работа со вложенными структурами данных:\n\n1. `arr.flat(depth)`:\n- «Выпрямляет» вложенные массивы. По умолчанию `depth = 1`.\n- Для полного сглаживания массива любой глубины вложенности используйте `arr.flat(Infinity)`.\n- Автоматически удаляет пустые слоты (дыры) из разреженных массивов.\n\n2. `arr.flatMap(fn)` (Мощная связка map + flat):\n- Применяет функцию трансформации к каждому элементу и затем «схлопывает» результат на 1 уровень глубины.\n- Работает быстрее и эффективнее, чем отдельный `.map().flat()`, так как не создает промежуточный массив в памяти.\n- Позволяет одновременно модифицировать, размножать и удалять элементы (если вернуть пустой массив `[]`, элемент отфильтруется!).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const users = [\n  { name: 'Иван', tags: ['javascript', 'react'] },\n  { name: 'Ольга', tags: ['html', 'css'] },\n  { name: 'Петр', tags: ['react', 'node'] }\n];\n\n// 1. Извлечение всех тегов в единый массив с flatMap\nconst allTags = users.flatMap((u) => u.tags);\nconsole.log(allTags); // ['javascript', 'react', 'html', 'css', 'react', 'node']\n\n// 2. Уникальные теги через Set:\nconst uniqueTags = [...new Set(allTags)];\nconsole.log(uniqueTags); // ['javascript', 'react', 'html', 'css', 'node']\n\n// 3. flatMap для одновременной фильтрации и модификации:\nconst prices = [10, 25, -5, 40, 0];\nconst doubledPositive = prices.flatMap((p) => (p > 0 ? [p * 2] : []));\nconsole.log(doubledPositive); // [20, 50, 80] (-5 и 0 отфильтрованы!)",
+            "title": "Использование flatMap для тегов и условной фильтрации",
+            "explanation": "flatMap извлекает вложенные массивы за один проход. Возврат пустого массива [] в колбэке удаляет нежелательные элементы."
+          }
+        },
+        {
+          "title": "Производительность и оптимизация работы с большими массивами",
+          "content": "Во фронтенд-приложениях обработка массивов из 10 000+ элементов может заблокировать Main Thread, если писать код неэффективно:\n\n1. Проблема длинных цепочек методов (Method Chaining Overhead):\nЦепочка `items.filter(A).map(B).filter(C).map(D)` на массиве из 100 000 элементов создаст в памяти 3 огромных промежуточных массива и заставит сборщик мусора (Garbage Collector) непрерывно очищать память.\n✅ Решение: объединяйте операции в один проход через `reduce` или классический цикл `for (let i = 0; i < len; i++)` для критических участков.\n\n2. Генерация диапазонов чисел через `Array.from()`:\n`const range = Array.from({ length: 100 }, (_, i) => i + 1);` — создает массив чисел от 1 до 100 без ручных циклов `push`.\n\n3. Типизированные массивы (TypedArrays — `Uint8Array`, `Float32Array`):\nИспользуются для работы с бинарными данными, аудио, Canvas, WebGL и криптографией. Выделяют непрерывный блок памяти в Stack/Buffer и работают в 5–10 раз быстрее обычных массивов.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Быстрая генерация пагинации (страницы от 1 до 10)\nconst pages = Array.from({ length: 10 }, (_, i) => i + 1);\nconsole.log(pages); // [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]\n\n// 2. Оптимизация 1 проходом (reduce вместо filter + map)\nconst rawData = [15, -4, 22, 0, 8, -12, 35];\n\n// Вместо: rawData.filter(x => x > 0).map(x => x * 10)\nconst optimized = rawData.reduce((acc, x) => {\n  if (x > 0) acc.push(x * 10);\n  return acc;\n}, []);\nconsole.log(optimized); // [150, 220, 80, 350]",
+            "title": "Генерация диапазонов Array.from и оптимизация цепочек",
+            "explanation": "Array.from генерирует массив с нужной длиной. reduce объединяет фильтрацию и маппинг в 1 проход без промежуточных массивов."
           }
         }
       ],
       "seniorTips": [
-        "sort() мутирует массив! Всегда копируйте: [...arr].sort((a, b) => a - b)."
+        "ВСЕГДА передавайте `initialValue` в `reduce(fn, initialValue)`. Это исключает ошибку `TypeError: Reduce of empty array with no initial value` при получении пустого массива с бэкенда.",
+        "Используйте `flatMap()` вместо связки `.map().flat()` — это выполняется за один проход и экономит оперативную память.",
+        "Для поиска последнего элемента массива используйте нативный `arr.findLast()` (ES2023) вместо опасного `arr.reverse().find()` (который мутирует массив!).",
+        "Используйте `some()` и `every()` для раннего выхода (Short-circuiting): они прекращают итерацию сразу, как только результат становится известен."
       ],
       "commonMistakes": [
         {
-          "bad": "[10, 5, 20].sort() /* [10, 20, 5] */",
-          "good": "[10, 5, 20].sort((a, b) => a - b)",
-          "reason": "sort() по умолчанию сортирует как строки."
+          "bad": "// Использование map вместо forEach ради побочного эффекта\nusers.map(u => { saveToDB(u); });",
+          "good": "users.forEach(u => { saveToDB(u); });",
+          "reason": "Метод map создает новый массив в памяти. Если этот массив никуда не присваивается, создается бесполезная нагрузка на Garbage Collector."
+        },
+        {
+          "bad": "// reduce без initialValue падает на пустом массиве\nconst total = [].reduce((sum, x) => sum + x.price); // 💥 TypeError!",
+          "good": "const total = [].reduce((sum, x) => sum + x.price, 0); // ✅ 0",
+          "reason": "Без initialValue метод reduce пытается взять первый элемент массива. На пустом массиве это приводит к фатальному сбою приложения."
+        },
+        {
+          "bad": "// Поиск с конца через reverse мутирует оригинал\nconst last = items.reverse().find(x => x.active); // ❌ items развернулся!",
+          "good": "const last = items.findLast(x => x.active); // ✅ Чистый поиск",
+          "reason": "Метод reverse() мутирует исходный массив на месте, что ломает порядок элементов во всем остальном приложении."
         }
       ],
       "keyTakeaways": [
-        "map трансформирует элементы.",
-        "filter оставляет нужные.",
-        "reduce сворачивает массив."
+        "`map` преобразует элементы 1-в-1, `filter` отбирает подмножество, `flatMap` объединяет маппинг со сглаживанием.",
+        "`reduce` агрегирует массив в единое значение (сумму, объект, дерево), требуя обязательного `initialValue`.",
+        "`findLast` и `findLastIndex` (ES2023) нативно ищут элементы с конца массива без мутации через `reverse()`.",
+        "`some()` и `every()` поддерживают short-circuit оптимизацию и мгновенно прерывают проверку.",
+        "`Array.from({ length: N }, fn)` — лучший инструмент генерации массивов диапазонов."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"arr-demo\"><h3>Товары</h3><ul id=\"prod-list\"></ul></div>",
-      "initialCss": ".arr-demo { padding: 20px; background: white; border-radius: 12px; }",
-      "initialJs": "const goods = [{ name: 'Клавиатура', price: 4500 }, { name: 'ПК', price: 120000 }];\nconst cheap = goods.filter(g => g.price < 5000);\nconst ul = document.getElementById('prod-list');\ncheap.forEach(g => {\n  const li = document.createElement('li');\n  li.textContent = `${g.name} — ${g.price} ₽`;\n  ul.appendChild(li);\n});",
-      "instructions": "Посмотрите работу метода filter."
+      "initialHtml": "<div id=\"js-output-box\"></div>",
+      "initialCss": "#js-output-box {\n  font-family: 'JetBrains Mono', monospace;\n  background: #0a0e13;\n  color: #2dff8a;\n  padding: 16px;\n  border-radius: 8px;\n  border: 1px solid #30363d;\n  min-height: 220px;\n  white-space: pre-wrap;\n}",
+      "initialJs": "const out = document.getElementById('js-output-box');\nconst log = (t) => out.textContent += t + '\\n';\n\nconst scores = [85, 42, 99, 73, 99, 64];\n\n// 1. Поиск с конца (ES2023 findLastIndex)\nconst lastMaxIdx = scores.findLastIndex(s => s === 99);\nlog('Индекс последней 99: ' + lastMaxIdx); // 4\n\n// 2. Frequency Map на reduce:\nconst freq = scores.reduce((acc, s) => {\n  acc[s] = (acc[s] || 0) + 1;\n  return acc;\n}, {});\nlog('Частота оценок: ' + JSON.stringify(freq));",
+      "instructions": "Практика с массивами:\n1. Запустите код и посмотрите на работу findLastIndex и frequency map\n2. Напишите агрегацию reduce для подсчета средней оценки (average score)\n3. Используйте flatMap для извлечения массива подзадач из списка проектов"
     },
     "task": {
-      "title": "Подсчет среднего балла",
-      "scenario": "Напишите расчет среднего балла массива оценок через reduce.",
+      "title": "Разработка аналитического ядра обработки логов финансовых транзакций",
+      "scenario": "Вы разрабатываете модуль аналитики для финтех-платформы. Модуль принимает массив транзакций и должен сгруппировать их по валютам, подсчитать общую сумму и статистику через reduce, найти последнюю подозрительную операцию через findLast и извлечь список уникальных тегов через flatMap.",
       "criteria": [
-        "Использован метод reduce"
+        "Функция calculateTotals(transactions) возвращает общую сумму и количество через 1 проход reduce",
+        "Функция groupTransactionsByCurrency(transactions) группирует операции по валюте (RUB, USD, EUR)",
+        "Функция findLastFailedTransaction(transactions) ищет последнюю неудачную транзакцию через findLast",
+        "Функция extractUniqueTags(transactions) извлекает уникальные теги через flatMap и Set",
+        "Все методы должны быть чистыми и не мутировать входные массивы"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Исходные данные\nconst logs = [\n  { id: 1, amount: 5000, currency: 'RUB', status: 'success', tags: ['food', 'card'] },\n  { id: 2, amount: 120, currency: 'USD', status: 'failed', tags: ['travel'] },\n  { id: 3, amount: 3500, currency: 'RUB', status: 'failed', tags: ['online'] },\n  { id: 4, amount: 80, currency: 'USD', status: 'success', tags: ['card'] }\n];\n\nfunction processAnalytics(transactions) {\n  // Ваш код\n}"
       },
       "hints": [
-        "Используйте современные стандарты ES6+."
+        "В calculateTotals используйте transactions.reduce((acc, t) => { ... }, { sum: 0, count: 0 })",
+        "Используйте transactions.findLast(t => t.status === 'failed')",
+        "Для тегов: [...new Set(transactions.flatMap(t => t.tags || []))]"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const scores = [80, 90, 100, 70, 85];\nconst avg = scores.reduce((a, b) => a + b, 0) / scores.length;\nconsole.log('Средний:', avg);",
-        "explanation": "Расчет среднего через reduce."
+        "js": "function calculateTotals(transactions = []) {\n  return transactions.reduce(\n    (acc, t) => {\n      acc.count += 1;\n      acc.totalAmount += (t.amount ?? 0);\n      return acc;\n    },\n    { count: 0, totalAmount: 0 }\n  );\n}\n\nfunction groupTransactionsByCurrency(transactions = []) {\n  return transactions.reduce((groups, t) => {\n    const curr = t.currency || 'UNKNOWN';\n    if (!groups[curr]) groups[curr] = [];\n    groups[curr].push(t);\n    return groups;\n  }, {});\n}\n\nfunction findLastFailedTransaction(transactions = []) {\n  return transactions.findLast((t) => t.status === 'failed') ?? null;\n}\n\nfunction extractUniqueTags(transactions = []) {\n  const allTags = transactions.flatMap((t) => t.tags || []);\n  return [...new Set(allTags)];\n}",
+        "explanation": "Аналитическое ядро использует современные практики JS: reduce с явным initialValue для сумм и группировки, findLast для мгновенного поиска с конца и flatMap + Set для дедупликации тегов."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j6-q1",
-          "question": "Какой метод возвращает НОВЫЙ массив преобразованных элементов?",
+          "id": "js6-q1",
+          "question": "Что произойдет при вызове [].reduce((sum, item) => sum + item) на пустом массиве без передачи initialValue?",
           "options": [
-            "forEach",
-            "filter",
-            "map",
-            "reduce"
+            "Метод вернет 0",
+            "Метод выбросит фатальную ошибку TypeError: Reduce of empty array with no initial value",
+            "Метод вернет undefined",
+            "Метод вернет NaN"
           ],
-          "correctIndex": 2,
-          "explanation": "map возвращает новый массив той же длины с трансформированными элементами."
+          "correctIndex": 1,
+          "explanation": "Если у массива нет элементов и не задан initialValue, reduce не может инициализировать аккумулятор и выбрасывает исключение TypeError."
+        },
+        {
+          "id": "js6-q2",
+          "question": "Чем метод flatMap() превосходит связку .map().flat()?",
+          "options": [
+            "flatMap работает только с числами",
+            "flatMap объединяет маппинг и уплощение за 1 проход, работая быстрее и не создавая промежуточный временный массив в памяти",
+            "flatMap удаляет отрицательные числа",
+            "Разницы в производительности нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "flatMap() выполняет трансформацию и уплощение за единый проход по массиву, предотвращая создание промежуточного массива в памяти кучи (Heap)."
+        },
+        {
+          "id": "js6-q3",
+          "question": "Какое ключевое преимущество имеет метод findLast() стандарта ES2023 перед связкой arr.reverse().find()?",
+          "options": [
+            "findLast() работает асинхронно",
+            "findLast() ищет элемент с конца массива БЕЗ мутации исходного массива (reverse мутирует исходный массив)",
+            "findLast() возвращает массив совпадений",
+            "findLast() удаляет найденный элемент"
+          ],
+          "correctIndex": 1,
+          "explanation": "Метод reverse() мутирует исходный массив на месте, приводя к скрытым багам. Метод findLast() производит чистый поиск с конца массива без каких-либо побочных эффектов."
+        },
+        {
+          "id": "js6-q4",
+          "question": "Почему методы some() и every() работают быстрее, чем filter().length > 0?",
+          "options": [
+            "some() и every() написаны на языке C++",
+            "some() и every() поддерживают short-circuiting: они немедленно останавливают итерацию, как только результат становится очевиден",
+            "filter() всегда проверяет типы данных",
+            "some() работает в фоновом потоке"
+          ],
+          "correctIndex": 1,
+          "explanation": "Методы some() и every() прекращают обход массива при первом нахождении true (для some) или false (для every), в то время как filter() вынужден обойти абсолютно весь массив до самого конца."
+        },
+        {
+          "id": "js6-q5",
+          "question": "Как быстро сгенерировать массив чисел от 1 до 50 без использования цикла for и push?",
+          "options": [
+            "new Array(50).fill(1..50)",
+            "Array.from({ length: 50 }, (_, i) => i + 1)",
+            "Array.generate(1, 50)",
+            "[1...50]"
+          ],
+          "correctIndex": 1,
+          "explanation": "Array.from({ length: 50 }, (_, i) => i + 1) создает массив из 50 элементов и инициализирует каждый элемент значением его индекса + 1."
         }
       ]
     }

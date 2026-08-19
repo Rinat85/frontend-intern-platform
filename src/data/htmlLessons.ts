@@ -989,115 +989,191 @@ export const htmlLessons: Lesson[] = [
     "moduleId": "html",
     "level": 6,
     "title": "Ссылки и адресация (URL)",
-    "subtitle": "Тег a, абсолютные и относительные пути, якоря и безопасность",
-    "description": "Изучение гипертекста: принципы адресации в вебе, связывание страниц, навигационные якоря, схемы mailto/tel и обязательные атрибуты безопасности target blank.",
-    "estimatedMinutes": 30,
+    "subtitle": "Абсолютные и относительные пути, якоря, протоколы mailto/tel, атрибуты target, rel и download",
+    "description": "Освойте фундаментальный механизм гипертекста в HTML5: структуру URL, абсолютные vs относительные пути, якорную навигацию с плавной прокруткой, протоколы mailto/tel/sms, безопасность target='_blank' с rel='noopener noreferrer' и атрибут download.",
+    "estimatedMinutes": 55,
     "difficulty": "beginner",
     "tags": [
-      "HTML",
-      "Links",
-      "URL",
-      "Navigation",
-      "Security"
+      "links",
+      "url",
+      "anchors",
+      "navigation",
+      "security",
+      "noopener",
+      "mailto",
+      "tel"
     ],
     "theory": {
-      "overview": "Ссылки (`<a>` — anchor, якорь) превращают разрозненные страницы в единую паутину — гипертекстовое пространство (HyperText). С помощью ссылок пользователь переходит между страницами, скачивает файлы, звонит по телефону или перемещается к нужному разделу длинного документа.\n\nНеправильная работа с ссылками приводит к критическим уязвимостям безопасности (табджекинг) и потере позиций в поисковой выдаче из-за битых ссылок (ошибки 404).",
+      "overview": "Гиперссылка (Hyperlink, тег `<a>` — anchor) — основа Всемирной паутины (WWW). Именно ссылки связывают миллиарды разрозненных веб-страниц, документов и медиафайлов в единую глобальную паутину.\n\nВ этом уроке мы детально изучим анатомию URL-адреса, разберёмся с подводными камнями абсолютных и относительных путей, научимся строить доступную якорную навигацию («Skip to content»), использовать протоколы `mailto:` и `tel:` для мобильных устройств, а также защитим приложение от критической уязвимости Tabnabbing с помощью `rel=\"noopener noreferrer\"`.",
       "sections": [
         {
-          "title": "Абсолютные vs Относительные пути",
-          "content": "В атрибуте `href` используются два типа путей:\n- **Абсолютные URL**: полный адрес в сети с протоколом (`https://google.com/search`, `https://cdn.example.com/logo.png`). Используются для внешних ресурсов.\n- **Относительные пути**: путь от текущего файла к целевому внутри вашего проекта:\n  • `about.html` или `./about.html` — файл в той же папке.\n  • `images/photo.jpg` — файл в подпапке `images`.\n  • `../index.html` — подняться на один уровень вверх к родительской папке (`..`).\n  • `/contacts` — путь от корня веб-сервера (Root-relative).",
+          "title": "Анатомия гиперссылки: тег <a> и структура URL",
+          "content": "Тег `<a>` (Anchor) превращает любой вложенный текст или медиаэлемент в кликабельную ссылку.\n\nПолная структура URL-адреса (Uniform Resource Locator):\n`https://sub.domain.com:443/catalog/items?sort=price&page=2#item-42`\n1. Протокол / Схема (`https://`, `http://`, `ftp://`): определяет протокол передачи данных. Всегда используйте безопасный HTTPS.\n2. Доменное имя и порт (`domain.com:443`): адрес сервера (порт 443 для HTTPS и 80 для HTTP опускаются по умолчанию).\n3. Путь к ресурсу (Path: `/catalog/items`): иерархическое расположение страницы на веб-сервере.\n4. Query-параметры (`?sort=price&page=2`): пары `ключ=значение`, передающие фильтры, пагинацию или UTM-метки.\n5. Хэш-фрагмент / Якорь (`#item-42`): идентификатор узла внутри текущей страницы (браузер скроллит к элементу с соответствующим `id`).\n\nАбсолютные vs Относительные пути:\n- Абсолютный URL (`https://site.ru/about`): содержит полный адрес с протоколом и доменом. Обязателен для внешних ссылок на сторонние ресурсы.\n- Относительный от корня (`/about`): начинается со слеша, ищет файл от корня текущего домена. Идеален для внутренней навигации сайта.\n- Относительный к текущей папке (`./images/pic.png` или `../doc.pdf`): ищет ресурс относительно текущей директории страницы (`..` поднимается на уровень выше).",
+          "image": {
+            "src": "/images/lessons/html-links-url.svg",
+            "alt": "Анатомия URL и безопасность гиперссылок target blank noopener",
+            "caption": "Полная структура URL: протокол, домен, путь, query-параметры и якорный хэш. Безопасность внешних ссылок через rel='noopener'"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Примеры путей к файлам",
-            "code": "<!-- Внешняя ссылка -->\n<a href=\"https://github.com/facebook/react\">Репозиторий React</a>\n\n<!-- Относительная ссылка внутри проекта -->\n<a href=\"/docs/getting-started.html\">Начать обучение</a>\n\n<!-- Переход на уровень выше -->\n<a href=\"../index.html\">Вернуться на главную</a>",
-            "explanation": "Различие между внешними абсолютными и локальными относительными путями."
+            "code": "<!-- Внешняя абсолютная ссылка -->\n<a href=\"https://developer.mozilla.org/ru/\" target=\"_blank\" rel=\"noopener noreferrer\">\n  Документация MDN Web Docs\n</a>\n\n<!-- Внутренние относительные ссылки -->\n<nav>\n  <!-- От корня домена -->\n  <a href=\"/\">Главная</a>\n  <a href=\"/catalog/frontend\">Курсы Frontend</a>\n  <!-- Подъем на 1 уровень выше в файловой структуре -->\n  <a href=\"../assets/curriculum.pdf\" download=\"curriculum-2026.pdf\">\n    Скачать программу курса (PDF)\n  </a>\n</nav>",
+            "title": "Примеры абсолютных, относительных ссылок и скачивания",
+            "explanation": "Внешняя ссылка на MDN использует target='_blank' и защитный rel='noopener'. Ссылка на программу использует атрибут download для сохранения PDF-файла."
           }
         },
         {
-          "title": "Безопасность target=\"_blank\" и специальные схемы",
-          "content": "Критически важные атрибуты и протоколы:\n- **Открытие в новой вкладке**: `target=\"_blank\"`. **ВАЖНО:** Всегда добавляйте `rel=\"noopener noreferrer\"`! Без этого открытая вкладка получает доступ к объекту `window.opener` родительской страницы и может подменить исходный сайт на фишинговый (уязвимость Reverse Tabnabbing).\n- **Якорные ссылки (Smooth Scroll)**: `href=\"#contacts\"` — плавный переход к элементу с `id=\"contacts\"` на той же странице.\n- **Телефонный звонок**: `href=\"tel:+79991234567\"` — открывает звонилку на смартфоне.\n- **Электронная почта**: `href=\"mailto:hr@company.com?subject=Стажировка\"` — открывает почтовый клиент.\n- **Скачивание файла**: атрибут `download` (`<a href=\"book.pdf\" download>Скачать PDF</a>`).",
+          "title": "Якорные ссылки, плавная прокрутка и доступность (Skip to content)",
+          "content": "Якорная ссылка (Anchor Link) позволяет мгновенно перемещаться к определенной секции внутри текущей веб-страницы.\n\nМеханизм работы якоря:\n1. Целевой блок размечается уникальным атрибутом `id`: `<section id=\"pricing\">`.\n2. Ссылка указывает на этот `id` через символ решетки `#`: `<a href=\"#pricing\">Тарифы</a>`.\n3. При клике браузер плавно скроллит страницу так, чтобы блок `id=\"pricing\"` оказался в верхней части экрана, и добавляет `#pricing` в адресную строку URL.\n\nПроблема перекрытия фиксированной шапкой (Sticky/Fixed Header Problem):\nЕсли на сайте закреплена шапка высотой 70px, то якорь скроллится под шапку и заголовок оказывается скрыт! Решение в современном CSS:\n`html { scroll-behavior: smooth; scroll-padding-top: 80px; }`.\n\nПаттерн доступности «Skip to content» (Пропустить навигацию):\nПервой ссылкой на странице размещают невидимую для зрячих ссылку `<a href=\"#main-content\" class=\"skip-link\">Перейти к основному контенту</a>`. Незрячие пользователи, перемещающиеся клавишей `Tab`, могут одним нажатием пропустить повторяющуюся шапку с 20 ссылками меню и сразу перейти к чтению статьи.",
           "codeExample": {
             "language": "html",
-            "title": "Безопасные внешние и сервисные ссылки",
-            "code": "<!-- Безопасное открытие внешней ссылки -->\n<a href=\"https://react.dev\" target=\"_blank\" rel=\"noopener noreferrer\">\n  Официальная документация React\n</a>\n\n<!-- Сервисные ссылки для связи -->\n<a href=\"tel:+78005553535\">Позвонить в поддержку</a>\n<a href=\"mailto:team@frontend.academy\">Написать нам</a>\n<a href=\"#pricing\">Посмотреть тарифы</a>",
-            "explanation": "Атрибут rel=\"noopener noreferrer\" защищает от вредоносного перехвата окна, а tel/mailto вызывают системные приложения."
+            "code": "<!-- 1. Ссылка Skip to content для доступности (a11y) -->\n<a href=\"#main-content\" class=\"skip-link\">Пропустить навигацию</a>\n\n<!-- 2. Фиксированное меню со ссылками на секции -->\n<header class=\"sticky-nav\">\n  <a href=\"#overview\">Обзор</a>\n  <a href=\"#curriculum\">Программа</a>\n  <a href=\"#reviews\">Отзывы</a>\n</header>\n\n<!-- 3. Основной контент и секции с уникальными id -->\n<main id=\"main-content\">\n  <section id=\"overview\"><h2>Обзор курса</h2></section>\n  <section id=\"curriculum\"><h2>Программа обучения</h2></section>\n  <section id=\"reviews\"><h2>Отзывы выпускников</h2></section>\n</main>\n\n<style>\n  html {\n    scroll-behavior: smooth;\n    scroll-padding-top: 80px; /* Отступ от липкой шапки */\n  }\n  .skip-link {\n    position: absolute;\n    top: -100px;\n    left: 16px;\n    padding: 8px 16px;\n    background: #2dff8a;\n    color: #0a0e13;\n    font-weight: bold;\n    z-index: 1000;\n  }\n  .skip-link:focus {\n    top: 16px; /* Появляется только при фокусе клавишей Tab */\n  }\n</style>",
+            "title": "Якорная навигация и доступная ссылка Skip to content",
+            "explanation": "scroll-padding-top гарантирует, что секции не скроллятся под шапку. skip-link всплывает при фокусе Tab и ускоряет навигацию для людей с клавиатурой."
+          }
+        },
+        {
+          "title": "Специальные протоколы: mailto, tel, sms, geo и мессенджеры",
+          "content": "Гиперссылки умеют не только открывать веб-страницы, но и взаимодействовать с нативными приложениями смартфона и операционной системы:\n\n1. `tel:` (Телефонные звонки):\n- Синтаксис: `<a href=\"tel:+78005553535\">8 (800) 555-35-35</a>`.\n- На смартфонах открывает стандартное приложение «Телефон» с набранным номером.\n- Внимание: в значении атрибута `href` номер ВСЕГДА указывается строго в международном стандарте (`+7...` без пробелов, скобок и тире!). Текст внутри тега может содержать любое форматирование.\n\n2. `mailto:` (Электронная почта):\n- Синтаксис: `<a href=\"mailto:support@academy.ru?subject=Вопрос&body=Здравствуйте\">Написать в поддержку</a>`.\n- Открывает почтовый клиент пользователя (Outlook, Apple Mail, Gmail) с предзаполненной темой (`subject`), текстом (`body`) и копией (`cc`, `bcc`).\n\n3. Ссылки на мессенджеры и социальные сети:\n- Telegram: `href=\"https://t.me/username\"` (универсальный web-линк) или `href=\"tg://resolve?domain=username\"` (нативное приложение).\n- WhatsApp: `href=\"https://wa.me/79991234567?text=Привет\"`.",
+          "codeExample": {
+            "language": "html",
+            "code": "<div class=\"contact-widget\">\n  <h3>Служба поддержки стажёров</h3>\n  \n  <!-- Звонок в 1 клик -->\n  <p>\n    Телефон: <a href=\"tel:+78005553535\">+7 (800) 555-35-35</a> (бесплатно по РФ)\n  </p>\n  \n  <!-- Письмо с предзаполненной темой -->\n  <p>\n    Email: <a href=\"mailto:help@intern.dev?subject=Помощь%20с%20Уроком%206&body=Здравствуйте,%20у%20меня%20вопрос...\">\n      help@intern.dev\n    </a>\n  </p>\n\n  <!-- Чат в Telegram -->\n  <a href=\"https://t.me/frontend_interns_bot\" class=\"btn-tg\" target=\"_blank\" rel=\"noopener noreferrer\">\n    Открыть чат в Telegram\n  </a>\n</div>",
+            "title": "Разметка звонков tel:, писем mailto: и чатов Telegram",
+            "explanation": "Атрибут tel: содержит чистый номер для автоматического набора. mailto: содержит URL-encoded параметры subject и body."
+          }
+        },
+        {
+          "title": "Безопасность и SEO: target=\"_blank\", noopener, noreferrer, nofollow",
+          "content": "Атрибут `target` управляет контекстом открытия страницы (`_self` — в текущей вкладке по умолчанию, `_blank` — в новой вкладке, `_parent`, `_top`).\n\nКритическая уязвимость Tabnabbing (Reverse Tabnabbing):\nКогда вы открываете ссылку `<a href=\"https://evil.com\" target=\"_blank\">`, открывшаяся страница `evil.com` в старых браузерах получала доступ к объекту `window.opener` родительской страницы!\nХакерский сайт мог выполнить `window.opener.location = 'https://fake-login-bank.ru'`, незаметно подменив исходную вкладку пользователя на фишинговую страницу ввода пароля.\n\nЗащита через атрибут `rel`:\n1. `rel=\"noopener\"` — полностью обнуляет `window.opener` (`window.opener === null`), изолируя процесс новой вкладки.\n2. `rel=\"noreferrer\"` — блокирует отправку HTTP-заголовка `Referer` (скрывает от стороннего сервера, с какого URL пришел пользователь), а также автоматически включает `noopener`.\n\nSEO-атрибуты `rel` для поисковых систем (Google / Яндекс):\n- `rel=\"nofollow\"` — указывает поисковому роботу не передавать ссылочный вес (PageRank) целевой странице (для непроверенного контента).\n- `rel=\"sponsored\"` — для рекламных и платных партнерских ссылок.\n- `rel=\"ugc\"` (User Generated Content) — для ссылок, оставленных пользователями в комментариях и на форумах.\n\nАтрибут `download`:\nПринудительно скачивает файл вместо открытия в браузере: `<a href=\"/reports/2026.pdf\" download=\"final-report.pdf\">Скачать</a>`.",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Безопасная внешняя партнерская ссылка -->\n<a\n  href=\"https://partner-tools.com/ide-pro\"\n  target=\"_blank\"\n  rel=\"noopener noreferrer sponsored\"\n>\n  Купить профессиональную IDE со скидкой (Партнёр)\n</a>\n\n<!-- Скачивание архива с кастомным именем файла -->\n<a href=\"/builds/v1.0.4.zip\" download=\"frontend-platform-v1.0.4.zip\">\n  Скачать релизный архив (.ZIP)\n</a>",
+            "title": "Безопасные внешние ссылки и принудительное скачивание",
+            "explanation": "Комбинация target='_blank' + rel='noopener noreferrer sponsored' защищает от фишинга и корректно размечает рекламу для поисковиков."
           }
         }
       ],
       "seniorTips": [
-        "Всегда добавляйте `rel=\"noopener noreferrer\"` при использовании `target=\"_blank\"`.",
-        "Для кнопок интерфейса (открыть модалку, удалить элемент) используйте `<button>`, а не `<a href=\"#\">`! Ссылка должна вести на ресурс или якорь."
+        "При любом использовании `target=\"_blank\"` ВСЕГДА явно пишите `rel=\"noopener noreferrer\"`. В современных браузерах noopener включен по умолчанию, но на старых мобильных WebKit это защищает пользователей от фишинга.",
+        "Всегда добавляйте в CSS свойство `scroll-padding-top: var(--header-height);` на селектор `html` — это навсегда решает проблему перекрытия якорных заголовков фиксированной шапкой сайта.",
+        "Никогда не используйте ссылки-пустышки `<a href=\"#\">` или `<a href=\"javascript:void(0)\">` для открытия модалок или переключения табов. Если элемент выполняет действие в JS, а не переходит по URL — это семантический `<button type=\"button\">`!",
+        "Для телефонных номеров в `href=\"tel:...\"` всегда используйте международный формат `+7...` без пробелов и скобок — это гарантирует корректный набор номера на любых устройствах."
       ],
       "commonMistakes": [
         {
-          "bad": "<a href=\"https://evil.com\" target=\"_blank\">Опасная ссылка</a>",
-          "good": "<a href=\"https://partner.com\" target=\"_blank\" rel=\"noopener noreferrer\">Безопасная ссылка</a>",
-          "reason": "Без rel=\"noopener noreferrer\" создается уязвимость безопасности tabnabbing."
+          "bad": "<!-- Внешняя ссылка без защиты -->\n<a href=\"https://external-resource.com\" target=\"_blank\">Перейти на сайт</a>",
+          "good": "<a href=\"https://external-resource.com\" target=\"_blank\" rel=\"noopener noreferrer\">Перейти на сайт</a>",
+          "reason": "Без rel='noopener noreferrer' целевая страница может получить доступ к window.opener и скрытно подменить родительскую вкладку на фишинговую страницу."
         },
         {
-          "bad": "<a href=\"#\" onclick=\"deleteItem()\">Удалить</a>",
-          "good": "<button type=\"button\" onclick=\"deleteItem()\">Удалить</button>",
-          "reason": "Действия приложения должны выполняться кнопками button, а не псевдо-ссылками a."
+          "bad": "<!-- Использование ссылки вместо кнопки -->\n<a href=\"#\" onclick=\"openAuthModal()\">Войти в аккаунт</a>",
+          "good": "<button type=\"button\" onclick=\"openAuthModal()\">Войти в аккаунт</button>",
+          "reason": "Ссылка предназначена для перехода по URL. Использование <a> для JS-действий ломает доступность (скринридер ждёт перехода) и скроллит страницу вверх при клике на '#'."
+        },
+        {
+          "bad": "<a href=\"tel:8 (800) 555-35-35\">Позвонить</a>",
+          "good": "<a href=\"tel:+78005553535\">8 (800) 555-35-35</a>",
+          "reason": "Пробелы и скобки в href='tel:...' ломают автоматический набор номера на многих моделях Android и iOS. Номер в href должен быть чистым и в международном формате."
         }
       ],
       "keyTakeaways": [
-        "Относительные пути позволяют сайту работать на любом домене и локально.",
-        "target=\"_blank\" всегда сопровождается rel=\"noopener noreferrer\".",
-        "Схемы tel: и mailto: вызывают телефон и почту на мобильных устройствах."
+        "Тег `<a>` связывает страницы через абсолютные и относительные URL-адреса.",
+        "Якорные ссылки `href=\"#id\"` скроллят к элементу с соответствующим `id`, требуя `scroll-padding-top` для компенсации шапки.",
+        "Паттерн доступности `Skip to content` позволяет пользователям с клавиатурой быстро перейти к главному контенту.",
+        "Протоколы `tel:` и `mailto:` активируют нативные звонки и почтовые клиенты.",
+        "Для всех внешних ссылок с `target=\"_blank\"` обязателен атрибут `rel=\"noopener noreferrer\"` для защиты от Tabnabbing."
       ]
     },
     "sandbox": {
-      "initialHtml": "<nav class=\"demo-links\">\n  <a href=\"#section1\" class=\"link-pill\">Секция 1</a>\n  <a href=\"#section2\" class=\"link-pill\">Секция 2</a>\n  <a href=\"https://github.com\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"link-pill external\">GitHub ↗</a>\n  <a href=\"mailto:test@example.com\" class=\"link-pill\">Написать email</a>\n</nav>\n<div style=\"margin-top: 30px;\">\n  <section id=\"section1\" style=\"padding: 15px; background: #e0e7ff; margin-bottom: 10px; border-radius: 8px;\">Контент первой секции</section>\n  <section id=\"section2\" style=\"padding: 15px; background: #fef3c7; border-radius: 8px;\">Контент второй секции</section>\n</div>",
-      "initialCss": ".demo-links { display: flex; gap: 10px; flex-wrap: wrap; }\n.link-pill { display: inline-block; padding: 8px 16px; background: #4f46e5; color: white; text-decoration: none; border-radius: 20px; font-size: 13px; font-weight: 600; }\n.link-pill:hover { background: #4338ca; }\n.link-pill.external { background: #0f172a; }",
-      "initialJs": "console.log('Links sandbox ready');",
-      "instructions": "Проверьте работу якорных ссылок при клике на «Секция 1» и «Секция 2»."
+      "initialHtml": "<div class=\"links-playground\">\n  <nav class=\"demo-nav\">\n    <a href=\"#section-features\">Возможности</a>\n    <a href=\"#section-pricing\">Цены</a>\n    <a href=\"tel:+78001234567\">📞 Позвонить</a>\n    <a href=\"mailto:test@intern.dev?subject=Вопрос\">✉️ Написать</a>\n  </nav>\n\n  <div style=\"height: 120px;\"></div>\n  <section id=\"section-features\" class=\"demo-sec\"><h3>Раздел: Возможности</h3></section>\n  <div style=\"height: 120px;\"></div>\n  <section id=\"section-pricing\" class=\"demo-sec\"><h3>Раздел: Тарифы и цены</h3></section>\n</div>",
+      "initialCss": ".links-playground {\n  height: 250px;\n  overflow-y: auto;\n  background: #0a0e13;\n  padding: 16px;\n  color: #e6edf3;\n  font-family: monospace;\n  scroll-behavior: smooth;\n}\n.demo-nav {\n  position: sticky;\n  top: 0;\n  background: #161b22;\n  padding: 10px;\n  border: 1px solid #30363d;\n  display: flex;\n  gap: 12px;\n  border-radius: 6px;\n  z-index: 10;\n}\n.demo-nav a {\n  color: #2dff8a;\n  text-decoration: none;\n}\n.demo-nav a:hover {\n  text-decoration: underline;\n  color: #29e7ff;\n}\n.demo-sec {\n  padding: 16px;\n  background: #0d1117;\n  border: 1px dashed #29e7ff;\n  border-radius: 6px;\n}",
+      "initialJs": "console.log('Песочница ссылок готова');",
+      "instructions": "Практика со ссылками:\n1. Кликните по ссылкам 'Возможности' и 'Цены' — проверьте плавный якорный переход\n2. Добавьте ссылку на скачивание файла с атрибутом download='document.pdf'\n3. Добавьте внешнюю ссылку с target='_blank' и rel='noopener noreferrer'"
     },
     "task": {
-      "title": "Создание блока контактов",
-      "scenario": "Создайте контактный блок с номером телефона, email и ссылкой на соцсети в новой вкладке.",
+      "title": "Разработка доступного навигационного меню и контактного хаба",
+      "scenario": "Вам необходимо сверстать навигационный хаб для корпоративного лендинга: добавить доступную скрытую ссылку «Skip to content», главное якорное меню с компенсацией липкой шапки, безопасные ссылки на внешних партнеров и кликабельные контакты (телефон и email).",
       "criteria": [
-        "Использована ссылка tel: с номером телефона",
-        "Использована ссылка mailto: с email",
-        "Использована внешняя ссылка с target=\"_blank\" и rel=\"noopener noreferrer\""
+        "Добавлена ссылка 'Skip to content' с href='#main' и доступным поведением при фокусе",
+        "Якорные ссылки ведут к секциям с соответствующими id",
+        "Внешняя ссылка на партнера открывается в новой вкладке с target='_blank' и rel='noopener noreferrer'",
+        "Телефон размечен через tel: в международном формате +7...",
+        "Email размечен через mailto: с темой письма",
+        "Кнопка скачивания прайс-листа содержит атрибут download"
       ],
       "starterCode": {
-        "html": "<!-- Создайте ссылки контактов -->\n<div class=\"contacts-block\">\n  \n</div>",
-        "css": "/* Стили задания */\n"
+        "html": "<header>\n  <!-- Разметьте навигацию и контакты -->\n  <nav></nav>\n</header>\n<main id=\"main\">\n  <section id=\"services\"><h2>Услуги</h2></section>\n  <section id=\"contacts\"><h2>Контакты</h2></section>\n</main>"
       },
       "hints": [
-        "Используйте href=\"tel:+...\", href=\"mailto:...\", target=\"_blank\" rel=\"noopener noreferrer\"."
+        "Используйте <a href='#main' class='skip-link'>Пропустить к контенту</a>",
+        "Для звонков: <a href='tel:+78005553535'>8 (800) 555-35-35</a>",
+        "Для внешней ссылки: <a href='https://partner.com' target='_blank' rel='noopener noreferrer'>Партнёр</a>"
       ],
       "solution": {
-        "html": "<div class=\"contacts-block\">\n  <p>Телефон: <a href=\"tel:+79990001122\">+7 (999) 000-11-22</a></p>\n  <p>Email: <a href=\"mailto:intern@academy.ru\">intern@academy.ru</a></p>\n  <p><a href=\"https://t.me/frontend\" target=\"_blank\" rel=\"noopener noreferrer\">Наш Telegram-канал</a></p>\n</div>",
-        "css": "/* Решение */\n",
-        "explanation": "Полный набор контактных ссылок по стандартам безопасности и доступности."
+        "html": "<a href=\"#main\" class=\"skip-link\">Пропустить навигацию</a>\n\n<header class=\"header-nav\">\n  <nav>\n    <a href=\"#services\">Услуги</a>\n    <a href=\"#contacts\">Контакты</a>\n    <a href=\"/docs/price.pdf\" download=\"price-2026.pdf\">Скачать прайс (.PDF)</a>\n    <a href=\"https://partner-portal.com\" target=\"_blank\" rel=\"noopener noreferrer sponsored\">Партнёры</a>\n  </nav>\n  <div class=\"contacts-bar\">\n    <a href=\"tel:+78005553535\">8 (800) 555-35-35</a>\n    <a href=\"mailto:sales@company.ru?subject=Заказ%20услуг\">sales@company.ru</a>\n  </div>\n</header>\n\n<main id=\"main\">\n  <section id=\"services\"><h2>Услуги</h2><p>Разработка веб-приложений.</p></section>\n  <section id=\"contacts\"><h2>Контакты</h2><p>Свяжитесь с нами любым удобным способом.</p></section>\n</main>",
+        "explanation": "Разметка полностью соответствует стандартам доступности и безопасности: содержит skip-link, чистый номер tel:, mailto: с темой, безопасный target='_blank' с rel='noopener noreferrer' и атрибут download."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h6-q1",
-          "question": "Какой атрибут безопасности обязателен при target=\"_blank\"?",
+          "id": "html6-q1",
+          "question": "В чём заключается опасность уязвимости Tabnabbing при использовании ссылки <a href='...' target='_blank'> без дополнительных атрибутов?",
           "options": [
-            "rel=\"noopener noreferrer\"",
-            "alt=\"blank\"",
-            "type=\"secure\"",
-            "download=\"true\""
+            "Сторонняя страница может прочитать пароли из cookies пользователя",
+            "Сторонняя страница может через свойство window.opener.location незаметно перенаправить исходную родительскую вкладку на фишинговый сайт",
+            "Страница зависает и перестает отвечать",
+            "Уязвимости не существует"
           ],
-          "correctIndex": 0,
-          "explanation": "rel=\"noopener noreferrer\" блокирует доступ к window.opener и защищает от tabnabbing."
+          "correctIndex": 1,
+          "explanation": "При target='_blank' без rel='noopener' открывшаяся страница имеет ссылку на родительское окно через window.opener и может скрытно изменить адрес родительской вкладки на фальшивую форму входа."
         },
         {
-          "id": "h6-q2",
-          "question": "Как оформить ссылку для совершения звонка с телефона?",
+          "id": "html6-q2",
+          "question": "Какая комбинация атрибутов rel полностью устраняет уязвимость Tabnabbing и скрывает реферер?",
           "options": [
-            "href=\"call:123\"",
-            "href=\"phone:123\"",
-            "href=\"tel:+79991234567\"",
-            "href=\"#call\""
+            "rel='safe external'",
+            "rel='noopener noreferrer'",
+            "rel='nofollow hide'",
+            "rel='target-parent'"
           ],
-          "correctIndex": 2,
-          "explanation": "Схема tel: используется для телефонных номеров."
+          "correctIndex": 1,
+          "explanation": "rel='noopener' обнуляет window.opener (защищая от Tabnabbing), а 'noreferrer' дополнительно блокирует отправку заголовка Referer со страницей-источником."
+        },
+        {
+          "id": "html6-q3",
+          "question": "Как правильно оформить телефонный номер для безошибочного набора со смартфонов?",
+          "options": [
+            "<a href='phone:8-800-555-35-35'>Позвонить</a>",
+            "<a href='tel:+78005553535'>8 (800) 555-35-35</a>",
+            "<a href='call:+7 (800) 555-35-35'>8 (800) 555-35-35</a>",
+            "<button type='phone'>+78005553535</button>"
+          ],
+          "correctIndex": 1,
+          "explanation": "Протокол tel: требует в значении href строго международный формат (+7...) без пробелов, скобок и дефисов, в то время как текст ссылки внутри тега может быть красиво отформатирован для пользователя."
+        },
+        {
+          "id": "html6-q4",
+          "question": "Какое CSS-свойство предотвращает перекрытие якорных заголовков фиксированной шапкой сайта?",
+          "options": [
+            "scroll-behavior: auto;",
+            "scroll-padding-top: 80px; (на селекторе html)",
+            "margin-top: 80px;",
+            "z-index: 1000;"
+          ],
+          "correctIndex": 1,
+          "explanation": "Свойство scroll-padding-top на селекторе html задает отступ от верхнего края viewport при прокрутке к якорю, гарантируя, что заголовок секции не окажется под фиксированной шапкой."
+        },
+        {
+          "id": "html6-q5",
+          "question": "Зачем на странице используется скрытая ссылка «Skip to content» (<a href='#main'>)?",
+          "options": [
+            "Для ускорения загрузки JavaScript",
+            "Для доступности: позволяет незрячим пользователям и людям, управляющим сайтом с клавиатуры (Tab), одним нажатием пропустить шапку и перейти сразу к главному контенту",
+            "Для индексации сайта поисковыми ботами",
+            "Для закрытия модальных окон"
+          ],
+          "correctIndex": 1,
+          "explanation": "Skip-link — ключевое требование стандарта доступности WCAG. Она дает возможность пользователям с клавиатурой не проходить через десятки ссылок в шапке на каждой странице."
         }
       ]
     }

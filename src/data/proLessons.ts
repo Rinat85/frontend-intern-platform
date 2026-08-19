@@ -977,5 +977,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-6",
+    "moduleId": "pro",
+    "level": 6,
+    "title": "Сетевой стек: HTTP/HTTPS, REST API, WebSocket и SSE",
+    "subtitle": "HTTP/2/3, REST архитектура, статус-коды, ETag кэширование, WebSockets и Server-Sent Events",
+    "description": "Освойте современный сетевой стек фронтенд-инженера: эволюцию протоколов HTTP/1.1 -> HTTP/2 -> HTTP/3, семантику методов и статус-кодов REST API, ETag и Cache-Control валидацию, сравнение WebSockets vs Server-Sent Events (SSE) для real-time связи.",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "network",
+      "http",
+      "https",
+      "rest-api",
+      "websocket",
+      "sse",
+      "caching",
+      "etag"
+    ],
+    "theory": {
+      "overview": "Фронтенд-приложение не существует в вакууме: оно непрерывно обменивается данными с бэкенд-серверами, микросервисами и сторонними API через сетевой стек.\n\nПонимание протоколов передачи данных — ключевой навык для проектирования надежных, быстрых и отказоустойчивых интерфейсов. В этом уроке мы изучим эволюцию HTTP/2 и HTTP/3, детально разберём семантику REST API и статус-кодов, настроим HTTP-кэширование через ETag и сравним три технологии связи в реальном времени: Polling, Server-Sent Events (SSE) и WebSockets.",
+      "sections": [
+        {
+          "title": "Протоколы HTTP/1.1 vs HTTP/2 vs HTTP/3 и безопасность HTTPS",
+          "content": "Протокол HTTP (HyperText Transfer Protocol) — фундамент обмена данными в вебе.\n\nЭволюция протокола HTTP:\n\n1. HTTP/1.1 (1997 год):\n- Текстовый протокол. Для каждого запроса открывалось отдельное TCP-соединение (или переиспользовалось через Keep-Alive).\n- Главная проблема: Head-of-Line Blocking (Блокировка начала очереди) — если один тяжелый запрос завис, все последующие запросы в этой очереди ждут.\n- Браузеры ограничивали параллельные соединения до 6 штук на один домен.\n\n2. HTTP/2 (2015 год):\n- Бинарный протокол поверх одного TCP-соединения.\n- Мультиплексирование (Multiplexing): десятки запросов и ответов передаются параллельно чередующимися фреймами без блокировки очереди!\n- Сжатие заголовков HPACK (сокращает оверхед сетевых заголовков на 85%).\n\n3. HTTP/3 (2022 год):\n- Работает поверх нового транспортного протокола QUIC на базе UDP (вместо медленного TCP Handshake).\n- Мгновенное 0-RTT переподключение при смене Wi-Fi на 4G без потери пакетов.\n\nБезопасность HTTPS (TLS/SSL):\nШифрует весь трафик между браузером и сервером. Защищает от атак Man-in-the-Middle (MitM), подмены трафика провайдером и перехвата паролей/кук.",
+          "image": {
+            "src": "/images/lessons/web-network-protocols.svg",
+            "alt": "Сетевой стек: REST API, Server-Sent Events SSE, WebSockets и статус-коды",
+            "caption": "REST API для CRUD запросов, SSE для однонаправленных потоков (AI, котировки) и WebSocket для 2-way real-time связи"
+          },
+          "codeExample": {
+            "language": "bash",
+            "code": "# Просмотр заголовков HTTP/2 ответа через curl:\ncurl -I https://api.academy.ru/v1/users\n\n# Пример HTTP/2 ответа:\n# HTTP/2 200\n# content-type: application/json; charset=utf-8\n# cache-control: public, max-age=3600, stale-while-revalidate=60\n# etag: W/\"65a1f-18dc0\"\n# server: cloudflare",
+            "title": "Заголовки сетевого ответа протокола HTTP/2",
+            "explanation": "HTTP/2 ответ возвращает статус 200, ETag хэш для валидации кэша и директиву stale-while-revalidate для мгновенного отклика."
+          }
+        },
+        {
+          "title": "REST API: Семантика методов, идемпотентность и статус-коды",
+          "content": "REST (Representational State Transfer) — доминирующий архитектурный стиль взаимодействия клиента и сервера.\n\nСемантика HTTP-методов:\n1. `GET` — чтение ресурса. Безопасный (не меняет данные на сервере) и идемпотентный.\n2. `POST` — создание нового ресурса (`/api/users`). Не идемпотентный (повторные вызовы создадут дубликаты пользователей!).\n3. `PUT` — полная замена существующего ресурса. Идемпотентный.\n4. `PATCH` — частичное обновление полей объекта (`{ status: 'active' }`).\n5. `DELETE` — удаление ресурса. Идемпотентный.\n6. `OPTIONS` — Preflight-запрос CORS для проверки разрешенных методов.\n\nHTTP Статус-коды (Карта инженера):\n- `2xx Успех`: `200 OK`, `201 Created` (успешное создание), `204 No Content` (успешное удаление без тела ответа).\n- `3xx Перенаправление`: `301 Moved Permanently` (редирект), `304 Not Modified` (данные не изменились, взять из кэша браузера!).\n- `4xx Ошибки клиента`: `400 Bad Request` (ошибка валидации), `401 Unauthorized` (пользователь не залогинен), `403 Forbidden` (залогинен, но нет прав/роли), `404 Not Found`, `422 Unprocessable Entity`, `429 Too Many Requests` (Rate Limiting).\n- `5xx Ошибки сервера`: `500 Internal Server Error`, `502 Bad Gateway`, `503 Service Unavailable`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Универсальный обработчик статус-кодов API:\nasync function apiRequest(url, options = {}) {\n  const response = await fetch(url, options);\n  \n  if (response.status === 204) return null; // No Content\n  \n  if (!response.ok) {\n    if (response.status === 401) {\n      // Редирект на экран логина (токен истек)\n      window.location.href = '/login';\n      throw new Error('Сессия истекла');\n    }\n    if (response.status === 403) {\n      throw new Error('Недостаточно прав для выполнения действия');\n    }\n    if (response.status === 429) {\n      throw new Error('Слишком много запросов. Подождите 1 минуту.');\n    }\n    const errorData = await response.json().catch(() => ({}));\n    throw new Error(errorData.message || `Ошибка сервера: ${response.status}`);\n  }\n  \n  return response.json();\n}",
+            "title": "Обработка статус-кодов 401, 403, 429 и 204 в fetch",
+            "explanation": "Профессиональный клиент разделяет 401 (нет авторизации) и 403 (нет прав), а также корректно обрабатывает пустой ответ 204 No Content."
+          }
+        },
+        {
+          "title": "Связь в реальном времени: WebSockets vs Server-Sent Events (SSE)",
+          "content": "Когда интерфейс требует мгновенного обновления данных без ручной перезагрузки страницы (Real-Time UI):\n\n1. Polling (Опрос по таймеру — устаревший подход):\nКлиент каждые 3 секунды отправляет `GET /messages`. 99% запросов возвращают пустой ответ, нагружая сервер и расходуя батарею смартфона.\n\n2. Server-Sent Events (SSE — Однонаправленный стрим):\n- Сервер держит открытое соединение `Content-Type: text/event-stream` и отправляет события клиенту по мере их появления.\n- В браузере поддерживается нативным API `const eventSource = new EventSource('/api/stream')`.\n- Автоматически восстанавливает соединение при обрыве сети (Auto-Reconnect)!\n- Идеально для: генерации ответов нейросетями (LLM ChatGPT стриминг), уведомлений, биржевых котировок, спортивных трансляций.\n\n3. WebSockets (Двунаправленный канал `ws://` / `wss://`):\n- Клиент отправляет HTTP-запрос с заголовком `Upgrade: websocket`. Сервер отвечает `101 Switching Protocols`.\n- Устанавливается постоянный полнодуплексный TCP-сокет. И клиент, и сервер могут в любой момент отправлять бинарные или текстовые фреймы с минимальным оверхедом (2–8 байт!).\n- Идеально для: онлайн-игр, чатов, совместного редактирования документов (Figma, Miro, Google Docs).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Клиент Server-Sent Events (SSE) для стриминга ответов LLM/AI:\nconst sse = new EventSource('/api/ai-completion');\nsse.onmessage = (event) => {\n  const token = JSON.parse(event.data).text;\n  document.getElementById('ai-response').textContent += token;\n};\nsse.onerror = () => sse.close();\n\n// 2. Клиент WebSocket для двустороннего чата:\nconst ws = new WebSocket('wss://api.academy.ru/chat');\nws.onopen = () => {\n  console.log('WS соединение установлено');\n  ws.send(JSON.stringify({ type: 'join', room: 'frontend-interns' }));\n};\nws.onmessage = (event) => {\n  const msg = JSON.parse(event.data);\n  renderNewMessage(msg);\n};",
+            "title": "Реализация клиентов SSE (EventSource) и WebSocket",
+            "explanation": "SSE идеально подходит для одностороннего стриминга текста от AI, а WebSocket обеспечивает двустороннюю интерактивность чата."
+          }
+        },
+        {
+          "title": "HTTP-кэширование: Cache-Control, ETag и 304 Not Modified",
+          "content": "Кэширование — самый мощный способ ускорения веб-приложений и снижения нагрузки на серверную инфраструктуру:\n\n1. Механизм ETag (Entity Tag) и условные запросы:\n- Сервер вычисляет хэш содержимого ресурса и отправляет его в заголовке: `ETag: \"68b329da\"`.\n- При следующем запросе браузер отправляет заголовок: `If-None-Match: \"68b329da\"`.\n- Если данные на сервере НЕ изменились, сервер отвечает пустым заголовком `304 Not Modified` (0 байт тела!), и браузер мгновенно берет данные из локального дискового кэша!\n\n2. Заголовок `Cache-Control`:\n- `max-age=3600` — ресурс свежий в течение 3600 секунд (1 час).\n- `no-cache` — кэшировать можно, но перед каждым использованием ОБЯЗАТЕЛЬНО валидировать с сервером через ETag.\n- `no-store` — СТРОГО запрещено кэшировать (для платежных данных и приватных токенов).\n- `stale-while-revalidate=60` — современная стратегия: браузер МГНОВЕННО отдает пользователю чуть устаревший кэш, параллельно в фоне делая тихий запрос на сервер для обновления данных.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Настройка кэширования для статических файлов в Node.js / Express:\napp.use('/assets', express.static('dist/assets', {\n  maxAge: '1y',\n  immutable: true // Файлы с хэшами (index-BPe6.js) никогда не изменятся!\n}));\n\n// Настройка для динамического API с фоновой ревалидацией:\napp.get('/api/catalog', (req, res) => {\n  res.setHeader(\n    'Cache-Control',\n    'public, max-age=60, stale-while-revalidate=300'\n  );\n  res.json(catalogData);\n});",
+            "title": "Настройка стратегий immutable и stale-while-revalidate",
+            "explanation": "immutable кэширует JS/CSS бандлы на 1 год без повторных запросов. stale-while-revalidate обеспечивает мгновенную отдачу каталога."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Всегда разделяйте статусы `401 Unauthorized` (пользователь не авторизован -> редирект на экран логина) и `403 Forbidden` (пользователь авторизован, но у него нет прав -> показ экрана 'Доступ запрещен').",
+        "Для стриминга текста нейросетей (ChatGPT, Claude) или биржевых котировок используйте Server-Sent Events (SSE) вместо WebSocket. SSE работает по стандартному HTTP/2 и автоматически переподключается при обрыве связи.",
+        "Для статических файлов с хэшами в именах (`index-D3f8.js`) всегда выставляйте `Cache-Control: public, max-age=31536000, immutable` — это навсегда исключает лишние сетевые запросы.",
+        "В REST API используйте существительные во множественном числе для именования ресурсов (`/api/v1/users`, `/api/v1/orders/12/items`), а действие определяйте HTTP-методом (GET, POST, DELETE)."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Использование GET для удаления ресурса\n<a href=\"/api/delete-user?id=42\">Удалить пользователя</a>",
+          "good": "// Использование семантического DELETE метода\nfetch('/api/users/42', { method: 'DELETE' });",
+          "reason": "GET-запросы должны быть безопасными и не мутировать данные. Поисковые боты и предзагрузчики ссылок могут случайно перейти по ссылке и удалить все данные."
+        },
+        {
+          "bad": "// Сервер возвращает 200 OK на ошибку\nHTTP/1.1 200 OK\n{ \"error\": true, \"message\": \"User not found\" }",
+          "good": "HTTP/1.1 404 Not Found\n{ \"message\": \"User not found\" }",
+          "reason": "Возврат 200 OK на ошибки ломает стандартную обработку в response.ok, кэширование браузера и системы мониторинга (Sentry/Datadog)."
+        },
+        {
+          "bad": "// Использование WebSocket для редких разовых уведомлений\nconst ws = new WebSocket('wss://...'); // Держит постоянный открытый порт",
+          "good": "const sse = new EventSource('/api/notifications');",
+          "reason": "WebSocket требует удержания постоянного TCP-сокета на сервере, что расходует память и соединения. Для редких серверных пушей SSE в разы проще и эффективнее."
+        }
+      ],
+      "keyTakeaways": [
+        "HTTP/2 и HTTP/3 обеспечивают мультиплексирование потоков и сжатие заголовков поверх одного соединения.",
+        "REST API строится на ресурсах и семантических методах (GET, POST, PUT, PATCH, DELETE) с идемпотентностью.",
+        "Статусы 2xx означают успех, 304 — кэш валиден, 401 — нет логина, 403 — нет прав, 429 — Rate Limit, 5xx — сбой сервера.",
+        "SSE — идеален для одностороннего стриминга (AI, котировки) с авто-реконнектом. WebSocket — для двусторонних real-time чатов и игр.",
+        "Стратегия `stale-while-revalidate` и ETag валидация ускоряют повторную загрузку данных до 0 мс."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"network-app\">\n  <h3>Симулятор REST API Клиента и статус-кодов</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"btn-200\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">200 OK</button>\n    <button id=\"btn-401\" style=\"background:#ffb02e; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">401 Auth Error</button>\n    <button id=\"btn-403\" style=\"background:#ff7b72; color:#fff; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">403 Forbidden</button>\n    <button id=\"btn-304\" style=\"background:#29e7ff; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">304 ETag Cache</button>\n  </div>\n  <div id=\"net-log\" style=\"padding:12px; background:#161b22; border:1px solid #30363d; border-radius:6px; min-height:80px; font-family:monospace;\"></div>\n</div>",
+      "initialCss": "#network-app {\n  font-family: monospace;\n  color: #e6edf3;\n  padding: 16px;\n  background: #0d1117;\n  border-radius: 8px;\n}",
+      "initialJs": "const logEl = document.getElementById('net-log');\nconst log = (msg, color = '#2dff8a') => logEl.innerHTML = `<span style='color:${color}'>${msg}</span>`;\n\ndocument.getElementById('btn-200').addEventListener('click', () => {\n  log('HTTP/2 200 OK: Данные успешно получены с сервера [Размер: 1.4 КБ]');\n});\ndocument.getElementById('btn-401').addEventListener('click', () => {\n  log('HTTP/2 401 Unauthorized: Токен авторизации истек -> Редирект на /login', '#ffb02e');\n});\ndocument.getElementById('btn-403').addEventListener('click', () => {\n  log('HTTP/2 403 Forbidden: Доступ запрещен (Требуется роль ADMIN)', '#ff7b72');\n});\ndocument.getElementById('btn-304').addEventListener('click', () => {\n  log('HTTP/2 304 Not Modified: If-None-Match ETag совпал -> Мгновенная отдача из кэша (0 байт трафика!)', '#29e7ff');\n});",
+      "instructions": "Практика с сетевыми статусами:\n1. Нажмите поочередно кнопки статус-кодов и изучите логику обработки\n2. Обратите внимание на статус 304 Not Modified — он экономит 100% трафика тела ответа\n3. Добавьте симуляцию статуса 429 Too Many Requests с выводом времени ожидания Retry-After"
+    },
+    "task": {
+      "title": "Разработка отказоустойчивого сетевого HTTP-клиента с ETag кэшем и повторными попытками",
+      "scenario": "Вам необходимо создать отказоустойчивый сетевой модуль HttpClient для взаимодействия с REST API: клиент должен автоматически подставлять ETag заголовки кэширования, обрабатывать статусы 401/403/429 и выполнять автоматические повторные попытки (Retry с Exponential Backoff) при сетевых сбоях 500/503.",
+      "criteria": [
+        "Класс HttpClient хранит кэш ETag хэшей в Map",
+        "Метод request(url, options) отправляет заголовок If-None-Match при наличии кэшированного ETag",
+        "При получении 304 Not Modified возвращает данные из локального кэша",
+        "Обработка ошибок 401 (вызов onUnauthorized колбэка) и 403 (вызов onForbidden)",
+        "При ошибках 500/502/503 выполняется до maxRetries повторных запросов с увеличивающейся задержкой"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте сетевой клиент HttpClient\nclass HttpClient {\n  constructor(config = {}) {\n    this.etagCache = new Map();\n  }\n\n  async get(url) {\n    // Ваш код\n  }\n}"
+      },
+      "hints": [
+        "Сохраняйте в Map: this.etagCache.set(url, { etag, data })",
+        "Для паузы между retry используйте await new Promise(r => setTimeout(r, delay))",
+        "При ответе 304 возвращайте this.etagCache.get(url).data"
+      ],
+      "solution": {
+        "js": "class HttpClient {\n  constructor({\n    onUnauthorized = () => {},\n    onForbidden = () => {},\n    maxRetries = 3\n  } = {}) {\n    this.onUnauthorized = onUnauthorized;\n    this.onForbidden = onForbidden;\n    this.maxRetries = maxRetries;\n    this.etagCache = new Map();\n  }\n\n  async get(url, attempt = 1) {\n    const headers = { 'Accept': 'application/json' };\n    const cached = this.etagCache.get(url);\n    if (cached?.etag) {\n      headers['If-None-Match'] = cached.etag;\n    }\n\n    try {\n      const res = await fetch(url, { method: 'GET', headers });\n\n      if (res.status === 304 && cached) {\n        return cached.data;\n      }\n\n      if (res.status === 401) {\n        this.onUnauthorized();\n        throw new Error('401 Unauthorized');\n      }\n      if (res.status === 403) {\n        this.onForbidden();\n        throw new Error('403 Forbidden');\n      }\n\n      if (!res.ok && res.status >= 500 && attempt <= this.maxRetries) {\n        const delay = Math.pow(2, attempt) * 200; // Exponential backoff\n        await new Promise((r) => setTimeout(r, delay));\n        return this.get(url, attempt + 1);\n      }\n\n      if (!res.ok) {\n        throw new Error(`HTTP Error ${res.status}`);\n      }\n\n      const data = await res.json();\n      const newEtag = res.headers.get('ETag');\n      if (newEtag) {\n        this.etagCache.set(url, { etag: newEtag, data });\n      }\n      return data;\n    } catch (err) {\n      if (attempt <= this.maxRetries && !err.message.includes('401') && !err.message.includes('403')) {\n        await new Promise((r) => setTimeout(r, Math.pow(2, attempt) * 200));\n        return this.get(url, attempt + 1);\n      }\n      throw err;\n    }\n  }\n}",
+        "explanation": "HttpClient реализует промышленный стандарт: ETag валидацию с поддержкой 304 Not Modified, перехват авторизационных статусов 401/403 и умный retry с экспоненциальной задержкой при серверных сбоях 5xx."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro6-q1",
+          "question": "В чём заключается фундаментальное отличие протокола Server-Sent Events (SSE) от WebSockets?",
+          "options": [
+            "SSE работает быстрее в 100 раз",
+            "SSE — это однонаправленный поток данных от сервера к клиенту поверх стандартного HTTP с автоматическим переподключением, а WebSocket — постоянный полнодуплексный двунаправленный канал",
+            "SSE требует отдельного порта, а WebSocket работает через HTTP",
+            "WebSocket не поддерживает передачу текста"
+          ],
+          "correctIndex": 1,
+          "explanation": "SSE обеспечивает легковесный поток событий от сервера к клиенту (идеален для AI стриминга и котировок) поверх HTTP. WebSocket создает двустороннее равноправное соединение для игр и чатов."
+        },
+        {
+          "id": "pro6-q2",
+          "question": "Какое поведение обеспечивает статус-код ответа HTTP 304 Not Modified?",
+          "options": [
+            "Сервер удалил ресурс",
+            "Сервер подтверждает, что запрошенный ресурс не изменился с момента предыдущего запроса (ETag совпал), и клиент мгновенно берет тело ответа из локального кэша",
+            "Сервер перегружен",
+            "Доступ запрещен"
+          ],
+          "correctIndex": 1,
+          "explanation": "Ответ 304 Not Modified возвращается сервером без тела ответа (0 байт), подтверждая, что версия в кэше браузера актуальна, экономя трафик и ускоряя загрузку."
+        },
+        {
+          "id": "pro6-q3",
+          "question": "В чём разница между ошибками HTTP 401 Unauthorized и HTTP 403 Forbidden?",
+          "options": [
+            "Ошибки полностью одинаковы",
+            "401 означает, что пользователь не аутентифицирован (нет валидного токена), а 403 — пользователь аутентифицирован, но не имеет прав доступа к данному ресурсу",
+            "401 возникает на мобильных, 403 на десктопах",
+            "403 означает ошибку сервера"
+          ],
+          "correctIndex": 1,
+          "explanation": "401 (Unauthenticated) требует прохождения входа в систему (логина). 403 (Forbidden) означает, что сервер знает, кто вы, но ваши права/роли не позволяют выполнить действие."
+        },
+        {
+          "id": "pro6-q4",
+          "question": "Какое ключевое преимущество дал протокол HTTP/2 по сравнению с HTTP/1.1?",
+          "options": [
+            "HTTP/2 удалил заголовки",
+            "Мультиплексирование запросов: передача множества параллельных запросов и ответов через единое TCP-соединение без блокировки начала очереди (Head-of-Line Blocking)",
+            "HTTP/2 работает без интернета",
+            "HTTP/2 запретил использование cookies"
+          ],
+          "correctIndex": 1,
+          "explanation": "Мультиплексирование HTTP/2 позволяет браузеру скачивать десятки CSS, JS и изображений параллельно через один сокет, устраняя задержки ожидания в очереди."
+        },
+        {
+          "id": "pro6-q5",
+          "question": "Что означает понятие «Идемпотентность HTTP-метода» (Idempotency)?",
+          "options": [
+            "Метод выполняется быстрее остальных",
+            "Многократное выполнение одного и того же запроса приводит к тому же результату на сервере, что и однократный вызов (GET, PUT, DELETE)",
+            "Метод шифрует данные",
+            "Метод не может быть вызван повторно"
+          ],
+          "correctIndex": 1,
+          "explanation": "Идемпотентный метод (GET, PUT, DELETE) можно безопасно повторять при сбоях сети: повторный вызов DELETE /users/42 или PUT /users/42 оставит состояние сервера неизменным."
+        }
+      ]
+    }
   }
 ];

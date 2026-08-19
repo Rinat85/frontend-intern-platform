@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgp6" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgp6)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Pro: Сетевой стек и протоколы связи</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">HTTP/2/3, REST API, WebSockets, Server-Sent Events (SSE) и HTTP-кэширование</text>
+
+  <!-- 3 Communication Models -->
+  <rect x="20" y="65" width="245" height="185" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="142" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">HTTP / REST API</text>
+  <text x="142" y="100" fill="#8b949e" font-size="8" text-anchor="middle">Request-Response модель</text>
+  <rect x="35" y="110" width="215" height="28" rx="4" fill="#0d1117" stroke="#30363d"/><text x="142" y="128" fill="#e6edf3" font-size="8" text-anchor="middle">Клиент → Запрос → Сервер</text>
+  <rect x="35" y="142" width="215" height="28" rx="4" fill="#0d1117" stroke="#30363d"/><text x="142" y="160" fill="#e6edf3" font-size="8" text-anchor="middle">Клиент ← Ответ (200 OK) ← Сервер</text>
+  <text x="142" y="186" fill="#8b949e" font-size="7" text-anchor="middle">• Соединение закрывается/переиспользуется</text>
+  <text x="142" y="198" fill="#8b949e" font-size="7" text-anchor="middle">• Идемпотентность GET/PUT/DELETE</text>
+  <text x="142" y="210" fill="#8b949e" font-size="7" text-anchor="middle">• Идеально для CRUD и веб-страниц</text>
+  <text x="142" y="235" fill="#29e7ff" font-size="8" font-weight="600" text-anchor="middle">HTTP/2: Мультиплексирование</text>
+
+  <rect x="278" y="65" width="245" height="185" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
+  <text x="400" y="85" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Server-Sent Events (SSE)</text>
+  <text x="400" y="100" fill="#8b949e" font-size="8" text-anchor="middle">Однонаправленный стрим</text>
+  <rect x="293" y="110" width="215" height="28" rx="4" fill="#0d1117" stroke="#30363d"/><text x="400" y="128" fill="#e6edf3" font-size="8" text-anchor="middle">Клиент → Подключение (EventSource) →</text>
+  <rect x="293" y="142" width="215" height="28" rx="4" fill="#0d1117" stroke="#30363d"/><text x="400" y="160" fill="#ffb02e" font-size="8" text-anchor="middle">Сервер == Поток событий (events) ==&gt;</text>
+  <text x="400" y="186" fill="#8b949e" font-size="7" text-anchor="middle">• Работает поверх стандартного HTTP</text>
+  <text x="400" y="198" fill="#8b949e" font-size="7" text-anchor="middle">• Автоматический Reconnect из коробки</text>
+  <text x="400" y="210" fill="#8b949e" font-size="7" text-anchor="middle">• Стриминг LLM (ChatGPT), котировки акций</text>
+  <text x="400" y="235" fill="#ffb02e" font-size="8" font-weight="600" text-anchor="middle">text/event-stream</text>
+
+  <rect x="536" y="65" width="245" height="185" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="658" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">WebSocket (ws://, wss://)</text>
+  <text x="658" y="100" fill="#8b949e" font-size="8" text-anchor="middle">Полнодуплексный 2-way канал</text>
+  <rect x="551" y="110" width="215" height="28" rx="4" fill="#0d1117" stroke="#30363d"/><text x="658" y="128" fill="#e6edf3" font-size="8" text-anchor="middle">HTTP Upgrade Handshake (101)</text>
+  <rect x="551" y="142" width="215" height="28" rx="4" fill="#0d1117" stroke="#2dff8a"/><text x="658" y="160" fill="#2dff8a" font-size="8" text-anchor="middle">Клиент &lt;== Бинарные фреймы ==&gt; Сервер</text>
+  <text x="658" y="186" fill="#8b949e" font-size="7" text-anchor="middle">• Минимальный оверхед (2-8 байт/сообщение)</text>
+  <text x="658" y="198" fill="#8b949e" font-size="7" text-anchor="middle">• Мгновенная доставка с нулевой задержкой</text>
+  <text x="658" y="210" fill="#8b949e" font-size="7" text-anchor="middle">• Онлайн-игры, чаты, Figma collaboration</text>
+  <text x="658" y="235" fill="#2dff8a" font-size="8" font-weight="600" text-anchor="middle">Постоянный TCP сокет</text>
+
+  <!-- Status codes & Caching -->
+  <rect x="20" y="260" width="760" height="95" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="280" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">HTTP Статус-коды &amp; Кэширование</text>
+  <rect x="35" y="292" width="135" height="26" rx="4" fill="#161b22" stroke="#2dff8a"/><text x="102" y="309" fill="#2dff8a" font-size="8" text-anchor="middle">2xx: 200 OK, 201, 204</text>
+  <rect x="180" y="292" width="135" height="26" rx="4" fill="#161b22" stroke="#29e7ff"/><text x="247" y="309" fill="#29e7ff" font-size="8" text-anchor="middle">3xx: 301 Moved, 304 Cache</text>
+  <rect x="325" y="292" width="145" height="26" rx="4" fill="#161b22" stroke="#ffb02e"/><text x="397" y="309" fill="#ffb02e" font-size="8" text-anchor="middle">4xx: 401 Auth, 403, 404, 429</text>
+  <rect x="480" y="292" width="135" height="26" rx="4" fill="#161b22" stroke="#f85149"/><text x="547" y="309" fill="#f85149" font-size="8" text-anchor="middle">5xx: 500 Error, 502, 503</text>
+  <rect x="625" y="292" width="140" height="26" rx="4" fill="#161b22" stroke="#d2a8ff"/><text x="695" y="309" fill="#d2a8ff" font-size="8" text-anchor="middle">ETag + 304 Not Modified</text>
+  <text x="400" y="338" fill="#8b949e" font-size="8" text-anchor="middle">Cache-Control: public, max-age=31536000, immutable | stale-while-revalidate=60</text>
+
+  <!-- Bottom: Senior Tip -->
+  <rect x="20" y="365" width="760" height="60" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-dasharray="4,3"/>
+  <text x="400" y="385" fill="#2dff8a" font-size="9" font-weight="600" text-anchor="middle">💡 Архитектурное правило: 401 vs 403</text>
+  <text x="400" y="402" fill="#e6edf3" font-size="8" text-anchor="middle">401 Unauthorized = пользователь НЕ залогинен (редирект на Login). 403 Forbidden = залогинен, но нет прав (показ экрана "Доступ запрещен").</text>
+</svg>

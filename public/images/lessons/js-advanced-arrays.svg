@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgj6" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgj6)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">JS: Продвинутые методы работы с массивами</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">map vs filter vs reduce, flatMap, ES2023 findLast и оптимизация памяти</text>
+
+  <!-- Array Methods Grid -->
+  <rect x="20" y="65" width="245" height="160" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="142" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Трансформация (map/filter)</text>
+  <rect x="35" y="96" width="215" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="142" y="112" fill="#29e7ff" font-size="9" text-anchor="middle">arr.map(x =&gt; x * 2)</text>
+  <text x="142" y="125" fill="#8b949e" font-size="7" text-anchor="middle">1-в-1 трансформация элементов (новый массив)</text>
+  <rect x="35" y="138" width="215" height="36" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="142" y="154" fill="#29e7ff" font-size="9" text-anchor="middle">arr.filter(x =&gt; x &gt; 10)</text>
+  <text x="142" y="167" fill="#8b949e" font-size="7" text-anchor="middle">Отбор по булеву предикату</text>
+  <rect x="35" y="180" width="215" height="36" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="142" y="196" fill="#2dff8a" font-size="9" text-anchor="middle">arr.flatMap(x =&gt; [x, x*2])</text>
+  <text x="142" y="209" fill="#8b949e" font-size="7" text-anchor="middle">map + flat(1) за один проход!</text>
+
+  <!-- Middle: Reduce Swiss Knife -->
+  <rect x="278" y="65" width="245" height="160" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
+  <text x="400" y="85" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Агрегация: reduce()</text>
+  <rect x="293" y="96" width="215" height="50" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="112" fill="#ffb02e" font-size="9" text-anchor="middle">arr.reduce((acc, x) =&gt; ..., init)</text>
+  <text x="400" y="126" fill="#e6edf3" font-size="7" text-anchor="middle">acc = аккумулятор, x = текущий элемент</text>
+  <text x="400" y="138" fill="#f85149" font-size="7" text-anchor="middle">⚠️ init ОБЯЗАТЕЛЕН (иначе crash на пустом!)</text>
+  <rect x="293" y="152" width="215" height="64" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="168" fill="#e6edf3" font-size="8" font-weight="600" text-anchor="middle">Паттерны на reduce:</text>
+  <text x="400" y="182" fill="#8b949e" font-size="7" text-anchor="middle">• Подсчет суммы и статистики</text>
+  <text x="400" y="194" fill="#8b949e" font-size="7" text-anchor="middle">• Группировка объектов по ключу (Group By)</text>
+  <text x="400" y="206" fill="#8b949e" font-size="7" text-anchor="middle">• Построение дерева из плоского списка</text>
+
+  <!-- Right: Search & ES2023 -->
+  <rect x="536" y="65" width="245" height="160" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="658" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">Поиск и новинки ES2023</text>
+  <rect x="551" y="96" width="215" height="34" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="658" y="112" fill="#29e7ff" font-size="9" text-anchor="middle">find() / findIndex()</text>
+  <text x="658" y="124" fill="#8b949e" font-size="7" text-anchor="middle">Первое совпадение (слева направо)</text>
+  <rect x="551" y="136" width="215" height="34" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="658" y="152" fill="#2dff8a" font-size="9" text-anchor="middle">findLast() / findLastIndex()</text>
+  <text x="658" y="164" fill="#8b949e" font-size="7" text-anchor="middle">ES2023: поиск с конца БЕЗ reverse()!</text>
+  <rect x="551" y="176" width="215" height="40" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="658" y="192" fill="#29e7ff" font-size="9" text-anchor="middle">some() / every()</text>
+  <text x="658" y="206" fill="#8b949e" font-size="7" text-anchor="middle">Short-circuit: ранний выход из цикла</text>
+
+  <!-- Performance Box -->
+  <rect x="20" y="240" width="760" height="90" rx="8" fill="#0d1117" stroke="#f85149" stroke-width="1"/>
+  <text x="400" y="260" fill="#f85149" font-size="11" font-weight="600" text-anchor="middle">⚠️ Оптимизация производительности: Цепочки методов на больших данных</text>
+  <text x="400" y="280" fill="#e6edf3" font-size="8" text-anchor="middle">items.filter(...).map(...).filter(...).reduce(...) на 100 000 элементов создаст 3 промежуточных массива в Heap!</text>
+  <text x="400" y="296" fill="#2dff8a" font-size="8" text-anchor="middle">✅ Решение: объединяйте операции в 1 проход через reduce() или классический цикл for для критических участков</text>
+  <text x="400" y="312" fill="#8b949e" font-size="7" text-anchor="middle">Array.from({ length: N }, (_, i) =&gt; i) — быстрая генерация диапазонов</text>
+
+  <!-- Bottom: Summary -->
+  <rect x="20" y="340" width="760" height="85" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="360" fill="#2dff8a" font-size="10" font-weight="600" text-anchor="middle">Сводная шпаргалка по методам</text>
+  <text x="400" y="378" fill="#e6edf3" font-size="8" text-anchor="middle">forEach (побочный эффект, void) | map (новый массив) | filter (подмножество) | flatMap (трансформация + уплощение)</text>
+  <text x="400" y="394" fill="#8b949e" font-size="8" text-anchor="middle">find (элемент/undefined) | some/every (boolean) | reduce (любая структура) | toSorted/toSpliced (ES2023 copy)</text>
+</svg>

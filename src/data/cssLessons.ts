@@ -988,83 +988,191 @@ export const cssLessons: Lesson[] = [
     "moduleId": "css",
     "level": 6,
     "title": "Типографика и веб-шрифты",
-    "subtitle": "Шрифтовые пары, @font-face, Google Fonts, rem, em и line-height",
-    "description": "Работа с текстом: подключение шрифтов через @font-face, font-display: swap, расчет пропорций rem/em, межстрочные интервалы line-height.",
-    "estimatedMinutes": 30,
+    "subtitle": "font-family, @font-face, font-display: swap, Variable Fonts, line-height и адаптивный clamp()",
+    "description": "Освойте профессиональную веб-типографику: подключение шрифтов через @font-face (формат WOFF2), устранение невидимого текста через font-display: swap, преимущества вариативных шрифтов (Variable Fonts), микротипографику и адаптивный clamp().",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "CSS",
-      "Typography",
-      "Fonts"
+      "typography",
+      "fonts",
+      "font-face",
+      "font-display",
+      "variable-fonts",
+      "clamp",
+      "line-height",
+      "rem"
     ],
     "theory": {
-      "overview": "Типографика формирует характер интерфейса. Правильный подбор гарнитуры и межстрочных интервалов делает чтение комфортным.",
+      "overview": "Типографика составляет более 90% любого веб-интерфейса. Правильно подобранный шрифт, выверенный межстрочный интервал (line-height) и адаптивный размер шрифта делают сайт удобным для чтения и формируют визуальную идентичность бренда.\n\nВ этом уроке мы разберём подключение кастомных шрифтов через современный формат WOFF2, разберёмся с поведением `font-display: swap` для предотвращения эффекта FOIT, изучим гибкость вариативных шрифтов (Variable Fonts) и настроим адаптивную типографику без медиа-запросов с помощью математической функции `clamp()`.",
       "sections": [
         {
-          "title": "Подключение веб-шрифтов",
-          "content": "- `@font-face`: подключение WOFF2 файлов.\n- `font-display: swap`: устраняет невидимый текст (FOIT) во время загрузки.\n- Единицы `rem` (от html) vs `em` (от родителя). Рекомендуется `rem`.",
+          "title": "Семейства шрифтов, Fallback-стеки и Generic Families",
+          "content": "Свойство `font-family` принимает упорядоченный список шрифтов (Font Stack), которые браузер пробует применить слева направо:\n\nБазовые универсальные семейства (Generic Font Families):\n1. `sans-serif` — шрифты без засечек (рубленые): Inter, Roboto, Arial, Helvetica. Стандарт для современных цифровых интерфейсов и чтения с экранов.\n2. `serif` — шрифты с засечками: Times New Roman, Georgia, Merriweather. Традиционно используются для длинных литературных текстов и премиальных изданий.\n3. `monospace` — моноширинные шрифты (все символы одинаковой ширины): JetBrains Mono, Fira Code, Courier. Стандарт для кода, терминалов и табличных данных.\n4. `system-ui` — системный шрифт текущей операционной системы пользователя (San Francisco на macOS/iOS, Segoe UI на Windows, Roboto на Android).\n\nПравило построения надёжного Font Stack:\nВсегда начинайте с желаемого кастомного шрифта, затем указывайте системные шрифты разных ОС и завершайте общим generic-семейством:\n`font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;`.\nЕсли название шрифта содержит пробелы — его ОБЯЗАТЕЛЬНО нужно оборачивать в кавычки (`'JetBrains Mono'`).",
+          "image": {
+            "src": "/images/lessons/css-typography-fonts.svg",
+            "alt": "CSS Типографика: font-face, font-display swap, Variable Fonts и clamp",
+            "caption": "WOFF2 и font-display: swap ускоряют загрузку, Variable Fonts заменяют десятки файлов, а clamp() дает плавную адаптивность"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Подключение шрифта",
-            "code": "@font-face {\n  font-family: 'Inter';\n  src: url('/fonts/inter.woff2') format('woff2');\n  font-display: swap;\n}\nbody { font-family: 'Inter', sans-serif; font-size: 1rem; line-height: 1.6; }",
-            "explanation": "WOFF2 шрифт с swap."
+            "code": "/* Идеальный стек шрифтов для интерфейса */\nbody {\n  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,\n    Helvetica, Arial, sans-serif;\n  font-size: 1rem; /* 16px по умолчанию */\n  line-height: 1.5; /* Относительный межстрочный интервал */\n  color: #e6edf3;\n}\n\n/* Моноширинный стек для блоков кода */\ncode, pre, kbd {\n  font-family: 'JetBrains Mono', 'Fira Code', Menlo, Monaco, Consolas,\n    'Courier New', monospace;\n}",
+            "title": "Настройка системного и моноширинного Font Stack",
+            "explanation": "Если Inter не успел загрузиться, браузер мгновенно покажет системный шрифт Apple (-apple-system) или Windows (Segoe UI) без задержки."
+          }
+        },
+        {
+          "title": "Подключение шрифтов через @font-face и стратегия font-display",
+          "content": "Директива `@font-face` позволяет загрузить и использовать любой кастомный шрифт на сайте.\n\nФорматы файлов шрифтов:\n- `WOFF2` (Web Open Font Format 2) — современный золотой стандарт индустрии. Имеет алгоритм сжатия Brotli (на 30% меньше WOFF), поддерживается 99%+ браузеров.\n- Форматы `.ttf`, `.otf`, `.eot`, `.svg` устарели для веба и НЕ должны использоваться в современном продакшене.\n\nСтратегия загрузки `font-display`:\nКогда браузер видит кастомный шрифт, он отправляет сетевой запрос. Что показывать пользователю, пока файл качается?\n1. `font-display: swap;` (Рекомендуется!):\nБраузер МГНОВЕННО рисует текст системным fallback-шрифтом (нет невидимого текста!), а когда WOFF2 скачался — плавно подменяет его на кастомный.\n2. `font-display: block;` (Антипаттерн FOIT — Flash of Invisible Text):\nБраузер скрывает текст на 3 секунды, показывая пустое место! Если интернет медленный — пользователь видит белый экран.\n3. `font-display: optional;`:\nБраузер дает 100 мс на загрузку. Не успел — оставляет системный шрифт навсегда на эту сессию (идеально для слабых мобильных сетей).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Подключение кастомного шрифта Inter Regular (400) */\n@font-face {\n  font-family: 'Inter';\n  src: url('/fonts/inter-regular.woff2') format('woff2');\n  font-weight: 400;\n  font-style: normal;\n  font-display: swap; /* Мгновенный показ без пустого экрана! */\n  unicode-range: U+0000-00FF, U+0400-045F; /* Только латиница и кириллица */\n}\n\n/* Подключение Inter Bold (700) */\n@font-face {\n  font-family: 'Inter';\n  src: url('/fonts/inter-bold.woff2') format('woff2');\n  font-weight: 700;\n  font-style: normal;\n  font-display: swap;\n}",
+            "title": "Правильное подключение WOFF2 шрифтов с font-display: swap",
+            "explanation": "font-display: swap предотвращает невидимый текст. unicode-range отсекает ненужные иероглифы и спецсимволы, уменьшая вес файла до 15-20 КБ."
+          }
+        },
+        {
+          "title": "Вариативные шрифты (Variable Fonts)",
+          "content": "Вариативный шрифт (Variable Font) — это революционная технология цифровой типографики (OpenType Font Variations).\n\nОбычные шрифты vs Вариативные шрифты:\n- В классическом подходе для каждого начертания нужен отдельный файл: `inter-light.woff2` (300), `inter-regular.woff2` (400), `inter-medium.woff2` (500), `inter-bold.woff2` (700). 5 начертаний = 5 HTTP-запросов и ~150 КБ.\n- В вариативном шрифте ВСЕ начертания упакованы в ОДИН компактный файл (~45 КБ), который поддерживает любую дробную жирность от 100 до 900 (`font-weight: 542;`), наклон и ширину символов!\n\nОси вариации (Variation Axes):\n- `wght` (Weight) — жирность от 100 до 900\n- `wdth` (Width) — ширина символов (от узкого condensed до широкого expanded)\n- `slnt` (Slant) / `ital` (Italic) — угол наклона курсива\n- Плавная CSS-анимация: жирность вариативного шрифта можно плавно анимировать через `transition: font-weight 0.2s ease`!",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Подключение одного вариативного файла шрифта */\n@font-face {\n  font-family: 'InterVariable';\n  src: url('/fonts/inter-variable.woff2') format('woff2-variations');\n  font-weight: 100 900; /* Диапазон доступной жирности */\n  font-display: swap;\n}\n\n.interactive-heading {\n  font-family: 'InterVariable', sans-serif;\n  font-weight: 400;\n  transition: font-weight 0.3s ease, letter-spacing 0.3s ease;\n}\n\n.interactive-heading:hover {\n  font-weight: 750; /* Плавное утолщение без скачков макета! */\n  letter-spacing: -0.01em;\n}",
+            "title": "Подключение и плавная анимация Variable Font",
+            "explanation": "Один файл inter-variable.woff2 заменяет 9 отдельных файлов шрифта и позволяет плавно анимировать жирность от 400 до 750."
+          }
+        },
+        {
+          "title": "Микротипографика: line-height, letter-spacing, rem и функция clamp()",
+          "content": "Качественная типографика складывается из деталей:\n\n1. `line-height` (Межстрочный интервал):\n- ВСЕГДА задавайте безразмерным числом: `line-height: 1.5;` (а не `24px`!).\n- Множитель масштабируется автоматически при изменении `font-size`. Для основного текста оптимально `1.5`–`1.65`, для крупных заголовков `h1` — плотнее: `1.1`–`1.2`.\n\n2. `letter-spacing` (Межбуквенный интервал / трекинг):\n- Для больших заголовков (32px+) уменьшайте: `letter-spacing: -0.02em;` (делает заголовок собранным).\n- Для мелкого текста заглавными буквами (CAPS) увеличивайте: `text-transform: uppercase; letter-spacing: 0.08em;`.\n\n3. `rem` vs `px`:\n- Всегда используйте `rem` (Root EM) для размеров текста. `1rem` = базовый размер браузера (обычно 16px). Если слабовидящий пользователь увеличит базовый шрифт в браузере до 20px, весь интерфейс на `rem` пропорционально увеличится, а жесткие `px` останутся микроскопическими!\n\n4. Адаптивный размер текста через `clamp()`:\n`font-size: clamp(min, preferred, max);`\nПозволяет плавно масштабировать размер заголовка от мобильного экрана до 4K монитора без медиа-запросов:\n`font-size: clamp(1.5rem, 3vw + 1rem, 3rem);`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Адаптивный заголовок через clamp() */\n.hero-title {\n  /* Мин: 28px (1.75rem), плавно растет с шириной экрана 4vw, Макс: 56px (3.5rem) */\n  font-size: clamp(1.75rem, 4vw + 0.75rem, 3.5rem);\n  line-height: 1.15;\n  letter-spacing: -0.025em;\n  font-weight: 800;\n}\n\n/* Акцентный бейдж заглавными буквами с трекингом */\n.badge-caps {\n  font-size: 0.75rem; /* 12px */\n  text-transform: uppercase;\n  letter-spacing: 0.08em;\n  font-weight: 600;\n  color: #2dff8a;\n}",
+            "title": "Адаптивная типографика с clamp() и микротипографика",
+            "explanation": "clamp() вычисляет идеальный размер шрифта для любой ширины вьюпорта без единого @media query. letter-spacing делает крупные заголовки аккуратными."
           }
         }
       ],
       "seniorTips": [
-        "Всегда используйте rem для font-size."
+        "Всегда используйте безразмерный `line-height: 1.5;` вместо жестких пикселей `line-height: 24px;`. Безразмерный множитель наследуется корректно при любом `font-size`.",
+        "Для веб-шрифтов подключайте ТОЛЬКО формат `format('woff2')`. Форматы `.eot`, `.ttf` и `.svg` шрифтов в современном вебе — мёртвый груз.",
+        "Всегда прописывайте `font-display: swap;` внутри каждого блока `@font-face` — это гарантирует, что пользователь увидит текст мгновенно даже при медленном 3G-интернете.",
+        "Используйте функцию `clamp(1.5rem, 3vw + 1rem, 3rem)` для заголовков лендингов — это исключает необходимость писать 5 медиа-запросов под разные разрешения экранов."
       ],
       "commonMistakes": [
         {
-          "bad": "p { font-size: 16px; }",
-          "good": "p { font-size: 1rem; }",
-          "reason": "px игнорирует настройки пользователя в браузере."
+          "bad": "/* Жесткий line-height в пикселях на родительском блоке */\nbody { font-size: 16px; line-height: 22px; }\nh1 { font-size: 40px; /* line-height унаследуется 22px, строки склеятся! */ }",
+          "good": "body { font-size: 1rem; line-height: 1.5; }\nh1 { font-size: 2.5rem; line-height: 1.2; }",
+          "reason": "Пиксельный line-height наследуется дочерними заголовками без изменений, в результате чего крупный текст слипается в одну кашу."
+        },
+        {
+          "bad": "/* Загрузка шрифта без font-display */\n@font-face {\n  font-family: 'Custom';\n  src: url('/font.woff2');\n  /* font-display отсутствует -> браузер скрывает текст на 3 сек! */\n}",
+          "good": "@font-face {\n  font-family: 'Custom';\n  src: url('/font.woff2') format('woff2');\n  font-display: swap;\n}",
+          "reason": "Без font-display: swap браузер применяет стратегию block, скрывая текст до завершения загрузки шрифта (эффект невидимого текста FOIT)."
+        },
+        {
+          "bad": "/* Жесткие пиксели для размеров шрифтов */\np { font-size: 14px; }",
+          "good": "p { font-size: 0.875rem; }",
+          "reason": "Использование px игнорирует настройки масштабирования шрифта в браузере пользователя, нарушая требования доступности (a11y)."
         }
       ],
       "keyTakeaways": [
-        "rem зависит от html font-size.",
-        "font-display: swap убирает задержку рендеринга."
+        "Font Stack строится от кастомного шрифта через системные (-apple-system, Segoe UI) к generic-классу (sans-serif, monospace).",
+        "WOFF2 — единственный необходимый формат файлов шрифтов в современном вебе.",
+        "`font-display: swap;` устраняет эффект невидимого текста (FOIT), показывая системный шрифт до загрузки кастомного.",
+        "Вариативные шрифты (Variable Fonts) объединяют все начертания и жирности в один файл весом ~40 КБ.",
+        "Функция `clamp(min, preferred, max)` обеспечивает плавное адаптивное масштабирование типографики."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"font-demo\"><h2>Типографика</h2><p>Текст с line-height 1.6.</p></div>",
-      "initialCss": ".font-demo { padding: 20px; background: white; border-radius: 12px; font-family: sans-serif; }\nh2 { font-size: 1.5rem; color: #0f172a; }\np { font-size: 1rem; line-height: 1.6; color: #475569; }",
-      "initialJs": "console.log('Typography loaded');",
-      "instructions": "Попробуйте изменить line-height."
+      "initialHtml": "<div class=\"typography-sandbox\">\n  <span class=\"badge-tag\">Frontend Typography</span>\n  <h1 class=\"clamp-heading\">Современный CSS и Веб-шрифты</h1>\n  <p class=\"body-text\">\n    Типографика — это искусство оформления печатного и цифрового текста. \n    Используйте относительные единицы rem, выверенный line-height и адаптивный clamp.\n  </p>\n</div>",
+      "initialCss": ".typography-sandbox {\n  padding: 20px;\n  background: #0a0e13;\n  color: #e6edf3;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n}\n.badge-tag {\n  font-size: 0.75rem;\n  text-transform: uppercase;\n  letter-spacing: 0.08em;\n  color: #2dff8a;\n  font-weight: 700;\n}\n.clamp-heading {\n  font-size: clamp(1.5rem, 3vw + 0.5rem, 2.5rem);\n  line-height: 1.15;\n  letter-spacing: -0.02em;\n  color: #29e7ff;\n  margin: 12px 0;\n}\n.body-text {\n  font-size: 1rem;\n  line-height: 1.6;\n  color: #8b949e;\n  max-width: 60ch; /* Оптимальная длина строки для чтения */\n}",
+      "initialJs": "console.log('Песочница типографики активна');",
+      "instructions": "Практика с типографикой:\n1. Измените параметры функции clamp(1.2rem, 5vw, 3rem) у заголовка\n2. Добавьте свойство letter-spacing: 0.15em к бейджу\n3. Задайте тексту max-width: 45ch и проверьте читаемость"
     },
     "task": {
-      "title": "Настройка типографики",
-      "scenario": "Оформите заголовок в rem и параграф с line-height: 1.7.",
+      "title": "Проектирование масштабируемой системы адаптивной типографики",
+      "scenario": "Вам поручено разработать типографический фундамент дизайн-системы платформы: подключить кастомный шрифт через @font-face с WOFF2 и защитой font-display: swap, настроить адаптивный размер главного заголовка через clamp(), задать относительные line-height и оформить акцентные бейджи с трекингом letter-spacing.",
       "criteria": [
-        "Заголовку задан font-size в rem",
-        "Параграфу задан line-height: 1.7"
+        "Объявлено правило @font-face с форматом woff2 и свойством font-display: swap",
+        "Главный стек шрифтов body использует rem и безразмерный line-height: 1.5",
+        "Заголовок h1 использует clamp() для адаптивного размера без медиа-запросов",
+        "Крупный заголовок имеет отрицательный letter-spacing (-0.02em)",
+        "Бейдж с text-transform: uppercase имеет увеличенный letter-spacing (0.08em)",
+        "Длина строки текстового абзаца ограничена max-width в символьных единицах ch"
       ],
       "starterCode": {
-        "html": "<article class=\"art\"><h2>Заголовок</h2><p>Текст статьи.</p></article>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте типографическую дизайн-систему */\nbody {\n}\nh1 {\n}\n.badge {\n}"
       },
       "hints": [
-        "Задайте .art h2 { font-size: 1.5rem; } .art p { line-height: 1.7; }."
+        "В @font-face используйте src: url(...) format('woff2'); font-display: swap;",
+        "Используйте font-size: clamp(1.75rem, 3vw + 1rem, 3rem);",
+        "Ограничьте ширину текста: max-width: 65ch;"
       ],
       "solution": {
-        "html": "<article class=\"art\"><h2>Заголовок</h2><p>Текст статьи.</p></article>",
-        "css": ".art { padding: 20px; background: white; border-radius: 8px; }\n.art h2 { font-size: 1.5rem; color: #1e293b; }\n.art p { font-size: 1rem; line-height: 1.7; color: #475569; }",
-        "explanation": "Читаемая типографика."
+        "css": "@font-face {\n  font-family: 'PlatformSans';\n  src: url('/fonts/platform-sans.woff2') format('woff2');\n  font-weight: 400 800;\n  font-style: normal;\n  font-display: swap;\n}\n\nbody {\n  font-family: 'PlatformSans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n  font-size: 1rem;\n  line-height: 1.5;\n  color: #e6edf3;\n  background: #0a0e13;\n}\n\nh1 {\n  font-size: clamp(1.75rem, 3vw + 1rem, 3rem);\n  line-height: 1.2;\n  letter-spacing: -0.02em;\n  font-weight: 800;\n  color: #29e7ff;\n}\n\np {\n  font-size: 1rem;\n  line-height: 1.6;\n  max-width: 65ch;\n  color: #8b949e;\n}\n\n.badge {\n  font-size: 0.75rem;\n  text-transform: uppercase;\n  letter-spacing: 0.08em;\n  font-weight: 700;\n  color: #2dff8a;\n}",
+        "explanation": "Система использует формат WOFF2 с font-display: swap, адаптивную функцию clamp(), относительный line-height, безопасный font-stack и оптимальную ширину строки 65ch."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c6-q1",
-          "question": "Относительно чего считается 1rem?",
+          "id": "css6-q1",
+          "question": "Какой формат файлов веб-шрифтов является современным стандартом благодаря алгоритму сжатия Brotli и поддержке во всех браузерах?",
           "options": [
-            "Ширины экрана",
-            "font-size тега <html> (16px)",
-            "Родителя",
-            "Окна"
+            "TTF (TrueType Font)",
+            "WOFF2 (Web Open Font Format 2)",
+            "EOT (Embedded OpenType)",
+            "SVG Font"
           ],
           "correctIndex": 1,
-          "explanation": "rem (Root EM) зависит от font-size тега html."
+          "explanation": "Формат WOFF2 использует алгоритм сжатия Brotli, обеспечивая минимальный размер файлов (на 30% меньше WOFF) и поддерживается более чем 99% браузеров."
+        },
+        {
+          "id": "css6-q2",
+          "question": "Что делает директива font-display: swap в правиле @font-face?",
+          "options": [
+            "Меняет шрифт каждые 5 секунд",
+            "Мгновенно отображает текст системным fallback-шрифтом и плавно заменяет его на кастомный сразу после завершения загрузки файла",
+            "Скрывает текст до тех пор, пока кастомный шрифт полностью не загрузится",
+            "Отключает сглаживание шрифтов"
+          ],
+          "correctIndex": 1,
+          "explanation": "font-display: swap полностью устраняет эффект невидимого текста (FOIT), гарантируя, что пользователь мгновенно увидит контент системным шрифтом без задержек."
+        },
+        {
+          "id": "css6-q3",
+          "question": "В чём главное преимущество вариативных шрифтов (Variable Fonts) перед классическими наборами шрифтов?",
+          "options": [
+            "Они не требуют подключения CSS",
+            "Один компактный файл содержит все вариации жирности (100–900), наклона и ширины, позволяя плавно анимировать начертание",
+            "Они работают без интернета",
+            "Они всегда бесплатные"
+          ],
+          "correctIndex": 1,
+          "explanation": "Variable Font упаковывает непрерывный спектр жирностей, ширин и наклонов в один легкий файл (~40 КБ), заменяя 8–10 отдельных файлов обычных шрифтов."
+        },
+        {
+          "id": "css6-q4",
+          "question": "Почему line-height для текста рекомендуется указывать безразмерным множителем (line-height: 1.5;), а не в пикселях?",
+          "options": [
+            "Пиксели запрещены стандартом CSS3",
+            "Безразмерный множитель автоматически и пропорционально масштабирует межстрочный интервал при любом изменении font-size у дочерних элементов",
+            "Безразмерный множитель ускоряет работу видеокарты",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "line-height: 1.5 вычисляет интервал как 150% от текущего font-size элемента. Если дочерний заголовок имеет font-size: 32px, его line-height станет 48px, а жесткие пиксели склеили бы строки."
+        },
+        {
+          "id": "css6-q5",
+          "question": "Как работает функция font-size: clamp(1.5rem, 3vw + 1rem, 3rem)?",
+          "options": [
+            "Всегда возвращает среднее арифметическое",
+            "Ограничивает размер шрифта минимумом 1.5rem и максимумом 3rem, плавно масштабируя текст пропорционально ширине экрана (3vw + 1rem)",
+            "Выбирает случайный размер при каждом обновлении",
+            "Работает только на планшетах"
+          ],
+          "correctIndex": 1,
+          "explanation": "clamp(MIN, PREFERRED, MAX) держит размер не меньше MIN (1.5rem на мобилках) и не больше MAX (3rem на десктопах), плавно меняя размер в зависимости от вьюпорта без медиа-запросов."
         }
       ]
     }

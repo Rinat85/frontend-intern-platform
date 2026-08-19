@@ -794,83 +794,191 @@ export const cssLessons: Lesson[] = [
     "moduleId": "css",
     "level": 5,
     "title": "Позиционирование (Position)",
-    "subtitle": "Static, relative, absolute, fixed, sticky и z-index",
-    "description": "Управление координатами: привязка absolute к relative родителю, fixed шапки, sticky меню и слои z-index.",
-    "estimatedMinutes": 35,
+    "subtitle": "Static, Relative, Absolute, Fixed, Sticky, Stacking Context и z-index",
+    "description": "Освойте управление координатами элементов в CSS: 5 типов свойства position, тонкости работы с координатами top/right/bottom/left и свойством inset, правила создания Stacking Context и глубокую работу с z-index.",
+    "estimatedMinutes": 60,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Position",
-      "ZIndex"
+      "position",
+      "relative",
+      "absolute",
+      "fixed",
+      "sticky",
+      "z-index",
+      "stacking-context",
+      "inset"
     ],
     "theory": {
-      "overview": "Position позволяет размещать элементы с точностью до пикселя по координатам top/left/right/bottom.",
+      "overview": "Свойство `position` определяет, по каким математическим правилам браузер вычисляет координаты элемента на экране и участвует ли он в стандартном потоке документа (Normal Flow).\n\nПозиционирование лежит в основе создания модальных окон, всплывающих подсказок (tooltips), бейджей на карточках, плавающих кнопок (FAB), липких шапок (Sticky Header) и многослойных интерфейсов. В этом уроке мы разберём все 5 типов `position`, разберёмся с контекстом наложения (Stacking Context) и навсегда устраним проблемы с `z-index`.",
       "sections": [
         {
-          "title": "Режимы position",
-          "content": "- `relative`: смещение от места; точка отсчета для absolute потомков!\n- `absolute`: позиция относительно ближайшего relative предка.\n- `fixed`: зафиксирован на экране при скролле.\n- `sticky`: прилипает при скролле внутри родителя.",
+          "title": "Пять режимов position: static, relative, absolute, fixed, sticky",
+          "content": "Каждый режим `position` кардинально меняет поведение элемента:\n\n1. `position: static` (значение по умолчанию):\n- Элемент располагается в нормальном потоке документа (Normal Flow).\n- Координатные свойства `top`, `right`, `bottom`, `left` и `z-index` ПОЛНОСТЬЮ ИГНОРИРУЮТСЯ!\n\n2. `position: relative` (относительное позиционирование):\n- Элемент остаётся в нормальном потоке, сохраняя своё физическое место (соседние блоки не сдвигаются!).\n- Свойства `top`/`left`/`right`/`bottom` визуально сдвигают элемент относительно его СОБСТВЕННОГО исходного положения.\n- Главное назначение: служит координатной сеткой (якорем) для вложенных `absolute`-элементов!\n\n3. `position: absolute` (абсолютное позиционирование):\n- Элемент ВЫРЫВАЕТСЯ из потока документа (занимает 0px места, соседи подтягиваются вверх).\n- Позиционируется относительно БЛИЖАЙШЕГО предка, у которого `position` отличен от `static` (`relative`, `absolute`, `fixed`, `sticky`). Если такого предка нет — позиционируется относительно корневого контейнера `<html>` (Initial Containing Block).\n\n4. `position: fixed` (фиксированное позиционирование):\n- Вырывается из потока и привязывается строго к границам окна браузера (Viewport).\n- НЕ скроллится вместе со страницей. Идеально для шапки сайта, полноэкранных модалок и кнопки «Наверх».\n\n5. `position: sticky` (липкое позиционирование):\n- Гибрид: ведёт себя как `relative`, пока находится в поле зрения, но как только при скролле достигает заданного порога (`top: 0`), «прилипает» как `fixed`!\n- Прилипает ТОЛЬКО внутри своего родительского контейнера (как только родитель проскролливается — элемент уезжает вместе с ним).",
+          "image": {
+            "src": "/images/lessons/css-position-types.svg",
+            "alt": "Сравнение 5 типов position: static, relative, absolute, fixed и sticky",
+            "caption": "static находится в потоке, relative создает якорь, absolute и fixed вырываются из потока, sticky прилипает при скролле"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Relative + absolute",
-            "code": ".btn { position: relative; }\n.badge { position: absolute; top: -6px; right: -6px; background: red; color: white; border-radius: 10px; padding: 2px 6px; }",
-            "explanation": "Бейдж в углу кнопки."
+            "code": "/* 1. Карточка-родитель как якорь для бейджа */\n.product-card {\n  position: relative; /* Якорь для absolute */\n  width: 300px;\n  padding: 20px;\n  background: #161b22;\n  border-radius: 8px;\n}\n\n/* 2. Абсолютный бейдж скидки в правом верхнем углу */\n.badge-discount {\n  position: absolute;\n  top: 12px;\n  right: 12px;\n  background: #2dff8a;\n  color: #0a0e13;\n  padding: 4px 8px;\n  font-weight: bold;\n  border-radius: 4px;\n}\n\n/* 3. Фиксированная шапка сайта */\n.site-header {\n  position: fixed;\n  top: 0;\n  left: 0;\n  right: 0;\n  height: 60px;\n  z-index: 100;\n}\n\n/* 4. Липкая боковая панель */\n.sidebar-sticky {\n  position: sticky;\n  top: 80px; /* Прилипнет в 80px от верха экрана */\n}",
+            "title": "Практическое применение relative, absolute, fixed и sticky",
+            "explanation": "product-card с position: relative удерживает absolute-бейдж внутри своих границ. site-header зафиксирован на экране, а sidebar-sticky плавно прилипает при прокрутке."
+          }
+        },
+        {
+          "title": "Контекст наложения (Stacking Context) и z-index",
+          "content": "Свойство `z-index` управляет порядком отрисовки элементов вдоль оси Z (перпендикулярно плоскости экрана). Чем больше число `z-index`, тем ближе элемент к пользователю.\n\nФундаментальные правила z-index:\n1. `z-index` работает ТОЛЬКО на позиционированных элементах (где `position` равен `relative`, `absolute`, `fixed` или `sticky`), а также на прямых flex/grid-дочерних элементах. На `position: static` он ИГНОРИРУЕТСЯ!\n\n2. Stacking Context (Контекст наложения):\nКонтекст наложения — это изолированная трехмерная группа слоев. Элементы внутри одного контекста наложения не могут «выглянуть» наружу и перекрыть элементы из более высокого контекста!\n\nЧто создаёт новый Stacking Context:\n- Корневой элемент документа `<html>`\n- `position` (`relative`/`absolute`/`fixed`/`sticky`) + `z-index` отличен от `auto`\n- `opacity` меньше `1` (например, `opacity: 0.99`)\n- `transform`, `filter`, `perspective`, `clip-path` отличные от `none`\n- `will-change` со значением любого свойства, создающего контекст\n- `contain: layout` или `container-type`\n\nКлассическая ловушка: если у родителя A `z-index: 1`, а у родителя B `z-index: 2`, то дочерний элемент A с `z-index: 999999` ВСЁ РАВНО окажется ПОД родителем B!",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Правильная иерархия слоев через дизайн-токены */\n:root {\n  --z-base: 0;\n  --z-card-badge: 10;\n  --z-dropdown: 50;\n  --z-sticky-header: 100;\n  --z-modal-backdrop: 500;\n  --z-modal-content: 510;\n  --z-toast-notification: 1000;\n}\n\n.modal-overlay {\n  position: fixed;\n  inset: 0;\n  background: rgba(0, 0, 0, 0.8);\n  z-index: var(--z-modal-backdrop);\n}\n\n.modal-dialog {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  z-index: var(--z-modal-content);\n}",
+            "title": "Системное управление z-index через переменные",
+            "explanation": "Использование CSS-переменных для z-index исключает хаос случайных чисел 999999 и гарантирует правильный порядок наложения модалок и уведомлений."
+          }
+        },
+        {
+          "title": "Свойство inset и центрирование через absolute",
+          "content": "В современном CSS появилось логическое сокращение `inset`, объединяющее `top`, `right`, `bottom`, `left`:\n- `inset: 0;` эквивалентно `top: 0; right: 0; bottom: 0; left: 0;` (растягивание на 100% контейнера).\n- `inset: 10px 20px;` эквивалентно `top: 10px; bottom: 10px; left: 20px; right: 20px;`.\n\nТехники абсолютного центрирования:\n\n1. Абсолютное центрирование через transform (универсальный способ):\n`position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);`\nРаботает при любых неизвестных размерах элемента.\n\n2. Абсолютное центрирование через inset и margin: auto:\n`position: absolute; inset: 0; margin: auto; width: 200px; height: 100px;`\nИдеально выравнивает элемент точно по центру родителя без искажения субпиксельного сглаживания текста.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Полноэкранный оверлей на 100% родителя */\n.card-overlay {\n  position: absolute;\n  inset: 0; /* Растягивает на всю площадь карточки */\n  background: rgba(10, 14, 19, 0.75);\n  backdrop-filter: blur(4px);\n}\n\n/* 2. Центрирование модального окна без transform */\n.centered-box {\n  position: absolute;\n  inset: 0;\n  margin: auto;\n  width: 320px;\n  height: 200px;\n  background: #161b22;\n  border: 1px solid #2dff8a;\n}",
+            "title": "Использование inset: 0 и центрирование через margin: auto",
+            "explanation": "inset: 0 растягивает позиционированный блок на всю область родителя. В комбинации с margin: auto центрирует блок с фиксированными размерами."
+          }
+        },
+        {
+          "title": "Подводные камни position: sticky и fixed",
+          "content": "Два самых коварных бага, с которыми сталкиваются даже Middle-разработчики:\n\n1. Почему ломается `position: sticky`:\n- Наличие `overflow: hidden`, `overflow: auto` или `overflow: scroll` на ЛЮБОМ из родительских контейнеров отменяет скролл-контекст окна, и sticky перестает прилипать!\n- Не задано координатное свойство (например, `top: 0`). Без указания `top`/`bottom` липкий элемент не знает, в какой точке фиксироваться.\n- Высота родителя равна высоте самого sticky-элемента (элементу негде скроллиться внутри родителя).\n\n2. Почему ломается `position: fixed`:\n- Если у ЛЮБОГО предка fixed-элемента задано свойство `transform` (например, `transform: scale(1)`), `filter`, `perspective` или `contain: paint`, то этот предок становится содержащим блоком (Containing Block)!\n- В результате `position: fixed` перестаёт фиксироваться относительно Viewport экрана и начинает скроллиться внутри этого предка как обычный `absolute`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* ❌ Ошибка: fixed сломается, если у родителя есть transform */\n.parent-wrapper {\n  transform: translateZ(0); /* Создает containing block! */\n}\n.parent-wrapper .fixed-modal {\n  position: fixed; /* ❌ Будет позиционироваться по parent, а не по экрану! */\n  top: 0;\n  left: 0;\n}\n\n/* ✅ Правильно: модальные окна монтируются в корень <body> (React Portal) */\nbody > .modal-portal {\n  position: fixed;\n  inset: 0;\n  z-index: 1000;\n}",
+            "title": "Баг fixed внутри transform и решение через React Portal",
+            "explanation": "Свойство transform на предке превращает его в контейнер для fixed. Решение — монтировать модалки в корень body через React Portal."
           }
         }
       ],
       "seniorTips": [
-        "Всегда задавайте position: relative родителю для привязки position: absolute детей."
+        "Используйте современное свойство `inset: 0;` вместо громоздкой записи `top: 0; right: 0; bottom: 0; left: 0;` — это сокращает CSS и повышает читаемость.",
+        "Для модальных окон и глобальных попапов всегда монтируйте DOM-узел в корень `<body>` (в React через `createPortal`). Это исключит баги с `transform` и Stacking Context родителей.",
+        "Если `position: sticky` не прилипает — проверьте всех родителей элемента в DevTools: кто-то из них наверняка имеет `overflow: hidden` или `overflow: auto`.",
+        "Всегда организуйте `z-index` через централизованную шкалу переменных (`--z-dropdown`, `--z-header`, `--z-modal`), чтобы избежать гонки неконтролируемых значений `9999`."
       ],
       "commonMistakes": [
         {
-          "bad": ".badge { position: absolute; top: 0; } /* Нет relative у родителя */",
-          "good": ".card { position: relative; }\n.badge { position: absolute; top: 0; }",
-          "reason": "Без relative у родителя элемент позиционируется от body."
+          "bad": "/* Забыли relative на карточке */\n.card { width: 300px; }\n.card .badge { position: absolute; top: 10px; right: 10px; }",
+          "good": ".card { position: relative; width: 300px; }\n.card .badge { position: absolute; top: 10px; right: 10px; }",
+          "reason": "Без position: relative на родительской карточке absolute-бейдж улетит в правый верхний угол всей страницы (к тегу <html>)."
+        },
+        {
+          "bad": "/* z-index на элементе с position: static */\n.btn { position: static; z-index: 100; }",
+          "good": ".btn { position: relative; z-index: 100; }",
+          "reason": "Свойство z-index полностью игнорируется браузером на элементах со статическим позиционированием (static)."
+        },
+        {
+          "bad": "/* sticky без указания координат */\n.sticky-nav { position: sticky; }",
+          "good": ".sticky-nav { position: sticky; top: 0; }",
+          "reason": "position: sticky не начнет прилипать, пока явно не указана координата фиксации (top, bottom, left или right)."
         }
       ],
       "keyTakeaways": [
-        "relative задает точку отсчета для absolute.",
-        "fixed прибивает к окну."
+        "`static` — стандартный поток. `relative` — сдвиг от себя + якорь для absolute. `absolute` — вырывается из потока и ищет relative-предка.",
+        "`fixed` фиксируется относительно Viewport окна. `sticky` прилипает при скролле внутри родительского контейнера.",
+        "`z-index` работает только на позиционированных элементах (relative, absolute, fixed, sticky).",
+        "Stacking Context изолирует слои: дочерний элемент не может перекрыть внешний слой, если его родитель имеет меньший `z-index`.",
+        "Свойство `inset: 0` растягивает позиционированный блок на 100% ширины и высоты содержащего блока."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"p-card\"><button class=\"p-btn\">Кнопка<span class=\"p-badge\">1</span></button></div>",
-      "initialCss": ".p-card { padding: 30px; background: white; border-radius: 12px; text-align: center; }\n.p-btn { position: relative; padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }\n.p-badge { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; }",
-      "initialJs": "console.log('Position loaded');",
-      "instructions": "Попробуйте изменить top/right."
+      "initialHtml": "<div class=\"position-playground\">\n  <div class=\"parent-card\">\n    <span class=\"badge-abs\">NEW</span>\n    <h3>Карточка товара</h3>\n    <p>position: relative у родителя держит absolute-бейдж внутри.</p>\n  </div>\n\n  <div class=\"sticky-box\">Липкий заголовок (sticky top: 0)</div>\n  <div class=\"scroll-content\">Прокрутите вниз для проверки sticky...</div>\n</div>",
+      "initialCss": ".position-playground {\n  height: 250px;\n  overflow-y: auto;\n  background: #0a0e13;\n  padding: 16px;\n  color: #e6edf3;\n  font-family: monospace;\n}\n.parent-card {\n  position: relative;\n  background: #161b22;\n  border: 1px solid #30363d;\n  padding: 16px;\n  border-radius: 8px;\n  margin-bottom: 20px;\n}\n.badge-abs {\n  position: absolute;\n  top: -10px;\n  right: 12px;\n  background: #2dff8a;\n  color: #0a0e13;\n  padding: 2px 8px;\n  font-size: 11px;\n  font-weight: bold;\n  border-radius: 4px;\n}\n.sticky-box {\n  position: sticky;\n  top: 0;\n  background: #29e7ff;\n  color: #0a0e13;\n  padding: 8px 12px;\n  font-weight: bold;\n  border-radius: 4px;\n}\n.scroll-content {\n  height: 400px;\n  padding-top: 20px;\n  color: #8b949e;\n}",
+      "initialJs": "console.log('Позиционирование активно');",
+      "instructions": "Практика с position:\n1. Попробуйте убрать position: relative у .parent-card — посмотрите, куда улетит зеленый бейдж\n2. Прокрутите блок вниз и наблюдайте, как .sticky-box фиксируется в top: 0\n3. Измените координаты бейджа: bottom: -10px; left: 12px;"
     },
     "task": {
-      "title": "Бейдж на карточке",
-      "scenario": "Разместите бейдж в углу карточки.",
+      "title": "Создание интерактивной карточки с бейджем, тултипом и липким футером",
+      "scenario": "Вам необходимо сверстать карточку товара для каталога: в правом верхнем углу должен располагаться absolute-бейдж скидки, снизу — всплывающий тултип при наведении, а внизу экрана — фиксированная плашка с кнопкой покупки.",
       "criteria": [
-        "Родителю задан position: relative",
-        "Бейджу задан position: absolute"
+        "Карточка товара имеет position: relative для создания содержащего блока",
+        "Бейдж со скидкой позиционирован абсолютно в правом верхнем углу (top: 12px, right: 12px)",
+        "Оверлей карточки растянут на 100% площади через inset: 0",
+        "Плавающая плашка корзины зафиксирована снизу экрана (position: fixed, bottom: 0, z-index: 100)",
+        "Соблюдена правильная иерархия z-index"
       ],
       "starterCode": {
-        "html": "<div class=\"card\"><span class=\"b\">Хит</span><h3>Товар</h3></div>",
-        "css": "/* Стили */\n"
+        "html": "<div class=\"catalog-container\">\n  <div class=\"product-card\">\n    <span class=\"badge-sale\">-25%</span>\n    <h2>Игровая клавиатура CyberKey</h2>\n    <p>Механическая клавиатура с подсветкой.</p>\n  </div>\n  <div class=\"bottom-cart-bar\">\n    <span>В корзине 1 товар</span>\n    <button>Оформить заказ</button>\n  </div>\n</div>",
+        "css": "/* Напишите стили позиционирования */"
       },
       "hints": [
-        "Задайте .card { position: relative; } и .b { position: absolute; top: 10px; left: 10px; }."
+        "Задайте .product-card { position: relative; }",
+        "Используйте .badge-sale { position: absolute; top: 12px; right: 12px; }",
+        "Используйте .bottom-cart-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; }"
       ],
       "solution": {
-        "html": "<div class=\"card\"><span class=\"b\">Хит</span><h3>Товар</h3></div>",
-        "css": ".card { position: relative; padding: 30px 20px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }\n.b { position: absolute; top: 10px; left: 10px; background: #f59e0b; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }",
-        "explanation": "Связка relative + absolute."
+        "css": ".product-card {\n  position: relative;\n  width: 320px;\n  padding: 24px;\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 12px;\n  color: #e6edf3;\n}\n.badge-sale {\n  position: absolute;\n  top: 12px;\n  right: 12px;\n  background: #ffb02e;\n  color: #0a0e13;\n  font-weight: bold;\n  font-size: 12px;\n  padding: 4px 10px;\n  border-radius: 6px;\n}\n.bottom-cart-bar {\n  position: fixed;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  height: 60px;\n  background: #0d1117;\n  border-top: 1px solid #2dff8a;\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n  padding: 0 24px;\n  z-index: 100;\n}",
+        "explanation": "product-card с relative удерживает absolute-бейдж внутри своих границ. bottom-cart-bar с position: fixed и z-index: 100 стабильно закреплена внизу экрана."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c5-q1",
-          "question": "Относительно чего позиционируется absolute элемент?",
+          "id": "css5-q1",
+          "question": "Относительно какого элемента позиционируется блок с position: absolute?",
           "options": [
-            "Всегда body",
-            "Ближайшего предка с non-static position",
-            "Экрана",
-            "Соседа"
+            "Всегда относительно окна браузера (Viewport)",
+            "Относительно ближайшего предка, у которого position отличен от static (relative, absolute, fixed, sticky), либо относительно <html>",
+            "Всегда относительно своего прямого родителя, независимо от его стилей",
+            "Относительно предыдущего соседнего элемента"
           ],
           "correctIndex": 1,
-          "explanation": "absolute ищет ближайшего предка с non-static position."
+          "explanation": "position: absolute ищет ближайшего предка в дереве DOM с position != static. Если ни у одного предка позиционирование не задано, то отсчёт ведётся от Initial Containing Block (тег <html>)."
+        },
+        {
+          "id": "css5-q2",
+          "question": "Что произойдет с местом в потоке документа, которое занимал элемент, если ему задать position: relative и сдвинуть через top: 20px; left: 30px;?",
+          "options": [
+            "Место освободится, и соседние элементы сдвинутся вверх",
+            "Физическое место в потоке полностью сохраняется, а элемент сдвигается только визуально поверх соседей",
+            "Элемент исчезнет из DOM",
+            "Ширина элемента сожмётся до 0px"
+          ],
+          "correctIndex": 1,
+          "explanation": "При position: relative элемент сохраняет исходное физическое пространство в Normal Flow. Соседние блоки не двигаются, а сам элемент лишь визуально смещается относительно своего исходного положения."
+        },
+        {
+          "id": "css5-q3",
+          "question": "Почему свойство z-index: 9999 не работает на обычном блоке div?",
+          "options": [
+            "Число 9999 слишком велико для CSS",
+            "Свойство z-index работает только на позиционированных элементах (relative, absolute, fixed, sticky) и flex/grid-детях, а по умолчанию у div стоит position: static",
+            "z-index работает только на ссылках и кнопках",
+            "z-index требует обязательного указания цвета фона"
+          ],
+          "correctIndex": 1,
+          "explanation": "По умолчанию у элементов задано position: static. В этом режиме браузер игнорирует z-index. Чтобы z-index заработал, достаточно добавить хотя бы position: relative."
+        },
+        {
+          "id": "css5-q4",
+          "question": "Какое свойство CSS является современным эквивалентом записи top: 0; right: 0; bottom: 0; left: 0;?",
+          "options": [
+            "all: 0;",
+            "box-align: 0;",
+            "inset: 0;",
+            "position-all: 0;"
+          ],
+          "correctIndex": 2,
+          "explanation": "Свойство inset — это логическое CSS-сокращение для одновременной установки top, right, bottom и left. inset: 0 растягивает позиционированный блок по всем 4 сторонам."
+        },
+        {
+          "id": "css5-q5",
+          "question": "Почему элемент со свойством position: sticky может перестать прилипать при прокрутке страницы?",
+          "options": [
+            "Если у одного из родительских контейнеров задано свойство overflow: hidden, auto или scroll",
+            "Если не задано координатное свойство (например, top: 0)",
+            "Если высота родителя равна высоте самого липкого элемента",
+            "Все вышеперечисленные причины могут сломать position: sticky"
+          ],
+          "correctIndex": 3,
+          "explanation": "position: sticky очень чувствителен к контексту: overflow: hidden/auto/scroll на предках отменяет скролл-контекст окна, отсутствие top не задает точку залипания, а равная высота родителя не оставляет пространства для скролла."
         }
       ]
     }

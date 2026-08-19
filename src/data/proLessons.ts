@@ -784,5 +784,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-5",
+    "moduleId": "pro",
+    "level": 5,
+    "title": "Производительность фронтенда (Web Performance) и Core Web Vitals",
+    "subtitle": "LCP, INP, CLS, оптимизация загрузки ресурсов, Main Thread и профилирование",
+    "description": "Освойте оптимизацию веб-приложений по стандарту Core Web Vitals: сокращение LCP (Largest Contentful Paint), улучшение отзывчивости INP (Interaction to Next Paint), устранение дёргания верстки CLS, разгрузку Main Thread и аудит в Lighthouse.",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "performance",
+      "core-web-vitals",
+      "lcp",
+      "inp",
+      "cls",
+      "lighthouse",
+      "optimization",
+      "lazy-loading"
+    ],
+    "theory": {
+      "overview": "Скорость загрузки и отзывчивость интерфейса напрямую определяют бизнес-показатели продукта: конверсию, удержание пользователей и позиции в поисковой выдаче Google и Яндекс.\n\nПо статистике Google, увеличение задержки ответа всего на 100 мс снижает конверсию на 7%, а более 50% мобильных пользователей закрывают сайт, если он загружается дольше 3 секунд. В этом уроке мы разберём ключевые метрики Core Web Vitals (LCP, INP, CLS), научимся профилировать код в Chrome DevTools и применять лучшие архитектурные практики ускорения рендеринга.",
+      "sections": [
+        {
+          "title": "Core Web Vitals от Google: LCP, INP и CLS",
+          "content": "Core Web Vitals — это набор ключевых стандартизированных метрик Google, оценивающих реальный пользовательский опыт взаимодействия с веб-страницей (Real User Monitoring — RUM):\n\n1. LCP (Largest Contentful Paint — Скорость загрузки главного контента):\n- Измеряет время от начала загрузки страницы до момента, когда самый крупный видимый блок контента в первом экране (баннер, заголовок h1 или видео) полностью отрисован.\n- Норма: `<= 2.5 секунды` (зелёная зона). От 2.5 до 4.0 с — требует улучшения, > 4.0 с — плохо.\n\n2. INP (Interaction to Next Paint — Отзывчивость интерфейса):\n- Сменил устаревшую метрику FID в 2024 году. Измеряет задержку между ЛЮБЫМ действием пользователя (клик, тап по экрану, нажатие клавиши) и моментом, когда браузер смог отрисовать следующий обновлённый кадр на экране.\n- Норма: `<= 200 миллисекунд`. От 200 до 500 мс — требует улучшения, > 500 мс — плохо.\n\n3. CLS (Cumulative Layout Shift — Визуальная стабильность):\n- Измеряет суммарный сдвиг элементов верстки в процессе загрузки страницы (когда текст или кнопки внезапно «прыгают» вниз из-за запоздалой подгрузки картинки или рекламного баннера без заданных размеров).\n- Норма: `<= 0.1` (безразмерный коэффициент). От 0.1 до 0.25 — средне, > 0.25 — плохо.",
+          "image": {
+            "src": "/images/lessons/web-performance-metrics.svg",
+            "alt": "Метрики Core Web Vitals: LCP, INP, CLS и шкалы оценки Google",
+            "caption": "Core Web Vitals оценивает скорость первого экрана (LCP <= 2.5s), отзывчивость на действия (INP <= 200ms) и стабильность верстки (CLS <= 0.1)"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Измерение Core Web Vitals в продакшене через библиотеку web-vitals:\nimport { onLCP, onINP, onCLS } from 'web-vitals';\n\nfunction sendToAnalytics({ name, value, id, rating }) {\n  console.log(`[Metric] ${name}: ${value.toFixed(2)} (${rating})`);\n  // Отправка в систему мониторинга (Google Analytics / Sentry / Datadog)\n  navigator.sendBeacon('/analytics', JSON.stringify({ name, value, id }));\n}\n\nonLCP(sendToAnalytics);\nonINP(sendToAnalytics);\nonCLS(sendToAnalytics);",
+            "title": "Сбор реальных метрик Core Web Vitals в браузере",
+            "explanation": "Пакет web-vitals перехватывает PerformanceObserver события браузера и логирует статус LCP, INP и CLS с оценкой (good, needs-improvement, poor)."
+          }
+        },
+        {
+          "title": "Оптимизация загрузки ресурсов и ускорение LCP",
+          "content": "Для достижения LCP <= 2.5s необходимо оптимизировать путь доставки критических ресурсов (Critical Rendering Path):\n\n1. Оптимизация изображений:\n- Современные форматы: `AVIF` (сжатие на 50% лучше JPEG) и `WebP` с фоллбэком через тег `<picture>`.\n- Отложенная загрузка: `loading=\"lazy\"` для ВСЕХ картинок ниже первого экрана.\n- Высокий приоритет для LCP: `fetchpriority=\"high\"` на главном баннере первого экрана (НИКОГДА не ставьте `loading=\"lazy\"` на главный баннер!).\n\n2. Оптимизация веб-шрифтов:\n- Предзагрузка критического шрифта: `<link rel=\"preload\" href=\"/font.woff2\" as=\"font\" type=\"font/woff2\" crossorigin>`.\n- Правило `font-display: swap;` в CSS: мгновенно показывает системный шрифт, заменяя его на кастомный по мере загрузки (устраняет эффект невидимого текста FOIT).\n\n3. Сетевая оптимизация и кэширование:\n- Сжатие ответов сервера: алгоритм `Brotli` (`br`) эффективнее `gzip` на 15–20%.\n- Использование CDN (Content Delivery Network) для приближения статики к пользователю.\n- Агрессивное кэширование статических ассетов с хэшами в именах: `Cache-Control: public, max-age=31536000, immutable`.",
+          "codeExample": {
+            "language": "html",
+            "code": "<head>\n  <!-- Предзагрузка главного LCP-изображения и шрифта -->\n  <link rel=\"preload\" fetchpriority=\"high\" as=\"image\" href=\"/banner.avif\" type=\"image/avif\" />\n  <link rel=\"preload\" as=\"font\" href=\"/fonts/inter.woff2\" type=\"font/woff2\" crossorigin />\n</head>\n<body>\n  <!-- Идеальная разметка адаптивного LCP-изображения -->\n  <picture>\n    <source srcset=\"/banner.avif\" type=\"image/avif\" />\n    <source srcset=\"/banner.webp\" type=\"image/webp\" />\n    <img\n      src=\"/banner.jpg\"\n      alt=\"Курс Frontend-разработки\"\n      width=\"1200\"\n      height=\"630\"\n      fetchpriority=\"high\"\n      decoding=\"async\"\n    />\n  </picture>\n</body>",
+            "title": "Идеальная оптимизация LCP-изображения",
+            "explanation": "picture с AVIF/WebP снижает вес картинки. fetchpriority='high' загружает её первым приоритетом. width/height предотвращают сдвиг макета CLS."
+          }
+        },
+        {
+          "title": "Разгрузка Main Thread и оптимизация отзывчивости (INP)",
+          "content": "JavaScript в браузере выполняется в едином главном потоке (Main Thread), где также происходят парсинг HTML, пересчет стилей (Style Recalculation) и отрисовка кадров (Paint).\n\nЕсли скрипт выполняется дольше 50 миллисекунд — это Длинная Задача (Long Task). Во время Long Task браузер полностью зависает (Freezes): не реагирует на клики, скролл и ввод текста, что катастрофически ухудшает метрику INP.\n\nАрхитектурные методы оптимизации INP:\n\n1. Разбивка Long Tasks (Yielding to Main Thread):\nРазбивайте тяжелые циклы и вычисления на мелкие чанки с уступкой потока браузеру через `await scheduler.yield()` или `setTimeout(resolve, 0)`.\n\n2. Паттерны Debounce и Throttle:\n- `Debounce` — откладывает вызов функции до тех пор, пока не пройдет пауза в событиях (идеально для живого поиска `input`).\n- `Throttle` — гарантирует вызов функции не чаще одного раза в N миллисекунд (для `scroll` и `resize`).\n\n3. Web Workers:\nВынос тяжелых не-DOM операций (обработка больших массивов, криптография, парсинг Excel/CSV, сжатие изображений) в отдельный фоновый поток (Background Worker Thread).\n\n4. Виртуализация списков (Virtualization):\nРендеринг в DOM только тех 10–20 элементов, которые видны на экране прямо сейчас, вместо отрисовки 10 000 DOM-узлов (библиотеки TanStack Virtual, react-window).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Утилита debounce для защиты от перегрузки Main Thread при вводе\nfunction debounce(fn, delayMs = 300) {\n  let timer = null;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delayMs);\n  };\n}\n\nconst searchInput = document.getElementById('search');\nsearchInput.addEventListener('input', debounce((e) => {\n  fetchSearchResults(e.target.value); // Вызовется только через 300мс после окончания ввода\n}, 300));\n\n// 2. Разбивка длинной задачи через yield\nasync function processLargeDataChunked(items) {\n  for (let i = 0; i < items.length; i++) {\n    processItem(items[i]);\n    // Каждые 100 элементов даем браузеру отрисовать кадр и обработать клики\n    if (i % 100 === 0 && 'scheduler' in window) {\n      await scheduler.yield();\n    }\n  }\n}",
+            "title": "Debounce и разбивка длинных задач для идеального INP",
+            "explanation": "debounce предотвращает лавину запросов при наборе текста. scheduler.yield возвращает управление браузеру для плавной отрисовки интерфейса."
+          }
+        },
+        {
+          "title": "Борьба со сдвигами верстки (CLS) и аудит в Lighthouse",
+          "content": "Cumulative Layout Shift (CLS) возникает, когда видимый элемент меняет свое положение между двумя кадрами без взаимодействия со стороны пользователя.\n\nГлавные причины и решения CLS:\n\n1. Картинки и видео без размеров:\n- ❌ Ошибка: `<img src=\"pic.jpg\">` (браузер выделяет 0px, а после загрузки картинка расталкивает контент вниз!).\n- ✅ Решение: ВСЕГДА указывать атрибуты `width` и `height` на теге `<img>` или задавать в CSS `aspect-ratio: 16 / 9;`.\n\n2. Динамический контент и реклама:\n- Резервируйте фиксированное минимальное пространство (`min-height`) под рекламные баннеры, виджеты погоды и комментарии до их загрузки.\n\n3. Скелетонные экраны (Skeleton Loading) вместо спиннеров:\nСкелетоны занимают точные геометрические размеры будущего контента, предотвращая скачки макета при ответе API.\n\nИнструменты профилирования производительности:\n- **Lighthouse** (вкладка в Chrome DevTools) — комплексный аудит Performance, Accessibility, Best Practices, SEO.\n- **Performance Panel** в DevTools — детальный таймлайн кадров, Long Tasks (красные треугольники), Flame Chart вызовов функций.\n- **PageSpeed Insights** — реальные полевые данные пользователей (CrUX — Chrome User Experience Report).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Резервирование пропорций через aspect-ratio (защита от CLS) */\n.responsive-image {\n  width: 100%;\n  height: auto;\n  aspect-ratio: 16 / 9; /* Браузер сразу резервирует место до загрузки! */\n  object-fit: cover;\n}\n\n/* 2. Скелетон-плейсхолдер фиксированной высоты */\n.card-skeleton {\n  min-height: 240px;\n  background: linear-gradient(90deg, #161b22 25%, #21262d 50%, #161b22 75%);\n  background-size: 200% 100%;\n  animation: skeletonShimmer 1.5s infinite;\n  border-radius: 8px;\n}\n\n@keyframes skeletonShimmer {\n  0% { background-position: 200% 0; }\n  100% { background-position: -200% 0; }\n}",
+            "title": "Защита от CLS: aspect-ratio и Skeleton Shimmer",
+            "explanation": "aspect-ratio резервирует точное пространство на экране до скачивания файла картинки, снижая CLS до нуля. Скелетон исключает скачки при подгрузке данных."
+          }
+        }
+      ],
+      "seniorTips": [
+        "НИКОГДА не добавляйте `loading=\"lazy\"` на главное LCP-изображение первого экрана. Это задерживает его скачивание браузером на 1–2 секунды! Используйте `fetchpriority=\"high\"`.",
+        "Всегда указывайте атрибуты `width` и `height` на всех тегах `<img>`. В современном HTML они не задают жесткий пиксельный размер, а сообщают браузеру соотношение сторон (Aspect Ratio).",
+        "Применяйте `font-display: swap` для шрифтов в `@font-face` — это исключает невидимый текст (FOIT) и мгновенно показывает системный шрифт.",
+        "Тестируйте сайт в Lighthouse с включенным мобильным профилем и 4x CPU Throttling — только так можно увидеть реальный пользовательский опыт на бюджетных смартфонах."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "<!-- lazy-loading на главной картинке первого экрана -->\n<img src=\"/hero-banner.jpg\" loading=\"lazy\" />",
+          "good": "<img src=\"/hero-banner.jpg\" fetchpriority=\"high\" width=\"1200\" height=\"600\" />",
+          "reason": "loading='lazy' на первом экране заставляет браузер отложить загрузку LCP-баннера, что обрушивает оценку производительности в красную зону."
+        },
+        {
+          "bad": "<!-- Изображения без указания размеров -->\n<img src=\"/card-thumb.jpg\" style=\"width: 100%;\" />",
+          "good": "<img src=\"/card-thumb.jpg\" width=\"400\" height=\"225\" style=\"width: 100%; height: auto; aspect-ratio: 16/9;\" />",
+          "reason": "Без указания пропорций браузер не знает высоту картинки до её скачивания, что приводит к резкому сдвигу контента вниз (высокий CLS)."
+        },
+        {
+          "bad": "// Синхронный тяжелый цикл на 500 000 элементов в обработчике клика\nbutton.addEventListener('click', () => { heavyCalculation(); });",
+          "good": "// Вынос в Web Worker или разбивка с debounce/yield\nbutton.addEventListener('click', () => { worker.postMessage('start'); });",
+          "reason": "Синхронный тяжелый код блокирует Main Thread дольше 50мс (Long Task), замораживая весь интерфейс и разрушая метрику INP."
+        }
+      ],
+      "keyTakeaways": [
+        "Core Web Vitals состоит из трёх столпов: LCP (загрузка <= 2.5s), INP (отзывчивость <= 200ms) и CLS (стабильность <= 0.1).",
+        "Для LCP: используйте форматы AVIF/WebP, предзагрузку шрифтов preload, CDN и `fetchpriority=\"high\"` на главном баннере.",
+        "Для INP: разбивайте задачи дольше 50мс (Long Tasks) через `scheduler.yield()`, используйте `debounce`/`throttle` и Web Workers.",
+        "Для CLS: всегда задавайте `width`/`height` или `aspect-ratio` картинкам, используйте скелетоны и резервируйте место под баннеры.",
+        "Lighthouse и Performance Panel в Chrome DevTools — основные инструменты диагностики узких мест производительности."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"perf-app\">\n  <h3>Симулятор оптимизации ввода (Debounce)</h3>\n  <input id=\"search-input\" placeholder=\"Начните быстро печатать текст...\" style=\"width:100%; padding:8px; background:#03060a; color:#2dff8a; border:1px solid #30363d; font-family:monospace;\" />\n  <div style=\"display:flex; gap:16px; margin-top:12px;\">\n    <div style=\"flex:1; padding:10px; background:#161b22; border:1px solid #f85149; border-radius:6px;\">\n      <strong style=\"color:#f85149;\">Без Debounce (вызовы API):</strong>\n      <div id=\"raw-count\" style=\"font-size:24px; font-weight:bold;\">0</div>\n    </div>\n    <div style=\"flex:1; padding:10px; background:#161b22; border:1px solid #2dff8a; border-radius:6px;\">\n      <strong style=\"color:#2dff8a;\">С Debounce 300ms:</strong>\n      <div id=\"debounced-count\" style=\"font-size:24px; font-weight:bold;\">0</div>\n    </div>\n  </div>\n</div>",
+      "initialCss": "#perf-app {\n  font-family: monospace;\n  color: #e6edf3;\n  padding: 16px;\n  background: #0d1117;\n  border-radius: 8px;\n}",
+      "initialJs": "const input = document.getElementById('search-input');\nconst rawEl = document.getElementById('raw-count');\nconst debEl = document.getElementById('debounced-count');\n\nlet rawCount = 0;\nlet debCount = 0;\n\nfunction debounce(fn, delay) {\n  let timer;\n  return (...args) => {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn(...args), delay);\n  };\n}\n\nconst handleDebounced = debounce(() => {\n  debCount++;\n  debEl.textContent = debCount;\n}, 300);\n\ninput.addEventListener('input', () => {\n  rawCount++;\n  rawEl.textContent = rawCount;\n  handleDebounced();\n});",
+      "instructions": "Практика Web Performance:\n1. Быстро напечатайте слово в инпуте и сравните счетчики\n2. Обратите внимание, как debounce сокращает число тяжелых вызовов в 5-10 раз, разгружая Main Thread\n3. Попробуйте изменить задержку debounce с 300ms на 500ms"
+    },
+    "task": {
+      "title": "Аудит и комплексная оптимизация страницы каталога по Core Web Vitals",
+      "scenario": "Страница каталога интернет-магазина провалила аудит Lighthouse (Score: 38/100): LCP равен 4.8s из-за неоптимизированного баннера, CLS составляет 0.45 из-за отсутствия размеров у карточек товаров, а поисковая строка замораживает интерфейс (INP > 600ms). Вам нужно реализовать модуль оптимизации.",
+      "criteria": [
+        "Реализовать HOF-утилиту debounce(fn, delayMs) для оптимизации инпута поиска",
+        "Сформировать правильную HTML-разметку LCP-баннера с форматом picture (AVIF, WebP), fetchpriority='high' и явными width/height",
+        "Задать CSS-правило aspect-ratio для карточек каталога для устранения CLS",
+        "Написать асинхронную функцию chunkedProcessing(items, processFn, chunkSize)",
+        "Соблюдать стандарты Core Web Vitals (LCP <= 2.5s, INP <= 200ms, CLS <= 0.1)"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте утилиты оптимизации производительности\nfunction debounce(fn, delayMs) {\n  // Ваш код\n}\n\nasync function chunkedProcessing(items, processFn, chunkSize = 50) {\n  // Разбивка длинной задачи\n}"
+      },
+      "hints": [
+        "В debounce сохраняйте let timer и сбрасывайте через clearTimeout",
+        "Для уступки потока используйте await new Promise(r => setTimeout(r, 0))",
+        "В разметке баннера используйте <picture><source srcset='...avif' type='image/avif'><img fetchpriority='high' width='1200' height='600'>"
+      ],
+      "solution": {
+        "js": "function debounce(fn, delayMs = 300) {\n  let timer = null;\n  return function (...args) {\n    clearTimeout(timer);\n    timer = setTimeout(() => fn.apply(this, args), delayMs);\n  };\n}\n\nasync function chunkedProcessing(items = [], processFn, chunkSize = 50) {\n  const results = [];\n  for (let i = 0; i < items.length; i += chunkSize) {\n    const chunk = items.slice(i, i + chunkSize);\n    for (const item of chunk) {\n      results.push(processFn(item));\n    }\n    // Уступка Main Thread браузеру для отрисовки кадров\n    await new Promise((resolve) => setTimeout(resolve, 0));\n  }\n  return results;\n}",
+        "explanation": "debounce устраняет спам вызовов и разгружает Main Thread (улучшая INP). chunkedProcessing разбивает длинную задачу на микропакеты, предотвращая зависание интерфейса."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro5-q1",
+          "question": "Какое пороговое значение метрики LCP (Largest Contentful Paint) считается отличным (Good) по стандарту Google Core Web Vitals?",
+          "options": [
+            "<= 100 миллисекунд",
+            "<= 2.5 секунды",
+            "<= 5.0 секунд",
+            "<= 0.1"
+          ],
+          "correctIndex": 1,
+          "explanation": "По стандарту Google Core Web Vitals значение LCP считается хорошим (Good / в зеленой зоне), если оно составляет 2.5 секунды или меньше."
+        },
+        {
+          "id": "pro5-q2",
+          "question": "Какую проблему решает метрика INP (Interaction to Next Paint), сменившая FID в Core Web Vitals?",
+          "options": [
+            "Измеряет размер JavaScript бандла",
+            "Измеряет задержку между действием пользователя (клик, ввод) и отрисовкой следующего кадра с визуальным откликом интерфейса",
+            "Проверяет правильность контрастности цветов",
+            "Измеряет скорость интернет-соединения"
+          ],
+          "correctIndex": 1,
+          "explanation": "Метрика INP (Interaction to Next Paint) оценивает общую отзывчивость страницы на протяжении всего времени сессии: за сколько миллисекунд браузер успевает обновить экран после клика или нажатия клавиши (норма <= 200 мс)."
+        },
+        {
+          "id": "pro5-q3",
+          "question": "Почему добавление атрибута loading='lazy' на главное LCP-изображение первого экрана является грубой ошибкой?",
+          "options": [
+            "loading='lazy' ломает JavaScript на странице",
+            "Браузер откладывает загрузку такого изображения, ожидая завершения рендеринга страницы, что искусственно ухудшает LCP на 1-2 секунды",
+            "Картинка вообще не загрузится",
+            "loading='lazy' запрещен стандартом W3C"
+          ],
+          "correctIndex": 1,
+          "explanation": "loading='lazy' предназначен только для изображений ниже первого экрана. На LCP-элементе он заставляет браузер отложить сетевой запрос, что приводит к критическому ухудшению показателя LCP."
+        },
+        {
+          "id": "pro5-q4",
+          "question": "Как эффективно защитить страницу от высокого показателя сдвига макета (CLS)?",
+          "options": [
+            "Отключить загрузку картинок",
+            "Всегда указывать атрибуты width и height на тегах <img> или задавать свойство aspect-ratio в CSS, а также использовать скелетонные экраны",
+            "Увеличить размер шрифта",
+            "Использовать position: absolute для всех элементов"
+          ],
+          "correctIndex": 1,
+          "explanation": "Указание width/height или aspect-ratio позволяет браузеру мгновенно зарезервировать прямоугольную область точного размера в макете до скачивания изображения, снижая CLS до 0."
+        },
+        {
+          "id": "pro5-q5",
+          "question": "Какое свойство CSS-шрифтов предотвращает эффект невидимого текста (FOIT) при загрузке кастомного веб-шрифта?",
+          "options": [
+            "font-style: italic;",
+            "font-display: swap;",
+            "font-weight: bold;",
+            "font-rendering: fast;"
+          ],
+          "correctIndex": 1,
+          "explanation": "Директива font-display: swap в @font-face указывает браузеру мгновенно отобразить текст системным резервным шрифтом и заменить его на кастомный сразу после скачивания файла шрифта."
+        }
+      ]
+    }
   }
 ];

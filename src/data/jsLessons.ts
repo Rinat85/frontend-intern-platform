@@ -788,83 +788,190 @@ export const jsLessons: Lesson[] = [
     "moduleId": "javascript",
     "level": 5,
     "title": "Объекты и массивы: Базовые операции",
-    "subtitle": "Литералы, деструктуризация, spread-оператор и иммутабельность",
-    "description": "Хранение структур данных: свойства объектов, деструктуризация { name, age } и [first, second], оператор расширения spread (...), методы slice и splice.",
-    "estimatedMinutes": 35,
+    "subtitle": "Модель памяти, передача по ссылке, методы Object, мутации vs иммутабельность и ES2023",
+    "description": "Изучите фундаментальные структуры данных в JavaScript: устройство памяти Stack vs Heap, опасности передачи по ссылке, методы Object (keys, values, entries, fromEntries, hasOwn), Shallow vs Deep Clone (structuredClone) и иммутабельные методы массивов.",
+    "estimatedMinutes": 65,
     "difficulty": "beginner",
     "tags": [
-      "JavaScript",
-      "Objects",
-      "Arrays",
-      "Spread"
+      "objects",
+      "arrays",
+      "references",
+      "heap",
+      "stack",
+      "immutability",
+      "structuredClone",
+      "es2023"
     ],
     "theory": {
-      "overview": "Объекты и массивы — основные структуры данных в JavaScript.",
+      "overview": "Объекты (`Object`) и массивы (`Array`) — главные составные структуры данных в JavaScript. В отличие от примитивов, объекты хранятся в куче (Heap), а переменные содержат лишь ссылки на адреса в оперативной памяти.\n\nПонимание разницы между передачей по значению и по ссылке — водораздел между новичком и квалифицированным инженером. Непонимание ссылочной модели приводит к багам мутаций в React/Redux, когда состояние изменяется «под капотом», но интерфейс не перерисовывается. В этом уроке мы разберём модель памяти, нативный `structuredClone()`, методы `Object` и иммутабельные операции ES2023.",
       "sections": [
         {
-          "title": "Деструктуризация и Spread",
-          "content": "- Деструктуризация: `const { name, role } = user;`\n- Spread: `const copy = { ...user, active: true };` (иммутабельное обновление).",
+          "title": "Модель памяти: Примитивы (Stack) vs Ссылочные типы (Heap)",
+          "content": "В JavaScript все типы данных делятся на две категории по способу хранения в памяти:\n\n1. Примитивные типы (`number`, `string`, `boolean`, `null`, `undefined`, `symbol`, `bigint`):\n- Хранятся непосредственно в стеке вызовов (Stack Memory).\n- Передаются ПО ЗНАЧЕНИЮ (Pass by Value). При копировании переменной создаётся независимая копия битов в памяти.\n- Примитивы абсолютно неизменяемы (Immutable).\n\n2. Ссылочные типы (`Object`, `Array`, `Function`, `Map`, `Set`, `Date`):\n- Тело объекта хранится в динамической куче памяти (Heap Memory).\n- Переменная хранит лишь указатель (ссылку / Reference) на адрес ячейки в Heap.\n- Передаются ПО ССЫЛКЕ (Pass by Reference).\n\nОпасность мутаций по ссылке:\nЕсли вы присвоите `const user2 = user1;`, то `user2` указывает на ТОТ ЖЕ САМЫЙ объект в куче! Изменение `user2.name = 'Пётр'` мгновенно изменит и `user1.name`!\n\nСравнение по ссылке:\nДва разных объекта с одинаковым содержимым НЕ РАВНЫ друг другу: `{ a: 1 } === { a: 1 }` вернёт `false`, потому что они лежат по разным адресам в памяти Heap. Равенство `obj1 === obj2` истинно только тогда, когда обе переменные указывают на один и тот же адрес.",
+          "image": {
+            "src": "/images/lessons/js-objects-arrays.svg",
+            "alt": "Модель памяти в JavaScript: Stack vs Heap и методы Object и Array",
+            "caption": "Примитивы копируются по значению в Stack, а объекты передаются по ссылке в Heap. Для вложенных структур необходим deep clone"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Spread копирование",
-            "code": "const user = { name: 'Алексей', role: 'Intern' };\nconst updated = { ...user, role: 'Senior' };\nconsole.log(updated);",
-            "explanation": "Создание нового объекта без мутации оригинала."
+            "code": "// 1. Примитивы: независимые копии в Stack\nlet x = 42;\nlet y = x;\ny = 99;\nconsole.log(x); // 42 (x не изменился!)\n\n// 2. Объекты: общая ссылка в Heap\nconst devA = { name: 'Иван', role: 'Intern' };\nconst devB = devA; // Копируется ССЫЛКА, а не объект!\n\ndevB.role = 'Senior';\nconsole.log(devA.role); // 'Senior' ⚠️ (devA тоже изменился!)\n\n// 3. Сравнение по ссылке\nconsole.log({} === {}); // false (разные адреса в памяти)\nconsole.log(devA === devB); // true (один и тот же адрес)",
+            "title": "Разница между копированием примитивов и ссылок",
+            "explanation": "devA и devB ссылаются на один объект в куче. Мутация поля через devB мгновенно отражается на devA."
+          }
+        },
+        {
+          "title": "Клонирование данных: Поверхностное (Shallow) vs Глубокое (Deep)",
+          "content": "Чтобы безопасно модифицировать объекты без мутации оригиналов, необходимо создавать их копии:\n\n1. Поверхностное копирование (Shallow Copy):\n- Создаёт новый внешний объект, но ВСЕ вложенные объекты и массивы копируются КАК ССЫЛКИ!\n- Синтаксис: Spread-оператор `{ ...obj }` или `Object.assign({}, obj)`.\n- Для массивов: `[...arr]` или `arr.slice()`.\n- Если объект плоский (без вложенности) — shallow copy идеален и максимально быстр.\n\n2. Глубокое копирование (Deep Copy):\n- Рекурсивно клонирует все уровни вложенности, создавая абсолютно независимое дерево объектов в памяти Heap.\n- `structuredClone(obj)` — современный нативный стандарт JavaScript (поддерживается всеми браузерами и Node.js 17+). Корректно копирует `Date`, `Set`, `Map`, `RegExp`, циклические ссылки.\n- `JSON.parse(JSON.stringify(obj))` — устаревший хак с критическими ограничениями (теряет методы/функции, превращает `undefined` в пропуск, ломает `Date` в строки, падает на циклических ссылках).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const user = {\n  id: 101,\n  name: 'Анна',\n  skills: ['HTML', 'CSS'],\n  settings: { theme: 'dark' }\n};\n\n// 1. Shallow Copy через spread:\nconst shallow = { ...user };\nshallow.name = 'Ольга'; // user.name останется 'Анна'\nshallow.skills.push('JS'); // ⚠️ user.skills ТОЖЕ изменится, ссылка общая!\n\n// 2. Нативное Deep Copy через structuredClone:\nconst deep = structuredClone(user);\ndeep.settings.theme = 'light'; // user.settings.theme останется 'dark'!\ndeep.skills.push('React');     // user.skills не тронут!",
+            "title": "Shallow Copy против нативного structuredClone",
+            "explanation": "Spread { ...user } копирует только верхний уровень, массив skills остается общим. structuredClone создает 100% независимую копию на всех уровнях вложенности."
+          }
+        },
+        {
+          "title": "Статические методы Object: keys, values, entries, fromEntries, hasOwn",
+          "content": "Для эффективной работы с объектами в JavaScript используется набор мощных статических методов:\n\n1. `Object.keys(obj)` — возвращает массив строковых ключей объекта: `['id', 'name']`.\n2. `Object.values(obj)` — возвращает массив значений свойств: `[101, 'Анна']`.\n3. `Object.entries(obj)` — возвращает массив пар `[ключ, значение]`: `[['id', 101], ['name', 'Анна']]`. Незаменим для фильтрации и трансформации объектов через методы массивов!\n4. `Object.fromEntries(entries)` — производит обратную операцию: собирает объект из массива пар `[ключ, значение]`.\n\n5. `Object.hasOwn(obj, 'prop')` (стандарт ES2022):\nБезопасная проверка наличия собственного свойства у объекта. Пришла на смену устаревшему `obj.hasOwnProperty()`, который падает с ошибкой, если объект создан через `Object.create(null)` или свойство `hasOwnProperty` переопределено пользователем.\n\n6. `Object.freeze(obj)` — «замораживает» объект: запрещает добавление, удаление и изменение свойств (делает объект иммутабельным на верхнем уровне).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const inventory = {\n  apples: 15,\n  oranges: 0,\n  bananas: 8,\n  kiwi: 0\n};\n\n// Фильтрация объекта: оставляем только товары в наличии\nconst inStock = Object.fromEntries(\n  Object.entries(inventory).filter(([item, count]) => count > 0)\n);\nconsole.log(inStock); // { apples: 15, bananas: 8 }\n\n// Безопасная проверка наличия свойства\nconsole.log(Object.hasOwn(inventory, 'apples')); // true\nconsole.log(Object.hasOwn(inventory, 'mango'));  // false",
+            "title": "Трансформация объектов через entries и fromEntries",
+            "explanation": "Object.entries превращает объект в массив для фильтрации, а Object.fromEntries мгновенно восстанавливает отфильтрованный объект."
+          }
+        },
+        {
+          "title": "Массивы: Мутирующие vs Иммутабельные методы и новинки ES2023",
+          "content": "Во фронтенд-разработке (особенно в React, Redux и Vue) критически важно различать методы массивов, которые мутируют исходный массив, и методы, возвращающие новый массив:\n\nМутирующие методы (изменяют исходный массив на месте — антипаттерн в React state!):\n- `push()`, `pop()`, `shift()`, `unshift()`\n- `splice()` (удаление/вставка по индексу)\n- `sort()`, `reverse()`\n\nИммутабельные методы (возвращают НОВЫЙ массив, сохраняя оригинал в безопасности):\n- `map()`, `filter()`, `slice()`, `concat()`, `flat()`, `flatMap()`\n\nРеволюционные иммутабельные методы ES2023 (Change Array by Copy):\n1. `arr.toSorted(compareFn)` — иммутабельная сортировка (вместо `[...arr].sort()`).\n2. `arr.toReversed()` — иммутабельный реверс (вместо `[...arr].reverse()`).\n3. `arr.toSpliced(start, deleteCount, ...items)` — иммутабельный `splice`.\n4. `arr.with(index, value)` — возвращает новый массив с заменённым элементом по индексу!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const scores = [85, 92, 78, 99, 64];\n\n// ❌ Старый мутирующий способ:\n// scores.sort(); // ⚠️ Исходный массив scores безвозвратно мутирован!\n\n// ✅ Современный иммутабельный стандарт ES2023:\nconst sortedScores = scores.toSorted((a, b) => b - a);\nconsole.log(sortedScores); // [99, 92, 85, 78, 64] (новый массив)\nconsole.log(scores);       // [85, 92, 78, 99, 64] (оригинал не тронут!)\n\n// Замена элемента по индексу без мутации (with):\nconst updatedScores = scores.with(0, 100); // [100, 92, 78, 99, 64]",
+            "title": "Иммутабельные методы массивов стандарта ES2023",
+            "explanation": "toSorted и with производят операции без мутации исходного массива scores, гарантируя надежность состояния в React."
           }
         }
       ],
       "seniorTips": [
-        "В React всегда используйте иммутабельное обновление через { ...obj }."
+        "Для глубокого клонирования сложных структур всегда используйте нативный `structuredClone()`. Откажитесь от устаревшего костыля `JSON.parse(JSON.stringify())`.",
+        "Вместо `obj.hasOwnProperty('key')` всегда пишите современный `Object.hasOwn(obj, 'key')` — это стандарт безопасности в коммерческих проектах.",
+        "Используйте новые методы ES2023 (`toSorted`, `toReversed`, `toSpliced`, `with`) вместо мутирующих аналогов для манипуляций с состоянием компонентов.",
+        "Помните: spread `{ ...obj }` клонирует ТОЛЬКО первый уровень вложенности. Если внутри есть объекты или массивы — их ссылки останутся общими!"
       ],
       "commonMistakes": [
         {
-          "bad": "user.role = 'Admin'; /* Мутация */",
-          "good": "const updated = { ...user, role: 'Admin' };",
-          "reason": "Мутация ломает реактивность."
+          "bad": "const original = { user: { name: 'Иван' } };\nconst copy = { ...original };\ncopy.user.name = 'Ольга'; // ❌ Мутировал и original!",
+          "good": "const original = { user: { name: 'Иван' } };\nconst copy = structuredClone(original);\ncopy.user.name = 'Ольга'; // ✅ original остался нетронутым",
+          "reason": "Spread-оператор { ...obj } делает лишь поверхностную копию. Вложенный объект user скопировался по ссылке."
+        },
+        {
+          "bad": "// Мутация массива прямо в функции\nfunction getTopUsers(users) {\n  return users.sort((a, b) => b.rating - a.rating);\n}",
+          "good": "function getTopUsers(users) {\n  return users.toSorted((a, b) => b.rating - a.rating);\n}",
+          "reason": "Метод sort() мутирует переданный аргумент users. Вызов такой функции ломает данные в других частях приложения."
+        },
+        {
+          "bad": "if (user.hasOwnProperty('email')) { ... }",
+          "good": "if (Object.hasOwn(user, 'email')) { ... }",
+          "reason": "Если user создан через Object.create(null), у него нет прототипа и вызов .hasOwnProperty() выбросит фатальную ошибку TypeError."
         }
       ],
       "keyTakeaways": [
-        "Деструктуризация извлекает поля в переменные.",
-        "Spread создает поверхностную копию."
+        "Примитивы хранятся в Stack и копируются по значению. Объекты хранятся в Heap и передаются по ссылке.",
+        "`structuredClone()` — нативный стандарт глубокого клонирования сложных объектов со всеми уровнями вложенности.",
+        "Комбинация `Object.entries()` + метод массива + `Object.fromEntries()` позволяет фильтровать и трансформировать объекты любой сложности.",
+        "`Object.hasOwn(obj, key)` — безопасный стандарт проверки наличия свойств.",
+        "Методы ES2023 `toSorted()`, `toReversed()`, `toSpliced()`, `with()` позволяют работать с массивами строго иммутабельно."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"obj-demo\"><h3>Профиль</h3><p id=\"obj-info\"></p></div>",
-      "initialCss": ".obj-demo { padding: 20px; background: white; border-radius: 12px; }",
-      "initialJs": "const intern = { name: 'Иван', score: 95 };\nconst { name, score } = intern;\ndocument.getElementById('obj-info').textContent = `${name} — ${score} баллов`;",
-      "instructions": "Посмотрите работу деструктуризации."
+      "initialHtml": "<div id=\"js-box\"></div>",
+      "initialCss": "#js-box {\n  font-family: 'JetBrains Mono', monospace;\n  background: #0a0e13;\n  color: #2dff8a;\n  padding: 16px;\n  border-radius: 8px;\n  border: 1px solid #30363d;\n  min-height: 220px;\n  white-space: pre-wrap;\n}",
+      "initialJs": "const out = document.getElementById('js-box');\nconst log = (t) => out.textContent += t + '\\n';\n\n// Демонстрация structuredClone и иммутабельности:\nconst original = {\n  title: 'Курс JS',\n  stats: { views: 1500, likes: 320 },\n  tags: ['web', 'frontend']\n};\n\nconst deep = structuredClone(original);\ndeep.stats.views = 9999;\ndeep.tags.push('react');\n\nlog('Original views: ' + original.stats.views + ' (не изменился!)');\nlog('Original tags: ' + original.tags.join(', '));\nlog('Deep clone views: ' + deep.stats.views);",
+      "instructions": "Практика с объектами и массивами:\n1. Запустите код и убедитесь в надежности structuredClone\n2. Профильтруйте объект цен через Object.entries/fromEntries, оставив товары дороже 1000 руб\n3. Отсортируйте массив [50, 10, 80, 20] иммутабельным методом toSorted()"
     },
     "task": {
-      "title": "Объединение массивов",
-      "scenario": "Объедините два массива через spread-оператор.",
+      "title": "Разработка модуля глубокой нормализации и иммутабельного обновления базы данных",
+      "scenario": "Вы разрабатываете модуль управления состоянием пользователей. Модуль должен принимать сырой объект базы данных, нормализовать его структуру через Object.entries/fromEntries, обновлять данные пользователей строго иммутабельно без мутации исходного состояния и использовать нативное глубокое клонирование.",
       "criteria": [
-        "Использован spread [...arr1, ...arr2]"
+        "Функция cloneDeep(data) использует нативный structuredClone с fallback-защитой",
+        "Функция filterActiveUsers(usersById) фильтрует объект через Object.entries/fromEntries",
+        "Функция updateUserSkill(usersById, userId, newSkill) возвращает обновленный объект без мутации оригинала",
+        "Функция getSortedUsersByScore(usersArray) сортирует массив пользователей иммутабельно",
+        "Использовать Object.hasOwn для проверки существования пользователя"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Исходные данные\nconst usersDB = {\n  u1: { name: 'Иван', active: true, score: 85, skills: ['JS'] },\n  u2: { name: 'Ольга', active: false, score: 92, skills: ['HTML'] },\n  u3: { name: 'Петр', active: true, score: 78, skills: ['CSS'] }\n};\n\nfunction filterActiveUsers(users) {\n  // Ваш код\n}"
       },
       "hints": [
-        "Используйте современные стандарты ES6+."
+        "Используйте Object.fromEntries(Object.entries(users).filter(([id, u]) => u.active))",
+        "Для обновления скилла используйте structuredClone или вложенный spread",
+        "Для сортировки используйте массив.toSorted((a, b) => b.score - a.score)"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const a = ['HTML', 'CSS'];\nconst b = ['JS', 'React'];\nconst all = [...a, ...b];\nconsole.log(all);",
-        "explanation": "Иммутабельное объединение."
+        "js": "function cloneDeep(data) {\n  if (typeof structuredClone === 'function') {\n    return structuredClone(data);\n  }\n  return JSON.parse(JSON.stringify(data));\n}\n\nfunction filterActiveUsers(usersById = {}) {\n  return Object.fromEntries(\n    Object.entries(usersById).filter(([id, user]) => user && user.active)\n  );\n}\n\nfunction updateUserSkill(usersById = {}, userId, newSkill) {\n  if (!Object.hasOwn(usersById, userId)) return usersById;\n  \n  const cloned = cloneDeep(usersById);\n  const currentSkills = cloned[userId].skills || [];\n  if (!currentSkills.includes(newSkill)) {\n    cloned[userId].skills = [...currentSkills, newSkill];\n  }\n  return cloned;\n}\n\nfunction getSortedUsersByScore(usersArray = []) {\n  return usersArray.toSorted((a, b) => (b.score ?? 0) - (a.score ?? 0));\n}",
+        "explanation": "Модуль строго следует принципам иммутабельности: filterActiveUsers трансформирует структуру через entries/fromEntries, updateUserSkill проверяет ключ через Object.hasOwn и клонирует объект, а getSortedUsersByScore использует toSorted."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j5-q1",
-          "question": "Какой оператор создает поверхностную копию?",
+          "id": "js5-q1",
+          "question": "Что выведет в консоль следующий код: const a = { x: 1 }; const b = a; b.x = 2; console.log(a.x);?",
           "options": [
-            "Spread (...)",
-            "&&",
-            "~",
-            "->"
+            "1",
+            "2",
+            "undefined",
+            "TypeError"
           ],
-          "correctIndex": 0,
-          "explanation": "Spread-оператор (...) копирует свойства объекта/массива."
+          "correctIndex": 1,
+          "explanation": "Объекты в JavaScript передаются по ссылке. Переменные a и b указывают на один и тот же объект в памяти Heap. Мутация b.x = 2 изменяет свойство и для переменной a."
+        },
+        {
+          "id": "js5-q2",
+          "question": "Какое ключевое ограничение имеет поверхностное клонирование через spread const copy = { ...user }?",
+          "options": [
+            "Spread-оператор работает медленнее, чем ручной цикл",
+            "Копируются только свойства первого уровня. Все вложенные объекты и массивы копируются как ссылки на старую память",
+            "Spread не умеет копировать строковые значения",
+            "Spread превращает числа в строки"
+          ],
+          "correctIndex": 1,
+          "explanation": "Spread { ...obj } производит Shallow Copy. Если внутри user есть вложенный объект user.address или массив user.skills, то copy.address будет указывать на тот же адрес памяти, что и в оригинале."
+        },
+        {
+          "id": "js5-q3",
+          "question": "Какой нативный метод JavaScript является современным стандартом глубокого клонирования объектов?",
+          "options": [
+            "Object.clone()",
+            "JSON.clone()",
+            "structuredClone()",
+            "Object.deepAssign()"
+          ],
+          "correctIndex": 2,
+          "explanation": "structuredClone() — это нативный стандарт глубокого клонирования в JS, корректно обрабатывающий вложенные объекты, массивы, Date, Set, Map и циклические ссылки."
+        },
+        {
+          "id": "js5-q4",
+          "question": "Почему Object.hasOwn(obj, 'prop') предпочтительнее устаревшего obj.hasOwnProperty('prop')?",
+          "options": [
+            "Object.hasOwn выполняется в 100 раз быстрее",
+            "Object.hasOwn корректно работает на объектах, созданных через Object.create(null) и на объектах, где свойство hasOwnProperty переопределено",
+            "Object.hasOwn автоматически создает свойство, если его нет",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "Если объект создан через Object.create(null), у него нет прототипа Object.prototype, и вызов obj.hasOwnProperty() вызовет падение TypeError. Статический метод Object.hasOwn(obj, key) полностью защищен от этого."
+        },
+        {
+          "id": "js5-q5",
+          "question": "В чём преимущество метода массива toSorted() из стандарта ES2023 перед классическим sort()?",
+          "options": [
+            "toSorted() работает только со строками",
+            "toSorted() не мутирует исходный массив, а возвращает новый отсортированный массив",
+            "toSorted() удаляет дубликаты",
+            "toSorted() сортирует асинхронно"
+          ],
+          "correctIndex": 1,
+          "explanation": "Классический метод sort() мутирует исходный массив на месте, что ломает стейт в React. Метод toSorted() является иммутабельным и возвращает новый массив."
         }
       ]
     }

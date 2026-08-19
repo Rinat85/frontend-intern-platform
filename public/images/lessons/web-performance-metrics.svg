@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 390" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgperf5" x1="0" y1="0" x2="800" y2="390" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="390" fill="url(#bgperf5)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Performance: Core Web Vitals</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">3 ключевые метрики Google для оценки UX</text>
+  <rect x="20" y="65" width="245" height="200" rx="10" fill="none" stroke="#2dff8a" stroke-width="2"/>
+  <text x="142" y="90" fill="#2dff8a" font-size="14" font-weight="700" text-anchor="middle">LCP</text>
+  <text x="142" y="106" fill="#e6edf3" font-size="9" text-anchor="middle">Largest Contentful Paint</text>
+  <text x="142" y="120" fill="#8b949e" font-size="8" text-anchor="middle">Скорость загрузки контента</text>
+  <rect x="35" y="132" width="75" height="30" rx="5" fill="#0d1117" stroke="#2dff8a"/><text x="72" y="148" fill="#2dff8a" font-size="9" text-anchor="middle">2.5s</text><text x="72" y="158" fill="#2dff8a" font-size="6" text-anchor="middle">Хорошо</text>
+  <rect x="120" y="132" width="55" height="30" rx="5" fill="#0d1117" stroke="#ffb02e"/><text x="147" y="148" fill="#ffb02e" font-size="9" text-anchor="middle">4s</text><text x="147" y="158" fill="#ffb02e" font-size="6" text-anchor="middle">Средне</text>
+  <rect x="185" y="132" width="55" height="30" rx="5" fill="#0d1117" stroke="#f85149"/><text x="212" y="148" fill="#f85149" font-size="9" text-anchor="middle">&gt;4s</text><text x="212" y="158" fill="#f85149" font-size="6" text-anchor="middle">Плохо</text>
+  <text x="142" y="184" fill="#e6edf3" font-size="8" text-anchor="middle">Оптимизация:</text>
+  <text x="142" y="198" fill="#8b949e" font-size="7" text-anchor="middle">Lazy-load, Preload, CDN, Brotli</text>
+  <text x="142" y="212" fill="#8b949e" font-size="7" text-anchor="middle">WebP/AVIF, SSR/SSG</text>
+  <text x="142" y="226" fill="#8b949e" font-size="7" text-anchor="middle">font-display: swap</text>
+  <text x="142" y="255" fill="#2dff8a" font-size="8" text-anchor="middle">Когда появляется главный контент?</text>
+  <rect x="278" y="65" width="245" height="200" rx="10" fill="none" stroke="#29e7ff" stroke-width="2"/>
+  <text x="400" y="90" fill="#29e7ff" font-size="14" font-weight="700" text-anchor="middle">INP</text>
+  <text x="400" y="106" fill="#e6edf3" font-size="9" text-anchor="middle">Interaction to Next Paint</text>
+  <text x="400" y="120" fill="#8b949e" font-size="8" text-anchor="middle">Отзывчивость на действия</text>
+  <rect x="293" y="132" width="75" height="30" rx="5" fill="#0d1117" stroke="#2dff8a"/><text x="330" y="148" fill="#2dff8a" font-size="9" text-anchor="middle">200ms</text><text x="330" y="158" fill="#2dff8a" font-size="6" text-anchor="middle">Хорошо</text>
+  <rect x="378" y="132" width="55" height="30" rx="5" fill="#0d1117" stroke="#ffb02e"/><text x="405" y="148" fill="#ffb02e" font-size="9" text-anchor="middle">500ms</text><text x="405" y="158" fill="#ffb02e" font-size="6" text-anchor="middle">Средне</text>
+  <rect x="443" y="132" width="55" height="30" rx="5" fill="#0d1117" stroke="#f85149"/><text x="470" y="148" fill="#f85149" font-size="9" text-anchor="middle">&gt;500</text><text x="470" y="158" fill="#f85149" font-size="6" text-anchor="middle">Плохо</text>
+  <text x="400" y="184" fill="#e6edf3" font-size="8" text-anchor="middle">Оптимизация:</text>
+  <text x="400" y="198" fill="#8b949e" font-size="7" text-anchor="middle">Yield long tasks, rAF</text>
+  <text x="400" y="212" fill="#8b949e" font-size="7" text-anchor="middle">Debounce/Throttle, Web Workers</text>
+  <text x="400" y="226" fill="#8b949e" font-size="7" text-anchor="middle">Виртуализация списков</text>
+  <text x="400" y="255" fill="#29e7ff" font-size="8" text-anchor="middle">Как быстро UI реагирует на клик?</text>
+  <rect x="536" y="65" width="245" height="200" rx="10" fill="none" stroke="#ffb02e" stroke-width="2"/>
+  <text x="658" y="90" fill="#ffb02e" font-size="14" font-weight="700" text-anchor="middle">CLS</text>
+  <text x="658" y="106" fill="#e6edf3" font-size="9" text-anchor="middle">Cumulative Layout Shift</text>
+  <text x="658" y="120" fill="#8b949e" font-size="8" text-anchor="middle">Визуальная стабильность</text>
+  <rect x="551" y="132" width="75" height="30" rx="5" fill="#0d1117" stroke="#2dff8a"/><text x="588" y="148" fill="#2dff8a" font-size="9" text-anchor="middle">0.1</text><text x="588" y="158" fill="#2dff8a" font-size="6" text-anchor="middle">Хорошо</text>
+  <rect x="636" y="132" width="55" height="30" rx="5" fill="#0d1117" stroke="#ffb02e"/><text x="663" y="148" fill="#ffb02e" font-size="9" text-anchor="middle">0.25</text><text x="663" y="158" fill="#ffb02e" font-size="6" text-anchor="middle">Средне</text>
+  <rect x="701" y="132" width="55" height="30" rx="5" fill="#0d1117" stroke="#f85149"/><text x="728" y="148" fill="#f85149" font-size="9" text-anchor="middle">&gt;0.25</text><text x="728" y="158" fill="#f85149" font-size="6" text-anchor="middle">Плохо</text>
+  <text x="658" y="184" fill="#e6edf3" font-size="8" text-anchor="middle">Оптимизация:</text>
+  <text x="658" y="198" fill="#8b949e" font-size="7" text-anchor="middle">width/height на img/video</text>
+  <text x="658" y="212" fill="#8b949e" font-size="7" text-anchor="middle">aspect-ratio CSS, скелетоны</text>
+  <text x="658" y="226" fill="#8b949e" font-size="7" text-anchor="middle">font-display: swap</text>
+  <text x="658" y="255" fill="#ffb02e" font-size="8" text-anchor="middle">Дёргается ли страница?</text>
+  <rect x="20" y="285" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="308" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Инструменты измерения</text>
+  <rect x="40" y="320" width="130" height="22" rx="4" fill="#161b22" stroke="#29e7ff"/><text x="105" y="335" fill="#29e7ff" font-size="9" text-anchor="middle">Lighthouse</text>
+  <rect x="185" y="320" width="130" height="22" rx="4" fill="#161b22" stroke="#29e7ff"/><text x="250" y="335" fill="#29e7ff" font-size="9" text-anchor="middle">PageSpeed Insights</text>
+  <rect x="330" y="320" width="130" height="22" rx="4" fill="#161b22" stroke="#29e7ff"/><text x="395" y="335" fill="#29e7ff" font-size="9" text-anchor="middle">Web Vitals (JS)</text>
+  <rect x="475" y="320" width="150" height="22" rx="4" fill="#161b22" stroke="#29e7ff"/><text x="550" y="335" fill="#29e7ff" font-size="9" text-anchor="middle">DevTools Performance</text>
+  <rect x="640" y="320" width="130" height="22" rx="4" fill="#161b22" stroke="#29e7ff"/><text x="705" y="335" fill="#29e7ff" font-size="9" text-anchor="middle">WebPageTest</text>
+  <text x="400" y="363" fill="#8b949e" font-size="8" text-anchor="middle">Lighthouse: 90-100 = зелёный, 50-89 = оранжевый, 0-49 = красный</text>
+</svg>

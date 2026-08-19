@@ -485,9 +485,9 @@ a:hover { color: var(--cyan); }
 .theory-bullet-list li { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; line-height: 1.6; color: var(--fg-1); }
 .theory-bullet-list li .inline-icon { margin-top: 3px; flex-shrink: 0; }
 /* theory-code-expl: see consolidated block below */
-.takeaways-list { list-style: none; padding: 0; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
-.takeaways-list li { position: relative; padding-left: 18px; font-size: 13px; line-height: 1.6; color: var(--fg-0); }
-.takeaways-list li::before { content: '>\x20'; position: absolute; left: 0; color: var(--neon); font-weight: bold; }
+/* takeaways-list moved to bottom consolidated section */
+/* takeaways-list li moved to bottom consolidated section */
+/* removed old ::before with broken escape */
 
 .key-concept { background: var(--bg-1); border: 1px solid var(--line); padding: 16px; margin-bottom: 12px; }
 .analogy-card { background: var(--bg-2); border: 1px solid var(--line); padding: 16px; margin-bottom: 12px; }
@@ -1223,22 +1223,7 @@ a:hover { color: var(--cyan); }
   border-top: 1px dashed var(--line);
 }
 
-.takeaways-card {
-  background: var(--bg-2);
-  border: 1px solid var(--line-2);
-  border-left: 3px solid var(--neon);
-  padding: 20px;
-  margin-top: 8px;
-}
-
-.takeaways-card h4 {
-  font-size: 13px;
-  font-family: var(--font-mono);
-  color: var(--neon);
-  margin-bottom: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
+/* old takeaways-card block cleaned */
 
 
 
@@ -1431,4 +1416,55 @@ pre code,
 .theory-code-expl-text {
   flex: 1;
   line-height: 1.8;
+}
+
+
+/* ==========================================================================
+   TAKEAWAYS (KEY TAKEAWAYS CARD & LIST)
+   ========================================================================== */
+.takeaways-card {
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-left: 4px solid var(--neon);
+  padding: 24px;
+  margin-top: 24px;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(45, 255, 138, 0.04);
+}
+
+.takeaways-card h4 {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--neon);
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.takeaways-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.takeaways-list li {
+  position: relative;
+  padding-left: 24px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--fg-0);
+}
+
+.takeaways-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: var(--neon);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.7;
 }

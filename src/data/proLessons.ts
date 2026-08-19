@@ -1170,5 +1170,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-7",
+    "moduleId": "pro",
+    "level": 7,
+    "title": "Архитектура State Management и Паттерны проектирования в SPA",
+    "subtitle": "UI = f(State), Redux-архитектура, Observer/PubSub, Immutable State и Feature-Sliced Design (FSD)",
+    "description": "Освойте архитектуру управления состоянием в Single Page Applications (SPA): математическую формулу UI = f(State), паттерны Observer и PubSub, однонаправленный поток данных Redux (Actions, Reducers, Store), селекторы и модульную методологию Feature-Sliced Design (FSD).",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "state-management",
+      "architecture",
+      "redux",
+      "pubsub",
+      "observer",
+      "fsd",
+      "immutability",
+      "spa"
+    ],
+    "theory": {
+      "overview": "По мере роста фронтенд-приложения от пары кнопок до масштабного SPA с десятками экранов, корзиной, чатом и авторизацией, главной проблемой становится управление состоянием (State Management).\n\nХаотичное разбрасывание данных по компонентам (Props Drilling) и мутации глобальных переменных превращают код в «спагетти», где изменение в одном виджете непредсказуемо ломает другой. В этом уроке мы изучим фундаментальную концепцию `UI = f(State)`, реализуем паттерны Observer и PubSub, разберём Redux-архитектуру с чистыми редьюсерами и освоим правила масштабируемой архитектуры Feature-Sliced Design (FSD).",
+      "sections": [
+        {
+          "title": "Что такое State (Состояние) и концепция UI = f(State)",
+          "content": "Фундаментальный принцип современной фронтенд-разработки (React, Vue, Solid, Svelte) описывается формулой:\n`UI = f(State)`\nИнтерфейс пользователя (UI) является чистой математической проекцией (функцией `f`) от текущего состояния данных (`State`). Вы не манипулируете DOM-узлами вручную — вы меняете состояние, а фреймворк декларативно обновляет экран.\n\nКлассификация состояния в SPA:\n1. **Server State** — кэш данных от API (список товаров, профиль пользователя). Требует инвалидации, кэширования и индикаторов загрузки/ошибок (React Query / TanStack Query, RTK Query).\n2. **Client / Global UI State** — данные, разделяемые несколькими независимыми виджетами (текущая тема, статус боковой панели, товары в корзине, токен сессии).\n3. **Local Component State** — изолированное состояние конкретного компонента (открыт ли селект, текст внутри инпута, активный таб).\n4. **URL State** — состояние, синхронизированное со строкой браузера (`/catalog?category=laptops&sort=price_asc&page=2`). Золотое правило: все фильтры, поисковые запросы и пагинация ДОЛЖНЫ храниться в URL, чтобы пользователь мог отправить ссылку другу или обновить страницу!",
+          "image": {
+            "src": "/images/lessons/web-state-architecture.svg",
+            "alt": "Архитектура State Management: Redux flow, PubSub, UI = f(State) и FSD",
+            "caption": "Однонаправленный поток данных Redux: Action -> Reducer -> Store -> UI. Слоистая архитектура Feature-Sliced Design"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Пример декларативной концепции UI = f(State):\nfunction renderUI(state) {\n  return `\n    <div class=\"app-layout theme-${state.theme}\">\n      <header>Привет, ${state.user ? state.user.name : 'Гость'}!</header>\n      <main>\n        ${state.isLoading ? '<div class=\"spinner\">Загрузка...</div>' : ''}\n        ${state.error ? `<div class=\"error\">${state.error}</div>` : ''}\n        <ul class=\"cart-list\">\n          ${state.cart.map((item) => `<li>${item.title} — ${item.price} ₽</li>`).join('')}\n        </ul>\n      </main>\n    </div>\n  `;\n}",
+            "title": "Концепция UI как чистой функции от состояния",
+            "explanation": "Рендеринг интерфейса полностью определяется объектом state. Изменение state.isLoading или state.cart мгновенно переводит UI в нужное состояние."
+          }
+        },
+        {
+          "title": "Паттерны проектирования: Observer (Наблюдатель) и PubSub",
+          "content": "Для реактивного обновления интерфейса при изменении состояния используются классические поведенческие паттерны GoF:\n\n1. **Паттерн Observer (Наблюдатель)**:\n- Субъект (`Subject` / `Observable`) хранит состояние и массив функций-подписчиков (`observers`).\n- При изменении состояния субъект вызывает метод `notify()`, оповещая всех зарегистрированных наблюдателей.\n- Лежит в основе реактивности Vue 3 (`reactive`/`ref`), MobX и RxJS.\n\n2. **Паттерн Publish-Subscribe (PubSub / Шина событий)**:\n- В отличие от Observer, отправитель (`Publisher`) и получатель (`Subscriber`) ВООБЩЕ НЕ ЗНАЮТ о существовании друг друга!\n- Они общаются через посредника — брокер событий (`EventBus` / `EventEmitter`).\n- `bus.on('ORDER_COMPLETED', handleAnalytics)` (подписка)\n- `bus.emit('ORDER_COMPLETED', { orderId: 402 })` (публикация события).\n- Идеален для слабой связности (Decoupling) независимых модулей приложения.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Реализация универсальной реактивной шины событий PubSub:\nclass EventEmitter {\n  constructor() {\n    this.events = new Map();\n  }\n\n  // Подписка на событие\n  on(eventName, callback) {\n    if (!this.events.has(eventName)) {\n      this.events.set(eventName, new Set());\n    }\n    this.events.get(eventName).add(callback);\n    \n    // Возвращаем функцию отписки\n    return () => this.events.get(eventName)?.delete(callback);\n  }\n\n  // Публикация события\n  emit(eventName, data) {\n    const listeners = this.events.get(eventName);\n    if (listeners) {\n      listeners.forEach((callback) => callback(data));\n    }\n  }\n}",
+            "title": "Реализация паттерна Publish-Subscribe (EventEmitter)",
+            "explanation": "EventEmitter использует Map и Set для безопасного хранения подписчиков и возвращает функцию отписки для предотвращения утечек памяти."
+          }
+        },
+        {
+          "title": "Однонаправленный поток данных (Unidirectional Data Flow) и Redux",
+          "content": "Архитектура Redux (Flux-паттерн) решает проблему непредсказуемых мутаций данных:\n\n3 Фундаментальных принципа Redux:\n1. **Единый источник правды (Single Source of Truth)**:\nВсе глобальное состояние приложения хранится в едином объекте — `Store`.\n\n2. **Состояние только для чтения (State is Read-Only)**:\nЕдинственный способ изменить состояние — отправить объект Действия (`Action`), описывающий намерение: `dispatch({ type: 'cart/addItem', payload: product })`.\n\n3. **Изменения происходят через Чистые Функции (Reducers)**:\nРедьюсер принимает `(currentState, action)` и возвращает АБСОЛЮТНО НОВЫЙ объект состояния `newState`.\n\nРедьюсер СТРОГО обязан быть чистой функцией (Pure Function):\n- Никаких мутаций исходного `state` (всегда возвращайте `{ ...state, ... }`)!\n- Никаких асинхронных вызовов (`fetch`), генераторов случайных чисел (`Math.random()`) или чтения дат (`new Date()`) внутри редьюсера!\n- Селекторы (Selectors) извлекают и мемоизируют нужные кусочки состояния (`selectCartTotal(state)`).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Чистый редьюсер управления корзиной\nfunction cartReducer(state = { items: [], total: 0 }, action) {\n  switch (action.type) {\n    case 'CART_ADD_ITEM': {\n      const item = action.payload;\n      const newItems = [...state.items, item];\n      return {\n        ...state,\n        items: newItems,\n        total: state.total + item.price\n      };\n    }\n    case 'CART_CLEAR':\n      return { items: [], total: 0 };\n    default:\n      return state;\n  }\n}\n\n// 2. Селектор с вычислением количества товаров\nconst selectCartCount = (state) => state.items.length;",
+            "title": "Чистый редьюсер и селектор в Redux-архитектуре",
+            "explanation": "Редьюсер cartReducer не мутирует state.items, а создает новый массив через spread [...state.items, item], обеспечивая предсказуемость."
+          }
+        },
+        {
+          "title": "Архитектура Feature-Sliced Design (FSD) и слои приложения",
+          "content": "Feature-Sliced Design (FSD) — передовая архитектурная методология организации фронтенд-проектов, стандартизирующая структуру кода для командной разработки.\n\nИерархия слоев FSD (строго сверху вниз по правилу зависимостей):\n1. `app/` — инициализация приложения (провайдеры Store, глобальные стили, роутер).\n2. `pages/` — компоненты страниц приложения (`HomePage`, `CatalogPage`, `ProfilePage`).\n3. `widgets/` — самостоятельные крупные UI-блоки (`Header`, `Sidebar`, `Feed`, `CartWidget`).\n4. `features/` — пользовательские сценарии и бизнес-фичи (`AuthByEmail`, `AddToCart`, `FilterCatalog`).\n5. `entities/` — бизнес-сущности предметной области (`User`, `Product`, `Order`, `Comment`).\n6. `shared/` — переиспользуемый инфраструктурный код (`UI-Kit`, `API Client`, хелперы, типы).\n\nГлавное архитектурное правило FSD:\nМодули могут импортировать код ТОЛЬКО из слоев, расположенных СТРОГО НИЖЕ их по иерархии! Слой `entities/` не может знать о существовании `features/` или `pages/`. Модули одного слоя не могут импортировать друг друга (Cross-Imports запрещены!).",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Структура слоев Feature-Sliced Design (FSD) в проекте:\n// src/\n// ├── app/         <- Провайдеры Redux/React Router, global.css\n// ├── pages/       <- Каталог (CatalogPage), Корзина (CartPage)\n// ├── widgets/     <- Шапка (Header), Карточка товара (ProductCard)\n// ├── features/    <- Добавить в корзину (AddToCartBtn), Поиск (SearchInput)\n// ├── entities/    <- Модель пользователя (User), Модель товара (Product)\n// └── shared/      <- UI кнопки (Button), Сетевой клиент (httpClient)\n\n// Пример импорта по правилам FSD (строго сверху вниз):\n// Внутри widgets/Header:\nimport { SearchInput } from '@/features/search'; // ✅ features ниже widgets\nimport { UserAvatar } from '@/entities/user';    // ✅ entities ниже widgets\nimport { Button } from '@/shared/ui';           // ✅ shared ниже widgets",
+            "title": "Организация слоев и правила импортов в Feature-Sliced Design",
+            "explanation": "Правило направленности зависимостей FSD исключает циклические импорты и делает кодовую базу масштабируемой для сотен разработчиков."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Храните в глобальном стейте только те данные, которые действительно нужны нескольким независимым экранам или виджетам. Локальное состояние (открыт ли dropdown, текст текущего инпута) должно оставаться локальным внутри компонента.",
+        "Всегда синхронизируйте ключевые фильтры и параметры сортировки с URL-параметрами поиска (`?page=2&filter=active`) — это позволяет пользователям делиться прямыми ссылками и сохранять состояние при перезагрузке.",
+        "Редьюсеры в архитектуре State Management ВСЕГДА должны быть абсолютно чистыми функциями без сайд-эффектов (никаких `fetch`, `Math.random()` или мутаций внутри редьюсера!).",
+        "Придерживайтесь правила однонаправленного потока зависимостей FSD: модули нижних слоев (`entities`, `shared`) никогда не должны импортировать код из верхних слоев (`features`, `pages`)."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Мутация стейта внутри редьюсера\nfunction reducer(state, action) {\n  state.user.name = action.payload; // ❌ Прямая мутация!\n  return state;\n}",
+          "good": "function reducer(state, action) {\n  return {\n    ...state,\n    user: { ...state.user, name: action.payload }\n  };\n}",
+          "reason": "Прямая мутация объекта оставляет ту же ссылку на память. React и Redux используют сравнение по ссылке и не обнаружат изменение, не перерисовав экран."
+        },
+        {
+          "bad": "// Хранение временного значения каждого текстового инпута в глобальном Store\ndispatch({ type: 'SEARCH_INPUT_KEYSTROKE', payload: 'a' });",
+          "good": "// Использование локального useState для инпута и отправка в Store только по Debounce/Submit",
+          "reason": "Отправка каждого символа в глобальный Store вызывает пересчет всего дерева компонентов приложения, приводя к лагам при наборе текста."
+        },
+        {
+          "bad": "// Нарушение FSD: импорт верхнего слоя внутри нижнего\n// Внутри entities/user/model.ts:\nimport { Header } from '@/widgets/Header'; // ❌ Ошибка архитектуры!",
+          "good": "// Сущности (entities) должны быть изолированы и не знать о виджетах и страницах",
+          "reason": "Циклические зависимости и импорт верхних слоев разрушают модульность и делают невозможным переиспользование сущностей."
+        }
+      ],
+      "keyTakeaways": [
+        "`UI = f(State)` — фундаментальный принцип: интерфейс является чистой проекцией состояния данных.",
+        "URL-параметры (`?sort=price&page=2`) — важнейшая часть состояния для фильтров, сортировок и пагинации.",
+        "Observer и PubSub обеспечивают слабую связность и реактивное уведомление подписчиков при изменении стейта.",
+        "Redux строится на однонаправленном потоке: `Action -> Reducer (чистая функция) -> Store -> UI`.",
+        "Feature-Sliced Design (FSD) делит проект на слои `app -> pages -> widgets -> features -> entities -> shared` со строгим направлением импортов сверху вниз."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"redux-app\">\n  <h3>Мини Redux Store (UI = f(State))</h3>\n  <div style=\"font-size:24px; font-weight:bold; margin:12px 0;\" id=\"counter-val\">0</div>\n  <div style=\"display:flex; gap:8px;\">\n    <button id=\"btn-inc\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">+1 Increment</button>\n    <button id=\"btn-dec\" style=\"background:#ffb02e; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">-1 Decrement</button>\n    <button id=\"btn-reset\" style=\"background:#f85149; color:#fff; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">Reset</button>\n  </div>\n</div>",
+      "initialCss": "#redux-app {\n  font-family: monospace;\n  color: #e6edf3;\n  padding: 16px;\n  background: #0d1117;\n  border-radius: 8px;\n}",
+      "initialJs": "function createStore(reducer, initialState) {\n  let state = initialState;\n  const listeners = new Set();\n  return {\n    getState: () => state,\n    dispatch: (action) => {\n      state = reducer(state, action);\n      listeners.forEach(fn => fn());\n    },\n    subscribe: (fn) => {\n      listeners.add(fn);\n      return () => listeners.delete(fn);\n    }\n  };\n}\n\nfunction counterReducer(state = { count: 0 }, action) {\n  switch (action.type) {\n    case 'INC': return { count: state.count + 1 };\n    case 'DEC': return { count: state.count - 1 };\n    case 'RESET': return { count: 0 };\n    default: return state;\n  }\n}\n\nconst store = createStore(counterReducer, { count: 0 });\nconst valEl = document.getElementById('counter-val');\n\nstore.subscribe(() => {\n  valEl.textContent = store.getState().count;\n});\n\ndocument.getElementById('btn-inc').onclick = () => store.dispatch({ type: 'INC' });\ndocument.getElementById('btn-dec').onclick = () => store.dispatch({ type: 'DEC' });\ndocument.getElementById('btn-reset').onclick = () => store.dispatch({ type: 'RESET' });",
+      "instructions": "Практика со State Management:\n1. Нажмите кнопки и наблюдайте работу однонаправленного потока dispatch -> reducer -> subscribe -> render\n2. Добавьте действие { type: 'ADD_BY', payload: 10 }\n3. Добавьте в состояние массив логов истории изменений state.history"
+    },
+    "task": {
+      "title": "Разработка реактивного State Management Store с историей действий и мемоизацией",
+      "scenario": "Вам необходимо спроектировать микро-библиотеку управления состоянием: хранилище Store должно поддерживать подписку через subscribe, иммутабельное обновление через чистый редьюсер, запись истории экшенов (Action Log) и мемоизированный селектор createSelector.",
+      "criteria": [
+        "Класс Store инкапсулирует состояние и список подписчиков",
+        "Метод dispatch(action) обновляет состояние через редьюсер строго иммутабельно",
+        "Метод subscribe(listener) возвращает функцию отписки",
+        "Реализована функция createSelector(selectFn), кэширующая результат при неизменном стейте",
+        "Редьюсер является чистой функцией без побочных эффектов"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте реактивное хранилище Store\nclass Store {\n  constructor(reducer, initialState) {\n    // Ваш код\n  }\n}"
+      },
+      "hints": [
+        "В Store храните let state и Set подписчиков",
+        "В createSelector кэшируйте: let lastState, lastResult;",
+        "Проверяйте lastState === currentState по ссылке"
+      ],
+      "solution": {
+        "js": "class Store {\n  #state;\n  #reducer;\n  #listeners = new Set();\n  #history = [];\n\n  constructor(reducer, initialState = {}) {\n    this.#reducer = reducer;\n    this.#state = initialState;\n  }\n\n  getState() {\n    return this.#state;\n  }\n\n  getHistory() {\n    return [...this.#history];\n  }\n\n  dispatch(action) {\n    if (!action || typeof action.type !== 'string') {\n      throw new Error('Action must have a string type');\n    }\n    this.#state = this.#reducer(this.#state, action);\n    this.#history.push(action);\n    this.#listeners.forEach((listener) => listener(this.#state));\n  }\n\n  subscribe(listener) {\n    this.#listeners.add(listener);\n    return () => this.#listeners.delete(listener);\n  }\n}\n\nfunction createSelector(selectorFn) {\n  let lastState = null;\n  let lastResult = null;\n  return (state) => {\n    if (state === lastState) {\n      return lastResult;\n    }\n    lastState = state;\n    lastResult = selectorFn(state);\n    return lastResult;\n  };\n}",
+        "explanation": "Хранилище Store реализует чистый однонаправленный поток Redux с приватными полями, возвратом функции отписки и мемоизированным селектором createSelector для максимальной производительности."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro7-q1",
+          "question": "В чём заключается концепция UI = f(State) в современной веб-разработке?",
+          "options": [
+            "Пользовательский интерфейс (UI) является чистой математической проекцией текущего состояния данных (State), и разработчик меняет состояние, а фреймворк декларативно обновляет DOM",
+            "UI пишется только на языке C++",
+            "State обновляется только после перезагрузки страницы",
+            "UI создается один раз и никогда не меняется"
+          ],
+          "correctIndex": 0,
+          "explanation": "Формула UI = f(State) означает, что вид экрана в любой момент времени полностью предопределен объектом состояния State. Декларативный рендеринг избавляет от ручных мутаций DOM."
+        },
+        {
+          "id": "pro7-q2",
+          "question": "Какое ключевое требование предъявляется к функциям-редьюсерам (Reducers) в Redux-архитектуре?",
+          "options": [
+            "Редьюсер должен делать асинхронные HTTP-запросы",
+            "Редьюсер обязан быть Чистой Функцией (Pure Function): не мутировать входные аргументы, не производить побочных эффектов и возвращать новый объект состояния",
+            "Редьюсер должен сохранять данные в localStorage",
+            "Редьюсер должен вызывать alert()"
+          ],
+          "correctIndex": 1,
+          "explanation": "Редьюсеры в Redux обязаны быть строго чистыми функциями. Они принимают (state, action) и возвращают новый иммутабельный объект состояния без мутаций и сайд-эффектов."
+        },
+        {
+          "id": "pro7-q3",
+          "question": "Какие данные ОБЯЗАТЕЛЬНО следует хранить в URL Query параметрах (?sort=price&page=2), а не в скрытом стейте?",
+          "options": [
+            "Пароли пользователей",
+            "Параметры фильтрации, поисковые запросы, сортировки и пагинацию списков, чтобы пользователи могли делиться ссылкой и сохранять состояние при перезагрузке",
+            "Тексты всплывающих подсказок",
+            "Временные координаты курсора мыши"
+          ],
+          "correctIndex": 1,
+          "explanation": "Хранение фильтров, пагинации и поиска в URL позволяет пользователям отправлять точные ссылки коллегам, открывать страницы в новых вкладках и пользоваться кнопками 'Назад/Вперед' в браузере."
+        },
+        {
+          "id": "pro7-q4",
+          "question": "Какое главное правило импортов действует в архитектуре Feature-Sliced Design (FSD)?",
+          "options": [
+            "Все файлы могут свободно импортировать друг друга",
+            "Модули могут импортировать код ТОЛЬКО из слоев, расположенных СТРОГО НИЖЕ их по иерархии (app -> pages -> widgets -> features -> entities -> shared), а кросс-импорты на одном слое запрещены",
+            "Импорты разрешены только снизу вверх",
+            "Запрещено использовать TypeScript"
+          ],
+          "correctIndex": 1,
+          "explanation": "Направленность зависимостей FSD сверху вниз исключает возникновение циклических связей и делает архитектуру масштабируемой: нижние слои (shared, entities) полностью автономны."
+        },
+        {
+          "id": "pro7-q5",
+          "question": "В чём заключается различие между паттернами Observer (Наблюдатель) и PubSub (Publish-Subscribe)?",
+          "options": [
+            "Observer работает только в Node.js",
+            "В Observer субъект напрямую хранит ссылки на своих наблюдателей, а в PubSub издатель и подписчик полностью изолированы и общаются через сторонний брокер событий (EventBus)",
+            "PubSub не поддерживает передачу данных",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "В паттерне PubSub между издателем и подписчиком появляется центральная шина событий (Event Channel). Отправитель не знает, кто слушает событие, обеспечивая максимальное разделение модулей (Decoupling)."
+        }
+      ]
+    }
   }
 ];

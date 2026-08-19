@@ -1183,120 +1183,192 @@ export const htmlLessons: Lesson[] = [
     "moduleId": "html",
     "level": 7,
     "title": "Изображения, мультимедиа и адаптивная графика",
-    "subtitle": "Теги img, picture, source, WebP, SVG, video и audio",
-    "description": "Медиа-контент в современном вебе: предотвращение сдвига верстки (CLS) через width/height, отложенная загрузка loading=\"lazy\", адаптивные форматы WebP/AVIF через picture, векторный SVG и видеоплееры.",
-    "estimatedMinutes": 35,
+    "subtitle": "img, picture, video, audio, форматы AVIF/WebP/SVG, srcset, sizes и ленивая загрузка",
+    "description": "Освойте современную работу с медиаконтентом в HTML5: разницу между растром и вектором (SVG), адаптивную графику через srcset и sizes, арт-дирекшн и фоллбэки в теге <picture>, автоплей видео на смартфонах и оптимизацию Core Web Vitals.",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "HTML",
-      "Images",
-      "Media",
-      "SVG",
-      "Performance"
+      "images",
+      "multimedia",
+      "picture",
+      "video",
+      "audio",
+      "avif",
+      "webp",
+      "svg",
+      "srcset",
+      "lazy-loading"
     ],
     "theory": {
-      "overview": "Медиа-файлы (изображения, аудио, видео) составляют до 70–80% общего веса веб-страницы. Неумение оптимизировать графику приводит к медленной загрузке сайта, ухудшению Core Web Vitals и раздражению пользователей.\n\nСовременный HTML предоставляет мощные инструменты: от нативного Lazy Loading до тега `<picture>`, отдающего Retina-качество для iPhone и сжатые WebP-файлы для обычных мониторов.",
+      "overview": "Изображения и видео составляют до 70% общего веса средней веб-страницы. От правильного выбора форматов сжатия, адаптивной сетки разрешений и отложенной загрузки напрямую зависят оценка LCP в Google Core Web Vitals, трафик пользователей и конверсия.\n\nВ этом уроке мы разберём современные форматы графики (AVIF, WebP, SVG), научимся отдавать адаптивные изображения под экраны Retina через `srcset` и `sizes`, настраивать арт-дирекшн (Art Direction) в теге `<picture>` и правильно внедрять фоновое видео с учётом ограничений мобильных ОС iOS и Android.",
       "sections": [
         {
-          "title": "Тег <img>: Атрибуты alt, loading и предотвращение CLS",
-          "content": "Базовый синтаксис изображения:\n- `src` — путь к файлу изображения (JPG, PNG, WebP, SVG).\n- `alt` — **обязательный альтернативный текст**. Описывает, что изображено. Нужен для:\n  1. Скринридеров (незрячие пользователи «видят» картинку ушами).\n  2. Отображения, если картинка не загрузилась из-за сбоя сети.\n  3. Поисковой индексации в Google/Яндекс Картинках.\n- `width` и `height` — указание исходных пропорций. Браузер сразу резервирует место под картинку, предотвращая дергание страницы (Cumulative Layout Shift, CLS).\n- `loading=\"lazy\"` — браузер загружает картинку только тогда, когда пользователь доскроллил до неё (экономит гигабайты мобильного трафика).",
+          "title": "Анатомия <img> и форматы графики: Растр (AVIF/WebP) vs Вектор (SVG)",
+          "content": "Форматы графики делятся на два принципиальных класса:\n\n1. Растровая графика (сетка пикселей):\n- `AVIF` (AV1 Image File Format) — новейший стандарт 2024–2026 гг. Имеет непревзойденное сжатие (на 50% легче JPEG и на 20% легче WebP при том же качестве). Поддерживает HDR и прозрачность.\n- `WebP` — современный стандарт от Google. Поддерживается 98%+ браузеров, на 30% легче JPEG/PNG, поддерживает альфа-канал (прозрачность) и анимацию.\n- `JPEG/JPG` — классический формат для фотографий без прозрачности.\n- `PNG` — сжатие без потерь (Lossless) с поддержкой прозрачности. Идеален для скриншотов с текстом и графиков с четкими линиями.\n\n2. Векторная графика (`SVG` — Scalable Vector Graphics):\n- Текстовый XML-код, описывающий геометрические примитивы (линии, кривые Безье, круги).\n- Бесконечно масштабируется без потери четкости на любых 4K/8K экранах при микроскопическом весе (1–5 КБ).\n- Идеален для логотипов, иконок и UI-элементов.\n\nКритическая важность атрибута `alt`:\n- Текст `alt` озвучивается скринридерами для незрячих пользователей (Accessibility WCAG).\n- Отображается вместо картинки при медленном соединении или ошибке 404.\n- Индексируется поисковыми роботами для поиска по картинкам (SEO).\n- Золотое правило: если картинка чисто декоративная (фоновый узор, разделитель) — ОБЯЗАТЕЛЬНО ставьте пустой `alt=\"\"` (скринридер пропустит её без звука). Если атрибут `alt` отсутствует вовсе — скринридер прочитает имя файла (`banner-v2_final_2026.jpg`), что ужасно для пользователя!\n\nАтрибуты `width` и `height`:\nВСЕГДА указывайте атрибуты `width` и `height` на теге `<img>`! Браузер использует их для мгновенного резервирования соотношения сторон (Aspect Ratio), полностью исключая сдвиг макета (CLS = 0).",
+          "image": {
+            "src": "/images/lessons/html-multimedia-responsive.svg",
+            "alt": "Адаптивная графика в HTML: тег picture, srcset, sizes и видео video",
+            "caption": "Тег picture обеспечивает прогрессивную отдачу форматов AVIF/WebP/JPG и арт-дирекшн. srcset и sizes выбирают размер под экран"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Оптимизированный тег img",
-            "code": "<img \n  src=\"/images/developer-workspace.webp\"\n  alt=\"Рабочее место программиста с двумя мониторами и клавиатурой\"\n  width=\"800\"\n  height=\"600\"\n  loading=\"lazy\"\n  class=\"responsive-img\"\n/>",
-            "explanation": "Присутствуют все атрибуты производительности: alt для a11y, width/height против CLS, loading=lazy для скорости."
+            "code": "<!-- Идеальная разметка адаптивной картинки с защитой от CLS -->\n<img\n  src=\"/images/products/keyboard.jpg\"\n  alt=\"Механическая клавиатура с RGB-подсветкой и тихими свитчами\"\n  width=\"800\"\n  height=\"450\"\n  loading=\"lazy\"\n  decoding=\"async\"\n  class=\"product-thumb\"\n/>\n\n<!-- Декоративный векторный разделитель (пустой alt!) -->\n<img src=\"/icons/divider-neon.svg\" alt=\"\" aria-hidden=\"true\" />",
+            "title": "Семантическая разметка img с alt, размерами и lazy-loading",
+            "explanation": "Указание width и height предотвращает сдвиг макета CLS. loading='lazy' откладывает загрузку до скролла. Пустой alt='' скрывает декоративную графику от скринридеров."
           }
         },
         {
-          "title": "Адаптивные изображения с тегом <picture> и современные форматы",
-          "content": "Форматы графики:\n- **WebP и AVIF**: современные форматы сжатия (на 30–50% легче PNG/JPG при том же качестве).\n- **SVG (Scalable Vector Graphics)**: векторный формат на основе XML. Идеален для логотипов и иконок: бесконечная четкость на любом масштабе и микроскопический вес.\n- **Тег `<picture>`**: позволяет браузеру выбрать лучший формат и размер в зависимости от разрешения экрана и поддержки браузером.",
+          "title": "Адаптивная графика: дескрипторы srcset и атрибут sizes",
+          "content": "Один и тот же файл изображения не может идеально подходить одновременно для старого смартфона 360px и для монитора 4K 3840px (для смартфона файл будет избыточно тяжелым, а на 4K — размытым).\n\n1. Адаптация под Retina-дисплеи (дескрипторы плотности `1x`, `2x`, `3x`):\n`srcset=\"logo.png 1x, logo-2x.png 2x, logo-3x.png 3x\"`\nБраузер с экраном Retina (DPR = 2) автоматически скачает четкую версию `logo-2x.png`.\n\n2. Адаптация под ширину экрана (дескрипторы ширины `w` + атрибут `sizes`):\n- `srcset` перечисляет доступные файлы и их физическую ширину в пикселях: `srcset=\"photo-400.jpg 400w, photo-800.jpg 800w, photo-1200.jpg 1200w\"`.\n- `sizes` сообщает браузеру, какую долю ширины экрана займет элемент ДО ТОГО, как загрузится и применится CSS-файл:\n`sizes=\"(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw\"`.\n- Браузер умножает ширину слота из `sizes` на Device Pixel Ratio (DPR) экрана и выбирает минимально достаточный по весу файл из `srcset`!",
           "codeExample": {
             "language": "html",
-            "title": "Адаптивный тег picture с fallback",
-            "code": "<picture>\n  <!-- Для современных браузеров с поддержкой AVIF -->\n  <source srcset=\"hero.avif\" type=\"image/avif\">\n  <!-- Для браузеров с поддержкой WebP -->\n  <source srcset=\"hero.webp\" type=\"image/webp\">\n  <!-- Резервный вариант (Fallback) для старых браузеров -->\n  <img src=\"hero.jpg\" alt=\"Главный баннер стажировки\" width=\"1200\" height=\"600\">\n</picture>",
-            "explanation": "Браузер выберет самый легкий поддерживаемый формат (AVIF -> WebP -> JPG)."
+            "code": "<img\n  src=\"/images/catalog/item-800.jpg\"\n  srcset=\"\n    /images/catalog/item-400.jpg   400w,\n    /images/catalog/item-800.jpg   800w,\n    /images/catalog/item-1200.jpg 1200w\n  \"\n  sizes=\"(max-width: 600px) 100vw, (max-width: 1024px) 50vw, 400px\"\n  alt=\"Карточка курса Frontend-разработчик\"\n  width=\"800\"\n  height=\"450\"\n  loading=\"lazy\"\n/>",
+            "title": "Использование srcset с дескрипторами ширины w и атрибутом sizes",
+            "explanation": "На мобилке 390px браузер выберет файл 400w (или 800w на Retina 2x), сэкономив до 80% мобильного интернет-трафика пользователя."
           }
         },
         {
-          "title": "Встраивание видео и аудио (HTML5 Media)",
-          "content": "Нативные медиаплееры без внешних плагинов:\n- `<video controls poster=\"cover.jpg\" preload=\"metadata\">` — видеоплеер. Атрибуты: `controls` (панель управления), `autoplay`, `muted` (без звука, обязательно для автозапуска!), `loop` (зацикливание), `playsinline` (воспроизведение на iPhone внутри страницы, а не в полноэкранном режиме).\n- `<audio controls src=\"podcast.mp3\">` — аудиоплеер для подкастов и музыки.\n- `<iframe src=\"...\" loading=\"lazy\">` — встраивание сторонних сервисов (YouTube, Яндекс Карты).",
+          "title": "Тег <picture>: Прогрессивные форматы (AVIF/WebP) и Арт-дирекшн",
+          "content": "Тег `<picture>` — это контейнер-обёртка для нескольких тегов `<source>` и одного обязательного тега `<img>` в конце.\n\nДва главных сценария использования `<picture>`:\n\n1. Прогрессивная отдача форматов (Format Switching):\nБраузер читает список `<source>` сверху вниз и выбирает ПЕРВЫЙ формат, который он поддерживает:\n- Если браузер поддерживает `AVIF` — качает AVIF (максимальная экономия трафика!).\n- Если нет — проверяет следующий `<source type=\"image/webp\">`.\n- Если браузер очень старый — игнорирует `<source>` и загружает классический `<img>` в формате JPEG/PNG.\n\n2. Арт-дирекшн (Art Direction — смена кадрирования под экран):\nНа десктопе баннер часто широкий и горизонтальный (16:9), а на смартфонах детали теряются, и нужен квадратный или вертикальный кроп (1:1 или 4:5):\n`<source media=\"(max-width: 600px)\" srcset=\"hero-mobile-square.avif\">`.",
           "codeExample": {
             "language": "html",
-            "title": "HTML5 Видеоплеер",
-            "code": "<video \n  controls \n  poster=\"/preview.jpg\"\n  width=\"640\"\n  height=\"360\"\n  playsinline\n>\n  <source src=\"intro.mp4\" type=\"video/mp4\">\n  <source src=\"intro.webm\" type=\"video/webm\">\n  Ваш браузер не поддерживает видео HTML5.\n</video>",
-            "explanation": "Полноценный нативный видеоплеер с обложкой poster и несколькими форматами для совместимости."
+            "code": "<picture class=\"hero-banner\">\n  <!-- 1. Мобильная версия (Art Direction: квадратный кроп для экранов <= 640px) -->\n  <source\n    media=\"(max-width: 640px)\"\n    type=\"image/avif\"\n    srcset=\"/images/hero-square.avif\"\n  />\n  <source\n    media=\"(max-width: 640px)\"\n    type=\"image/webp\"\n    srcset=\"/images/hero-square.webp\"\n  />\n\n  <!-- 2. Десктопные форматы (горизонтальный 16:9) -->\n  <source type=\"image/avif\" srcset=\"/images/hero-wide.avif\" />\n  <source type=\"image/webp\" srcset=\"/images/hero-wide.webp\" />\n\n  <!-- 3. Обязательный fallback img с размерами -->\n  <img\n    src=\"/images/hero-wide.jpg\"\n    alt=\"Главный баннер Академии стажёров\"\n    width=\"1200\"\n    height=\"600\"\n    fetchpriority=\"high\"\n    decoding=\"async\"\n  />\n</picture>",
+            "title": "Идеальная структура picture: Art Direction + AVIF/WebP Fallbacks",
+            "explanation": "Браузер на смартфоне скачает квадратный hero-square.avif, десктопный Chrome скачает hero-wide.avif, а старый браузер отобразит hero-wide.jpg."
+          }
+        },
+        {
+          "title": "Мультимедиа: <video>, <audio> и мобильные ограничения",
+          "content": "Для воспроизведения видео и звука без сторонних плагинов используются нативные теги HTML5:\n\n1. Тег `<video>` и мобильные ограничения iOS/Android:\n- `controls` — отображает стандартную панель управления (play, pause, volume, fullscreen).\n- `autoplay` — автозапуск видео. ВНИМАНИЕ: на ВСЕХ смартфонах и в современных браузерах автоплей СТРОГО ЗАБЛОКИРОВАН, если не указан атрибут `muted` (без звука)!\n- `playsinline` — критически важный атрибут для iOS Safari! Без него видео на iPhone при старте принудительно разворачивается на весь экран, ломая дизайн сайта.\n- `loop` — зацикливание воспроизведения.\n- `poster=\"thumb.jpg\"` — заставка-превью до старта воспроизведения.\n\n2. Тег `<audio>`: воспроизведение аудиофайлов (MP3, AAC, WAV, OGG) с поддержкой нескольких `<source>`.\n\n3. Вложенные субтитры через тег `<track>`:\n`<track kind=\"subtitles\" src=\"/subs-ru.vtt\" srclang=\"ru\" label=\"Русский\" default>` — стандарт доступности для людей с нарушением слуха.",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Фоновое промо-видео без звука для первого экрана -->\n<video\n  autoplay\n  muted\n  loop\n  playsinline\n  poster=\"/video/preview-poster.jpg\"\n  width=\"1280\"\n  height=\"720\"\n  class=\"hero-bg-video\"\n>\n  <source src=\"/video/promo.webm\" type=\"video/webm\" />\n  <source src=\"/video/promo.mp4\" type=\"video/mp4\" />\n  <track kind=\"subtitles\" src=\"/video/subs-ru.vtt\" srclang=\"ru\" label=\"Русский\" />\n  <p>Ваш браузер не поддерживает HTML5 видео.</p>\n</video>",
+            "title": "Разметка видео с автозапуском, постером и субтитрами",
+            "explanation": "Комбинация autoplay + muted + playsinline гарантирует запуск фонового видео на iPhone и смартфонах Android без всплытия на полный экран."
           }
         }
       ],
       "seniorTips": [
-        "Всегда указывайте атрибуты `width` и `height` у тегов `<img>`, а в CSS задавайте `max-width: 100%; height: auto;` для адаптивности.",
-        "Никогда не оставляйте `alt` пустым у контентных изображений. Если картинка чисто декоративная (узор, фоновая линия), указывайте `alt=\"\"` с атрибутом `aria-hidden=\"true\"`."
+        "Всегда оборачивайте форматы AVIF и WebP в тег `<picture>` с фоллбэком на классический JPEG/PNG для старых браузеров.",
+        "На смартфонах автоплей видео `autoplay` заблокирован браузерами, если не указан атрибут `muted` и `playsinline`.",
+        "Всегда указывайте `width` и `height` на всех тегах `<img>` — в современном HTML они сообщают браузеру соотношение сторон и сводят CLS к нулю.",
+        "Если изображение является декоративным фоном или иконкой-разделителем, ставьте пустой `alt=\"\"` (скринридер пропустит её без звука), но никогда не удаляйте атрибут `alt` целиком (иначе скринридер прочитает имя файла)."
       ],
       "commonMistakes": [
         {
-          "bad": "<img src=\"cat.jpg\"> <!-- Нет alt, width, height -->",
-          "good": "<img src=\"cat.jpg\" alt=\"Рыжий кот спит на диване\" width=\"400\" height=\"300\" loading=\"lazy\">",
-          "reason": "Отсутствие alt ломает доступность для незрячих, а отсутствие размеров вызывает дергание страницы (CLS)."
+          "bad": "<!-- Фоновое видео без muted и playsinline -->\n<video autoplay loop src=\"/promo.mp4\"></video>",
+          "good": "<video autoplay muted loop playsinline poster=\"/poster.jpg\" src=\"/promo.mp4\"></video>",
+          "reason": "Без muted браузер заблокирует автозапуск из-за политик безопасности звука, а без playsinline видео на iPhone раскроется на весь экран."
+        },
+        {
+          "bad": "<!-- Отсутствие атрибута alt -->\n<img src=\"/team-photo.jpg\" />",
+          "good": "<img src=\"/team-photo.jpg\" alt=\"Команда инженеров Frontend Academy на митапе\" width=\"800\" height=\"400\" />",
+          "reason": "Без alt скринридер начнет читать вслух имя файла 'team-photo.jpg', а поисковые роботы не смогут проиндексировать изображение."
+        },
+        {
+          "bad": "<!-- loading='lazy' на главном LCP-баннере первого экрана -->\n<picture><img src=\"/hero.jpg\" loading=\"lazy\" /></picture>",
+          "good": "<picture><img src=\"/hero.jpg\" fetchpriority=\"high\" width=\"1200\" height=\"600\" /></picture>",
+          "reason": "loading='lazy' на первом экране откладывает загрузку главного LCP-изображения, обрушивая метрики Core Web Vitals на 1.5–2 секунды."
         }
       ],
       "keyTakeaways": [
-        "WebP и AVIF уменьшают вес страниц в 2 раза по сравнению с JPG/PNG.",
-        "SVG идеален для логотипов, так как не теряет четкости на экранах Retina.",
-        "loading=\"lazy\" откладывает загрузку изображений ниже первого экрана."
+        "AVIF и WebP — стандарты растрового сжатия, а SVG — бесконечно масштабируемый вектор для иконок и логотипов.",
+        "`srcset` и `sizes` позволяют браузеру выбирать оптимальный по размеру файл под ширину экрана и плотность Retina (DPR 2x).",
+        "Тег `<picture>` обеспечивает прогрессивную отдачу форматов и арт-дирекшн кадрирование.",
+        "Автозапуск `<video>` на смартфонах работает только при наличии атрибутов `autoplay muted playsinline`.",
+        "Явные `width` и `height` на тегах `<img>` задают Aspect Ratio и устраняют сдвиг макета (CLS = 0)."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"media-card\">\n  <h3>Интерактивная демонстрация медиа</h3>\n  <!-- SVG иконка -->\n  <svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#4f46e5\" stroke-width=\"2\">\n    <rect x=\"2\" y=\"2\" width=\"20\" height=\"20\" rx=\"5\"></rect>\n    <circle cx=\"12\" cy=\"12\" r=\"4\"></circle>\n    <line x1=\"18\" y1=\"6\" x2=\"18.01\" y2=\"6\"></line>\n  </svg>\n  <p>Векторный SVG масштабируется без потери качества.</p>\n</div>",
-      "initialCss": ".media-card { padding: 20px; background: #fff; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }\nsvg { margin: 10px auto; }",
-      "initialJs": "console.log('Media sandbox loaded');",
-      "instructions": "Изучите, как SVG-код рендерится напрямую в HTML без внешних картинок."
+      "initialHtml": "<div class=\"media-playground\">\n  <h3>Демонстрация тега &lt;picture&gt;</h3>\n  <picture>\n    <source type=\"image/svg+xml\" srcset=\"/images/lessons/html-multimedia-responsive.svg\" />\n    <img\n      src=\"/images/lessons/html-multimedia-responsive.svg\"\n      alt=\"Схема адаптивной графики\"\n      width=\"600\"\n      height=\"330\"\n      style=\"width:100%; height:auto; border-radius:6px; border:1px solid #30363d;\"\n    />\n  </picture>\n</div>",
+      "initialCss": ".media-playground {\n  padding: 16px;\n  background: #0a0e13;\n  color: #e6edf3;\n  font-family: monospace;\n}",
+      "initialJs": "console.log('Песочница медиа готова');",
+      "instructions": "Практика с мультимедиа:\n1. Изучите структуру тега <picture>\n2. Добавьте разметку видео с атрибутами autoplay, muted, loop и playsinline\n3. Добавьте тег <audio controls> с несколькими источниками <source>"
     },
     "task": {
-      "title": "Вставка адаптивного медиа-блока",
-      "scenario": "Разместите изображение с атрибутами alt, размерами width/height и отложенной загрузкой lazy.",
+      "title": "Верстка адаптивной медиа-карточки товара с арт-дирекшн баннером и видео",
+      "scenario": "Вы разрабатываете промо-карточку флагманского товара: карточка должна содержать адаптивный баннер в теге <picture> с форматами AVIF/WebP и квадратным кадрированием для мобилок, промо-видео с постером и автоплеем без звука, а также декоративные иконки с правильными alt-атрибутами.",
       "criteria": [
-        "Тег <img> содержит корректный src и alt",
-        "Указаны width и height",
-        "Добавлен атрибут loading=\"lazy\""
+        "Главный баннер оформлен через тег <picture> с источниками type='image/avif' и type='image/webp'",
+        "Реализован арт-дирекшн для мобильных экранов media='(max-width: 640px)'",
+        "Обязательный fallback <img> содержит информативный alt и явные width/height",
+        "Промо-видео <video> содержит атрибуты autoplay, muted, loop, playsinline и poster",
+        "Декоративные элементы содержат пустой alt='' и aria-hidden='true'"
       ],
       "starterCode": {
-        "html": "<!-- Вставьте оптимизированное изображение -->\n",
-        "css": "/* Стили задания */\n"
+        "html": "<article class=\"product-promo-card\">\n  <!-- Разметьте адаптивный медиа-блок -->\n</article>"
       },
       "hints": [
-        "Используйте <img src=\"...\" alt=\"...\" width=\"600\" height=\"400\" loading=\"lazy\">."
+        "В <picture> поместите <source media='(max-width: 640px)' ...> перед десктопными источниками",
+        "Для видео используйте <video autoplay muted loop playsinline poster='/poster.jpg'>",
+        "На <img> укажите fetchpriority='high' для главного баннера"
       ],
       "solution": {
-        "html": "<figure class=\"photo-card\">\n  <img src=\"/images/team.jpg\" alt=\"Команда фронтенд-разработчиков за обсуждением проекта\" width=\"600\" height=\"400\" loading=\"lazy\">\n  <figcaption>Наша дружная команда разработки</figcaption>\n</figure>",
-        "css": "/* Решение */\n",
-        "explanation": "Эталонное оформление изображения с семантическим описанием figcaption."
+        "html": "<article class=\"product-promo-card\">\n  <picture class=\"promo-banner\">\n    <source media=\"(max-width: 640px)\" type=\"image/avif\" srcset=\"/images/phone-sq.avif\" />\n    <source media=\"(max-width: 640px)\" type=\"image/webp\" srcset=\"/images/phone-sq.webp\" />\n    <source type=\"image/avif\" srcset=\"/images/phone-wide.avif\" />\n    <source type=\"image/webp\" srcset=\"/images/phone-wide.webp\" />\n    <img\n      src=\"/images/phone-wide.jpg\"\n      alt=\"Флагманский смартфон CyberPhone с титановым корпусом\"\n      width=\"1200\"\n      height=\"600\"\n      fetchpriority=\"high\"\n      decoding=\"async\"\n    />\n  </picture>\n\n  <div class=\"promo-content\">\n    <h2>CyberPhone Ultra 2026</h2>\n    <p>Непревзойденная производительность и OLED дисплей.</p>\n    <img src=\"/icons/sparkle.svg\" alt=\"\" aria-hidden=\"true\" class=\"deco-icon\" />\n  </div>\n\n  <div class=\"promo-video-wrap\">\n    <video\n      autoplay\n      muted\n      loop\n      playsinline\n      poster=\"/video/phone-poster.jpg\"\n      width=\"640\"\n      height=\"360\"\n    >\n      <source src=\"/video/phone-demo.webm\" type=\"video/webm\" />\n      <source src=\"/video/phone-demo.mp4\" type=\"video/mp4\" />\n    </video>\n  </div>\n</article>",
+        "explanation": "Разметка полностью оптимизирована: <picture> поддерживает AVIF/WebP и мобильный арт-дирекшн, видео безопасно запускается на iOS благодаря muted + playsinline, декоративные иконки скрыты от скринридеров."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h7-q1",
-          "question": "Зачем у тега <img> указываются атрибуты width и height?",
+          "id": "html7-q1",
+          "question": "Почему на всех тегах <img> критически важно явно указывать атрибуты width и height?",
           "options": [
-            "Только для красоты",
-            "Чтобы браузер заранее выделил место в Layout и предотвратил сдвиг верстки (CLS)",
-            "Это обязательно для загрузки файла",
-            "Для сжатия картинки на сервере"
+            "Чтобы картинка не скачивалась слишком долго",
+            "Браузер вычисляет соотношение сторон (Aspect Ratio) и сразу резервирует место в макете до загрузки файла, сводя сдвиг верстки (CLS) к нулю",
+            "Без них картинка не отобразится в браузере",
+            "Для подключения стилей CSS"
           ],
           "correctIndex": 1,
-          "explanation": "Атрибуты width и height задают соотношение сторон, предотвращая Layout Shift при загрузке."
+          "explanation": "Явные width и height позволяют браузеру моментально зарезервировать прямоугольную область точных пропорций, предотвращая скачки макета (CLS)."
         },
         {
-          "id": "h7-q2",
-          "question": "Какой формат графики является векторным и не теряет резкости при увеличении?",
+          "id": "html7-q2",
+          "question": "Какая комбинация атрибутов ОБЯЗАТЕЛЬНА для автозапуска фонового <video> на смартфонах iPhone (iOS) и Android?",
           "options": [
-            "JPEG",
-            "PNG",
-            "GIF",
-            "SVG"
+            "autoplay controls",
+            "autoplay muted loop playsinline",
+            "autoplay volume='0'",
+            "preload='auto' start='0'"
           ],
-          "correctIndex": 3,
-          "explanation": "SVG — это векторный формат на основе математических кривых XML."
+          "correctIndex": 1,
+          "explanation": "Мобильные браузеры блокируют автоплей со звуком (требуется muted), а iOS Safari без атрибута playsinline развернет видео на весь экран."
+        },
+        {
+          "id": "html7-q3",
+          "question": "Как правильно разметить чисто декоративное изображение (фоновый узор, разделитель), чтобы не мешать незрячим пользователям со скринридерами?",
+          "options": [
+            "Удалить атрибут alt полностью",
+            "Указать пустой атрибут alt='' (и опционально aria-hidden='true')",
+            "Написать alt='декорация'",
+            "Использовать тег <object>"
+          ],
+          "correctIndex": 1,
+          "explanation": "Пустой alt='' сообщает скринридеру, что изображение декоративное, и его нужно пропустить. Без атрибута alt скринридер зачитает вслух техническое имя файла."
+        },
+        {
+          "id": "html7-q4",
+          "question": "В чём заключается концепция Арт-дирекшн (Art Direction) при использовании тега <picture>?",
+          "options": [
+            "Автоматическое наложение водяного знака",
+            "Смена кадрирования, пропорций и композиции изображения под разные размеры экранов (например, широкий баннер 16:9 на десктопе и квадратный кроп 1:1 на мобилке)",
+            "Показ рекламы поверх картинки",
+            "Автоматическая цветокоррекция в CSS"
+          ],
+          "correctIndex": 1,
+          "explanation": "Арт-дирекшн через <source media='...'> позволяет отдавать разные кадрированные версии одного изображения, сохраняя фокус на главном объекте на узких мобильных экранах."
+        },
+        {
+          "id": "html7-q5",
+          "question": "Какой формат растровой графики обеспечивает наилучшее сжатие (на 50% легче JPEG) и поддерживает HDR и прозрачность?",
+          "options": [
+            "GIF",
+            "AVIF",
+            "BMP",
+            "TIFF"
+          ],
+          "correctIndex": 1,
+          "explanation": "Формат AVIF на базе видеокодека AV1 обеспечивает максимальную степень сжатия при превосходном качестве, поддержку альфа-канала и 10/12-битного HDR цвета."
         }
       ]
     }

@@ -1175,86 +1175,191 @@ export const jsLessons: Lesson[] = [
     "moduleId": "javascript",
     "level": 7,
     "title": "DOM и манипуляция элементами",
-    "subtitle": "QuerySelector, textContent, classList, createElement и append",
-    "description": "Управление страницей: поиск элементов через querySelector / querySelectorAll, чтение и запись textContent, управление классами classList.add/remove/toggle, создание узлов createElement.",
-    "estimatedMinutes": 40,
+    "subtitle": "querySelector, DocumentFragment, template, closest(), dataset и оптимизация Reflow/Repaint",
+    "description": "Освойте профессиональную работу с объектной моделью документа (DOM): поиск элементов через querySelector и closest(), массовую вставку узлов через DocumentFragment и <template>, управление classList и dataset, оптимизацию фаз рендеринга Reflow и Repaint.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "JavaScript",
-      "DOM",
-      "Elements",
-      "Manipulation"
+      "dom",
+      "queryselector",
+      "documentfragment",
+      "template",
+      "closest",
+      "reflow",
+      "repaint",
+      "classlist"
     ],
     "theory": {
-      "overview": "Document Object Model (DOM) — объектное представление HTML-страницы. С помощью JS можно на лету изменять текст, структуру и стили любых элементов без перезагрузки.",
+      "overview": "DOM (Document Object Model) — это программный мост между кодом на JavaScript и визуальным деревом HTML-документа. Любое интерактивное действие в вебе (добавление товара в корзину, открытие модального окна, рендеринг списка данных) происходит через манипуляции с узлами DOM.\n\nВ этом уроке мы разберём современные стандарты работы с DOM, изучим поиск предков через `element.closest()`, научимся безопасно и быстро рендерить тысячи элементов без лагов с помощью `DocumentFragment` и тега `<template>`, а также поймём, как браузер вычисляет геометрию (Reflow) и перерисовывает пиксели (Repaint).",
       "sections": [
         {
-          "title": "Поиск и изменение элементов",
-          "content": "- `document.querySelector('.card')`: находит **первый** элемент по CSS-селектору.\n- `document.querySelectorAll('.item')`: находит **все** элементы (NodeList).\n- `element.textContent = 'Текст'`: безопасная запись текста (защита от XSS!).\n- `element.classList.add('active')` / `remove()` / `toggle()`: управление классами.\n- `document.createElement('div')` + `parent.appendChild(elem)`: создание новых узлов.",
+          "title": "Дерево DOM и современные методы поиска: querySelector и closest()",
+          "content": "Браузер парсит HTML и строит дерево объектов Node:\n\n1. Поиск элементов:\n- `document.querySelector('css-селектор')` — возвращает ПЕРВЫЙ найденный элемент (или `null`, если элемент не найден).\n- `document.querySelectorAll('css-селектор')` — возвращает статический (не живой) список `NodeList`. Статический список безопасен при удалении/добавлении элементов в цикле.\n- Почему устарели `getElementsByClassName` и `getElementsByTagName`: они возвращают «живые» коллекции `HTMLCollection`, мутация которых во время цикла `for` приводит к бесконечным циклам и утечкам памяти!\n\n2. Навигация вверх по дереву: `element.closest('.card')`:\n- Ищет БЛИЖАЙШЕГО предка, соответствующего CSS-селектору, поднимаясь вверх от текущего элемента к корню документа.\n- Незаменим для делегирования событий (Event Delegation), когда клик произошел по вложенной иконке внутри кнопки `<button><svg>...</svg></button>`.\n\n3. Чтение и запись data-атрибутов: `element.dataset`:\n`<div data-user-id=\"42\" data-role=\"admin\">` -> в JS доступно как `element.dataset.userId` и `element.dataset.role` (автоматическая конвертация kebab-case в camelCase).",
+          "image": {
+            "src": "/images/lessons/js-dom-manipulation.svg",
+            "alt": "Манипуляция DOM: DocumentFragment, template, closest и Reflow/Repaint",
+            "caption": "DocumentFragment выполняет вставку за 1 Reflow, closest() находит предка для делегирования, а Composite ускоряет анимации на GPU"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Манипуляция DOM",
-            "code": "const card = document.querySelector('.card');\ncard.classList.toggle('active');\n\nconst newBadge = document.createElement('span');\nnewBadge.className = 'badge';\nnewBadge.textContent = 'Новинка';\ncard.appendChild(newBadge);",
-            "explanation": "Динамическое добавление бейджа в карточку."
+            "code": "// 1. Поиск элементов\nconst catalog = document.querySelector('#catalog-grid');\nconst cards = document.querySelectorAll('.product-card'); // NodeList\n\n// 2. Превращение NodeList в массив для использования методов массива:\nconst titles = [...cards].map((card) => card.querySelector('h3').textContent);\n\n// 3. Использование closest() при клике на дочерний элемент\ndocument.addEventListener('click', (e) => {\n  const deleteBtn = e.target.closest('.btn-delete');\n  if (deleteBtn) {\n    const card = deleteBtn.closest('.product-card');\n    const itemId = card.dataset.itemId;\n    console.log(`Удаление товара ID: ${itemId}`);\n    card.remove();\n  }\n});",
+            "title": "Поиск элементов, NodeList и делегирование с closest()",
+            "explanation": "closest('.btn-delete') безошибочно находит кнопку, даже если пользователь кликнул по иконке или тексту внутри неё. dataset.itemId извлекает значение атрибута data-item-id."
+          }
+        },
+        {
+          "title": "Создание и вставка узлов: createElement, append, insertAdjacentHTML",
+          "content": "Методы создания и добавления DOM-узлов:\n\n1. Создание элемента: `const el = document.createElement('div');`\n\n2. Современные методы вставки (коллекция DOM Living Standard):\n- `parent.append(...nodesOrStrings)` — вставляет элементы или строки в конец родителя.\n- `parent.prepend(...nodesOrStrings)` — вставляет в начало родителя.\n- `node.before(...nodesOrStrings)` — вставляет перед текущим элементом.\n- `node.after(...nodesOrStrings)` — вставляет после текущего элемента.\n- В отличие от устаревшего `parent.appendChild(node)`, метод `.append()` умеет принимать несколько аргументов сразу и вставлять обычные строки текста без ручного создания `createTextNode`!\n\n3. Быстрая вставка HTML-строки: `element.insertAdjacentHTML(position, htmlString)`:\n- `position`: `'beforebegin'` (перед элементом), `'afterbegin'` (внутрь в начало), `'beforeend'` (внутрь в конец), `'afterend'` (после элемента).\n- Работает значительно быстрее `innerHTML += ...`, так как НЕ пересоздает уже существующие узлы внутри родителя!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const list = document.querySelector('.todo-list');\n\n// 1. Создание элемента через createElement\nconst item = document.createElement('li');\nitem.className = 'todo-item is-new';\nitem.textContent = 'Изучить DocumentFragment';\n\nconst delBtn = document.createElement('button');\ndelBtn.textContent = '✕';\ndelBtn.onclick = () => item.remove(); // Удаление узла в 1 строку!\n\nitem.append(delBtn); // Вставка кнопки внутрь li\nlist.prepend(item);  // Добавление в самое начало списка\n\n// 2. Вставка HTML строки через insertAdjacentHTML\nlist.insertAdjacentHTML(\n  'beforeend',\n  `<li class=\"todo-item\"><span>Повторить CSS Grid</span></li>`\n);",
+            "title": "Создание узлов createElement, методы append/prepend и insertAdjacentHTML",
+            "explanation": "item.remove() удаляет элемент из DOM без родительских ссылок. append вставляет кнопку. insertAdjacentHTML вставляет строку без перезаписи существующих узлов."
+          }
+        },
+        {
+          "title": "Безопасность и массовый рендеринг: DocumentFragment и тег <template>",
+          "content": "При работе с большими объемами данных классический подход приводит к фатальным тормозам интерфейса:\n\n1. Опасность `container.innerHTML += '...'` в цикле:\nПри каждом выполнении `innerHTML += ...` браузер ПОЛНОСТЬЮ уничтожает всё существующее DOM-дерево родителя, парсит новую строку и строит DOM с нуля! При 100 итерациях сбрасываются фокус, выделение текста и состояние всех инпутов!\n\n2. `DocumentFragment` (Виртуальный фрагмент документа):\n- Легковесный временный контейнер, существующий только в оперативной памяти (в куче Heap).\n- Вы наполняете `fragment` тысячами элементов в цикле `fragment.append(el)`, а затем вставляете фрагмент в DOM ОДНИМ действием: `container.append(fragment)`.\n- Браузер выполняет ровно ОДИН Reflow/Repaint вместо тысячи!\n\n3. HTML5 тег `<template>`:\n- Разметка внутри `<template>` парсится браузером, но НЕ отображается на странице (инертна: картинки не качаются, скрипты не исполняются).\n- В JS вы клонируете содержимое шаблона: `const clone = template.content.cloneNode(true);` и заполняете данными.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Массовый рендеринг 1000 элементов без лагов через DocumentFragment:\nfunction renderUsersFast(users, container) {\n  const fragment = document.createDocumentFragment();\n  const template = document.getElementById('user-card-template');\n\n  users.forEach((user) => {\n    // Глубокое клонирование шаблона (cloneNode(true))\n    const card = template.content.cloneNode(true);\n    card.querySelector('.user-name').textContent = user.name;\n    card.querySelector('.user-role').textContent = user.role;\n    card.querySelector('.user-card').dataset.userId = user.id;\n\n    fragment.append(card); // Добавление в виртуальный фрагмент в памяти\n  });\n\n  container.append(fragment); // Ровно 1 Reflow на 1000 элементов!\n}",
+            "title": "Высокопроизводительный рендеринг через template и DocumentFragment",
+            "explanation": "Все 1000 клонов собираются в виртуальном DocumentFragment в оперативной памяти и вставляются в DOM за одну миллисекунду."
+          }
+        },
+        {
+          "title": "Оптимизация рендеринга: Reflow, Repaint, Composite и Layout Thrashing",
+          "content": "Как браузер выводит изменения на экран:\n\n1. **Reflow (Layout / Пересчет геометрии)** — самый тяжелый процесс:\n- Браузер вычисляет точные координаты и размеры каждого элемента на экране.\n- Вызывается изменением геометрических свойств: `width`, `height`, `margin`, `padding`, `top`, `left`, `fontSize`, `display`.\n\n2. **Repaint (Paint / Перерисовка пикселей)**:\n- Браузер заливает пиксели цветом без изменения геометрии блоков.\n- Вызывается свойствами: `color`, `background-color`, `visibility`, `box-shadow`, `border-color`.\n\n3. **Composite (Композиция слоев на GPU)** — самый быстрый процесс (60/120 FPS!):\n- Свойства `transform` (`translate`, `scale`, `rotate`) и `opacity` анимируются напрямую на видеокарте (GPU) БЕЗ вызова Reflow и Repaint!\n\n4. Опасность **Layout Thrashing** (Дребезг макета):\nВозникает, когда в цикле чередуются операции записи стилей и чтения свойств геометрии (`offsetHeight`, `offsetWidth`, `getBoundingClientRect()`):\n`for (...) { el.style.width = ...; console.log(el.offsetWidth); }`\nБраузер вынужден принудительно выполнять синхронный Reflow на КАЖДОЙ итерации цикла!\n✅ Решение: сначала прочитайте все размеры в переменные, а затем примените стили пакетно.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// ❌ Layout Thrashing (катастрофическое падение FPS):\n// elements.forEach(el => {\n//   const w = el.offsetWidth; // ЧТЕНИЕ (вызывает принудительный Reflow!)\n//   el.style.width = (w + 10) + 'px'; // ЗАПИСЬ\n// });\n\n// ✅ Пакетная оптимизация (Fast & Smooth):\nconst widths = elements.map((el) => el.offsetWidth); // 1. Чтение всех размеров разом\nelements.forEach((el, i) => {\n  el.style.width = widths[i] + 10 + 'px'; // 2. Пакетная запись стилей\n});",
+            "title": "Устранение Layout Thrashing пакетным разделением чтения и записи",
+            "explanation": "Разделение чтения и записи геометрии позволяет браузеру оптимизировать пересчет макета и выполнить Reflow один раз."
           }
         }
       ],
       "seniorTips": [
-        "Используйте `textContent` вместо `innerHTML`, если вы вставляете текст от пользователя. `innerHTML` уязвим для XSS-атак."
+        "Для массовой вставки элементов ВСЕГДА используйте `DocumentFragment` или массив строк с `insertAdjacentHTML`. Никогда не делайте `container.innerHTML += ...` в цикле.",
+        "Используйте метод `element.closest('.selector')` для поиска родительских карточек и интерактивных контейнеров при обработке кликов.",
+        "Избегайте Layout Thrashing: сгруппируйте все операции чтения свойств геометрии (`getBoundingClientRect`, `offsetHeight`) до операций записи стилей.",
+        "При клонировании `<template>` всегда передавайте аргумент `cloneNode(true)` для глубокого копирования всего дерева потомков шаблона."
       ],
       "commonMistakes": [
         {
-          "bad": "elem.innerHTML = userComment; /* Уязвимость XSS */",
-          "good": "elem.textContent = userComment;",
-          "reason": "innerHTML выполняет внедренные вредоносные теги <script>."
+          "bad": "// innerHTML += в цикле уничтожает DOM\nusers.forEach(u => {\n  container.innerHTML += `<div class='card'>${u.name}</div>`;\n});",
+          "good": "const frag = document.createDocumentFragment();\nusers.forEach(u => {\n  const d = document.createElement('div');\n  d.textContent = u.name;\n  frag.append(d);\n});\ncontainer.append(frag);",
+          "reason": "innerHTML += пересоздает все DOM-узлы родителя на каждой итерации, сбрасывая введенные данные в формах и подвешивая браузер."
+        },
+        {
+          "bad": "// Прямая модификация инлайн-стилей\nel.style.color = 'red';\nel.style.backgroundColor = '#000';",
+          "good": "el.classList.add('is-error');",
+          "reason": "Инлайн-стили имеют высокий приоритет специфичности, ломают CSS-каскад и загромождают разметку. Управляйте состояниями через classList."
+        },
+        {
+          "bad": "const list = document.querySelectorAll('.item');\nlist.map(el => el.textContent); // ❌ Ошибка: list.map is not a function",
+          "good": "const list = document.querySelectorAll('.item');\nconst texts = [...list].map(el => el.textContent); // ✅ Преобразовано в Array",
+          "reason": "querySelectorAll возвращает NodeList, который не является массивом и не имеет методов map, filter, reduce."
         }
       ],
       "keyTakeaways": [
-        "querySelector находит элемент по CSS-селектору.",
-        "classList.toggle переключает классы.",
-        "createElement создает новые узлы DOM."
+        "`querySelector` находит 1 узел, `querySelectorAll` возвращает статический `NodeList`, а `closest()` находит предка вверх по дереву.",
+        "`append()`, `prepend()`, `before()`, `after()` поддерживают вставку нескольких узлов и строк одновременно.",
+        "`DocumentFragment` и `<template>` позволяют рендерить тысячи элементов за 1 Reflow без лагов.",
+        "`Reflow` пересчитывает геометрию, `Repaint` перерисовывает цвета, `Composite` плавно анимирует `transform/opacity` на GPU.",
+        "Разделение операций чтения геометрии и записи стилей предотвращает Layout Thrashing."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div id=\"dom-card\" class=\"card-box\"><h4 id=\"dom-title\">Заголовок</h4><button id=\"btn-dom\">Изменить DOM</button></div>",
-      "initialCss": ".card-box { padding: 20px; background: white; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0; }\n.card-box.active { background: #ecfdf5; border-color: #10b981; }\n#btn-dom { margin-top: 10px; padding: 8px 16px; background: #4f46e5; color: white; border: none; border-radius: 6px; cursor: pointer; }",
-      "initialJs": "document.getElementById('btn-dom').addEventListener('click', () => {\n  const card = document.getElementById('dom-card');\n  const title = document.getElementById('dom-title');\n  card.classList.toggle('active');\n  title.textContent = card.classList.contains('active') ? 'Карточка активирована!' : 'Заголовок';\n});",
-      "instructions": "Нажмите «Изменить DOM» и проверьте переключение классов и текста."
+      "initialHtml": "<div id=\"dom-app\">\n  <h3>Интерактивный список задач</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <input id=\"todo-input\" placeholder=\"Новая задача...\" style=\"flex:1; padding:6px; background:#03060a; color:#2dff8a; border:1px solid #30363d; font-family:monospace;\" />\n    <button id=\"add-btn\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">Добавить</button>\n  </div>\n  <ul id=\"todo-list\" style=\"list-style:none; padding:0; margin:0;\"></ul>\n</div>",
+      "initialCss": "#dom-app {\n  font-family: monospace;\n  color: #e6edf3;\n  padding: 16px;\n  background: #0d1117;\n  border-radius: 8px;\n}\n.todo-row {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 8px;\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 4px;\n  margin-bottom: 6px;\n}\n.del-btn {\n  background: #f85149;\n  color: white;\n  border: none;\n  padding: 2px 8px;\n  border-radius: 4px;\n  cursor: pointer;\n}",
+      "initialJs": "const input = document.getElementById('todo-input');\nconst addBtn = document.getElementById('add-btn');\nconst list = document.getElementById('todo-list');\n\nfunction addTodo(text) {\n  if (!text.trim()) return;\n  const li = document.createElement('li');\n  li.className = 'todo-row';\n  \n  const span = document.createElement('span');\n  span.textContent = text;\n  \n  const btn = document.createElement('button');\n  btn.className = 'del-btn';\n  btn.textContent = '✕';\n  btn.onclick = () => li.remove();\n  \n  li.append(span, btn);\n  list.prepend(li);\n  input.value = '';\n}\n\naddBtn.onclick = () => addTodo(input.value);\ninput.onkeydown = (e) => { if (e.key === 'Enter') addTodo(input.value); };",
+      "instructions": "Практика с DOM:\n1. Добавьте несколько задач и удалите одну из них кнопкой ✕\n2. Перепишите добавление с использованием DocumentFragment для пакетной вставки 5 задач сразу\n3. Добавьте переключение класса .completed по клику на текст задачи"
     },
     "task": {
-      "title": "Динамическое добавление элемента",
-      "scenario": "Создайте параграф с классом .notice и текстом «Успешно», добавьте его в конец контейнера.",
+      "title": "Разработка высокопроизводительного менеджера карточек на DocumentFragment и template",
+      "scenario": "Вам необходимо разработать модуль рендеринга каталога товаров: модуль должен принимать массив данных, использовать тег <template id='product-tpl'>, собирать элементы в DocumentFragment, поддерживать делегирование событий клика через closest() и безопасно экранировать данные через textContent.",
       "criteria": [
-        "Использован createElement",
-        "Задан класс и textContent",
-        "Элемент добавлен через appendChild"
+        "Функция renderProducts(items, container) использует DocumentFragment для единой вставки в DOM",
+        "Клонирование шаблона выполняется через template.content.cloneNode(true)",
+        "Текстовые поля заполняются безопасно через textContent (защита от XSS)",
+        "Идентификаторы товаров сохраняются в dataset.productId",
+        "Обработка кнопок 'Купить' и 'Удалить' реализована через единый слушатель с closest()"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "html": "<template id=\"product-tpl\">\n  <div class=\"item-card\">\n    <h4 class=\"item-title\"></h4>\n    <span class=\"item-price\"></span>\n    <button class=\"btn-buy\">Купить</button>\n    <button class=\"btn-del\">✕</button>\n  </div>\n</template>\n<div id=\"catalog-container\"></div>",
+        "js": "// Реализуйте функцию рендеринга\nfunction renderProducts(items, container) {\n  // Ваш код\n}"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "Используйте const frag = document.createDocumentFragment();",
+        "Клонируйте: const clone = template.content.cloneNode(true);",
+        "В обработчике клика: const buyBtn = e.target.closest('.btn-buy');"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const p = document.createElement('p');\np.className = 'notice';\np.textContent = 'Успешно!';\ndocument.body.appendChild(p);",
-        "explanation": "Динамическое создание и вставка узла в DOM."
+        "js": "function renderProducts(items = [], container) {\n  if (!container) return;\n  const template = document.getElementById('product-tpl');\n  const fragment = document.createDocumentFragment();\n\n  items.forEach((item) => {\n    const node = template.content.cloneNode(true);\n    const card = node.querySelector('.item-card');\n    card.dataset.productId = item.id;\n    \n    node.querySelector('.item-title').textContent = item.title;\n    node.querySelector('.item-price').textContent = `${item.price} ₽`;\n    \n    fragment.append(node);\n  });\n\n  container.innerHTML = ''; // Очистка\n  container.append(fragment); // 1 Reflow!\n}\n\n// Делегирование событий на контейнере\ndocument.getElementById('catalog-container').addEventListener('click', (e) => {\n  const card = e.target.closest('.item-card');\n  if (!card) return;\n  const id = card.dataset.productId;\n\n  if (e.target.closest('.btn-buy')) {\n    console.log(`Товар ${id} добавлен в корзину`);\n  } else if (e.target.closest('.btn-del')) {\n    card.remove();\n  }\n});",
+        "explanation": "Модуль рендерит карточки через DocumentFragment за 1 пересчет макета, использует template с глубоким клонированием, защищен от XSS через textContent и управляет кликами через делегирование с closest()."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j7-q1",
-          "question": "Какое свойство безопасно вставляет текст без риска XSS-атак?",
+          "id": "js7-q1",
+          "question": "В чём главное преимущество использования DocumentFragment при вставке большого количества элементов в DOM?",
           "options": [
-            "innerHTML",
-            "textContent",
-            "outerHTML",
-            "document.write"
+            "DocumentFragment автоматически переводит текст на русский язык",
+            "DocumentFragment собирает элементы в виртуальной памяти и вызывает ровно ОДИН Reflow/Repaint браузера при вставке в DOM вместо сотен перерисовок",
+            "DocumentFragment шифрует элементы",
+            "Разницы в производительности нет"
           ],
           "correctIndex": 1,
-          "explanation": "textContent безопасно экранирует спецсимволы и защищает от XSS."
+          "explanation": "DocumentFragment не является частью активного DOM-дерева. Все операции по добавлению потомков происходят в оперативной памяти, а финальная вставка вызывает единственный пересчет макета."
+        },
+        {
+          "id": "js7-q2",
+          "question": "Что делает метод element.closest('.card')?",
+          "options": [
+            "Ищет ближайший дочерний элемент",
+            "Ищет ближайшего предка вверх по дереву DOM (включая сам элемент), соответствующего CSS-селектору, или возвращает null",
+            "Закрывает модальное окно",
+            "Удаляет элемент из DOM"
+          ],
+          "correctIndex": 1,
+          "explanation": "closest() поднимается вверх по цепочке родителей от текущего элемента и возвращает первого предка с указанным селектором (основа делегирования событий)."
+        },
+        {
+          "id": "js7-q3",
+          "question": "Почему свойство transform анимируется плавнее (60/120 FPS), чем свойство left или margin-left?",
+          "options": [
+            "Свойство transform выполняет JavaScript код",
+            "transform обрабатывается на видеокарте (GPU) в фазе Composite, не вызывая тяжелых фаз Reflow (пересчета геометрии) и Repaint",
+            "Свойство left запрещено стандартом W3C",
+            "Они анимируются одинаково"
+          ],
+          "correctIndex": 1,
+          "explanation": "Изменение left/top/margin вызывает Reflow всего документа на CPU. Свойство transform создает отдельный слой на GPU (Composite) и рендерится с максимальной плавностью без нагрузки на главный поток."
+        },
+        {
+          "id": "js7-q4",
+          "question": "Какое поведение обеспечивает тег <template> в HTML5?",
+          "options": [
+            "Отображает серый прямоугольник",
+            "Содержит разметку, которая парсится браузером, но не отображается на странице (инертна) и предназначена для клонирования через template.content.cloneNode(true)",
+            "Автоматически отправляет форму",
+            "Запрещает редактирование DOM"
+          ],
+          "correctIndex": 1,
+          "explanation": "Содержимое тега <template> невидимо и не активно (картинки внутри не загружаются), пока вы явно не клонируете его в JavaScript с помощью cloneNode(true)."
+        },
+        {
+          "id": "js7-q5",
+          "question": "Что такое Layout Thrashing (дребезг макета) в JavaScript?",
+          "options": [
+            "Удаление стилей из CSS",
+            "Антипаттерн чередования операций чтения свойств геометрии (offsetHeight, getBoundingClientRect) и записи стилей в цикле, вынуждающий браузер выполнять синхронный Reflow на каждой итерации",
+            "Ошибка парсинга JSON",
+            "Анимация без использования requestAnimationFrame"
+          ],
+          "correctIndex": 1,
+          "explanation": "Когда JS в цикле меняет стиль, а затем сразу запрашивает offsetHeight, браузер не может отложить пересчет и вынужден мгновенно выполнять тяжелый синхронный Reflow, что приводит к зависанию страницы."
         }
       ]
     }

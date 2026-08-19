@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgh7" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgh7)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">HTML: Адаптивная графика и Мультимедиа</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">Тег &lt;picture&gt;, srcset, sizes, форматы AVIF/WebP и видео &lt;video&gt;</text>
+
+  <!-- Picture Tag Architecture -->
+  <rect x="20" y="65" width="460" height="260" rx="8" fill="none" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="250" y="85" fill="#29e7ff" font-size="12" font-weight="600" text-anchor="middle">Анатомия тега &lt;picture&gt; (Форматы + Арт-дирекшн)</text>
+  
+  <rect x="35" y="98" width="430" height="42" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="45" y="114" fill="#2dff8a" font-size="9" font-weight="600">&lt;source type="image/avif" srcset="hero.avif" /&gt;</text>
+  <text x="45" y="128" fill="#8b949e" font-size="8">1. AVIF: Самое современное сжатие (на 50% легче JPEG)</text>
+
+  <rect x="35" y="148" width="430" height="42" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="45" y="164" fill="#ffb02e" font-size="9" font-weight="600">&lt;source type="image/webp" srcset="hero.webp" /&gt;</text>
+  <text x="45" y="178" fill="#8b949e" font-size="8">2. WebP: Универсальный формат (поддержка 98%+)</text>
+
+  <rect x="35" y="198" width="430" height="42" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="45" y="214" fill="#e6edf3" font-size="9" font-weight="600">&lt;source media="(max-width: 600px)" srcset="hero-mobile.jpg" /&gt;</text>
+  <text x="45" y="228" fill="#8b949e" font-size="8">3. Art Direction: квадратный кроп для узких экранов</text>
+
+  <rect x="35" y="248" width="430" height="65" rx="4" fill="#0d1117" stroke="#f85149"/>
+  <text x="45" y="264" fill="#f85149" font-size="9" font-weight="600">&lt;img src="hero.jpg" alt="..." width="1200" height="600" /&gt;</text>
+  <text x="45" y="278" fill="#e6edf3" font-size="8">4. Обязательный fallback &lt;img&gt; с размерами (CLS защита)</text>
+  <text x="45" y="292" fill="#2dff8a" font-size="7">fetchpriority="high" (для LCP) | loading="lazy" (для нижних)</text>
+
+  <!-- Right: Video & Performance -->
+  <rect x="500" y="65" width="280" height="260" rx="8" fill="none" stroke="#ffb02e" stroke-width="1.5"/>
+  <text x="640" y="85" fill="#ffb02e" font-size="12" font-weight="600" text-anchor="middle">Видео &lt;video&gt; на мобилках</text>
+  
+  <rect x="515" y="98" width="250" height="135" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="525" y="116" fill="#29e7ff" font-size="9" font-weight="600">&lt;video</text>
+  <text x="540" y="132" fill="#2dff8a" font-size="8">autoplay</text><text x="595" y="132" fill="#8b949e" font-size="8">// автозапуск</text>
+  <text x="540" y="148" fill="#2dff8a" font-size="8">muted</text><text x="580" y="148" fill="#f85149" font-size="8">⚠️ ОБЯЗАТЕЛЕН для автоплея!</text>
+  <text x="540" y="164" fill="#2dff8a" font-size="8">playsinline</text><text x="615" y="164" fill="#8b949e" font-size="8">// без фуллскрина iOS</text>
+  <text x="540" y="180" fill="#2dff8a" font-size="8">loop</text><text x="575" y="180" fill="#8b949e" font-size="8">// зацикливание</text>
+  <text x="540" y="196" fill="#2dff8a" font-size="8">poster="thumb.jpg"</text><text x="660" y="196" fill="#8b949e" font-size="8">// заставка</text>
+  <text x="525" y="214" fill="#29e7ff" font-size="9" font-weight="600">&gt;&lt;/video&gt;</text>
+
+  <rect x="515" y="242" width="250" height="70" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="640" y="260" fill="#ffb02e" font-size="9" font-weight="600" text-anchor="middle">Правила alt для доступности</text>
+  <text x="640" y="276" fill="#e6edf3" font-size="8" text-anchor="middle">• Смысловое фото: подробное описание</text>
+  <text x="640" y="290" fill="#2dff8a" font-size="8" text-anchor="middle">• Декоративная иконка: alt="" (пустой!)</text>
+  <text x="640" y="302" fill="#f85149" font-size="7" text-anchor="middle">❌ Без alt скринридер читает имя файла</text>
+
+  <!-- Bottom: srcset & sizes summary -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Формула srcset &amp; sizes для адаптивной сетки</text>
+  <text x="400" y="375" fill="#29e7ff" font-size="9" text-anchor="middle">srcset="card-400.jpg 400w, card-800.jpg 800w, card-1200.jpg 1200w"</text>
+  <text x="400" y="392" fill="#ffb02e" font-size="9" text-anchor="middle">sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"</text>
+  <text x="400" y="410" fill="#8b949e" font-size="8" text-anchor="middle">Браузер умножает ширину слота на Device Pixel Ratio (DPR 2x/3x) и выбирает идеальный по весу файл!</text>
+</svg>

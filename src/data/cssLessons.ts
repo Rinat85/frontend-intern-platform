@@ -1182,83 +1182,191 @@ export const cssLessons: Lesson[] = [
     "moduleId": "css",
     "level": 7,
     "title": "Цвета и фоны в CSS",
-    "subtitle": "HEX, RGB, HSL, градиенты и background-size",
-    "description": "Цветовые модели: HEX, RGB, HSL, прозрачность альфа-канала, linear-gradient, radial-gradient, background-size cover/contain.",
-    "estimatedMinutes": 30,
+    "subtitle": "RGB, HSL, революция OKLCH, градиенты, background-size, multiple backgrounds и color-scheme",
+    "description": "Освойте профессиональную работу с цветом и фонами: современные цветовые пространства (RGB Color 4, HSL, перцептивно-равномерный OKLCH с поддержкой Wide Gamut P3), сложные линейные, радиальные и конические градиенты, градиентный текст и системную тёмную тему color-scheme: dark.",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "CSS",
-      "Colors",
-      "Gradients"
+      "colors",
+      "oklch",
+      "hsl",
+      "rgb",
+      "gradients",
+      "backgrounds",
+      "color-scheme",
+      "dark-mode"
     ],
     "theory": {
-      "overview": "Цвет и фоны создают визуальную глубину интерфейса.",
+      "overview": "Цвет и фон — главные выразительные средства веб-дизайна, формирующие настроение, контрастность и визуальную глубину интерфейса.\n\nВ современном CSS произошла революция цветовых пространств: на смену классическим HEX и RGB пришел перцептивно-равномерный стандарт **OKLCH**, позволяющий отображать ультрасочные цвета широкого охвата Display P3 на современных OLED и Retina экранах. В этом уроке мы научимся строить палитры дизайн-систем на HSL и OKLCH, создавать сложные многослойные градиенты, градиентный текст и настраивать нативную тёмную тему через `color-scheme: dark`.",
       "sections": [
         {
-          "title": "Цветовые модели и градиенты",
-          "content": "- `HEX`: `#4f46e5`, `RGB`: `rgba(79, 70, 229, 0.9)`.\n- `HSL`: `hsl(245, 75%, 59%)` (Hue, Saturation, Lightness).\n- `linear-gradient(135deg, #6366f1, #a855f7)`.",
+          "title": "Цветовые пространства: HEX, RGB, HSL и революция OKLCH",
+          "content": "Эволюция представления цвета в CSS:\n\n1. HEX и RGB (sRGB пространство):\n- Шестнадцатеричный формат: `#2dff8a` или `#0a0e13ee` (8 знаков, последние 2 — альфа-канал прозрачности).\n- Современный синтаксис CSS Color Module 4: `rgb(45 255 138 / 0.8)` (без запятых, прозрачность через слеш `/`).\n\n2. HSL (Hue, Saturation, Lightness):\n- `hsl(146 100% 59% / 0.9)` — интуитивно понятное пространство для разработчиков:\n  • `Hue` (Оттенок): угол на цветовом круге от 0° до 360° (0 = красный, 120 = зеленый, 240 = синий).\n  • `Saturation` (Насыщенность): от 0% (серый) до 100% (чистый цвет).\n  • `Lightness` (Светлота): от 0% (черный) до 50% (чистый оттенок) и 100% (белый).\n- Идеален для дизайн-систем: изменение одной переменной `--h: 210` мгновенно меняет весь акцентный цвет бренда!\n\n3. OKLCH — Революция в CSS (Стандарт 2024–2026 гг.):\n- Синтаксис: `oklch(0.85 0.22 142 / 0.9)` — `L` (Lightness: 0-1), `C` (Chroma: насыщенность), `H` (Hue: 0-360).\n- **Перцептивная равномерность (Perceptually Uniform)**: В HSL чистый жёлтый цвет кажется глазу в 3 раза ярче чистого синего при одинаковом `L: 50%`. В OKLCH одинаковая светлота `L: 0.7` воспринимается человеческим глазом абсолютно одинаково для любого оттенка!\n- **P3 Wide Color Gamut**: OKLCH умеет выводить сочные неоновые оттенки, недоступные в старом sRGB.",
+          "image": {
+            "src": "/images/lessons/css-colors-backgrounds.svg",
+            "alt": "Цветовые пространства в CSS: RGB, HSL, OKLCH и градиенты",
+            "caption": "OKLCH обеспечивает перцептивную равномерность и охват Display P3, HSL идеален для палитр, а color-scheme окрашивает нативные скроллбары"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Градиент",
-            "code": ".hero { background: linear-gradient(135deg, #4f46e5, #06b6d4); color: white; padding: 40px; border-radius: 12px; }",
-            "explanation": "Линейный градиент."
+            "code": "/* Генерация палитры кнопок через CSS-переменные HSL */\n:root {\n  --primary-h: 146; /* Зеленый неоновый оттенок */\n  --primary-s: 100%;\n  --primary-l: 59%;\n  \n  --color-btn: hsl(var(--primary-h) var(--primary-s) var(--primary-l));\n  --color-btn-hover: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) + 8%));\n  --color-btn-active: hsl(var(--primary-h) var(--primary-s) calc(var(--primary-l) - 10%));\n  \n  /* Сверхсочный неоновый акцент в пространстве OKLCH */\n  --neon-cyan: oklch(0.88 0.24 200);\n  --neon-pink: oklch(0.72 0.28 340);\n}",
+            "title": "Построение палитры состояний через HSL и OKLCH",
+            "explanation": "Математика HSL и OKLCH позволяет динамически вычислять цвета hover и active состояний простым сложением светлоты без ручного подбора HEX-кодов."
+          }
+        },
+        {
+          "title": "Градиенты: linear, radial, conic и градиентный текст",
+          "content": "Градиенты в CSS являются генерируемыми изображениями (`<gradient>`), применяемыми в свойстве `background`:\n\n1. Линейный градиент (`linear-gradient`):\n- Направление: угол в градусах (`135deg`, `45deg`) или ключевые слова (`to right`, `to bottom right`).\n- Точки остановки (Color Stops): `linear-gradient(90deg, #2dff8a 0%, #29e7ff 50%, #ff2bd6 100%)`.\n\n2. Радиальный градиент (`radial-gradient`):\n- Распространяется кругом или эллипсом из центра: `radial-gradient(circle at center, #29e7ff 0%, transparent 70%)`.\n- Незаменим для создания эффекта неонового свечения (Glow Effect) вокруг кнопок и карточек.\n\n3. Конический градиент (`conic-gradient`):\n- Цвета вращаются вокруг центральной точки (как стрелка часов).\n- Идеален для круговых диаграмм (Pie Charts), неоновых анимированных рамок и радужных индикаторов загрузки.\n\n4. Эффект градиентного текста (Gradient Text):\nСвязка свойств: `background: linear-gradient(90deg, #2dff8a, #29e7ff); -webkit-background-clip: text; color: transparent;` окрашивает сам текст в цвета градиента!",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Эффектный градиентный заголовок */\n.neon-gradient-title {\n  font-size: 2.5rem;\n  font-weight: 800;\n  background: linear-gradient(135deg, #2dff8a 0%, #29e7ff 50%, #ff2bd6 100%);\n  -webkit-background-clip: text;\n  background-clip: text;\n  color: transparent; /* Делаем текст прозрачным, открывая градиент */\n}\n\n/* 2. Конический градиент для неонового бейджа */\n.radar-badge {\n  width: 80px;\n  height: 80px;\n  border-radius: 50%;\n  background: conic-gradient(from 0deg, #2dff8a, #29e7ff, transparent 80%);\n}",
+            "title": "Градиентный текст и конический градиент conic-gradient",
+            "explanation": "background-clip: text обрезает градиентный фон строго по контуру букв, создавая стильный неоновый заголовок."
+          }
+        },
+        {
+          "title": "Управление фоновыми изображениями: cover, contain, multiple backgrounds",
+          "content": "Свойства семейства `background` определяют геометрию отрисовки фонов:\n\n1. `background-size`:\n- `cover` — масштабирует изображение так, чтобы оно ПОЛНОСТЬЮ закрыло всю площадь контейнера (лишнее обрезается). Идеально для фоновых баннеров.\n- `contain` — масштабирует изображение так, чтобы оно ПОЛНОСТЬЮ поместилось внутри контейнера без обрезки.\n\n2. `background-position`:\nВыравнивание фона: `center`, `top right`, `50% 20%`.\n\n3. Множественные фоны (Multiple Backgrounds):\nСвойство `background` принимает список слоев через запятую. Первый слой рисуется ПОВЕРХ остальных!\n`background: radial-gradient(...) , url('/grid.svg') , #0a0e13;`.\n\n4. `background-attachment: fixed` — фиксирует фон относительно экрана при скролле (параллакс-эффект).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Многослойный киберпанк-фон карточки */\n.cyber-card {\n  background:\n    /* Слой 1: Радиальное неоновое пятно в правом верхнем углу */\n    radial-gradient(circle at top right, rgba(41, 231, 255, 0.2) 0%, transparent 60%),\n    /* Слой 2: Векторная сетка */\n    url('/images/cyber-grid.svg') repeat center / 40px 40px,\n    /* Слой 3: Базовый цвет подложки */\n    #0a0e13;\n  border: 1px solid #30363d;\n  border-radius: 12px;\n  padding: 24px;\n}",
+            "title": "Комбинация множественных фонов: градиент + сетка + цвет",
+            "explanation": "Три слоя фона накладываются друг на друга, создавая глубокую трехмерную киберпанк-текстуру."
+          }
+        },
+        {
+          "title": "Тёмная тема и системный режим: color-scheme и prefers-color-scheme",
+          "content": "Управление темами оформления в современном CSS:\n\n1. Свойство `color-scheme: dark;`:\nСообщает браузеру, что страница оптимизирована под тёмный режим. Браузер АВТОМАТИЧЕСКИ окрашивает нативные системные скроллбары, форму ввода текста, чекбоксы и селекты в темные тона без сложных кастомных стилей!\n\n2. Медиа-запрос `@media (prefers-color-scheme: dark)`:\nОпределяет системную тему операционной системы пользователя (Windows / macOS / iOS / Android) и автоматически применяет темные CSS-переменные.\n\n3. Переключение тем через `data-theme=\"dark\"`:\nСтандартный подход в SPA: класс или атрибут на теге `<html>`, управляемый через JS, с сохранением в `localStorage`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Базовая конфигурация цветовой схемы */\n:root {\n  color-scheme: dark light; /* Поддержка обеих тем */\n  \n  /* Светлая тема по умолчанию */\n  --bg: #ffffff;\n  --fg: #0a0e13;\n  --card-bg: #f6f8fa;\n}\n\n/* Автоматическая адаптация под темную тему ОС */\n@media (prefers-color-scheme: dark) {\n  :root {\n    --bg: #0a0e13;\n    --fg: #e6edf3;\n    --card-bg: #161b22;\n  }\n}\n\n/* Принудительное переключение через data-theme */\n[data-theme=\"dark\"] {\n  --bg: #0a0e13;\n  --fg: #e6edf3;\n  --card-bg: #161b22;\n}",
+            "title": "Настройка системной и принудительной тёмной темы",
+            "explanation": "color-scheme окрашивает системные контролы, а prefers-color-scheme синхронизирует палитру с операционной системой."
           }
         }
       ],
       "seniorTips": [
-        "Используйте HSL для создания гармоничных оттенков."
+        "Используйте цветовое пространство `oklch()` или `hsl()` в CSS-переменных — это позволяет генерировать палитры состояний (:hover, :active, :disabled) простым изменением светлоты `L` без ручного подбора десятков HEX-кодов.",
+        "Добавляйте `color-scheme: dark;` в `:root` при создании тёмных тем — это автоматически делает нативные системные скроллбары браузера и элементы ввода тёмными.",
+        "Для создания градиентного текста используйте связку: `background: linear-gradient(...); -webkit-background-clip: text; color: transparent;`.",
+        "При установке фонового изображения всегда задавайте фоновый цвет `background-color: #0a0e13;` схожего оттенка, чтобы текст оставался читаемым до загрузки тяжелой картинки."
       ],
       "commonMistakes": [
         {
-          "bad": "background: red;",
-          "good": "background: #ef4444;",
-          "reason": "Чистые спектральные цвета режут глаз."
+          "bad": "/* Использование чистого #000000 для темного фона и #ffffff для текста */\nbody { background: #000000; color: #ffffff; }",
+          "good": "body { background: #0a0e13; color: #e6edf3; }",
+          "reason": "Максимальный контраст 100% черного и 100% белого вызывает сильное зрительное утомление (эффект гало). Профессиональный UI использует мягкие темные оттенки."
+        },
+        {
+          "bad": "/* Градиентный текст без прозрачного цвета */\n.title { background: linear-gradient(90deg, red, blue); -webkit-background-clip: text; }",
+          "good": ".title { background: linear-gradient(90deg, red, blue); -webkit-background-clip: text; color: transparent; }",
+          "reason": "Без color: transparent собственный сплошной цвет текста перекрывает вырезанный градиентный фон."
+        },
+        {
+          "bad": "/* Забыли background-size: cover */\n.banner { background: url('/bg.jpg') no-repeat; }",
+          "good": ".banner { background: #0a0e13 url('/bg.jpg') no-repeat center / cover; }",
+          "reason": "Без cover картинка не растянется на всю площадь контейнера на больших экранах, оставив пустые поля."
         }
       ],
       "keyTakeaways": [
-        "HSL интуитивен для оттенков.",
-        "linear-gradient создает плавные переходы."
+        "OKLCH — самое передовое перцептивно-равномерное цветовое пространство с охватом Display P3.",
+        "HSL идеален для алгоритмической генерации палитр дизайн-систем через CSS-переменные.",
+        "Градиентный текст создается через `-webkit-background-clip: text; color: transparent;`.",
+        "Множественные фоны позволяют комбинировать градиентные пятна, векторные сетки и базовые цвета.",
+        "`color-scheme: dark` автоматически переключает оформление нативных скроллбаров и контролов формы в тёмный цвет."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"color-demo\"><h3>Градиент</h3></div>",
-      "initialCss": ".color-demo { padding: 30px; background: linear-gradient(135deg, #4f46e5, #9333ea); color: white; border-radius: 12px; text-align: center; }",
-      "initialJs": "console.log('Colors loaded');",
-      "instructions": "Измените угол градиента."
+      "initialHtml": "<div class=\"color-playground\">\n  <h1 class=\"grad-text\">Неоновый Киберпанк</h1>\n  <div class=\"glow-card\">\n    <p>Карточка с OKLCH цветами и радиальным свечением.</p>\n    <button class=\"glow-btn\">OKLCH Action</button>\n  </div>\n</div>",
+      "initialCss": ".color-playground {\n  padding: 24px;\n  background: #0a0e13;\n  color: #e6edf3;\n  font-family: monospace;\n  color-scheme: dark;\n}\n.grad-text {\n  font-size: 2rem;\n  font-weight: 800;\n  background: linear-gradient(135deg, oklch(0.85 0.22 142) 0%, oklch(0.88 0.24 200) 100%);\n  -webkit-background-clip: text;\n  color: transparent;\n  margin-bottom: 16px;\n}\n.glow-card {\n  background: radial-gradient(circle at top right, rgba(45, 255, 138, 0.15), transparent 70%), #161b22;\n  border: 1px solid #30363d;\n  border-radius: 10px;\n  padding: 20px;\n}\n.glow-btn {\n  background: oklch(0.85 0.22 142);\n  color: #0a0e13;\n  font-weight: bold;\n  border: none;\n  padding: 8px 16px;\n  border-radius: 6px;\n  cursor: pointer;\n  box-shadow: 0 0 15px rgba(45, 255, 138, 0.4);\n}",
+      "initialJs": "console.log('Песочница цветов активна');",
+      "instructions": "Практика с цветом и фонами:\n1. Измените угол линейного градиента текста на 45deg\n2. Попробуйте настроить конический градиент для обводки карточки\n3. Поэкспериментируйте со значениями светлоты L и хромы C в oklch()"
     },
     "task": {
-      "title": "Градиентный баннер",
-      "scenario": "Оформите баннер с градиентом и белым текстом.",
+      "title": "Создание неоновой киберпанк-карточки с OKLCH, градиентным текстом и свечением",
+      "scenario": "Вам необходимо сверстать карточку тарифа для Web3/Cyberpunk платформы: заголовок должен быть оформлен градиентным текстом, фон карточки должен комбинировать радиальное неоновое свечение и темную подложку, акцентная кнопка должна использовать цвет в пространстве OKLCH, а в корне должна быть включена поддержка color-scheme: dark.",
       "criteria": [
-        "Задан linear-gradient",
-        "Цвет текста белый"
+        "Задано свойство color-scheme: dark на корневом элементе",
+        "Заголовок карточки оформлен градиентным текстом через background-clip: text и color: transparent",
+        "Фон карточки использует многослойный фон с радиальным градиентом radial-gradient",
+        "Акцентные элементы используют цветовое пространство oklch()",
+        "Кнопка имеет неоновое свечение через box-shadow с альфа-каналом",
+        "Использованы переменные дизайн-системы для управления цветом"
       ],
       "starterCode": {
-        "html": "<div class=\"banner\"><h2>Акция</h2></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили неоновой карточки */\n.cyber-pricing-card {\n}\n.card-title {\n}\n.btn-buy {\n}"
       },
       "hints": [
-        "Задайте background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 24px; border-radius: 8px;"
+        "Для градиентного текста: background: linear-gradient(...); -webkit-background-clip: text; color: transparent;",
+        "Используйте background: radial-gradient(circle at top right, ...), #161b22;",
+        "Задайте цвет кнопки: background: oklch(0.85 0.22 142);"
       ],
       "solution": {
-        "html": "<div class=\"banner\"><h2>Акция</h2></div>",
-        "css": ".banner { padding: 30px; background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; border-radius: 12px; text-align: center; }",
-        "explanation": "Яркий баннер."
+        "css": ":root {\n  color-scheme: dark;\n  --neon-green: oklch(0.85 0.22 142);\n  --neon-cyan: oklch(0.88 0.24 200);\n  --bg-dark: #0a0e13;\n}\n\n.cyber-pricing-card {\n  width: 320px;\n  padding: 24px;\n  border-radius: 12px;\n  border: 1px solid rgba(45, 255, 138, 0.3);\n  background:\n    radial-gradient(circle at top right, rgba(41, 231, 255, 0.2) 0%, transparent 65%),\n    #161b22;\n  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);\n  color: #e6edf3;\n}\n\n.card-title {\n  font-size: 1.75rem;\n  font-weight: 800;\n  background: linear-gradient(135deg, var(--neon-green), var(--neon-cyan));\n  -webkit-background-clip: text;\n  background-clip: text;\n  color: transparent;\n  margin-bottom: 12px;\n}\n\n.btn-buy {\n  width: 100%;\n  padding: 10px;\n  background: var(--neon-green);\n  color: #0a0e13;\n  font-weight: 800;\n  border: none;\n  border-radius: 6px;\n  cursor: pointer;\n  box-shadow: 0 0 20px rgba(45, 255, 138, 0.35);\n  transition: box-shadow 0.2s ease, transform 0.2s ease;\n}\n\n.btn-buy:hover {\n  box-shadow: 0 0 30px rgba(45, 255, 138, 0.6);\n  transform: translateY(-2px);\n}",
+        "explanation": "Стилистика использует современный стек CSS: перцептивные OKLCH переменные, двухслойный фон с радиальным свечением, градиентный текст и неоновые тени."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c7-q1",
-          "question": "Что означает H в модели HSL?",
+          "id": "css7-q1",
+          "question": "В чём заключается фундаментальное преимущество цветового пространства OKLCH перед классическим HSL?",
           "options": [
-            "Height",
-            "Hue (Цветовой тон 0-360)",
-            "Hex",
-            "Hardness"
+            "OKLCH поддерживает меньше цветов для экономии памяти",
+            "OKLCH перцептивно-равномерен (одинаковая светлота L действительно воспринимается глазом одинаково для любых оттенков) и поддерживает широкий цветовой охват Display P3",
+            "OKLCH работает только в Photoshop",
+            "OKLCH не поддерживает прозрачность"
           ],
           "correctIndex": 1,
-          "explanation": "Hue — цветовой тон."
+          "explanation": "В HSL жёлтый цвет при Lightness: 50% кажется гораздо ярче синего при 50%. В OKLCH светлота L перцептивно выверена с учетом восприятия человеческого глаза, плюс поддерживается Wide Gamut P3."
+        },
+        {
+          "id": "css7-q2",
+          "question": "Какая связка CSS-свойств необходима для создания градиентного текста?",
+          "options": [
+            "color: gradient(red, blue);",
+            "background: linear-gradient(...); -webkit-background-clip: text; color: transparent;",
+            "text-fill: linear-gradient(...);",
+            "filter: hue-rotate(90deg);"
+          ],
+          "correctIndex": 1,
+          "explanation": "Градиент задается свойством background, свойство -webkit-background-clip: text вырезает фон по контуру букв, а color: transparent делает заливку текста прозрачной."
+        },
+        {
+          "id": "css7-q3",
+          "question": "Что делает свойство color-scheme: dark; в CSS?",
+          "options": [
+            "Перекрашивает все картинки в черно-белый цвет",
+            "Сообщает браузеру, что страница тёмная, и автоматически окрашивает нативные системные скроллбары, поля ввода и контролы формы в тёмный стиль",
+            "Инвертирует все цвета на странице",
+            "Удаляет тени у кнопок"
+          ],
+          "correctIndex": 1,
+          "explanation": "color-scheme: dark нативно включает тёмное оформление для элементов операционной системы (скроллбары, date-picker, селекты, чекбоксы)."
+        },
+        {
+          "id": "css7-q4",
+          "question": "Какой градиент в CSS используется для круговых диаграмм, спиннеров загрузки и вращающихся рамок?",
+          "options": [
+            "linear-gradient()",
+            "radial-gradient()",
+            "conic-gradient()",
+            "mesh-gradient()"
+          ],
+          "correctIndex": 2,
+          "explanation": "Конический градиент conic-gradient распределяет цвета по кругу вокруг центральной точки (от 0 до 360 градусов), идеально подходя для индикаторов и круговых графиков."
+        },
+        {
+          "id": "css7-q5",
+          "question": "Какой порядок наложения слоев применяется при использовании множественных фонов background: layer1, layer2, layer3;?",
+          "options": [
+            "Слой layer1 рисуется самым нижним (под всеми)",
+            "Слой layer1 рисуется самым верхним (поверх layer2 и layer3)",
+            "Порядок определяется случайным образом",
+            "Слои автоматически объединяются в один"
+          ],
+          "correctIndex": 1,
+          "explanation": "В CSS Multiple Backgrounds первый указанный слой (layer1) всегда рендерится самым верхним, перекрывая последующие слои (как слои в графическом редакторе)."
         }
       ]
     }

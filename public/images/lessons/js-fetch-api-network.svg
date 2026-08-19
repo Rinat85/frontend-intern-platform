@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgjf13" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgjf13)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">JS: Fetch API, HTTP-методы и JSON</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">fetch(), GET/POST/PUT/DELETE, Headers, Response, JSON.parse/stringify, Error Handling</text>
+
+  <!-- Left: Fetch API Lifecycle -->
+  <rect x="20" y="65" width="380" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="210" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">Жизненный цикл Fetch-запроса</text>
+
+  <rect x="35" y="100" width="350" height="36" rx="4" fill="#2dff8a22" stroke="#2dff8a"/>
+  <text x="210" y="114" fill="#2dff8a" font-size="8" font-weight="600" text-anchor="middle">1. fetch(url, options) → Promise&lt;Response&gt;</text>
+  <text x="210" y="128" fill="#8b949e" font-size="6" text-anchor="middle">Отправляет HTTP-запрос, возвращает промис</text>
+
+  <text x="210" y="146" fill="#29e7ff" font-size="12" text-anchor="middle">↓</text>
+
+  <rect x="35" y="152" width="350" height="36" rx="4" fill="#29e7ff22" stroke="#29e7ff"/>
+  <text x="210" y="166" fill="#29e7ff" font-size="8" font-weight="600" text-anchor="middle">2. Проверка response.ok (status 200–299)</text>
+  <text x="210" y="180" fill="#8b949e" font-size="6" text-anchor="middle">if (!response.ok) throw new Error(response.status)</text>
+
+  <text x="210" y="198" fill="#29e7ff" font-size="12" text-anchor="middle">↓</text>
+
+  <rect x="35" y="204" width="350" height="36" rx="4" fill="#ffb02e22" stroke="#ffb02e"/>
+  <text x="210" y="218" fill="#ffb02e" font-size="8" font-weight="600" text-anchor="middle">3. Парсинг тела: response.json() → Promise&lt;data&gt;</text>
+  <text x="210" y="232" fill="#8b949e" font-size="6" text-anchor="middle">Также: .text(), .blob(), .formData(), .arrayBuffer()</text>
+
+  <text x="210" y="250" fill="#29e7ff" font-size="12" text-anchor="middle">↓</text>
+
+  <rect x="35" y="256" width="350" height="36" rx="4" fill="#d2a8ff22" stroke="#d2a8ff"/>
+  <text x="210" y="270" fill="#d2a8ff" font-size="8" font-weight="600" text-anchor="middle">4. Использование данных: renderUI(data)</text>
+  <text x="210" y="284" fill="#8b949e" font-size="6" text-anchor="middle">Обновление DOM, рендеринг списка, заполнение формы</text>
+
+  <text x="210" y="308" fill="#f85149" font-size="7" text-anchor="middle">⚠ fetch НЕ бросает ошибку при HTTP 404/500! Проверяйте response.ok!</text>
+
+  <!-- Right: HTTP Methods -->
+  <rect x="420" y="65" width="360" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="600" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">HTTP-методы (CRUD)</text>
+
+  <rect x="435" y="98" width="330" height="46" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="445" y="114" fill="#2dff8a" font-size="8" font-weight="600">GET — Получить данные (Read)</text>
+  <text x="445" y="130" fill="#8b949e" font-size="7">fetch('/api/users') — без body!</text>
+
+  <rect x="435" y="150" width="330" height="46" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="445" y="166" fill="#29e7ff" font-size="8" font-weight="600">POST — Создать ресурс (Create)</text>
+  <text x="445" y="182" fill="#8b949e" font-size="7">method: 'POST', body: JSON.stringify(data)</text>
+
+  <rect x="435" y="202" width="330" height="46" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="445" y="218" fill="#ffb02e" font-size="8" font-weight="600">PUT / PATCH — Обновить (Update)</text>
+  <text x="445" y="234" fill="#8b949e" font-size="7">PUT = полная замена, PATCH = частичное</text>
+
+  <rect x="435" y="254" width="330" height="46" rx="4" fill="#0d1117" stroke="#f85149"/>
+  <text x="445" y="270" fill="#f85149" font-size="8" font-weight="600">DELETE — Удалить ресурс (Delete)</text>
+  <text x="445" y="286" fill="#8b949e" font-size="7">method: 'DELETE' — обычно без body</text>
+
+  <text x="600" y="314" fill="#8b949e" font-size="7" text-anchor="middle">Content-Type: application/json — обязателен для POST/PUT!</text>
+
+  <!-- Bottom -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Ключевые правила работы с Fetch API</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• fetch() НЕ бросает ошибку при HTTP 404/500 — всегда проверяйте response.ok перед .json()</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• JSON.stringify() для отправки тела, JSON.parse() для парсинга (response.json() делает это автоматически)</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• Заголовок 'Content-Type: application/json' обязателен для POST/PUT запросов с телом</text>
+</svg>

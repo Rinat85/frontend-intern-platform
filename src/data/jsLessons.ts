@@ -2335,88 +2335,190 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-13",
     "moduleId": "javascript",
     "level": 13,
-    "title": "Работа с сетью (Fetch API) и JSON",
-    "subtitle": "HTTP запросы, методы GET/POST, response.json() и обработка ошибок",
-    "description": "Связь с сервером: HTTP-запросы через fetch(url), проверка response.ok, сериализация и парсинг JSON (JSON.parse / JSON.stringify), отправка заголовков headers и POST-запросов.",
-    "estimatedMinutes": 40,
+    "title": "Работа с сетью: Fetch API, HTTP-методы и JSON",
+    "subtitle": "fetch(), GET/POST/PUT/DELETE, Headers, Response, JSON.parse/stringify, AbortController и обработка ошибок",
+    "description": "Освойте работу с сетью в JavaScript: отправка HTTP-запросов через Fetch API, CRUD-операции (GET, POST, PUT, DELETE) с JSON-телом, обработка ответов (response.ok, status), парсинг JSON, отмена запросов через AbortController и архитектурный паттерн API-клиента.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "JavaScript",
-      "Fetch",
-      "API",
-      "HTTP",
-      "JSON"
+      "fetch",
+      "http",
+      "json",
+      "rest-api",
+      "crud",
+      "abort-controller",
+      "error-handling",
+      "headers"
     ],
     "theory": {
-      "overview": "Fetch API — стандартный браузерный интерфейс для отправки сетевых HTTP-запросов (AJAX) к REST API серверам без сторонних библиотек.",
+      "overview": "Fetch API — это современный встроенный интерфейс JavaScript для выполнения HTTP-запросов к серверу. Он пришёл на замену устаревшему `XMLHttpRequest` (XHR) и обеспечивает чистый, промис-совместимый API для работы с REST-серверами.\n\nВ этом уроке мы разберём полный жизненный цикл запроса: от отправки `fetch()` до парсинга ответа `.json()`, научимся выполнять CRUD-операции (Create, Read, Update, Delete), правильно обрабатывать ошибки и отменять зависшие запросы через `AbortController`.",
       "sections": [
         {
-          "title": "GET и POST запросы через Fetch API",
-          "content": "- `fetch(url)`: по умолчанию отправляет `GET` запрос.\n- **Проверка статуса**: `if (!response.ok) throw new Error(...)` (**Важно:** fetch НЕ отклоняет промис при ошибках 404 или 500!).\n- `const data = await response.json()`: парсит JSON-тело ответа в JS-объект.\n- **POST запрос**: передача `method: 'POST'`, `headers: { 'Content-Type': 'application/json' }` и `body: JSON.stringify(payload)`.",
+          "title": "Жизненный цикл Fetch-запроса и критическая ловушка response.ok",
+          "content": "Пошаговый разбор работы fetch:\n\n1. **Отправка запроса**: `fetch(url, options)` возвращает `Promise<Response>`.\n\n2. **Критическая ловушка Fetch API ⚠️**:\n- **`fetch()` НЕ бросает ошибку при HTTP 404 или 500!** Промис будет `fulfilled` (выполнен), а не `rejected`.\n- `fetch()` отклоняется (`reject`) ТОЛЬКО при сетевом сбое: нет интернета, DNS не найден, CORS заблокирован.\n- Поэтому ОБЯЗАТЕЛЬНА проверка `response.ok` (true для статусов 200–299).\n\n3. **Парсинг тела ответа**:\n- `response.json()` — парсинг JSON в объект JavaScript (возвращает промис!).\n- `response.text()` — текст.\n- `response.blob()` — бинарные данные (файлы, изображения).\n- `response.formData()` — данные формы.\n\n4. **Использование данных** — обновление DOM, стейта, UI.",
+          "image": {
+            "src": "/images/lessons/js-fetch-api-network.svg",
+            "alt": "Жизненный цикл Fetch API и HTTP-методы CRUD",
+            "caption": "fetch() → проверка response.ok → парсинг .json() → использование данных. HTTP-методы: GET, POST, PUT/PATCH, DELETE"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Эталонная функция GET запроса",
-            "code": "async function fetchUsers() {\n  try {\n    const response = await fetch('https://jsonplaceholder.typicode.com/users/1');\n    \n    if (!response.ok) {\n      throw new Error(`HTTP ошибка! Статус: ${response.status}`);\n    }\n    \n    const user = await response.json();\n    console.log('Пользователь получен:', user.name);\n    return user;\n  } catch (error) {\n    console.error('Сетевой сбой:', error.message);\n  }\n}",
-            "explanation": "Полная цепочка обработки: fetch -> response.ok -> response.json -> catch."
+            "code": "// Правильный паттерн Fetch-запроса с обработкой ошибок\nasync function fetchUsers() {\n  try {\n    const response = await fetch('https://jsonplaceholder.typicode.com/users');\n    \n    // КРИТИЧЕСКИ ВАЖНО: fetch НЕ бросает ошибку при 404/500!\n    if (!response.ok) {\n      throw new Error(`HTTP ошибка: ${response.status} ${response.statusText}`);\n    }\n    \n    const users = await response.json(); // Парсинг JSON (второй await!)\n    console.log('Получено пользователей:', users.length);\n    return users;\n    \n  } catch (error) {\n    // Ловит и сетевые ошибки, и наш throw из response.ok\n    console.error('Сбой загрузки:', error.message);\n    return []; // Возвращаем fallback\n  }\n}",
+            "title": "Безопасный паттерн Fetch-запроса с проверкой response.ok",
+            "explanation": "Двойная защита: проверка response.ok ловит серверные ошибки (404, 500), а catch — сетевые сбои (offline, DNS, CORS)."
+          }
+        },
+        {
+          "title": "CRUD-операции: GET, POST, PUT/PATCH, DELETE",
+          "content": "Четыре основных HTTP-метода для работы с REST API:\n\n1. **GET** — Получить данные (Read):\n- Метод по умолчанию в `fetch()`. Запрос без тела (body).\n\n2. **POST** — Создать ресурс (Create):\n- Обязательно указать `method: 'POST'`, `body: JSON.stringify(data)` и заголовок `'Content-Type': 'application/json'`.\n\n3. **PUT / PATCH** — Обновить ресурс (Update):\n- `PUT` — полная замена ресурса (отправляем ВСЕ поля).\n- `PATCH` — частичное обновление (отправляем только изменённые поля).\n\n4. **DELETE** — Удалить ресурс (Delete):\n- `method: 'DELETE'` — обычно без тела (body).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const API_BASE = 'https://jsonplaceholder.typicode.com';\n\n// ===== POST: Создать нового пользователя =====\nasync function createUser(userData) {\n  const response = await fetch(`${API_BASE}/users`, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json', // ОБЯЗАТЕЛЬНЫЙ заголовок для JSON!\n    },\n    body: JSON.stringify(userData), // Сериализация JS-объекта в JSON-строку\n  });\n  \n  if (!response.ok) throw new Error(`Ошибка создания: ${response.status}`);\n  return response.json(); // Сервер обычно возвращает созданный объект с id\n}\n\n// ===== PATCH: Частично обновить имя =====\nasync function updateUserName(id, newName) {\n  const response = await fetch(`${API_BASE}/users/${id}`, {\n    method: 'PATCH',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify({ name: newName }), // Только изменяемое поле!\n  });\n  if (!response.ok) throw new Error(`Ошибка обновления: ${response.status}`);\n  return response.json();\n}\n\n// ===== DELETE: Удалить пользователя =====\nasync function deleteUser(id) {\n  const response = await fetch(`${API_BASE}/users/${id}`, {\n    method: 'DELETE', // Без body!\n  });\n  if (!response.ok) throw new Error(`Ошибка удаления: ${response.status}`);\n  return true;\n}",
+            "title": "Полный набор CRUD-операций через Fetch API с обработкой ошибок",
+            "explanation": "POST и PATCH требуют заголовок Content-Type и сериализацию body через JSON.stringify(). GET и DELETE отправляются без body."
+          }
+        },
+        {
+          "title": "Отмена запросов через AbortController и таймауты",
+          "content": "Зачем отменять запросы:\n- Пользователь переключил страницу в SPA — предыдущие запросы уже не нужны, но ответы продолжат обновлять стейт \"фантомными\" данными.\n- Поиск с авто-дополнением: каждый новый символ отправляет запрос — предыдущие нужно отменить, чтобы не показать устаревший результат.\n- Таймаут: если сервер не ответил за 5 секунд, запрос нужно оборвать.\n\nAbortController — встроенный API для отмены Fetch-запросов:\n1. Создаём контроллер: `const controller = new AbortController();`\n2. Передаём сигнал в fetch: `fetch(url, { signal: controller.signal })`\n3. Отменяем: `controller.abort();` — fetch немедленно отклоняется с ошибкой `AbortError`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Отмена запроса при навигации в SPA\nclass SearchService {\n  #currentController = null;\n\n  async search(query) {\n    // Отменяем ПРЕДЫДУЩИЙ запрос, если он ещё выполняется!\n    this.#currentController?.abort();\n    \n    this.#currentController = new AbortController();\n    \n    try {\n      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {\n        signal: this.#currentController.signal, // Привязка сигнала!\n      });\n      if (!response.ok) throw new Error(`HTTP ${response.status}`);\n      return await response.json();\n    } catch (error) {\n      if (error.name === 'AbortError') {\n        console.log('Предыдущий поиск отменен (новый запрос)');\n        return null; // Не показываем ошибку пользователю!\n      }\n      throw error; // Реальные ошибки пробрасываем дальше\n    }\n  }\n}\n\n// 2. Fetch с таймаутом через AbortSignal.timeout()\nasync function fetchWithTimeout(url, timeoutMs = 5000) {\n  const response = await fetch(url, {\n    signal: AbortSignal.timeout(timeoutMs), // Встроенный таймаут!\n  });\n  if (!response.ok) throw new Error(`HTTP ${response.status}`);\n  return response.json();\n}",
+            "title": "AbortController для отмены поиска и AbortSignal.timeout() для таймаутов",
+            "explanation": "AbortController предотвращает гонку состояний: при быстром вводе в поиск каждый новый символ отменяет предыдущий запрос, показывая только актуальный результат."
+          }
+        },
+        {
+          "title": "Архитектурный паттерн API-клиента (apiClient)",
+          "content": "В реальных проектах вместо вызова голого `fetch()` по всему приложению создаётся централизованный API-клиент:\n\nЗачем:\n- Базовый URL API не дублируется в каждом файле.\n- Заголовки авторизации (`Bearer token`) добавляются автоматически.\n- Ошибки обрабатываются единообразно (401 → редирект на логин).\n- Логирование и метрики запросов в одном месте.\n- При смене backend-URL или формата токена меняется один файл.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// shared/api/apiClient.js — централизованный API-клиент\nconst API_BASE = 'https://api.example.com/v1';\n\nasync function apiClient(endpoint, options = {}) {\n  const token = localStorage.getItem('auth_token');\n\n  const config = {\n    ...options,\n    headers: {\n      'Content-Type': 'application/json',\n      ...(token ? { Authorization: `Bearer ${token}` } : {}),\n      ...options.headers, // Пользовательские заголовки перезаписывают дефолтные\n    },\n  };\n\n  // Автоматическая сериализация body\n  if (options.body && typeof options.body === 'object') {\n    config.body = JSON.stringify(options.body);\n  }\n\n  const response = await fetch(`${API_BASE}${endpoint}`, config);\n\n  // Автоматический редирект на логин при протухшем токене\n  if (response.status === 401) {\n    localStorage.removeItem('auth_token');\n    window.location.href = '/login';\n    throw new Error('Сессия истекла. Авторизуйтесь заново.');\n  }\n\n  if (!response.ok) {\n    const errorBody = await response.json().catch(() => null);\n    throw new Error(errorBody?.message || `HTTP ${response.status}`);\n  }\n\n  // 204 No Content (при DELETE)\n  if (response.status === 204) return null;\n  return response.json();\n}\n\n// Удобные CRUD-обёртки\nexport const api = {\n  get: (url) => apiClient(url),\n  post: (url, body) => apiClient(url, { method: 'POST', body }),\n  patch: (url, body) => apiClient(url, { method: 'PATCH', body }),\n  delete: (url) => apiClient(url, { method: 'DELETE' }),\n};\n\n// Использование:\n// const users = await api.get('/users');\n// await api.post('/users', { name: 'Алексей', email: 'a@b.com' });",
+            "title": "Централизованный API-клиент с авторизацией и обработкой 401",
+            "explanation": "Все запросы проходят через единый apiClient: токен добавляется автоматически, 401 перенаправляет на логин, тело сериализуется в JSON."
           }
         }
       ],
       "seniorTips": [
-        "Помните: fetch отклоняет промис (reject) ТОЛЬКО при физическом разрыве сети (DNS сбой, оффлайн). При HTTP ошибках 404 и 500 промис успешно резолвится, поэтому проверка `response.ok` строго обязательна!"
+        "ВСЕГДА проверяйте `response.ok` после fetch() — это единственная защита от тихих серверных ошибок (404, 500), которые fetch не бросает как исключения.",
+        "Создавайте централизованный API-клиент (`apiClient`) для единообразной обработки авторизации, ошибок, базового URL и логирования.",
+        "Используйте `AbortController` для отмены устаревших запросов при навигации в SPA и быстром вводе в поиске — это предотвращает гонку состояний (Race Condition).",
+        "Для таймаута запросов используйте встроенный `AbortSignal.timeout(5000)` вместо самописного Promise.race."
       ],
       "commonMistakes": [
         {
-          "bad": "const res = await fetch('/api'); const data = await res.json(); /* Без проверки response.ok */",
-          "good": "if (!res.ok) throw new Error(res.statusText);",
-          "reason": "Без проверки response.ok при 404 парсинг JSON упадет с синтаксической ошибкой."
+          "bad": "// Забытая проверка response.ok\nconst data = await fetch('/api/users').then(r => r.json());\n// При 404 вернётся HTML-страница ошибки, и .json() выбросит SyntaxError!",
+          "good": "const res = await fetch('/api/users');\nif (!res.ok) throw new Error(`HTTP ${res.status}`);\nconst data = await res.json();",
+          "reason": "fetch() НЕ бросает ошибку при 404/500. Без проверки response.ok вы получите мусорные данные или SyntaxError при парсинге."
+        },
+        {
+          "bad": "// Забытый Content-Type при POST\nfetch('/api/users', {\n  method: 'POST',\n  body: JSON.stringify({ name: 'Test' }) // Сервер получит пустой body!\n})",
+          "good": "fetch('/api/users', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json' },\n  body: JSON.stringify({ name: 'Test' })\n})",
+          "reason": "Без заголовка Content-Type: application/json сервер не знает, что body — это JSON, и не может его распарсить."
+        },
+        {
+          "bad": "// Забытый JSON.stringify для body\nfetch('/api', { method: 'POST', body: { name: 'Test' } })\n// Тело будет '[object Object]' — строковое представление объекта!",
+          "good": "fetch('/api', { method: 'POST', body: JSON.stringify({ name: 'Test' }) })",
+          "reason": "fetch body принимает строку, Blob или FormData. Объект JavaScript автоматически не сериализуется — нужен JSON.stringify()."
         }
       ],
       "keyTakeaways": [
-        "fetch отправляет асинхронный HTTP-запрос.",
-        "Проверка response.ok обязательна для статусов 200-299.",
-        "JSON.stringify сериализует в строку."
+        "`fetch()` НЕ бросает ошибку при HTTP 404/500 — всегда проверяйте `response.ok`.",
+        "POST/PUT/PATCH требуют заголовок `Content-Type: application/json` и `JSON.stringify(body)`.",
+        "AbortController отменяет устаревшие запросы, предотвращая Race Conditions в поиске и навигации.",
+        "Централизованный API-клиент (`apiClient`) автоматизирует авторизацию, обработку ошибок и сериализацию.",
+        "`response.json()` возвращает промис — не забывайте второй `await`!"
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"fetch-demo\"><h3>Fetch API Demo</h3><button id=\"btn-fetch\">Запросить пользователя</button><pre id=\"fetch-res\"></pre></div>",
-      "initialCss": ".fetch-demo { padding: 20px; background: white; border-radius: 12px; }\n#fetch-res { margin-top: 10px; background: #f1f5f9; padding: 12px; border-radius: 6px; font-size: 12px; }",
-      "initialJs": "document.getElementById('btn-fetch').addEventListener('click', async () => {\n  const out = document.getElementById('fetch-res');\n  out.textContent = 'Загрузка с публичного API...';\n  try {\n    const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');\n    const data = await res.json();\n    out.textContent = JSON.stringify(data, null, 2);\n  } catch(e) {\n    out.textContent = 'Ошибка: ' + e.message;\n  }\n});",
-      "instructions": "Нажмите кнопку для отправки реального сетевого GET запроса."
+      "initialHtml": "<div id=\"fetch-app\">\n  <h3>Fetch API Тренажер</h3>\n  <button id=\"btn-get\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer; margin-right:8px;\">GET /users</button>\n  <button id=\"btn-post\" style=\"background:#29e7ff; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">POST /users</button>\n  <pre id=\"fetch-log\" style=\"margin-top:12px; color:#8b949e; font-size:11px; line-height:1.4; max-height:200px; overflow:auto;\"></pre>\n</div>",
+      "initialCss": "#fetch-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const log = document.getElementById('fetch-log');\n\ndocument.getElementById('btn-get').onclick = async () => {\n  log.textContent = '⏳ GET /users...\\n';\n  try {\n    const res = await fetch('https://jsonplaceholder.typicode.com/users');\n    if (!res.ok) throw new Error(`HTTP ${res.status}`);\n    const users = await res.json();\n    log.textContent += `✅ Получено ${users.length} пользователей:\\n`;\n    users.slice(0, 3).forEach(u => log.textContent += `  • ${u.name} (${u.email})\\n`);\n  } catch (e) { log.textContent += `❌ ${e.message}\\n`; }\n};\n\ndocument.getElementById('btn-post').onclick = async () => {\n  log.textContent = '⏳ POST /users (создание)...\\n';\n  try {\n    const res = await fetch('https://jsonplaceholder.typicode.com/users', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      body: JSON.stringify({ name: 'Стажёр', email: 'intern@academy.dev' })\n    });\n    if (!res.ok) throw new Error(`HTTP ${res.status}`);\n    const created = await res.json();\n    log.textContent += `✅ Создан пользователь с id: ${created.id}\\n`;\n    log.textContent += JSON.stringify(created, null, 2);\n  } catch (e) { log.textContent += `❌ ${e.message}\\n`; }\n};",
+      "instructions": "Практика с Fetch API:\n1. Нажмите 'GET /users' для получения данных с сервера\n2. Нажмите 'POST /users' для создания нового пользователя\n3. Добавьте кнопку DELETE для удаления по id"
     },
     "task": {
-      "title": "Отправка POST запроса через fetch",
-      "scenario": "Напишите функцию отправки POST запроса с объектом данных в формате JSON.",
+      "title": "Разработка централизованного API-клиента с CRUD-операциями, авторизацией и AbortController",
+      "scenario": "Разработайте модуль apiClient для учебного приложения. Клиент должен автоматически подставлять базовый URL и токен авторизации, обрабатывать ошибки (включая 401 — протухший токен), поддерживать все CRUD-методы (get, post, patch, delete) и отменять зависшие запросы через AbortSignal.timeout.",
       "criteria": [
-        "Указан method: 'POST'",
-        "Заданы headers Content-Type: application/json",
-        "Тело сериализовано через JSON.stringify"
+        "Реализована функция apiClient(endpoint, options) с автоматическим baseUrl и заголовками",
+        "При 401 выполняется очистка токена и перенаправление на /login",
+        "Экспортируются удобные методы: api.get(), api.post(), api.patch(), api.delete()",
+        "Все методы с телом автоматически сериализуют body через JSON.stringify()"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Разработайте централизованный API-клиент\nconst API_BASE = 'https://api.example.com';\n\nasync function apiClient(endpoint, options) {\n  // Ваш код\n}"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "Токен из localStorage: const token = localStorage.getItem('auth_token');",
+        "Проверка 401: if (response.status === 401) { ... redirect to /login }",
+        "Обёртки: get: (url) => apiClient(url), post: (url, body) => apiClient(url, { method: 'POST', body })"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "async function sendData(url, data) {\n  const response = await fetch(url, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify(data)\n  });\n  return response.json();\n}",
-        "explanation": "Стандартная отправка POST запроса."
+        "js": "const API_BASE = 'https://api.example.com';\n\nasync function apiClient(endpoint, options = {}) {\n  const token = localStorage.getItem('auth_token');\n\n  const config = {\n    ...options,\n    headers: {\n      'Content-Type': 'application/json',\n      ...(token ? { Authorization: `Bearer ${token}` } : {}),\n      ...options.headers,\n    },\n    signal: options.signal || AbortSignal.timeout(10000),\n  };\n\n  if (options.body && typeof options.body === 'object') {\n    config.body = JSON.stringify(options.body);\n  }\n\n  const response = await fetch(`${API_BASE}${endpoint}`, config);\n\n  if (response.status === 401) {\n    localStorage.removeItem('auth_token');\n    window.location.href = '/login';\n    throw new Error('Сессия истекла');\n  }\n\n  if (!response.ok) {\n    const errBody = await response.json().catch(() => null);\n    throw new Error(errBody?.message || `HTTP ${response.status}`);\n  }\n\n  if (response.status === 204) return null;\n  return response.json();\n}\n\nconst api = {\n  get: (url) => apiClient(url),\n  post: (url, body) => apiClient(url, { method: 'POST', body }),\n  patch: (url, body) => apiClient(url, { method: 'PATCH', body }),\n  delete: (url) => apiClient(url, { method: 'DELETE' }),\n};\n\nconsole.log('API-клиент готов к использованию');",
+        "explanation": "Централизованный apiClient автоматически добавляет токен, сериализует body, обрабатывает 401 и добавляет таймаут через AbortSignal.timeout."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j13-q1",
-          "question": "Отклоняет ли fetch() промис при HTTP статусе 404 (Not Found)?",
+          "id": "js13-q1",
+          "question": "Что произойдёт, если сервер вернёт HTTP 404 при выполнении fetch('/api/unknown')?",
           "options": [
-            "Да, сразу переходит в catch",
-            "Нет, промис успешно резолвится, статус нужно проверять через response.ok",
-            "Браузер зависает",
-            "Выбрасывает alert"
+            "fetch() бросит ошибку и выполнение перейдет в catch",
+            "Промис fetch() будет fulfilled (выполнен), response.ok будет false, и ошибка НЕ будет брошена автоматически",
+            "Браузер покажет алерт",
+            "Скрипт остановится"
           ],
           "correctIndex": 1,
-          "explanation": "fetch отклоняет промис только при сбое сети. Статусы 404 и 500 требуют проверки response.ok."
+          "explanation": "fetch() бросает ошибку (reject) только при сетевых сбоях. HTTP 404/500 — это корректные ответы сервера с response.ok === false."
+        },
+        {
+          "id": "js13-q2",
+          "question": "Какой заголовок ОБЯЗАТЕЛЬНО нужно указать при отправке JSON-данных через POST-запрос?",
+          "options": [
+            "Accept: text/html",
+            "Content-Type: application/json",
+            "Authorization: Basic",
+            "Cache-Control: no-cache"
+          ],
+          "correctIndex": 1,
+          "explanation": "Без заголовка Content-Type: application/json сервер не сможет распознать формат тела запроса и не распарсит JSON."
+        },
+        {
+          "id": "js13-q3",
+          "question": "Зачем используется AbortController при работе с Fetch API?",
+          "options": [
+            "Для ускорения запросов",
+            "Для отмены выполняющихся запросов: при навигации в SPA, при быстром вводе в поиск, для реализации таймаутов",
+            "Для кэширования ответов",
+            "Для шифрования данных"
+          ],
+          "correctIndex": 1,
+          "explanation": "AbortController позволяет программно отменять запросы, предотвращая гонку состояний и обработку устаревших данных."
+        },
+        {
+          "id": "js13-q4",
+          "question": "Почему нельзя передать JavaScript-объект напрямую в body параметр fetch()?",
+          "options": [
+            "Это синтаксическая ошибка",
+            "JavaScript-объект автоматически преобразуется в строку '[object Object]', а не в JSON. Необходим JSON.stringify()",
+            "fetch не поддерживает body",
+            "Объект автоматически сериализуется корректно"
+          ],
+          "correctIndex": 1,
+          "explanation": "Параметр body принимает строку, Blob или FormData. Объект JS автоматически вызывает toString(), давая '[object Object]'."
+        },
+        {
+          "id": "js13-q5",
+          "question": "Чем отличаются HTTP-методы PUT и PATCH?",
+          "options": [
+            "PUT создает ресурс, PATCH удаляет",
+            "PUT полностью заменяет ресурс (отправляются все поля), PATCH обновляет только указанные поля (частичное обновление)",
+            "Разницы нет",
+            "PUT быстрее PATCH"
+          ],
+          "correctIndex": 1,
+          "explanation": "PUT требует отправки полного объекта для замены, PATCH позволяет отправить только изменённые поля для точечного обновления."
         }
       ]
     }

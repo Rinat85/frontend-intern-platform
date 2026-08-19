@@ -2338,83 +2338,189 @@ export const cssLessons: Lesson[] = [
     "moduleId": "css",
     "level": 13,
     "title": "Адаптивный дизайн и Media Queries",
-    "subtitle": "Mobile-first, @media, брейкпоинты и prefers-color-scheme",
-    "description": "Верстка под все устройства: mobile-first подход через min-width, стандартные брейкпоинты sm/md/lg/xl, адаптивные таблицы.",
-    "estimatedMinutes": 35,
+    "subtitle": "Mobile First, @media min-width, viewport, clamp(), Container Queries и адаптивные изображения",
+    "description": "Освойте полный арсенал адаптивного дизайна: подход Mobile First, систему брейкпоинтов @media min-width, функцию clamp() для плавного масштабирования без медиа-запросов, Container Queries для компонентной адаптивности, адаптивные изображения <picture> и srcset, а также правильную настройку viewport.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Responsive",
-      "MediaQueries"
+      "responsive",
+      "media-queries",
+      "mobile-first",
+      "clamp",
+      "container-queries",
+      "viewport",
+      "srcset",
+      "breakpoints"
     ],
     "theory": {
-      "overview": "Адаптивная верстка гарантирует удобный интерфейс на экранах от смартфонов до десктопов.",
+      "overview": "Более 60% мирового веб-трафика приходится на смартфоны. Сайт, который выглядит идеально только на мониторе 1920×1080, теряет большинство своей аудитории.\n\nВ этом уроке мы освоим полный арсенал адаптивного дизайна: от классических `@media` запросов с подходом **Mobile First** до революционных современных техник — функции `clamp()`, Container Queries (`@container`) и адаптивных изображений через `<picture>` и `srcset`.",
       "sections": [
         {
-          "title": "Mobile-first и брейкпоинты",
-          "content": "- Mobile-first: базовые стили для мобилок, расширение через `@media (min-width: 768px)`.\n- Брейкпоинты: 640px (sm), 768px (md), 1024px (lg), 1280px (xl).",
+          "title": "Подход Mobile First и система брейкпоинтов",
+          "content": "Два подхода к адаптивному дизайну:\n\n1. **Desktop First (устаревший подход ❌)**:\n- Базовые стили пишутся для десктопа, затем сужаются через `@media (max-width: ...)`. Проблема: на мобилках загружаются все тяжелые десктопные стили, а потом перезаписываются — это расточительно и медленно.\n\n2. **Mobile First (индустриальный стандарт ✅)**:\n- Базовые CSS-стили (без `@media`) пишутся для самого маленького экрана (смартфон).\n- Стили для более широких экранов РАСШИРЯЮТСЯ через `@media (min-width: ...)` — от меньшего к большему.\n- Преимущества: быстрая загрузка на слабых устройствах, естественная прогрессивность, меньше CSS-кода.\n\n3. Стандартные брейкпоинты (Bootstrap/Tailwind style):\n- `576px` — Ландшафтный телефон (sm)\n- `768px` — Планшет портрет (md)\n- `1024px` — Планшет ландшафт / Ноутбук (lg)\n- `1280px` — Десктоп (xl)\n- `1536px` — Большой экран (2xl)",
+          "image": {
+            "src": "/images/lessons/css-responsive-media-queries.svg",
+            "alt": "Адаптивный дизайн: Mobile First брейкпоинты, clamp(), Container Queries",
+            "caption": "Mobile First: базовые стили для мобилок, расширение через min-width. Современные техники: clamp() и Container Queries"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Mobile-first",
-            "code": ".grid { display: grid; grid-template-columns: 1fr; gap: 16px; }\n@media (min-width: 768px) { .grid { grid-template-columns: repeat(2, 1fr); } }\n@media (min-width: 1024px) { .grid { grid-template-columns: repeat(4, 1fr); } }",
-            "explanation": "Плавный рост колонок."
+            "code": "/* ===== MOBILE FIRST: Базовые стили для смартфонов (0px) ===== */\n.catalog {\n  display: grid;\n  grid-template-columns: 1fr; /* 1 колонка на телефоне */\n  gap: 16px;\n  padding: 16px;\n}\n\n.card {\n  border-radius: 12px;\n  background: #161b22;\n  padding: 16px;\n}\n\n/* ===== ПЛАНШЕТ (768px+) ===== */\n@media (min-width: 768px) {\n  .catalog {\n    grid-template-columns: repeat(2, 1fr); /* 2 колонки */\n    gap: 20px;\n    padding: 24px;\n  }\n}\n\n/* ===== ДЕСКТОП (1024px+) ===== */\n@media (min-width: 1024px) {\n  .catalog {\n    grid-template-columns: repeat(3, 1fr); /* 3 колонки */\n    gap: 24px;\n    padding: 32px;\n    max-width: 1200px;\n    margin: 0 auto;\n  }\n}",
+            "title": "Mobile First каталог карточек: от 1 колонки к 3-м через min-width",
+            "explanation": "Базовые стили (без @media) рассчитаны на мобилку с 1 колонкой. По мере расширения экрана добавляются колонки и отступы."
+          }
+        },
+        {
+          "title": "Viewport Meta и единицы измерения vw, vh, dvh",
+          "content": "Обязательная настройка для корректного отображения на мобильных устройствах:\n\n1. **Viewport Meta-тег (обязательный)**:\n```html\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n```\n- `width=device-width` — ширина страницы равна ширине экрана устройства (а не 980px по умолчанию).\n- `initial-scale=1` — начальный масштаб 100%.\n- Без этого тега смартфоны симулируют десктопную ширину ~980px и показывают уменьшенную версию сайта!\n\n2. Единицы измерения вьюпорта:\n- `vw` / `vh` — 1% ширины/высоты окна браузера.\n- `dvh` (Dynamic Viewport Height) — учитывает скрытие/появление адресной строки Safari на iOS! (100vh в Safari может быть длиннее видимого экрана, а 100dvh — точно видимая область).\n- `svh` / `lvh` — Short/Large Viewport Height для предсказуемости.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Hero-секция на полный экран */\n.hero {\n  min-height: 100dvh; /* dvh учитывает адресную строку Safari iOS! */\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n\n/* Полноэкранный фон с ограничением */\n.fullscreen-bg {\n  width: 100vw;\n  height: 100svh; /* svh — без учета адресной строки */\n}\n\n/* Адаптивный заголовок (размер зависит от ширины экрана) */\n.hero-title {\n  font-size: clamp(1.5rem, 5vw, 3.5rem);\n  /* На экране 320px: 5vw = 16px → clamp выберет 1.5rem (24px)\n     На экране 1920px: 5vw = 96px → clamp ограничит до 3.5rem (56px) */\n}",
+            "title": "Единицы vw, dvh и функция clamp() для адаптивной типографики",
+            "explanation": "dvh решает проблему 100vh в мобильном Safari (где адресная строка скрывается при скролле), а clamp() плавно масштабирует шрифт."
+          }
+        },
+        {
+          "title": "Функция clamp() — адаптивность без медиа-запросов",
+          "content": "Революционная CSS-функция, устраняющая до 80% медиа-запросов:\n\n**Синтаксис: `clamp(MIN, PREFERRED, MAX)`**\n- `MIN` — минимальное значение (нижняя граница, обычно в rem).\n- `PREFERRED` — предпочтительное значение (гибкое, обычно в vw).\n- `MAX` — максимальное значение (верхняя граница, обычно в rem).\n\nКак работает:\n- На узких экранах `PREFERRED` (в `vw`) будет маленьким, и clamp() автоматически выберет `MIN`.\n- На средних экранах `PREFERRED` находится между `MIN` и `MAX` — и именно оно применяется.\n- На широких экранах `PREFERRED` превысит `MAX`, и clamp() ограничит значение до `MAX`.\n\nГде использовать:\n- `font-size: clamp(1rem, 2.5vw, 2rem);` — типографика.\n- `padding: clamp(16px, 4vw, 48px);` — отступы.\n- `gap: clamp(12px, 2vw, 32px);` — промежутки в Grid.\n- `max-width: clamp(280px, 90vw, 1200px);` — ширина контейнера.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Полностью адаптивная карточка БЕЗ единого @media запроса! */\n.fluid-card {\n  /* Ширина: от 280px до 600px, плавно по вьюпорту */\n  width: clamp(280px, 90vw, 600px);\n  margin: 0 auto;\n  \n  /* Отступы: от 16px до 40px */\n  padding: clamp(16px, 4vw, 40px);\n  \n  /* Текст: от 14px до 18px */\n  font-size: clamp(0.875rem, 1.5vw, 1.125rem);\n  \n  /* Заголовок: от 24px до 48px */\n  & h2 {\n    font-size: clamp(1.5rem, 4vw, 3rem);\n    line-height: 1.2;\n  }\n  \n  background: #161b22;\n  border-radius: clamp(8px, 1.5vw, 16px);\n  border: 1px solid #30363d;\n}",
+            "title": "Полностью адаптивная карточка на clamp() без единого @media",
+            "explanation": "Каждое свойство плавно масштабируется между минимумом и максимумом. На экране 320px текст будет 14px, а на 1920px — 18px, без резких переходов."
+          }
+        },
+        {
+          "title": "Container Queries (@container) и адаптивные изображения (srcset, <picture>)",
+          "content": "Следующее поколение адаптивности:\n\n1. **Container Queries (`@container`) — CSS Containment Level 3**:\nПроблема классических Media Queries: они реагируют на ширину ВСЕГО ОКНА браузера. Но компонент (карточка, виджет) может размещаться в боковой панели шириной 300px или в основном блоке шириной 900px. При одинаковой ширине окна карточка должна выглядеть по-разному!\n\nContainer Queries решают эту задачу:\n- Компонент адаптируется к размеру СВОЕГО КОНТЕЙНЕРА, а не к размеру экрана.\n- Синтаксис: родитель — `container-type: inline-size;`, стили — `@container (min-width: 400px) { ... }`.\n\n2. **Адаптивные изображения**:\n- `srcset` — набор изображений разных разрешений: браузер автоматически выбирает подходящее по DPR (Device Pixel Ratio: 1x, 2x, 3x).\n- `<picture>` — выбор формата (WebP, AVIF, JPEG) и размера в зависимости от ширины экрана.\n- `sizes` — подсказка браузеру: какую ширину займёт изображение на разных экранах.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* ===== Container Queries ===== */\n/* 1. Контейнер — любой родитель карточки */\n.card-wrapper {\n  container-type: inline-size;\n  container-name: card;\n}\n\n/* 2. Компактный вид (контейнер < 400px — например, в сайдбаре) */\n.product-card {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n}\n\n/* 3. Расширенный вид (контейнер >= 400px — в основном блоке) */\n@container card (min-width: 400px) {\n  .product-card {\n    flex-direction: row; /* Горизонтальная раскладка */\n    align-items: center;\n    gap: 20px;\n  }\n  .product-card img {\n    width: 200px;\n    height: 200px;\n    object-fit: cover;\n  }\n}",
+            "title": "Container Queries: карточка адаптируется к контейнеру, а не к окну",
+            "explanation": "В сайдбаре (300px) карточка будет вертикальной, а в основном блоке (700px) — горизонтальной. Оба варианта на одном экране!"
           }
         }
       ],
       "seniorTips": [
-        "Всегда используйте min-width для Mobile-first."
+        "Всегда используйте подход Mobile First (`@media (min-width: ...)`) — это индустриальный стандарт, обеспечивающий быструю загрузку на слабых устройствах.",
+        "Используйте `clamp()` для шрифтов, отступов и ширин — это устраняет до 80% ненужных @media запросов и обеспечивает плавное масштабирование.",
+        "Для полноэкранных секций используйте `100dvh` вместо `100vh` — это единственный способ корректно заполнить видимую область в мобильном Safari.",
+        "Container Queries (`@container`) — будущее компонентного дизайна: один и тот же компонент автоматически адаптируется под размер родителя, а не экрана."
       ],
       "commonMistakes": [
         {
-          "bad": "@media (max-width: 768px)",
-          "good": "@media (min-width: 768px)",
-          "reason": "Mobile-first легче оптимизировать."
+          "bad": "/* Desktop First — устаревший подход */\n.grid { grid-template-columns: repeat(3, 1fr); }\n@media (max-width: 768px) { .grid { grid-template-columns: 1fr; } }",
+          "good": "/* Mobile First — современный стандарт */\n.grid { grid-template-columns: 1fr; }\n@media (min-width: 768px) { .grid { grid-template-columns: repeat(3, 1fr); } }",
+          "reason": "Mobile First загружает лёгкие стили по умолчанию и расширяет их для крупных экранов. Desktop First заставляет мобилки загрузить и перезаписать тяжёлые стили."
+        },
+        {
+          "bad": ".hero { height: 100vh; } /* На iOS Safari страница длиннее видимой области! */",
+          "good": ".hero { height: 100dvh; } /* dvh учитывает динамическую адресную строку Safari */",
+          "reason": "100vh на мобильном Safari включает область за адресной строкой, создавая скролл. 100dvh решает проблему."
+        },
+        {
+          "bad": "/* Жесткие пиксели для шрифта — не масштабируется */\nh1 { font-size: 48px; }",
+          "good": "h1 { font-size: clamp(1.75rem, 5vw, 3rem); } /* Плавное масштабирование */",
+          "reason": "Жесткие пиксели не адаптируются. clamp() обеспечивает плавное и контролируемое изменение от мобилки до десктопа."
         }
       ],
       "keyTakeaways": [
-        "Mobile-first строится на min-width.",
-        "Базовые стили мобильные."
+        "Mobile First (`@media min-width`) — индустриальный стандарт адаптивного дизайна.",
+        "Viewport Meta (`width=device-width, initial-scale=1`) обязателен для корректного отображения на мобилках.",
+        "`clamp(min, preferred, max)` плавно масштабирует шрифты, отступы и размеры без @media.",
+        "Container Queries (`@container`) адаптируют компонент к размеру контейнера, а не окна.",
+        "`dvh` решает проблему `100vh` в мобильном Safari с динамической адресной строкой."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"r-demo\"><p class=\"r-t\">Измените размер окна</p></div>",
-      "initialCss": ".r-demo { padding: 20px; background: #e0e7ff; border-radius: 12px; text-align: center; }\n.r-t { font-weight: bold; color: #3730a3; }\n@media (min-width: 600px) { .r-demo { background: #dcfce7; } .r-t { color: #166534; } }",
-      "initialJs": "console.log('Responsive loaded');",
-      "instructions": "Измените размер окна."
+      "initialHtml": "<div class=\"responsive-demo\">\n  <div class=\"demo-card\">\n    <h2>Адаптивная карточка</h2>\n    <p>Текст плавно масштабируется через clamp()</p>\n    <span class=\"badge\">Mobile First</span>\n  </div>\n  <div class=\"demo-card\">\n    <h2>Вторая карточка</h2>\n    <p>Измените ширину окна для проверки!</p>\n    <span class=\"badge\">clamp()</span>\n  </div>\n</div>",
+      "initialCss": ".responsive-demo {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: clamp(12px, 2vw, 24px);\n  padding: clamp(12px, 3vw, 32px);\n  background: #0a0e13;\n  font-family: system-ui;\n}\n\n.demo-card {\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: clamp(8px, 1.5vw, 16px);\n  padding: clamp(12px, 3vw, 32px);\n  color: #e6edf3;\n}\n\n.demo-card h2 {\n  font-size: clamp(1.1rem, 3vw, 1.8rem);\n  color: #2dff8a;\n  margin: 0 0 8px;\n}\n\n.demo-card p {\n  font-size: clamp(0.8rem, 1.8vw, 1rem);\n  color: #8b949e;\n  margin: 0 0 12px;\n}\n\n.badge {\n  background: #2dff8a22;\n  color: #2dff8a;\n  padding: 4px 12px;\n  border-radius: 12px;\n  font-size: 12px;\n  font-weight: 600;\n}\n\n@media (min-width: 600px) {\n  .responsive-demo { grid-template-columns: repeat(2, 1fr); }\n}",
+      "initialJs": "console.log('Песочница Responsive Design активна');",
+      "instructions": "Практика с адаптивностью:\n1. Измените значения в clamp() и наблюдайте за масштабированием\n2. Добавьте третий брейкпоинт @media (min-width: 900px) с 3 колонками\n3. Попробуйте заменить @media на grid: repeat(auto-fit, minmax(250px, 1fr))"
     },
     "task": {
-      "title": "Адаптивное меню",
-      "scenario": "Сделайте меню в колонку для мобилок и в строку от 768px.",
+      "title": "Верстка полностью адаптивного лендинга на Mobile First с clamp() и Container Queries",
+      "scenario": "Вам необходимо сверстать адаптивный лендинг учебного курса: Hero-секция на 100dvh с адаптивным заголовком через clamp(), каталог преимуществ на CSS Grid с auto-fit, и карточки-отзывы с Container Queries (горизонтальный вид в широком блоке, вертикальный — в узком).",
       "criteria": [
-        "Базовый flex-direction: column",
-        "В min-width: 768px задан flex-direction: row"
+        "Подход Mobile First с @media (min-width: 768px) и (min-width: 1024px)",
+        "Hero-секция использует 100dvh и clamp() для адаптивного заголовка",
+        "Каталог использует repeat(auto-fit, minmax(280px, 1fr)) для автоадаптации",
+        "Карточки отзывов адаптируются через Container Queries (@container)"
       ],
       "starterCode": {
-        "html": "<nav class=\"m\"><a>Главная</a><a>О нас</a></nav>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили адаптивного лендинга по Mobile First */\n.hero {\n}\n.features-grid {\n}\n.testimonial-wrapper {\n}\n.testimonial-card {\n}"
       },
       "hints": [
-        "Задайте .m { display: flex; flex-direction: column; } @media (min-width: 768px) { .m { flex-direction: row; } }"
+        "Hero: min-height: 100dvh; font-size: clamp(2rem, 6vw, 4rem);",
+        "Grid: repeat(auto-fit, minmax(280px, 1fr))",
+        "Container: .testimonial-wrapper { container-type: inline-size; }"
       ],
       "solution": {
-        "html": "<nav class=\"m\"><a>Главная</a><a>О нас</a></nav>",
-        "css": ".m { display: flex; flex-direction: column; gap: 8px; padding: 16px; background: white; border-radius: 8px; }\n.m a { padding: 8px 16px; background: #f1f5f9; border-radius: 6px; text-decoration: none; color: #334155; }\n@media (min-width: 768px) { .m { flex-direction: row; } }",
-        "explanation": "Адаптивное меню."
+        "css": "/* Hero-секция */\n.hero {\n  min-height: 100dvh;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  text-align: center;\n  padding: clamp(24px, 6vw, 64px);\n  background: linear-gradient(135deg, #0a0e13 0%, #161b22 100%);\n}\n\n.hero h1 {\n  font-size: clamp(2rem, 6vw, 4rem);\n  color: #2dff8a;\n  margin-bottom: clamp(12px, 2vw, 24px);\n}\n\n.hero p {\n  font-size: clamp(1rem, 2.5vw, 1.5rem);\n  color: #8b949e;\n  max-width: 600px;\n}\n\n/* Каталог преимуществ (без @media!) */\n.features-grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));\n  gap: clamp(16px, 3vw, 32px);\n  padding: clamp(24px, 5vw, 64px);\n}\n\n/* Container Queries для отзывов */\n.testimonial-wrapper {\n  container-type: inline-size;\n  container-name: testimonial;\n}\n\n.testimonial-card {\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n  padding: 20px;\n  background: #161b22;\n  border-radius: 12px;\n  border: 1px solid #30363d;\n}\n\n@container testimonial (min-width: 500px) {\n  .testimonial-card {\n    flex-direction: row;\n    align-items: center;\n    gap: 24px;\n  }\n  .testimonial-card .avatar {\n    width: 80px;\n    height: 80px;\n    flex-shrink: 0;\n  }\n}",
+        "explanation": "Лендинг использует все 3 уровня адаптивности: clamp() для плавного масштабирования, auto-fit для автоматической сетки, и Container Queries для компонентной адаптации."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c13-q1",
-          "question": "Какой запрос используется в Mobile-first?",
+          "id": "css13-q1",
+          "question": "В чём главное отличие подхода Mobile First от Desktop First в адаптивном дизайне?",
           "options": [
-            "max-width",
-            "min-width",
-            "screen-only",
-            "portrait"
+            "Mobile First использует @media max-width",
+            "Mobile First пишет базовые стили для мобилок и РАСШИРЯЕТ их через @media (min-width: ...) для больших экранов",
+            "Mobile First запрещает использование Grid",
+            "Разницы нет"
           ],
           "correctIndex": 1,
-          "explanation": "Mobile-first использует min-width."
+          "explanation": "Mobile First: базовый CSS — для мобилки, усложнение через min-width. Desktop First делает наоборот через max-width, что расточительно."
+        },
+        {
+          "id": "css13-q2",
+          "question": "Что делает CSS-функция clamp(1rem, 3vw, 2rem)?",
+          "options": [
+            "Устанавливает фиксированный размер 3vw",
+            "Плавно масштабирует значение между 1rem (минимум) и 2rem (максимум), используя 3vw как предпочтительное гибкое значение",
+            "Обрезает текст",
+            "Устанавливает размер 1rem"
+          ],
+          "correctIndex": 1,
+          "explanation": "clamp(MIN, PREFERRED, MAX) ограничивает значение в диапазоне [MIN, MAX], используя PREFERRED (в vw) для плавного масштабирования между ними."
+        },
+        {
+          "id": "css13-q3",
+          "question": "Почему на мобильных устройствах рекомендуется использовать 100dvh вместо 100vh?",
+          "options": [
+            "dvh работает быстрее",
+            "100vh в мобильном Safari включает область за динамической адресной строкой, создавая нежелательный скролл. 100dvh учитывает текущую видимую область",
+            "dvh поддерживается только в Chrome",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "В мобильном Safari адресная строка скрывается при скролле. 100vh считает полную высоту включая эту зону, а 100dvh — только видимую часть."
+        },
+        {
+          "id": "css13-q4",
+          "question": "Чем Container Queries (@container) принципиально отличаются от Media Queries (@media)?",
+          "options": [
+            "Container Queries реагируют на ширину КОНТЕЙНЕРА (родителя компонента), а не на ширину окна браузера",
+            "Container Queries быстрее работают",
+            "Container Queries используют JavaScript",
+            "Разницы нет"
+          ],
+          "correctIndex": 0,
+          "explanation": "Container Queries позволяют компоненту адаптироваться к размеру его конкретного контейнера, делая его по-настоящему переиспользуемым в разных контекстах."
+        },
+        {
+          "id": "css13-q5",
+          "question": "Зачем нужен meta-тег viewport width=device-width, initial-scale=1?",
+          "options": [
+            "Для подключения JavaScript",
+            "Чтобы мобильный браузер использовал реальную ширину экрана устройства, а не симулировал десктопную ширину ~980px",
+            "Для анимаций",
+            "Для подключения шрифтов"
+          ],
+          "correctIndex": 1,
+          "explanation": "Без viewport meta мобильные браузеры рендерят страницу в виртуальном окне ~980px и масштабируют её — текст становится нечитаемо мелким."
         }
       ]
     }

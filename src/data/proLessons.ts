@@ -2326,5 +2326,197 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-13",
+    "moduleId": "pro",
+    "level": 13,
+    "title": "State Management: управление состоянием в SPA",
+    "subtitle": "Local, Global, Server и URL State. Redux Toolkit, Zustand, TanStack Query, Jotai и React Context",
+    "description": "Освойте все виды состояния в SPA-приложениях: локальное (useState), глобальное (Redux Toolkit, Zustand), серверное (TanStack Query, SWR, stale-while-revalidate) и URL-состояние (параметры маршрута). Научитесь выбирать правильный стейт-менеджер для проекта любого масштаба.",
+    "estimatedMinutes": 65,
+    "difficulty": "advanced",
+    "tags": [
+      "state-management",
+      "redux-toolkit",
+      "zustand",
+      "tanstack-query",
+      "react-context",
+      "jotai",
+      "server-state",
+      "url-state"
+    ],
+    "theory": {
+      "overview": "Состояние (State) — это данные, от которых зависит, что видит пользователь на экране. В простом приложении достаточно `useState`, но при росте до десятков экранов, авторизации, корзины, фильтров и кеша API-ответов — управление состоянием становится **главной архитектурной задачей** фронтенда.\n\nВ этом уроке мы классифицируем 4 типа состояния, разберём индустриальные решения (Redux Toolkit, Zustand, TanStack Query) и научимся выбирать правильный инструмент для проекта любого масштаба.",
+      "sections": [
+        {
+          "title": "4 типа состояния в SPA-приложении",
+          "content": "Классификация состояния по зоне ответственности:\n\n1. **Local State (Локальное / Компонентное)**:\n- Принадлежит одному компоненту: открыт ли модал, значение текстового поля, текущий слайд карусели.\n- Инструменты: `useState`, `useRef`, `useReducer`.\n- Правило: если состояние нужно ТОЛЬКО в одном компоненте — оставьте его локальным!\n\n2. **Global State (Глобальное / Клиентское)**:\n- Разделяется между многими компонентами в разных частях дерева: авторизация, тема (dark/light), корзина товаров, языковая локаль.\n- Инструменты: Redux Toolkit, Zustand, Jotai, MobX, React Context (для простых случаев).\n\n3. **Server State (Серверное / Кеш API)**:\n- Данные, полученные от сервера: списки пользователей, заказов, товаров.\n- Отличается от клиентского: данные «не наши» — они принадлежат серверу и могут устареть. Нужен кеш, ревалидация, оптимистичные обновления.\n- Инструменты: TanStack Query (React Query), SWR, RTK Query.\n\n4. **URL State (Маршрутное)**:\n- Состояние, отражённое в URL: `?page=2&sort=price&category=shoes`.\n- Фильтры, пагинация, поиск — всё, чем пользователь может поделиться ссылкой.\n- Инструменты: React Router (`useSearchParams`), nuqs, Next.js params.",
+          "image": {
+            "src": "/images/lessons/web-state-management.svg",
+            "alt": "4 типа состояния в SPA: Local, Global, Server, URL и однонаправленный поток данных",
+            "caption": "4 типа состояния: Local (useState), Global (Redux/Zustand), Server (TanStack Query), URL (?page=2). Однонаправленный поток: UI → Action → Store → UI"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// ===== 4 типа состояния в одном компоненте =====\n\nfunction ProductCatalog() {\n  // 1. LOCAL STATE — открыт ли фильтр\n  const [isFilterOpen, setFilterOpen] = useState(false);\n\n  // 2. GLOBAL STATE — авторизация (из Zustand)\n  const user = useAuthStore((s) => s.user);\n\n  // 3. SERVER STATE — список товаров (из TanStack Query)\n  const { data: products, isLoading } = useQuery({\n    queryKey: ['products', filters],\n    queryFn: () => api.get('/products', { params: filters }),\n    staleTime: 5 * 60 * 1000, // Кеш свежий 5 минут\n  });\n\n  // 4. URL STATE — фильтры из строки URL\n  const [searchParams, setSearchParams] = useSearchParams();\n  const page = Number(searchParams.get('page') || 1);\n  const sort = searchParams.get('sort') || 'popular';\n\n  return <div>...</div>;\n}",
+            "title": "Все 4 типа состояния: useState, Zustand, TanStack Query и useSearchParams",
+            "explanation": "Каждый тип состояния управляется своим специализированным инструментом. Смешивание ответственностей приводит к хаосу."
+          }
+        },
+        {
+          "title": "Zustand — минималистичный глобальный стейт-менеджер",
+          "content": "Zustand — глобальный стейт-менеджер нового поколения (3 КБ, Zero Boilerplate):\n\nПреимущества Zustand перед Redux:\n- **Нулевой бойлерплейт**: нет action types, reducers, action creators, dispatch, switch-case.\n- **3 КБ** gzip (Redux Toolkit ≈ 11 КБ + React-Redux ≈ 5 КБ).\n- **Нет Providers**: не нужно оборачивать приложение в `<Provider store={store}>`.\n- **Прямая мутация** через Immer (опционально) или ручные обновления.\n- **Встроенные middleware**: persist (localStorage), devtools (Redux DevTools), subscribeWithSelector.\n\nКогда использовать Zustand:\n- Средние проекты (5–30 экранов).\n- Когда нужна простота без бойлерплейта Redux.\n- Для standalone глобального стейта: тема, авторизация, корзина, тосты.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// store/useCartStore.js — Zustand стор корзины (весь файл!)\nimport { create } from 'zustand';\nimport { persist } from 'zustand/middleware';\n\nconst useCartStore = create(\n  persist(\n    (set, get) => ({\n      items: [],\n      \n      // Добавить товар (или +1 к количеству)\n      addItem: (product) => set((state) => {\n        const existing = state.items.find(i => i.id === product.id);\n        if (existing) {\n          return { items: state.items.map(i =>\n            i.id === product.id ? { ...i, qty: i.qty + 1 } : i\n          )};\n        }\n        return { items: [...state.items, { ...product, qty: 1 }] };\n      }),\n      \n      // Удалить товар\n      removeItem: (id) => set((state) => ({\n        items: state.items.filter(i => i.id !== id)\n      })),\n      \n      // Подсчёт общей суммы (вычисляемое значение)\n      get totalPrice() {\n        return get().items.reduce((sum, i) => sum + i.price * i.qty, 0);\n      },\n      \n      // Очистить корзину\n      clearCart: () => set({ items: [] }),\n    }),\n    { name: 'cart-storage' } // Автосохранение в localStorage!\n  )\n);\n\n// Использование в компоненте:\n// const items = useCartStore(s => s.items);\n// const addItem = useCartStore(s => s.addItem);",
+            "title": "Zustand: полноценная корзина с persist в localStorage за 30 строк",
+            "explanation": "Zustand создаёт стор одной функцией create(). Middleware persist автоматически сохраняет корзину в localStorage и восстанавливает при перезагрузке."
+          }
+        },
+        {
+          "title": "TanStack Query — управление серверным состоянием и кешем API",
+          "content": "Почему серверное состояние нельзя хранить в Redux/Zustand:\n- Данные из API **принадлежат серверу**, а не клиенту. Они могут устареть в любой момент.\n- Нужен **кеш с ревалидацией**: показать устаревшие данные мгновенно из кеша, а в фоне загрузить свежие (pattern **stale-while-revalidate**).\n- Нужны автоматические повторы при сбое, пагинация, бесконечная прокрутка, оптимистичные обновления.\n\nTanStack Query (React Query v5) решает все эти задачи:\n- `useQuery()` — GET-запросы с кешем, автоматическим рефетчем и стейтом загрузки.\n- `useMutation()` — POST/PUT/DELETE с оптимистичными обновлениями и инвалидацией кеша.\n- `staleTime` — время, в течение которого кеш считается свежим и повторный запрос не отправляется.\n- `gcTime` (бывший `cacheTime`) — время жизни кеша после размонтирования компонента.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// hooks/useProducts.js — серверный стейт через TanStack Query\nimport { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';\nimport { api } from '../shared/api/apiClient';\n\n// GET: Получить список товаров с кешем\nexport function useProducts(filters) {\n  return useQuery({\n    queryKey: ['products', filters],   // Уникальный ключ кеша\n    queryFn: () => api.get('/products', { params: filters }),\n    staleTime: 5 * 60 * 1000,          // 5 минут — данные считаются свежими\n    placeholderData: (previousData) => previousData, // Показываем старые, пока грузятся новые\n  });\n}\n\n// POST: Создать товар + оптимистичное обновление\nexport function useCreateProduct() {\n  const queryClient = useQueryClient();\n  \n  return useMutation({\n    mutationFn: (newProduct) => api.post('/products', newProduct),\n    \n    // Мгновенно добавляем товар в UI (до ответа сервера!)\n    onMutate: async (newProduct) => {\n      await queryClient.cancelQueries({ queryKey: ['products'] });\n      const previous = queryClient.getQueryData(['products']);\n      queryClient.setQueryData(['products'], (old) => [\n        ...old, { ...newProduct, id: Date.now() } // Временный id\n      ]);\n      return { previous }; // Сохраняем для отката\n    },\n    \n    // При ошибке — откатываем оптимистичное обновление\n    onError: (err, vars, context) => {\n      queryClient.setQueryData(['products'], context.previous);\n    },\n    \n    // При любом исходе — обновляем кеш с сервера\n    onSettled: () => {\n      queryClient.invalidateQueries({ queryKey: ['products'] });\n    },\n  });\n}",
+            "title": "TanStack Query: кеш, stale-while-revalidate и оптимистичные обновления",
+            "explanation": "useQuery кеширует данные на 5 минут. useMutation с onMutate мгновенно обновляет UI, а при ошибке откатывает изменения к предыдущему состоянию."
+          }
+        },
+        {
+          "title": "Как выбрать стейт-менеджер: матрица решений",
+          "content": "Практическая матрица выбора инструментов по масштабу проекта:\n\n1. **Маленький проект (1–5 экранов, 1 разработчик)**:\n- Local: `useState` + `useReducer`.\n- Global: `React Context` (тема, локаль).\n- Server: `fetch` + `useState` или `useSWR`.\n- Не подключайте Redux для двух переменных!\n\n2. **Средний проект (5–20 экранов, 2–5 разработчиков)**:\n- Local: `useState`.\n- Global: **Zustand** (3 КБ, zero boilerplate, persist middleware).\n- Server: **TanStack Query** (кеш, ревалидация, пагинация).\n- URL: `useSearchParams`.\n\n3. **Крупный Enterprise (50+ экранов, 10+ разработчиков)**:\n- Local: `useState`.\n- Global: **Redux Toolkit** (строгость, DevTools, middleware, ecosystem).\n- Server: **RTK Query** (встроен в RTK) или **TanStack Query**.\n- URL: `useSearchParams` + `nuqs`.\n\nЗолотое правило: **не смешивайте серверный и клиентский стейт!** Серверные данные (API-ответы) управляются TanStack Query, а клиентские (тема, корзина, модалы) — Zustand/Redux.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// ===== Антипаттерн: серверные данные в Redux (НЕ ДЕЛАЙТЕ ТАК!) =====\n// ❌ Redux-стор забит устаревшими данными из API\n// const usersSlice = createSlice({\n//   initialState: { users: [], loading: false, error: null },\n//   reducers: { setUsers, setLoading, setError },\n// });\n// useEffect(() => { dispatch(fetchUsers()); }, []);\n\n// ===== Правильный подход: разделение ответственности =====\n\n// ✅ Серверные данные — TanStack Query (кеш + ревалидация)\nconst { data: users, isLoading } = useQuery({\n  queryKey: ['users'],\n  queryFn: fetchUsers,\n  staleTime: 60_000,\n});\n\n// ✅ Клиентский стейт — Zustand (тема, модалы, корзина)\nconst theme = useThemeStore((s) => s.theme);\nconst toggleTheme = useThemeStore((s) => s.toggleTheme);\n\n// ✅ URL стейт — useSearchParams (фильтры, пагинация)\nconst [params] = useSearchParams();\nconst page = Number(params.get('page') || 1);",
+            "title": "Разделение ответственности: TanStack Query + Zustand + URL",
+            "explanation": "Каждый тип данных управляется специализированным инструментом. Серверные данные в Redux — антипаттерн, создающий ручное управление кешем."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Никогда не храните данные из API в Redux/Zustand напрямую — используйте TanStack Query (или RTK Query) для автоматического кеширования, ревалидации и обработки стейтов загрузки.",
+        "Используйте Zustand вместо Redux для средних проектов — в 5 раз меньше бойлерплейта и в 3 раза меньше бандл.",
+        "Всегда разделяйте серверный стейт (API-кеш) и клиентский стейт (тема, модалы, корзина) — это два принципиально разных класса данных.",
+        "Фильтры каталога, пагинацию и поисковую строку храните в URL (?page=2&sort=price) через useSearchParams — это позволяет делиться ссылками и сохраняет состояние при навигации."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Хранение серверных данных в Redux с ручным управлением\nconst [users, setUsers] = useState([]);\nconst [loading, setLoading] = useState(false);\nuseEffect(() => { setLoading(true); fetchUsers().then(setUsers).finally(() => setLoading(false)); }, []);",
+          "good": "// TanStack Query управляет кешем, загрузкой и ошибками автоматически\nconst { data: users, isLoading, error } = useQuery({ queryKey: ['users'], queryFn: fetchUsers });",
+          "reason": "Ручное управление isLoading, error и кешем — бойлерплейт, создающий баги. TanStack Query решает это декларативно."
+        },
+        {
+          "bad": "// Подключение Redux для хранения темы и открытия модала\n// createSlice + Provider + useSelector + dispatch — 50 строк бойлерплейта ради 2 переменных",
+          "good": "// Zustand: 5 строк кода\nconst useTheme = create((set) => ({\n  isDark: true,\n  toggle: () => set((s) => ({ isDark: !s.isDark })),\n}));",
+          "reason": "Для простого глобального стейта Redux избыточен. Zustand решает задачу в 10 раз компактнее."
+        },
+        {
+          "bad": "// Prop Drilling: прокидывание состояния через 5 уровней\n<App user={user}>\n  <Layout user={user}>\n    <Sidebar user={user}>\n      <UserAvatar user={user} />",
+          "good": "// Глобальный стейт Zustand — доступ из любого компонента\nconst user = useAuthStore(s => s.user);",
+          "reason": "Prop Drilling создает хрупкие связи между компонентами. Глобальный стейт делает данные доступными напрямую."
+        }
+      ],
+      "keyTakeaways": [
+        "4 типа состояния: Local (useState), Global (Zustand/Redux), Server (TanStack Query), URL (useSearchParams).",
+        "Серверные данные (API-кеш) и клиентские данные (тема, корзина) — разные сущности, управляемые разными инструментами.",
+        "Zustand — идеальный выбор для средних проектов: 3 КБ, zero boilerplate, persist middleware.",
+        "TanStack Query автоматизирует кеш, ревалидацию, повторные попытки и оптимистичные обновления API-данных.",
+        "Фильтры и пагинацию храните в URL для возможности поделиться ссылкой и сохранить состояние."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"state-app\">\n  <h3>Мини-счётчик корзины (State Demo)</h3>\n  <div style=\"display:flex; gap:8px; align-items:center; margin-bottom:12px;\">\n    <button id=\"btn-add\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">+ Добавить товар</button>\n    <button id=\"btn-remove\" style=\"background:#f85149; color:#fff; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">– Убрать</button>\n    <button id=\"btn-clear\" style=\"background:#30363d; color:#e6edf3; border:none; padding:8px 16px; cursor:pointer;\">Очистить</button>\n  </div>\n  <div id=\"cart-display\" style=\"color:#2dff8a; font-size:14px; font-weight:bold;\">Корзина: 0 товаров | Сумма: 0 ₽</div>\n  <div id=\"cart-items\" style=\"margin-top:8px; color:#8b949e; font-size:12px;\"></div>\n</div>",
+      "initialCss": "#state-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "// Простой стор — паттерн Zustand-like\nconst store = {\n  items: [],\n  listeners: new Set(),\n  subscribe(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); },\n  notify() { this.listeners.forEach(fn => fn(this)); },\n  addItem() {\n    const id = Date.now();\n    const price = Math.floor(Math.random() * 2000) + 500;\n    this.items.push({ id, name: `Товар #${this.items.length + 1}`, price });\n    this.notify();\n  },\n  removeItem() { this.items.pop(); this.notify(); },\n  clear() { this.items = []; this.notify(); },\n  get total() { return this.items.reduce((s, i) => s + i.price, 0); }\n};\n\nfunction render(s) {\n  document.getElementById('cart-display').textContent = `Корзина: ${s.items.length} товаров | Сумма: ${s.total.toLocaleString()} ₽`;\n  document.getElementById('cart-items').textContent = s.items.map(i => `${i.name}: ${i.price}₽`).join(' | ');\n}\n\nstore.subscribe(render);\ndocument.getElementById('btn-add').onclick = () => store.addItem();\ndocument.getElementById('btn-remove').onclick = () => store.removeItem();\ndocument.getElementById('btn-clear').onclick = () => store.clear();",
+      "instructions": "Демо управления состоянием:\n1. Нажимайте '+ Добавить товар' — товары добавляются в стор с случайной ценой\n2. '- Убрать' удаляет последний товар\n3. 'Очистить' сбрасывает корзину\n4. Попробуйте добавить persist (сохранение в localStorage)"
+    },
+    "task": {
+      "title": "Проектирование архитектуры State Management для интернет-магазина",
+      "scenario": "Вам необходимо спроектировать архитектуру управления состоянием для интернет-магазина: корзина (Zustand + persist), каталог товаров (TanStack Query с кешем), фильтры (URL State) и авторизация (Zustand). Реализуйте Zustand-стор корзины с методами addItem, removeItem, clearCart и вычисляемым totalPrice, а также хук useProducts на TanStack Query.",
+      "criteria": [
+        "Zustand стор корзины с методами addItem, removeItem, clearCart",
+        "Middleware persist для автосохранения корзины в localStorage",
+        "Хук useProducts на TanStack Query с queryKey, queryFn и staleTime",
+        "Чёткое разделение серверного (API) и клиентского (корзина) состояния"
+      ],
+      "starterCode": {
+        "js": "// Спроектируйте Zustand стор корзины и хук useProducts\n// Ваш код"
+      },
+      "hints": [
+        "import { create } from 'zustand'; import { persist } from 'zustand/middleware';",
+        "addItem: (product) => set(state => ({ items: [...state.items, product] }))",
+        "useQuery({ queryKey: ['products', filters], queryFn: ..., staleTime: 300000 })"
+      ],
+      "solution": {
+        "js": "// ===== 1. Zustand стор корзины =====\nconst useCartStore = (function() {\n  let state = { items: [] };\n  const listeners = new Set();\n\n  // Загружаем из localStorage\n  try {\n    const saved = localStorage.getItem('cart-storage');\n    if (saved) state = JSON.parse(saved);\n  } catch(e) {}\n\n  function set(updater) {\n    state = typeof updater === 'function' ? { ...state, ...updater(state) } : { ...state, ...updater };\n    localStorage.setItem('cart-storage', JSON.stringify(state));\n    listeners.forEach(fn => fn());\n  }\n\n  return function useCartStore(selector) {\n    const store = {\n      ...state,\n      addItem: (product) => set(s => {\n        const existing = s.items.find(i => i.id === product.id);\n        if (existing) {\n          return { items: s.items.map(i => i.id === product.id ? { ...i, qty: i.qty + 1 } : i) };\n        }\n        return { items: [...s.items, { ...product, qty: 1 }] };\n      }),\n      removeItem: (id) => set(s => ({ items: s.items.filter(i => i.id !== id) })),\n      clearCart: () => set({ items: [] }),\n      get totalPrice() { return state.items.reduce((sum, i) => sum + i.price * i.qty, 0); },\n    };\n    return selector ? selector(store) : store;\n  };\n})();\n\nconsole.log('Архитектура State Management спроектирована!');",
+        "explanation": "Zustand-like стор корзины с persist в localStorage, вычисляемым totalPrice и чётким API. Серверные данные управляются отдельно через TanStack Query."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro13-q1",
+          "question": "Какие 4 типа состояния выделяют в архитектуре современного SPA?",
+          "options": [
+            "Быстрое, медленное, среднее, локальное",
+            "Local (компонентное), Global (глобальное клиентское), Server (серверный кеш API), URL (маршрутное)",
+            "HTML, CSS, JS, JSON",
+            "Синхронное и асинхронное"
+          ],
+          "correctIndex": 1,
+          "explanation": "4 типа: Local (useState), Global (Zustand/Redux), Server (TanStack Query/SWR), URL (searchParams). Каждый тип требует своего инструмента."
+        },
+        {
+          "id": "pro13-q2",
+          "question": "Почему серверные данные (API-ответы) НЕ рекомендуется хранить в Redux?",
+          "options": [
+            "Redux не поддерживает массивы",
+            "Серверные данные принадлежат серверу и могут устареть в любой момент — нужны кеш, ревалидация и автоматические повторы, которые Redux не предоставляет из коробки",
+            "Redux медленнее fetch",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "Redux хранит клиентские данные (тема, корзина). Для серверного кеша нужны stale-while-revalidate, автоматический refetch и оптимистичные обновления — это решает TanStack Query."
+        },
+        {
+          "id": "pro13-q3",
+          "question": "В чём главное преимущество Zustand перед Redux для средних проектов?",
+          "options": [
+            "Zustand работает только в Node.js",
+            "Zustand в 5 раз компактнее (3 КБ vs 16 КБ), не требует Provider, boilerplate-free и поддерживает persist из коробки",
+            "Zustand не поддерживает TypeScript",
+            "Redux Toolkit полностью идентичен Zustand"
+          ],
+          "correctIndex": 1,
+          "explanation": "Zustand создаёт стор одной функцией create() без Provider, dispatch, createSlice, configureStore и прочего бойлерплейта Redux."
+        },
+        {
+          "id": "pro13-q4",
+          "question": "Что означает параметр staleTime в TanStack Query?",
+          "options": [
+            "Время анимации загрузки",
+            "Время, в течение которого закешированные данные считаются свежими и повторный запрос к серверу НЕ отправляется",
+            "Максимальный размер кеша",
+            "Время жизни cookie"
+          ],
+          "correctIndex": 1,
+          "explanation": "staleTime определяет период свежести кеша. Пока данные не устарели, TanStack Query мгновенно возвращает их из кеша без сетевого запроса."
+        },
+        {
+          "id": "pro13-q5",
+          "question": "Где правильнее всего хранить фильтры каталога (?category=shoes&sort=price) в SPA?",
+          "options": [
+            "В useState локально",
+            "В URL через useSearchParams — это позволяет делиться ссылкой и сохраняет фильтры при навигации по истории (back/forward)",
+            "В localStorage",
+            "В cookie"
+          ],
+          "correctIndex": 1,
+          "explanation": "URL State позволяет пользователю поделиться ссылкой с конкретными фильтрами, а также корректно работает с кнопками Назад/Вперёд в браузере."
+        }
+      ]
+    }
   }
 ];

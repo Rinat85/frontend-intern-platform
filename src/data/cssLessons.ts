@@ -211,85 +211,191 @@ export const cssLessons: Lesson[] = [
     "id": "css-2",
     "moduleId": "css",
     "level": 2,
-    "title": "Каскад, специфичность и наследование",
-    "subtitle": "Как браузер вычисляет вес селекторов и разрешает конфликты",
-    "description": "Математика CSS: Specificity (inline > ID > class > tag), правила каскада, наследуемые свойства и почему !important разрушает архитектуру.",
-    "estimatedMinutes": 35,
+    "title": "Flexbox и адаптивная верстка",
+    "subtitle": "Одномерная раскладка, оси, выравнивание и медиа-запросы",
+    "description": "Освойте CSS Flexbox для построения гибких одномерных раскладок, научитесь использовать медиа-запросы и создавать адаптивные интерфейсы по принципу Mobile First.",
+    "estimatedMinutes": 60,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Cascade",
-      "Specificity",
-      "Inheritance"
+      "flexbox",
+      "responsive",
+      "media-queries",
+      "mobile-first",
+      "layout"
     ],
     "theory": {
-      "overview": "Каскадность определяет победу правил при конфликте стилей. Браузер вычисляет специфичность каждого правила.",
+      "overview": "В первом уроке мы изучили селекторы, каскад и специфичность. Теперь настало время освоить Flexbox — главный инструмент одномерной раскладки в CSS. Flexbox (Flexible Box Layout Module) решает задачи, которые раньше требовали float-хаков, clearfix и абсолютного позиционирования: центрирование элементов, равномерное распределение пространства, выравнивание по осям и адаптивные сетки.\n\nFlexbox оперирует двумя осями: Main Axis (главная ось, по умолчанию горизонтальная) и Cross Axis (поперечная ось, перпендикулярная главной). Все свойства выравнивания привязаны к этим осям, и именно понимание осей — ключ к мастерству Flexbox.",
       "sections": [
         {
-          "title": "Матрица специфичности",
-          "content": "- Inline: вес 1000\n- ID: вес 100\n- Class, attribute, pseudo-class: вес 10\n- Tag, pseudo-element: вес 1\n- Побеждает наивысший вес.",
+          "title": "Flex-контейнер: display:flex и управление осями",
+          "content": "Для активации Flexbox достаточно одного свойства на родительском элементе: `display: flex`. Все прямые дочерние элементы автоматически становятся flex-items (гибкими элементами).\n\nСвойства flex-контейнера (родителя):\n\n`flex-direction` — определяет направление главной оси:\n- `row` (по умолчанию) — горизонтально, слева направо\n- `row-reverse` — горизонтально, справа налево\n- `column` — вертикально, сверху вниз\n- `column-reverse` — вертикально, снизу вверх\n\n`flex-wrap` — управляет переносом элементов:\n- `nowrap` (по умолчанию) — все элементы в одну линию, могут сжиматься\n- `wrap` — перенос на новую строку при нехватке места\n- `wrap-reverse` — перенос в обратном направлении\n\n`justify-content` — выравнивание вдоль ГЛАВНОЙ оси:\n- `flex-start` — прижать к началу\n- `flex-end` — прижать к концу\n- `center` — центрировать\n- `space-between` — крайние элементы к краям, остальные равномерно\n- `space-around` — равные отступы вокруг каждого элемента\n- `space-evenly` — абсолютно равные промежутки\n\n`align-items` — выравнивание вдоль ПОПЕРЕЧНОЙ оси:\n- `stretch` (по умолчанию) — растянуть на всю высоту контейнера\n- `flex-start` — прижать к верху\n- `flex-end` — прижать к низу\n- `center` — центрировать вертикально\n- `baseline` — выровнять по базовой линии текста\n\n`gap` — отступ между flex-items (заменяет margin-хаки):\n- `gap: 16px` — равный зазор\n- `row-gap: 16px; column-gap: 24px` — раздельные зазоры",
+          "image": {
+            "src": "/images/lessons/css-flexbox-layout.jpg",
+            "alt": "Визуализация CSS Flexbox: main axis, cross axis, justify-content и align-items",
+            "caption": "Flexbox: justify-content управляет главной осью, align-items — поперечной. gap задаёт отступы между элементами"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Веса селекторов",
-            "code": "p { color: black; } /* 1 */\n.text { color: green; } /* 10 */\n#main { color: red; } /* 100 -> ПОБЕДИТЕЛЬ */",
-            "explanation": "ID побеждает классы."
+            "code": "/* Навигационная панель с Flexbox */\n.navbar {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  padding: 12px 24px;\n  background: #0a0e13;\n  gap: 16px;\n}\n\n.navbar-logo {\n  font-size: 20px;\n  font-weight: 700;\n  color: #2dff8a;\n}\n\n.navbar-links {\n  display: flex;\n  gap: 24px;\n  list-style: none;\n  margin: 0;\n  padding: 0;\n}\n\n/* Абсолютное центрирование */\n.hero {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  min-height: 100vh;\n}",
+            "title": "Flexbox: навигация и центрирование",
+            "explanation": "space-between прижимает логотип к левому краю, ссылки — к правому. Вложенный flex (navbar-links) выстраивает ссылки горизонтально с gap. Абсолютное центрирование достигается justify-content: center + align-items: center."
+          }
+        },
+        {
+          "title": "Flex-элементы: flex-grow, flex-shrink, flex-basis",
+          "content": "Свойства flex-элементов (детей) определяют, как они делят доступное пространство внутри контейнера.\n\n`flex-grow` — коэффициент роста. Определяет, как элемент занимает СВОБОДНОЕ пространство:\n- `flex-grow: 0` (по умолчанию) — не растёт, сохраняет свой размер\n- `flex-grow: 1` — забирает всё доступное свободное пространство\n- Если у всех элементов `flex-grow: 1` — они делят пространство поровну\n- Если у одного `flex-grow: 2`, а у остальных `1` — он получит в 2 раза больше свободного пространства\n\n`flex-shrink` — коэффициент сжатия. Определяет, насколько элемент может сжиматься при нехватке места:\n- `flex-shrink: 1` (по умолчанию) — сжимается пропорционально\n- `flex-shrink: 0` — не сжимается (фиксированная ширина)\n\n`flex-basis` — начальный размер элемента до распределения свободного пространства:\n- `flex-basis: auto` (по умолчанию) — размер определяется контентом или width\n- `flex-basis: 200px` — начальная ширина 200px\n- `flex-basis: 0` — игнорировать размер контента, делить пространство только по flex-grow\n\nСокращённое свойство `flex` — комбинирует grow, shrink, basis:\n- `flex: 1` = `flex: 1 1 0%` — растёт, сжимается, basis = 0\n- `flex: 0 0 200px` — не растёт, не сжимается, фиксированная ширина 200px\n- `flex: auto` = `flex: 1 1 auto` — гибкий с учётом размера контента\n\nПолезные паттерны:\n- `flex: 1` на все элементы — равные колонки\n- Sidebar: `flex: 0 0 280px`, Main: `flex: 1` — фиксированный сайдбар + гибкий контент\n- `order: -1` — визуально переместить элемент в начало (не влияет на DOM и a11y)",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Классический layout: sidebar + main */\n.layout {\n  display: flex;\n  min-height: 100vh;\n}\n\n.sidebar {\n  flex: 0 0 260px;  /* фиксированная ширина */\n  background: #0d1117;\n  padding: 24px;\n}\n\n.content {\n  flex: 1;  /* занимает всё оставшееся место */\n  padding: 24px 32px;\n}\n\n/* Карточки равной ширины с переносом */\n.cards-grid {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 16px;\n}\n\n.card {\n  flex: 1 1 280px;\n  /* Растёт, сжимается, минимум 280px */\n  /* При нехватке места — перенос на новую строку */\n  padding: 20px;\n  border: 1px solid #2a2f38;\n  border-radius: 8px;\n}",
+            "title": "Sidebar Layout + адаптивная сетка карточек на Flexbox",
+            "explanation": "Sidebar с flex: 0 0 260px не растёт и не сжимается. Content с flex: 1 занимает всё остальное. Карточки с flex: 1 1 280px автоматически выстраиваются в сетку: при ширине > 280px × N+gap — N колонок, при нехватке места — перенос."
+          }
+        },
+        {
+          "title": "Медиа-запросы и подход Mobile First",
+          "content": "Медиа-запросы (`@media`) позволяют применять CSS-правила условно, в зависимости от характеристик устройства: ширины viewport, ориентации экрана, предпочтений пользователя.\n\nПодход Mobile First — стандарт индустрии. Его суть: базовые стили пишутся для мобильных экранов (самый простой layout), затем через `@media (min-width: ...)` добавляются расширения для планшетов и десктоп.\n\nПочему Mobile First?\n1. Производительность: мобильные устройства получают минимум CSS, не загружая лишние правила\n2. Приоритизация контента: заставляет дизайнера показать только важное на маленьком экране\n3. Прогрессивное улучшение: базовый опыт работает везде, улучшения добавляются для мощных устройств\n\nСтандартные брейкпоинты (Bootstrap/Tailwind convention):\n- Мобильные: `0 - 639px` (базовые стили, без @media)\n- Планшеты: `@media (min-width: 640px)` — sm\n- Малые десктопы: `@media (min-width: 768px)` — md\n- Десктопы: `@media (min-width: 1024px)` — lg\n- Большие экраны: `@media (min-width: 1280px)` — xl\n\nПолезные медиа-фичи:\n\n`prefers-color-scheme: dark` — тёмная тема ОС\n`prefers-reduced-motion: reduce` — пользователь отключил анимации (a11y!)\n`hover: hover` — устройство поддерживает hover (десктоп)\n`orientation: landscape` / `portrait` — ориентация экрана",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Mobile First: базовые стили для мобильных */\n.container {\n  padding: 16px;\n  max-width: 1200px;\n  margin: 0 auto;\n}\n\n.grid {\n  display: flex;\n  flex-direction: column;\n  gap: 16px;\n}\n\n.card {\n  padding: 16px;\n  border: 1px solid #2a2f38;\n  border-radius: 8px;\n}\n\n/* Планшеты: 2 колонки */\n@media (min-width: 640px) {\n  .grid {\n    flex-direction: row;\n    flex-wrap: wrap;\n  }\n  .card {\n    flex: 1 1 calc(50% - 8px);\n  }\n}\n\n/* Десктоп: 3 колонки */\n@media (min-width: 1024px) {\n  .card {\n    flex: 1 1 calc(33.333% - 11px);\n  }\n}\n\n/* Тёмная тема ОС */\n@media (prefers-color-scheme: dark) {\n  :root { --bg: #0a0e13; --fg: #e0e0e0; }\n}\n\n/* Отключение анимаций (a11y) */\n@media (prefers-reduced-motion: reduce) {\n  *, *::before, *::after {\n    animation-duration: 0.01ms !important;\n    transition-duration: 0.01ms !important;\n  }\n}",
+            "title": "Mobile First адаптивная сетка с медиа-запросами",
+            "explanation": "Базовые стили — одна колонка (мобильные). При 640px+ — 2 колонки через calc(50% - gap/2). При 1024px+ — 3 колонки. prefers-reduced-motion убирает анимации для пользователей с вестибулярными нарушениями."
+          }
+        },
+        {
+          "title": "CSS единицы измерения: px, em, rem, vw/vh, %, clamp()",
+          "content": "Выбор единиц измерения напрямую влияет на адаптивность, доступность и масштабируемость верстки.\n\nАбсолютные единицы:\n`px` (пиксели) — фиксированный размер. Используйте для: border, box-shadow, мелких декоративных элементов. НЕ используйте для font-size (ломает zoom/accessibility).\n\nОтносительные единицы:\n`em` — относительно font-size РОДИТЕЛЬСКОГО элемента. 1em = размер шрифта родителя. Каскадируется: em внутри em = компounding (1.5em × 1.5em = 2.25 оригинала). Используйте для: padding и margin внутри компонентов (масштабируется пропорционально тексту).\n\n`rem` — относительно font-size корневого элемента `<html>`. 1rem = 16px по умолчанию. НЕ каскадируется. Используйте для: font-size, глобальные отступы, медиа-запросы. Это стандарт индустрии для типографики.\n\nViewport единицы:\n`vw` — 1% ширины viewport. 100vw = полная ширина экрана.\n`vh` — 1% высоты viewport. 100vh = полная высота экрана.\n`dvh` (Dynamic Viewport Height) — учитывает выдвижную адресную строку мобильных браузеров (в отличие от vh).\n`svh` / `lvh` — Small/Large Viewport Height.\n\n`%` — относительно размера родительского элемента.\n\nФункция `clamp(min, preferred, max)` — адаптивные значения БЕЗ медиа-запросов:\n`font-size: clamp(16px, 2.5vw, 24px)` — шрифт не менее 16px, идеально 2.5% ширины экрана, но не более 24px.\n\nФункция `calc()` — арифметика с разными единицами:\n`width: calc(100% - 260px)` — ширина минус фиксированный сайдбар.\n`padding: calc(1rem + 1vw)` — комбинация абсолютного и viewport отступа.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Адаптивная типографика с clamp() */\n:root {\n  font-size: 16px; /* 1rem = 16px */\n}\n\nh1 {\n  /* min 28px, идеально 5vw, max 48px */\n  font-size: clamp(1.75rem, 5vw, 3rem);\n  line-height: 1.2;\n}\n\nh2 {\n  font-size: clamp(1.25rem, 3vw, 2rem);\n}\n\np {\n  font-size: 1rem; /* = 16px */\n  line-height: 1.6;\n  /* margin в em — масштабируется с font-size */\n  margin-bottom: 1em;\n}\n\n/* Hero на всю высоту экрана */\n.hero {\n  min-height: 100dvh; /* Dynamic Viewport Height */\n  padding: calc(2rem + 2vw);\n}\n\n/* Контейнер с максимальной шириной */\n.container {\n  width: min(1200px, 100% - 2rem);\n  margin-inline: auto; /* horizontal centering */\n}",
+            "title": "Адаптивная типографика с clamp(), rem и dvh",
+            "explanation": "clamp() обеспечивает плавное масштабирование шрифтов без @media. rem для типографики сохраняет доступность (настройки масштабирования пользователя). dvh решает проблему с адресной строкой мобильных браузеров. min() с вычитанием заменяет max-width + padding."
           }
         }
       ],
       "seniorTips": [
-        "Никогда не используйте !important для решения проблем каскада."
+        "Никогда не используйте px для font-size — это ломает масштабирование для пользователей с нарушениями зрения. Используйте rem или clamp().",
+        "Flexbox gap — современная замена margin-хаков между элементами. Поддержка gap в flex: 95%+ браузеров.",
+        "Тестируйте адаптивность в Chrome DevTools (Ctrl+Shift+M) на реальных устройствах: iPhone SE (375px), iPad (768px), Desktop (1024px+).",
+        "prefers-reduced-motion: reduce — обязательная проверка для a11y. Пользователи с вестибулярными нарушениями могут испытывать головокружение от анимаций."
       ],
       "commonMistakes": [
         {
-          "bad": ".btn { color: red !important; }",
-          "good": ".btn-danger { color: red; }",
-          "reason": "!important создает техдолг."
+          "bad": ".container {\n  width: 1200px;\n}\n.text {\n  font-size: 14px;\n}",
+          "good": ".container {\n  width: min(1200px, 100% - 2rem);\n  margin-inline: auto;\n}\n.text {\n  font-size: 0.875rem;\n}",
+          "reason": "Фиксированная width в px создаёт горизонтальный скролл на мобильных. font-size в px не масштабируется при изменении пользователем настроек размера текста в браузере."
+        },
+        {
+          "bad": ".flex-item {\n  margin-right: 16px;\n}\n.flex-item:last-child {\n  margin-right: 0;\n}",
+          "good": ".flex-container {\n  display: flex;\n  gap: 16px;\n}",
+          "reason": "margin-хак для отступов между flex-items — устаревший паттерн. gap автоматически обрабатывает крайние элементы и работает с flex-wrap."
+        },
+        {
+          "bad": "@media (max-width: 768px) {\n  /* мобильные стили */\n}",
+          "good": "/* базовые мобильные стили */\n@media (min-width: 768px) {\n  /* расширения для планшетов */\n}",
+          "reason": "Desktop First (max-width) — антипаттерн. Мобильные получают лишние CSS-правила, которые затем переопределяются. Mobile First (min-width) загружает минимум CSS для каждого устройства."
         }
       ],
       "keyTakeaways": [
-        "Inline (1000) > ID (100) > Class (10) > Tag (1).",
-        "Текстовые свойства наследуются."
+        "Flexbox оперирует двумя осями: `justify-content` управляет главной (Main Axis), `align-items` — поперечной (Cross Axis). `gap` задаёт отступы между элементами.",
+        "Свойство `flex: grow shrink basis` определяет поведение элемента: `flex: 1` — растёт и заполняет пространство, `flex: 0 0 260px` — фиксированный размер.",
+        "Mobile First (`min-width`) — стандарт индустрии: базовые стили для мобильных, расширения через `@media (min-width: ...)` для планшетов и десктоп.",
+        "Используйте `rem` для font-size (доступность), `clamp()` для адаптивной типографики, `dvh` для высоты viewport на мобильных, `gap` вместо margin-хаков.",
+        "`prefers-reduced-motion: reduce` и `prefers-color-scheme: dark` — обязательные медиа-фичи для доступности и UX."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"cascade-demo\" id=\"box\"><p class=\"text\">Текст</p></div>",
-      "initialCss": ".cascade-demo p { color: #3b82f6; }\n#box .text { color: #6366f1; font-weight: bold; }",
-      "initialJs": "console.log('Cascade loaded');",
-      "instructions": "Посмотрите приоритет ID."
+      "initialHtml": "<div class=\"card-grid\">\n  <div class=\"card\">\n    <h3>HTML</h3>\n    <p>Семантика и формы</p>\n  </div>\n  <div class=\"card\">\n    <h3>CSS</h3>\n    <p>Flexbox и Grid</p>\n  </div>\n  <div class=\"card\">\n    <h3>JavaScript</h3>\n    <p>ES6+ и DOM API</p>\n  </div>\n  <div class=\"card\">\n    <h3>React</h3>\n    <p>Компоненты и хуки</p>\n  </div>\n</div>",
+      "initialCss": ".card-grid {\n  /* Добавьте flex-контейнер */\n}\n\n.card {\n  padding: 24px;\n  border: 1px solid #2a2f38;\n  border-radius: 8px;\n  background: #0d1117;\n  color: #e0e0e0;\n}",
+      "initialJs": "",
+      "instructions": "Постройте адаптивную сетку карточек на Flexbox:\n1. Активируйте flex на .card-grid с gap: 16px\n2. Сделайте карточки в одну колонку по умолчанию\n3. При >=640px — 2 колонки\n4. При >=1024px — 4 колонки\n5. Используйте flex-wrap и flex-basis\n6. Добавьте hover-эффект на карточки"
     },
     "task": {
-      "title": "Модификатор ошибки",
-      "scenario": "Сверстайте карточку ошибки без !important.",
+      "title": "Адаптивная landing page на Flexbox",
+      "scenario": "Клиент заказал адаптивную landing page для SaaS-продукта. Вам нужно сверстать layout по принципу Mobile First: навигация, hero-секция, блок преимуществ (3 карточки) и футер.",
       "criteria": [
-        "Определен базовый класс",
-        "Создан модификатор ошибки"
+        "Mobile First подход: базовые стили без @media, расширения через min-width",
+        "Навигация: логотип слева, ссылки справа (space-between), на мобильных — колонкой",
+        "Hero: контент отцентрирован вертикально и горизонтально (min-height: 100dvh)",
+        "Карточки: 1 колонка на мобильных, 3 колонки на десктопе с gap",
+        "Все font-size в rem или clamp(), ни одного px для шрифтов",
+        "Добавить prefers-reduced-motion для отключения анимаций"
       ],
       "starterCode": {
-        "html": "<div class=\"status-card status-card--error\"><h4>Ошибка</h4><p>Сбой сети.</p></div>",
-        "css": "/* Стили */\n"
+        "html": "<header class=\"navbar\">\n  <span class=\"logo\">SaaSify</span>\n  <nav>\n    <a href=\"#\">Features</a>\n    <a href=\"#\">Pricing</a>\n    <a href=\"#\">Contact</a>\n  </nav>\n</header>\n<section class=\"hero\">\n  <h1>Build faster with SaaSify</h1>\n  <p>The modern platform for developers</p>\n</section>\n<section class=\"features\">\n  <div class=\"card\">Feature 1</div>\n  <div class=\"card\">Feature 2</div>\n  <div class=\"card\">Feature 3</div>\n</section>\n<footer>© 2024 SaaSify</footer>",
+        "css": "/* Напишите стили Mobile First */"
       },
       "hints": [
-        "Объявите модификатор ниже в коде."
+        "Начните с flex-direction: column для навигации, переключите на row при min-width: 768px",
+        "Hero: display: flex, justify-content: center, align-items: center, min-height: 100dvh",
+        "Карточки: flex-wrap: wrap с flex: 1 1 calc(33.333% - gap) на десктопе",
+        "Используйте clamp() для h1: clamp(2rem, 5vw, 3.5rem)"
       ],
       "solution": {
-        "html": "<div class=\"status-card status-card--error\"><h4>Ошибка</h4><p>Сбой сети.</p></div>",
-        "css": ".status-card { padding: 16px; background: #f8fafc; border-left: 4px solid #3b82f6; border-radius: 8px; }\n.status-card--error { background: #fef2f2; border-left-color: #ef4444; }",
-        "explanation": "БЭМ модификатор без !important."
+        "css": ".navbar { display: flex; flex-direction: column; gap: 12px; padding: 16px; }\n.logo { font-size: 1.5rem; font-weight: 700; color: #2dff8a; }\nnav { display: flex; gap: 16px; }\n.hero { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100dvh; text-align: center; padding: 2rem; }\nh1 { font-size: clamp(2rem, 5vw, 3.5rem); }\n.features { display: flex; flex-direction: column; gap: 16px; padding: 2rem; }\n.card { padding: 1.5rem; border: 1px solid #2a2f38; border-radius: 8px; }\n@media (min-width: 768px) { .navbar { flex-direction: row; justify-content: space-between; align-items: center; } .features { flex-direction: row; } .card { flex: 1; } }\n@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }",
+        "explanation": "Mobile First: базовые стили — колонки. @media min-width 768px — строки. clamp() для адаптивного h1. dvh для hero. prefers-reduced-motion для a11y."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c2-q1",
-          "question": "Какой вес имеет класс в CSS?",
+          "id": "css2-q1",
+          "question": "Какое свойство Flexbox управляет выравниванием элементов вдоль ГЛАВНОЙ (main) оси?",
           "options": [
-            "1",
-            "10",
-            "100",
-            "1000"
+            "align-items",
+            "align-content",
+            "justify-content",
+            "flex-direction"
+          ],
+          "correctIndex": 2,
+          "explanation": "justify-content управляет распределением и выравниванием flex-items вдоль главной оси (main axis). align-items управляет поперечной осью (cross axis). flex-direction определяет направление главной оси."
+        },
+        {
+          "id": "css2-q2",
+          "question": "Что означает запись flex: 0 0 260px?",
+          "options": [
+            "Элемент растёт с коэффициентом 260",
+            "Элемент НЕ растёт, НЕ сжимается, фиксированная ширина 260px",
+            "Элемент сжимается до 260px",
+            "Элемент имеет padding 260px"
           ],
           "correctIndex": 1,
-          "explanation": "Класс имеет вес 10."
+          "explanation": "flex — сокращение для flex-grow, flex-shrink, flex-basis. flex: 0 0 260px означает: grow=0 (не растёт), shrink=0 (не сжимается), basis=260px (фиксированная начальная ширина). Идеально для сайдбаров."
+        },
+        {
+          "id": "css2-q3",
+          "question": "Какой подход к адаптивной верстке является стандартом индустрии?",
+          "options": [
+            "Desktop First — @media (max-width: ...)",
+            "Mobile First — @media (min-width: ...)",
+            "Fluid — только vw/vh без @media",
+            "Fixed — фиксированная ширина 1200px"
+          ],
+          "correctIndex": 1,
+          "explanation": "Mobile First (min-width) — стандарт. Базовые стили для мобильных (без @media), расширения через min-width для планшетов/десктоп. Desktop First (max-width) нагружает мобильные лишними CSS-правилами."
+        },
+        {
+          "id": "css2-q4",
+          "question": "Что делает CSS-функция clamp(16px, 2.5vw, 24px)?",
+          "options": [
+            "Устанавливает фиксированный размер 16px",
+            "Масштабирует значение от 16px (минимум) до 24px (максимум), предпочитая 2.5vw",
+            "Умножает 16px на 2.5 и вычитает 24px",
+            "Применяет анимацию от 16px до 24px"
+          ],
+          "correctIndex": 1,
+          "explanation": "clamp(min, preferred, max) ограничивает значение: не менее 16px, идеально 2.5vw (2.5% ширины viewport), но не более 24px. Позволяет создавать адаптивную типографику без @media."
+        },
+        {
+          "id": "css2-q5",
+          "question": "Для чего используется медиа-фича prefers-reduced-motion: reduce?",
+          "options": [
+            "Для ускорения анимаций на мощных устройствах",
+            "Для отключения анимаций по запросу пользователя с вестибулярными нарушениями",
+            "Для замедления загрузки страницы",
+            "Для блокировки видео-контента"
+          ],
+          "correctIndex": 1,
+          "explanation": "prefers-reduced-motion: reduce срабатывает, когда пользователь включил 'Reduce motion' в настройках ОС. Это критически важно для a11y: пользователи с вестибулярными нарушениями могут испытывать головокружение от анимаций."
         }
       ]
     }

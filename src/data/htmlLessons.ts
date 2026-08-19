@@ -211,110 +211,192 @@ export const htmlLessons: Lesson[] = [
     "id": "html-2",
     "moduleId": "html",
     "level": 2,
-    "title": "Знакомство с CSS и JavaScript",
-    "subtitle": "Три кита фронтенда и Critical Rendering Path",
-    "description": "Разделение ответственности: как взаимодействуют HTML, CSS и JS, как браузер вычисляет стили (CSSOM) и формирует Render Tree.",
-    "estimatedMinutes": 35,
+    "title": "Семантическая разметка и формы",
+    "subtitle": "HTML5 Semantic Elements, доступность WCAG, формы и валидация",
+    "description": "Научитесь строить семантически правильные и доступные веб-страницы с помощью HTML5-элементов, создавать формы с нативной валидацией и понимать принципы WCAG 2.1.",
+    "estimatedMinutes": 55,
     "difficulty": "beginner",
     "tags": [
-      "HTML",
-      "CSS",
-      "JavaScript",
-      "Rendering"
+      "semantic",
+      "forms",
+      "accessibility",
+      "WCAG",
+      "validation",
+      "HTML5"
     ],
     "theory": {
-      "overview": "Любое современное веб-приложение строится на фундаменте трёх технологий, каждая из которых решает строго свою задачу (принцип Separation of Concerns):\n\n- 1. **HTML (Структура и смысл)**: каркас страницы, текстовый контент, элементы форм, ссылки, таблицы.\n- 2. **CSS (Оформление и эстетика)**: цвета, сетки (Flexbox/Grid), типографика, адаптивность под мобильные устройства, тени, анимации.\n- 3. **JavaScript (Поведение и динамика)**: обработка кликов, валидация полей без перезагрузки, асинхронные Fetch-запросы к API, управление состоянием приложения.",
+      "overview": "В первом уроке мы разобрали анатомию HTML-документа и сетевой цикл Request-Response. Теперь пришло время углубиться в смысловое (семантическое) наполнение страницы. Семантика HTML — это не просто \"красивый код\". Это фундаментальный принцип, который напрямую влияет на три критически важные области: SEO (поисковая оптимизация), Accessibility (доступность для людей с ограниченными возможностями) и Maintainability (читаемость и поддерживаемость кода командой).\n\nПочему это важно для стажёра? На код-ревью senior-разработчики в первую очередь обращают внимание именно на семантику. Использование `<div>` и `<span>` вместо `<nav>`, `<article>`, `<section>` — один из самых частых красных флагов, который сразу показывает уровень понимания HTML.",
       "sections": [
         {
-          "title": "Critical Rendering Path: Как браузер рисует пиксели",
-          "content": "Чтобы отобразить страницу на экране, браузер выполняет цепочку шагов (Critical Rendering Path):\n- 1. **Парсинг HTML -> DOM**: браузер читает HTML и строит дерево DOM.\n- 2. **Парсинг CSS -> CSSOM**: считываются таблицы стилей, формируется дерево стилей (CSS Object Model).\n- 3. **Построение Render Tree**: браузер объединяет DOM и CSSOM, отсекая невидимые элементы (например, со стилем `display: none`).\n- 4. **Layout (Reflow)**: рассчитываются точные геометрические координаты и размеры каждого прямоугольного блока на экране (в пикселях).\n- 5. **Paint (Repaint)**: происходит растровая отрисовка фонов, границ, текста и теней в слои пикселей.\n- 6. **Composite**: слои накладываются друг на друга на GPU и выводятся на монитор.",
+          "title": "HTML5 Семантические элементы: Структурная разметка страницы",
+          "content": "Семантические элементы HTML5 несут в себе смысловую нагрузку — они описывают не то, КАК контент выглядит (за это отвечает CSS), а то, ЧЕМ он является. Браузеры, поисковые роботы (Googlebot, Yandex-bot) и ассистивные технологии (скринридеры JAWS, NVDA, VoiceOver) используют семантику для построения модели accessibility tree.\n\nОсновные семантические теги-лэндмарки (ARIA Landmarks):\n\n`<header>` — шапка страницы или секции. Обычно содержит логотип, навигацию и поисковую форму. Может быть несколько `<header>` на странице (например, header страницы и header внутри `<article>`). Скринридер объявляет: \"banner landmark\".\n\n`<nav>` — основная навигация сайта. Содержит ссылки на ключевые разделы. Рекомендуется использовать не более 2-3 на странице (основная навигация, навигация в подвале, хлебные крошки). Скринридер объявляет: \"navigation landmark\".\n\n`<main>` — главный контент страницы. Допускается только ОДИН на странице. Контент внутри `<main>` должен быть уникальным — не повторяться на других страницах. Скринридер объявляет: \"main landmark\".\n\n`<article>` — самодостаточная единица контента, которая имеет смысл вне контекста страницы (статья блога, пост в ленте, карточка товара, комментарий). Рекомендация: если контент можно вырезать и вставить на другой сайт и он сохранит смысл — используйте `<article>`.\n\n`<section>` — тематическая группировка контента, обычно с заголовком. Отличие от `<div>`: `<section>` несёт семантический смысл и должна иметь заголовок (`<h2>`-`<h6>`). Если заголовка нет, вероятно, нужен `<div>`.\n\n`<aside>` — побочный контент, косвенно связанный с основным: боковая панель, виджеты, рекламные блоки, блок \"Похожие статьи\".\n\n`<footer>` — подвал страницы или секции. Содержит копирайт, контакты, ссылки на политику конфиденциальности. Может быть несколько (footer страницы и footer внутри `<article>`).",
+          "image": {
+            "src": "/images/lessons/html-semantic-layout.jpg",
+            "alt": "Сравнение семантической HTML5-структуры с div-разметкой",
+            "caption": "Семантическая структура помогает поисковым системам, скринридерам и разработчикам понимать контент страницы"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Подключение CSS и JS к HTML",
-            "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\">\n  <!-- Внешний файл стилей -->\n  <link rel=\"stylesheet\" href=\"styles.css\">\n</head>\n<body>\n  <button id=\"theme-btn\">Сменить тему</button>\n\n  <!-- Подключение скрипта с атрибутом defer -->\n  <script src=\"app.js\" defer></script>\n</body>\n</html>",
-            "explanation": "Стили подключаются в <head> через <link>, а скрипты с атрибутом defer выполняются после построения DOM, не блокируя рендеринг."
+            "code": "<body>\n  <header>\n    <nav aria-label=\"Основная навигация\">\n      <a href=\"/\">Главная</a>\n      <a href=\"/courses\">Курсы</a>\n      <a href=\"/about\">О нас</a>\n    </nav>\n  </header>\n\n  <main>\n    <article>\n      <h1>Как стать Frontend-разработчиком</h1>\n      <section>\n        <h2>Шаг 1: Изучите HTML и CSS</h2>\n        <p>Начните с основ семантической разметки...</p>\n      </section>\n      <section>\n        <h2>Шаг 2: Освойте JavaScript</h2>\n        <p>JavaScript — язык интерактивности...</p>\n      </section>\n    </article>\n    <aside aria-label=\"Полезные ресурсы\">\n      <h3>Рекомендуемые материалы</h3>\n      <ul>\n        <li><a href=\"#\">MDN Web Docs</a></li>\n      </ul>\n    </aside>\n  </main>\n\n  <footer>\n    <p>&copy; 2024 Frontend Academy</p>\n  </footer>\n</body>",
+            "title": "Семантический каркас страницы с ARIA-метками",
+            "explanation": "Каждый landmark-элемент получает aria-label для уникальной идентификации скринридером. Обратите внимание: <main> один на странице, <article> содержит самостоятельный контент, <section> группирует тематически связанные блоки."
           }
         },
         {
-          "title": "Способы подключения стилей и скриптов",
-          "content": "В веб-разработке используются разные способы связки технологий:\n- **Внешний файл (Best Practice)**: `<link rel=\"stylesheet\" href=\"style.css\">` и `<script src=\"main.js\" defer></script>`. Обеспечивает кэширование браузером и чистую модульную архитектуру.\n- **Встроенные стили (Internal)**: `<style>...</style>` внутри `<head>` — используется для критического CSS (Critical CSS).\n- **Инлайновые стили (Inline)**: `style=\"color: red;\"` прямо в теге — считается плохой практикой из-за невозможности переиспользования и высокой специфичности.",
+          "title": "Доступность (Accessibility / a11y) и стандарт WCAG 2.1",
+          "content": "Accessibility (сокращённо a11y — потому что между 'a' и 'y' ровно 11 символов) — это практика создания веб-сайтов, доступных для всех людей, включая пользователей с нарушениями зрения, слуха, моторики и когнитивных функций.\n\nWCAG 2.1 (Web Content Accessibility Guidelines) определяет 4 принципа, известных как POUR:\n\n1. Perceivable (Воспринимаемость): информация должна быть представлена в форме, доступной всем органам чувств. Пример: атрибут `alt` у `<img>` описывает содержимое для скринридеров и отображается при невозможности загрузить изображение.\n\n2. Operable (Управляемость): интерфейс должен быть полностью управляем с клавиатуры (Tab, Shift+Tab, Enter, Escape, стрелки). Фокус должен быть видимым (CSS `outline`).\n\n3. Understandable (Понятность): контент и навигация должны быть предсказуемыми. Формы должны давать чёткие инструкции и сообщения об ошибках.\n\n4. Robust (Надёжность): контент должен корректно интерпретироваться различными user agents, включая ассистивные технологии.\n\nКлючевые ARIA-атрибуты для стажёра:\n\n`aria-label` — текстовая метка для элемента без видимого текста (иконки-кнопки): `<button aria-label=\"Закрыть модальное окно\"><svg>...</svg></button>`.\n\n`aria-hidden=\"true\"` — скрывает декоративный элемент от скринридеров: `<span aria-hidden=\"true\">🎉</span>`.\n\n`aria-required=\"true\"` — указывает обязательное поле формы.\n\n`aria-live=\"polite\"` — объявляет динамические изменения содержимого (уведомления, счётчики).\n\n`role=\"alert\"` — мгновенно объявляет важное сообщение (ошибка валидации).",
           "codeExample": {
-            "language": "javascript",
-            "title": "Взаимодействие JS с DOM и классами CSS",
-            "code": "// Находим кнопку в DOM\nconst btn = document.getElementById('theme-btn');\n\n// Навешиваем слушатель клика\nbtn.addEventListener('click', () => {\n  // Модифицируем классы элемента <body>\n  document.body.classList.toggle('dark-theme');\n});",
-            "explanation": "JavaScript не меняет CSS-свойства вручную, а переключает класс, делегируя оформление чистому CSS."
+            "language": "html",
+            "code": "<!-- Доступная карточка товара -->\n<article aria-labelledby=\"product-title\">\n  <img\n    src=\"/images/keyboard.jpg\"\n    alt=\"Механическая клавиатура Keychron K8\n    с подсветкой RGB, 87 клавиш, TKL\"\n    width=\"400\" height=\"300\"\n    loading=\"lazy\"\n  />\n  <h3 id=\"product-title\">Keychron K8 Pro</h3>\n  <p>Цена: <strong>12 990 ₽</strong></p>\n  <button\n    type=\"button\"\n    aria-label=\"Добавить Keychron K8 Pro в корзину\"\n  >\n    В корзину\n  </button>\n</article>\n\n<!-- Доступное уведомление -->\n<div role=\"alert\" aria-live=\"assertive\">\n  Товар добавлен в корзину!\n</div>",
+            "title": "Доступная карточка товара с ARIA-атрибутами",
+            "explanation": "alt у img описывает содержимое подробно. aria-labelledby связывает article с заголовком. aria-label у кнопки-иконки дает текст для скринридера. role='alert' мгновенно объявляет обновление."
+          }
+        },
+        {
+          "title": "HTML-формы: элементы, атрибуты и нативная валидация",
+          "content": "Формы (`<form>`) — это основной механизм сбора данных от пользователя в вебе. Каждая форма авторизации, регистрации, поиска, оформления заказа и обратной связи построена на HTML-формах.\n\nАнатомия HTML-формы:\n\n`<form>` — контейнер формы. Ключевые атрибуты: `action` (URL для отправки), `method` (GET/POST), `novalidate` (отключает нативную валидацию, если нужна кастомная).\n\n`<label>` — текстовая метка, связанная с полем. Связь через `for=\"id-поля\"` или оборачиванием поля внутрь `<label>`. Клик по label фокусирует соответствующее поле — это критически важно для мобильных устройств и a11y.\n\n`<input>` — универсальный элемент ввода. Тип определяет поведение:\n- `type=\"text\"` — строка текста\n- `type=\"email\"` — валидация формата email\n- `type=\"password\"` — маскировка символов\n- `type=\"number\"` — числовой ввод с min/max/step\n- `type=\"tel\"` — номер телефона (мобильная клавиатура)\n- `type=\"url\"` — валидация URL\n- `type=\"date\"` — нативный дейтпикер\n- `type=\"checkbox\"` / `type=\"radio\"` — чекбоксы и радиокнопки\n- `type=\"file\"` — загрузка файлов (`accept=\".jpg,.png\"`)\n- `type=\"hidden\"` — скрытое поле (CSRF-токен)\n\n`<textarea>` — многострочный текстовый ввод с `rows` и `cols`.\n\n`<select>` + `<option>` + `<optgroup>` — выпадающий список с группировкой.\n\n`<fieldset>` + `<legend>` — визуальная и семантическая группировка полей.\n\nАтрибуты нативной валидации HTML5:\n\n`required` — поле обязательно для заполнения.\n`minlength` / `maxlength` — минимальная/максимальная длина текста.\n`min` / `max` — диапазон для числовых значений.\n`pattern` — регулярное выражение для валидации (например, `pattern=\"[A-Za-z]{3,}\"`).\n`placeholder` — подсказка в поле (НЕ замена `<label>`!).\n`autocomplete` — подсказка браузеру для автозаполнения (`autocomplete=\"email\"`).",
+          "codeExample": {
+            "language": "html",
+            "code": "<form action=\"/api/register\" method=\"POST\">\n  <fieldset>\n    <legend>Регистрация стажёра</legend>\n\n    <label for=\"fullname\">ФИО</label>\n    <input\n      type=\"text\" id=\"fullname\" name=\"fullname\"\n      required minlength=\"5\" maxlength=\"100\"\n      autocomplete=\"name\"\n      placeholder=\"Иванов Иван Иванович\"\n    />\n\n    <label for=\"email\">Email</label>\n    <input\n      type=\"email\" id=\"email\" name=\"email\"\n      required\n      autocomplete=\"email\"\n      placeholder=\"intern@company.ru\"\n    />\n\n    <label for=\"phone\">Телефон</label>\n    <input\n      type=\"tel\" id=\"phone\" name=\"phone\"\n      pattern=\"\\+7[0-9]{10}\"\n      placeholder=\"+79001234567\"\n      title=\"Формат: +7XXXXXXXXXX\"\n    />\n\n    <label for=\"position\">Направление</label>\n    <select id=\"position\" name=\"position\" required>\n      <option value=\"\">Выберите...</option>\n      <optgroup label=\"Разработка\">\n        <option value=\"frontend\">Frontend</option>\n        <option value=\"backend\">Backend</option>\n      </optgroup>\n      <optgroup label=\"Дизайн\">\n        <option value=\"ui\">UI/UX Design</option>\n      </optgroup>\n    </select>\n\n    <label for=\"motivation\">Мотивация</label>\n    <textarea\n      id=\"motivation\" name=\"motivation\"\n      rows=\"4\" minlength=\"50\" maxlength=\"1000\"\n      required\n      placeholder=\"Расскажите, почему хотите стажировку...\"\n    ></textarea>\n\n    <button type=\"submit\">Отправить заявку</button>\n  </fieldset>\n</form>",
+            "title": "Форма регистрации с нативной валидацией HTML5",
+            "explanation": "Каждый input привязан к label через for/id. Валидация работает нативно: required, type='email', pattern для телефона. fieldset + legend семантически группируют поля. optgroup создаёт разделы в select."
+          }
+        },
+        {
+          "title": "Мультимедиа в HTML5: <picture>, <video>, <audio> и адаптивные изображения",
+          "content": "Современный веб — это мультимедиа. HTML5 предоставляет нативные элементы для встраивания изображений, видео и аудио без сторонних плагинов.\n\nАдаптивные изображения — один из ключевых аспектов производительности. Основные инструменты:\n\n1. `<img>` с атрибутами `srcset` и `sizes` — позволяет браузеру самому выбрать оптимальное разрешение изображения:\n- `srcset` перечисляет варианты изображений с указанием ширины (`200w`, `400w`, `800w`)\n- `sizes` описывает, какую ширину элемент займёт на экране при разных viewport\n- Браузер автоматически выбирает наиболее подходящий файл на основе DPR (Device Pixel Ratio) устройства и доступной ширины\n\n2. `<picture>` — предоставляет полный контроль с помощью `<source>`: разные форматы (WebP, AVIF, JPEG), разные кадрирования для мобильных и десктоп, и поддержка art direction (разные изображения для разных экранов).\n\n3. Атрибуты `width` и `height` — предотвращают CLS (Cumulative Layout Shift, визуальный скачок) при загрузке.\n\n4. `loading=\"lazy\"` — отложенная загрузка для изображений за пределами viewport.\n\n5. `<video>` — нативный видеоплеер с атрибутами `controls`, `autoplay`, `muted`, `loop`, `poster`, `preload`.\n\n6. `<audio>` — нативный аудиоплеер с аналогичными атрибутами.",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Адаптивное изображение с WebP fallback -->\n<picture>\n  <source\n    type=\"image/avif\"\n    srcset=\"hero-400.avif 400w,\n            hero-800.avif 800w,\n            hero-1200.avif 1200w\"\n    sizes=\"(max-width: 768px) 100vw, 50vw\"\n  />\n  <source\n    type=\"image/webp\"\n    srcset=\"hero-400.webp 400w,\n            hero-800.webp 800w\"\n    sizes=\"(max-width: 768px) 100vw, 50vw\"\n  />\n  <img\n    src=\"hero-800.jpg\"\n    alt=\"Рабочее место frontend-разработчика\"\n    width=\"800\" height=\"450\"\n    loading=\"lazy\"\n    decoding=\"async\"\n  />\n</picture>\n\n<!-- Встроенное видео с субтитрами -->\n<video\n  controls\n  width=\"640\" height=\"360\"\n  poster=\"preview.jpg\"\n  preload=\"metadata\"\n>\n  <source src=\"intro.mp4\" type=\"video/mp4\" />\n  <source src=\"intro.webm\" type=\"video/webm\" />\n  <track\n    kind=\"subtitles\"\n    src=\"subs-ru.vtt\"\n    srclang=\"ru\"\n    label=\"Русские субтитры\"\n    default\n  />\n</video>",
+            "title": "Адаптивные изображения и видео с мультиформатной поддержкой",
+            "explanation": "picture предоставляет браузеру AVIF → WebP → JPEG фолбэк. srcset + sizes позволяет браузеру выбрать оптимальный размер. width/height предотвращает CLS. video с track обеспечивает субтитры для a11y."
           }
         }
       ],
       "seniorTips": [
-        "Никогда не используйте инлайновый JavaScript в HTML-атрибутах вроде `<button onclick=\"doSomething()\">`. Всегда вешайте обработчики через `addEventListener` в JS-файлах.",
-        "Скрипты всегда подключайте с атрибутом `defer` или `type=\"module\"`, чтобы парсер HTML не останавливался при загрузке тяжелых JS-файлов."
+        "Используйте HTML Validator (W3C) и axe DevTools для автоматической проверки семантики и a11y. Lighthouse в Chrome DevTools показывает Accessibility Score — стремитесь к 100/100.",
+        "Каждый интерактивный элемент (кнопка, ссылка, поле ввода) должен быть фокусируемым с клавиатуры и иметь видимый фокус (outline). Никогда не используйте outline: none без альтернативы.",
+        "Атрибут alt — обязательный для всех <img>. Для декоративных изображений используйте alt='' (пустой), чтобы скринридер их пропустил, а не aria-hidden на img.",
+        "Используйте heading hierarchy (h1 → h2 → h3) строго по вложенности. Не пропускайте уровни (h1 → h3). Это критически важно для навигации скринридеров."
       ],
       "commonMistakes": [
         {
-          "bad": "<p style=\"font-size: 18px; color: blue; font-family: Arial;\">Текст</p>",
-          "good": "<p class=\"lead-text\">Текст</p>\n/* В CSS: */\n.lead-text { font-size: 1.125rem; color: var(--color-primary); }",
-          "reason": "Инлайновые стили невозможно переопределить через темы и медиа-запросы, они раздувают размер HTML-файла."
+          "bad": "<div class=\"header\">\n  <div class=\"nav\">\n    <div class=\"link\">Главная</div>\n  </div>\n</div>",
+          "good": "<header>\n  <nav aria-label=\"Главное меню\">\n    <a href=\"/\">Главная</a>\n  </nav>\n</header>",
+          "reason": "div-суп (div soup) уничтожает семантику. Скринридеры не могут определить роли элементов. Поисковые роботы не понимают структуру контента. CSS-классы не заменяют семантические теги."
+        },
+        {
+          "bad": "<input type=\"text\" placeholder=\"Email\">\n<button>▶</button>",
+          "good": "<label for=\"email\">Email</label>\n<input type=\"email\" id=\"email\" required>\n<button type=\"submit\"\n  aria-label=\"Отправить форму\">\n  ▶\n</button>",
+          "reason": "Placeholder не заменяет label — он исчезает при вводе. Input без label невидим для скринридеров. Кнопка-иконка без aria-label не имеет доступного имени."
+        },
+        {
+          "bad": "<img src=\"photo.jpg\">",
+          "good": "<img src=\"photo.jpg\"\n  alt=\"Команда разработчиков на митинге\"\n  width=\"800\" height=\"450\"\n  loading=\"lazy\"\n/>",
+          "reason": "Без alt скринридер озвучит имя файла ('photo.jpg'). Без width/height произойдёт CLS (скачок контента) при загрузке. Без loading='lazy' изображения за viewport нагружают сеть."
         }
       ],
       "keyTakeaways": [
-        "HTML отвечает за разметку, CSS — за оформление, JS — за динамическое поведение.",
-        "Рендеринг страницы включает построение DOM + CSSOM, расчет Layout и фазу Paint.",
-        "Внешние файлы стилей и модульные скрипты — стандарт коммерческой разработки."
+        "Семантические теги HTML5 (`<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>`, `<footer>`) описывают СМЫСЛ контента, а не его внешний вид — это критически важно для SEO и доступности.",
+        "WCAG 2.1 определяет 4 принципа доступности (POUR): Perceivable, Operable, Understandable, Robust. Каждый интерактивный элемент должен быть фокусируемым с клавиатуры и иметь доступное имя.",
+        "HTML-формы используют нативную валидацию (`required`, `type`, `pattern`, `minlength`/`maxlength`) — это первая линия защиты. `<label>` обязателен для каждого поля ввода.",
+        "`<picture>` с `<source>` предоставляет мультиформатный фолбэк (AVIF → WebP → JPEG). `srcset` + `sizes` позволяет браузеру автоматически выбрать оптимальный размер изображения.",
+        "Всегда указывайте `alt` для `<img>`, `width`/`height` для предотвращения CLS, и `loading=\"lazy\"` для изображений за пределами viewport."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"card\">\n  <h2 id=\"card-title\">Интерактивная карточка</h2>\n  <p id=\"card-desc\">Нажмите кнопку ниже, чтобы изменить состояние через JavaScript.</p>\n  <button id=\"toggle-btn\">Активировать</button>\n</div>",
-      "initialCss": ".card {\n  padding: 24px;\n  background: #f8fafc;\n  border: 2px solid #e2e8f0;\n  border-radius: 12px;\n  transition: all 0.3s ease;\n}\n.card.active {\n  background: #ecfdf5;\n  border-color: #10b981;\n  transform: translateY(-4px);\n}\n#toggle-btn {\n  padding: 8px 16px;\n  background: #3b82f6;\n  color: white;\n  border: none;\n  border-radius: 6px;\n  cursor: pointer;\n}",
-      "initialJs": "const btn = document.getElementById('toggle-btn');\nconst card = document.querySelector('.card');\nbtn.addEventListener('click', () => {\n  card.classList.toggle('active');\n  console.log('Toggled active class');\n});",
-      "instructions": "Нажмите «Активировать» и посмотрите, как JS переключает класс, а CSS анимирует состояние."
+      "initialHtml": "<form id=\"contact-form\">\n  <!-- Создайте форму обратной связи -->\n  <!-- с полями: имя, email, тема, сообщение -->\n  <!-- и кнопкой отправки -->\n</form>",
+      "initialCss": "form {\n  max-width: 480px;\n  margin: 0 auto;\n  font-family: system-ui, sans-serif;\n}\n\nlabel {\n  display: block;\n  margin-bottom: 4px;\n  font-weight: 600;\n  font-size: 14px;\n}\n\ninput, textarea, select {\n  width: 100%;\n  padding: 8px 12px;\n  margin-bottom: 16px;\n  border: 1px solid #ccc;\n  border-radius: 6px;\n  font-size: 14px;\n  box-sizing: border-box;\n}\n\nbutton[type='submit'] {\n  background: #2dff8a;\n  color: #0a0e13;\n  border: none;\n  padding: 10px 24px;\n  border-radius: 6px;\n  font-weight: 700;\n  cursor: pointer;\n}",
+      "initialJs": "document.getElementById('contact-form')\n  .addEventListener('submit', (e) => {\n    e.preventDefault();\n    alert('Форма отправлена!');\n  });",
+      "instructions": "Создайте семантическую форму обратной связи:\n1. Оберните всё в <fieldset> с <legend>\n2. Добавьте поля: ФИО (text, required), Email (email, required), Тема (select с 3 вариантами), Сообщение (textarea, minlength=20)\n3. Каждое поле должно иметь <label> с for/id связью\n4. Добавьте кнопку submit\n5. Проверьте, что нативная валидация работает"
     },
     "task": {
-      "title": "Связка HTML + CSS + JS",
-      "scenario": "Создайте интерактивный блок уведомления со статусом успешного действия и кнопкой закрытия.",
+      "title": "Семантическая страница портфолио",
+      "scenario": "Вам поручили создать Landing Page портфолио frontend-разработчика с правильной семантической структурой. Страница должна быть полностью доступна с клавиатуры и корректно восприниматься скринридерами.",
       "criteria": [
-        "Создан блок уведомления с заголовком и текстом",
-        "Использован семантический тег <button>",
-        "Разметка готова для управления классами через стили"
+        "Использовать все основные landmark-элементы: header, nav, main, article, section, aside, footer",
+        "Навигация содержит минимум 3 ссылки-якоря (<a href=\"#skills\">)",
+        "Секция 'Обо мне' оформлена как <article> с <h1> внутри",
+        "Секция 'Навыки' содержит <ul> или <dl> (definition list)",
+        "Форма обратной связи с label, required, type=email и pattern для телефона",
+        "Все изображения имеют alt, width, height и loading='lazy'",
+        "Heading hierarchy строго соблюдена (h1 → h2 → h3, без пропусков)"
       ],
       "starterCode": {
-        "html": "<div class=\"alert alert-success\">\n  <!-- Добавьте заголовок, текст и кнопку -->\n</div>",
-        "css": "/* Стили задания */\n"
+        "html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Портфолио — Иван Петров</title>\n</head>\n<body>\n  <!-- Создайте семантическую структуру -->\n</body>\n</html>"
       },
       "hints": [
-        "Используйте класс .alert-success для фона и тег <button> с type=\"button\"."
+        "Начните с <header> содержащей <nav> с якорными ссылками",
+        "Используйте <main> с несколькими <section> для разных блоков",
+        "Для списка навыков попробуйте <dl><dt>HTML</dt><dd>Семантика, формы, a11y</dd></dl>",
+        "Форму оберните в <section> и добавьте fieldset + legend"
       ],
       "solution": {
-        "html": "<div class=\"alert alert-success\">\n  <h4 class=\"alert-title\">Успешно!</h4>\n  <p class=\"alert-message\">Данные профиля были сохранены.</p>\n  <button type=\"button\" class=\"alert-close\">Закрыть</button>\n</div>",
-        "css": "/* Решение */\n",
-        "explanation": "Чистая семантическая разметка, готовая к динамическому переключению видимости."
+        "html": "<header>\n  <nav aria-label=\"Основная навигация\">\n    <a href=\"#about\">Обо мне</a>\n    <a href=\"#skills\">Навыки</a>\n    <a href=\"#contact\">Контакт</a>\n  </nav>\n</header>\n<main>\n  <article id=\"about\">\n    <h1>Иван Петров — Frontend Developer</h1>\n    <p>Стажёр с опытом HTML, CSS, JavaScript</p>\n  </article>\n  <section id=\"skills\">\n    <h2>Навыки</h2>\n    <dl>\n      <dt>HTML</dt><dd>Семантика, формы, WCAG 2.1</dd>\n      <dt>CSS</dt><dd>Flexbox, Grid, анимации</dd>\n      <dt>JavaScript</dt><dd>ES6+, DOM API, fetch</dd>\n    </dl>\n  </section>\n  <section id=\"contact\">\n    <h2>Связаться</h2>\n    <form>\n      <fieldset>\n        <legend>Форма обратной связи</legend>\n        <label for=\"name\">Имя</label>\n        <input type=\"text\" id=\"name\" required />\n        <label for=\"email\">Email</label>\n        <input type=\"email\" id=\"email\" required />\n        <label for=\"msg\">Сообщение</label>\n        <textarea id=\"msg\" required minlength=\"20\"></textarea>\n        <button type=\"submit\">Отправить</button>\n      </fieldset>\n    </form>\n  </section>\n</main>\n<footer><p>&copy; 2024 Иван Петров</p></footer>",
+        "explanation": "Все landmark-элементы на месте: header, nav, main, article, section, footer. Heading hierarchy: h1 → h2. Форма с fieldset, legend, label+for, required, type=email. Навигация с якорными ссылками."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h2-q1",
-          "question": "Какая фаза отвечает за расчет координат и геометрии блоков на странице?",
+          "id": "html2-q1",
+          "question": "Какой HTML5-элемент обозначает самостоятельную единицу контента, которая имеет смысл вне контекста страницы?",
           "options": [
-            "HTML",
-            "Layout (Reflow)",
-            "SQL",
-            "DNS"
+            "<section>",
+            "<article>",
+            "<aside>",
+            "<div>"
           ],
           "correctIndex": 1,
-          "explanation": "На этапе Layout браузер рассчитывает ширину, высоту и позицию каждого элемента."
+          "explanation": "<article> обозначает самодостаточный контент: статью блога, пост в соцсети, комментарий, карточку товара. Его можно вырезать и вставить на другой сайт, и он сохранит смысл. <section> группирует тематически связанные блоки, но не является самодостаточным."
         },
         {
-          "id": "h2-q2",
-          "question": "Какой атрибут откладывает выполнение скрипта до полной готовности DOM?",
+          "id": "html2-q2",
+          "question": "Сколько элементов <main> допускается на одной HTML-странице?",
           "options": [
-            "async",
-            "defer",
-            "lazy",
-            "preload"
+            "Неограниченно",
+            "Максимум 2",
+            "Ровно 1",
+            "Ровно 0 — это устаревший тег"
+          ],
+          "correctIndex": 2,
+          "explanation": "Согласно спецификации HTML5, на странице допускается ровно один видимый <main>. Его контент должен быть уникальным и не повторяться на других страницах сайта (в отличие от header и footer)."
+        },
+        {
+          "id": "html2-q3",
+          "question": "Для чего нужен атрибут `for` у элемента <label>?",
+          "options": [
+            "Для указания CSS-стилей",
+            "Для связи метки с полем ввода по его id — клик по label фокусирует поле",
+            "Для отправки данных на сервер",
+            "Для SEO-оптимизации"
           ],
           "correctIndex": 1,
-          "explanation": "Атрибут defer гарантирует выполнение скрипта после завершения парсинга HTML."
+          "explanation": "Атрибут for связывает <label> с <input> через его id. Это позволяет: 1) кликнуть по тексту метки для фокуса на поле (важно для мобильных), 2) скринридерам объявить имя поля, 3) улучшить UX за счёт увеличения области клика."
+        },
+        {
+          "id": "html2-q4",
+          "question": "Что произойдёт, если у <img> не указан атрибут alt?",
+          "options": [
+            "Изображение не загрузится",
+            "Страница не пройдёт HTML-валидацию, скринридер озвучит имя файла",
+            "Ничего — alt не влияет на работу страницы",
+            "Браузер автоматически сгенерирует alt из имени файла"
+          ],
+          "correctIndex": 1,
+          "explanation": "Без alt: 1) HTML-валидатор выдаст ошибку, 2) скринридер озвучит путь к файлу ('images/photo_2024_final_v3.jpg'), 3) пользователи с медленным интернетом не поймут, что изображено. Для декоративных изображений используйте alt='' (пустой)."
+        },
+        {
+          "id": "html2-q5",
+          "question": "Какой атрибут input позволяет указать регулярное выражение для нативной валидации?",
+          "options": [
+            "regex",
+            "validate",
+            "pattern",
+            "mask"
+          ],
+          "correctIndex": 2,
+          "explanation": "Атрибут pattern принимает регулярное выражение. Браузер проверяет введённое значение при submit. Используется для кастомных форматов: телефон (pattern='\\+7[0-9]{10}'), почтовый индекс, номер документа. Работает совместно с title для пользовательской подсказки."
         }
       ]
     }

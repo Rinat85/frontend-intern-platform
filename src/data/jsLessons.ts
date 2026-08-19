@@ -208,85 +208,191 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-2",
     "moduleId": "javascript",
     "level": 2,
-    "title": "Типы данных и операторы",
-    "subtitle": "7 примитивов, Object, typeof, строгое сравнение === и nullish coalescing ??",
-    "description": "Система типов: String, Number, BigInt, Boolean, Symbol, null, undefined и Object, оператор typeof, строгое сравнение === vs == и операторы &&, ||, ??.",
-    "estimatedMinutes": 35,
+    "title": "Функции, область видимости и замыкания",
+    "subtitle": "Function Declaration vs Expression, Arrow Functions, Scope Chain и Closures",
+    "description": "Изучите все виды функций в JavaScript, разберитесь в цепочке областей видимости (Scope Chain), освойте замыкания (Closures) и научитесь использовать параметры по умолчанию, rest/spread и деструктуризацию.",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "JavaScript",
-      "Types",
-      "Operators",
-      "Coercion"
+      "functions",
+      "scope",
+      "closures",
+      "arrow-functions",
+      "destructuring",
+      "ES6+"
     ],
     "theory": {
-      "overview": "В JavaScript динамическая типизация: переменная может хранить данные любого типа. В языке существует 8 типов данных: 7 примитивов и сложный тип Object.",
+      "overview": "Функции — это фундаментальный строительный блок JavaScript. Они позволяют инкапсулировать логику, переиспользовать код и создавать абстракции. В JavaScript функции являются объектами первого класса (First-Class Citizens): их можно присваивать переменным, передавать как аргументы, возвращать из других функций и хранить в структурах данных.\n\nПонимание области видимости (Scope) и замыканий (Closures) — один из ключевых водоразделов между junior и middle уровнем. Эти концепции лежат в основе модульности, приватности данных, React-хуков, middleware и большинства паттернов проектирования.",
       "sections": [
         {
-          "title": "7 примитивов и Object",
-          "content": "- Примитивы: `string`, `number`, `bigint`, `boolean`, `null`, `undefined`, `symbol`.\n- `===`: строгое сравнение без приведения типов.\n- `??`: nullish coalescing (возвращает правое значение только для null / undefined).",
+          "title": "Виды функций в JavaScript: Declaration, Expression, Arrow",
+          "content": "JavaScript предоставляет несколько способов объявления функций, каждый со своими особенностями:\n\n1. Function Declaration (объявление функции):\n`function greet(name) { return 'Hello, ' + name; }`\nОсобенности:\n- Hoisting: доступна ДО объявления (поднимается вместе с телом)\n- Имеет собственный `this`, определяемый вызовом\n- Имеет объект `arguments`\n- Может быть использована как конструктор (`new`)\n\n2. Function Expression (функциональное выражение):\n`const greet = function(name) { return 'Hello, ' + name; };`\nОсобенности:\n- НЕ поднимается (hoisting работает только для переменной, не для значения)\n- Присваивается в переменную — можно передавать и возвращать\n- Может быть именованной (Named Function Expression) для дебаггинга: `const greet = function greeting(name) {...}`\n\n3. Arrow Function (стрелочная функция, ES6+):\n`const greet = (name) => 'Hello, ' + name;`\nОсобенности:\n- Краткий синтаксис: без `function`, если одно выражение — без `return` и `{}`\n- НЕ имеет собственного `this` — наследует `this` из окружающего лексического контекста (Lexical `this`)\n- НЕ имеет `arguments` (используйте rest: `...args`)\n- НЕ может быть конструктором (`new`)\n- Идеальна для callback-ов: `.map()`, `.filter()`, `.reduce()`, обработчики событий\n\n4. IIFE (Immediately Invoked Function Expression):\n`(function() { /* код */ })();`\nНемедленно выполняется и создаёт изолированную область видимости. Использовалась до ES6-модулей для инкапсуляции.\n\nКогда что использовать?\n- Методы объектов, конструкторы → Function Declaration (нужен `this`)\n- Callback-ы, .map/.filter/.reduce → Arrow Function (краткий синтаксис, нет `this`)\n- Экспортируемые функции → `export const fn = () => {}` или `export function fn() {}`",
+          "image": {
+            "src": "/images/lessons/js-functions-scope.jpg",
+            "alt": "Цепочка областей видимости JavaScript: Global Scope → Function Scope → Block Scope и замыкание",
+            "caption": "Scope Chain: каждая функция сохраняет ссылку на родительский скоуп. Замыкание позволяет функции запоминать переменные даже после завершения родительского контекста."
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Сравнение и оператор ??",
-            "code": "const count = 0;\nconst val1 = count || 10; // 10 (ошибка, 0 посчитан ложным)\nconst val2 = count ?? 10; // 0 (правильно!)\nconsole.log(typeof 42); // 'number'",
-            "explanation": "Оператор ?? корректно работает с нулями."
+            "code": "// 1. Function Declaration — hoisting работает\nconsole.log(add(2, 3)); // 5 — доступна до объявления\nfunction add(a, b) {\n  return a + b;\n}\n\n// 2. Function Expression — hoisting НЕ работает\n// console.log(multiply(2, 3)); // ReferenceError!\nconst multiply = function(a, b) {\n  return a * b;\n};\n\n// 3. Arrow Function — краткий синтаксис\nconst square = (x) => x * x;\nconst sum = (a, b) => a + b;\nconst greet = (name) => {\n  const greeting = `Привет, ${name}!`;\n  return greeting;\n};\n\n// 4. Arrow vs Regular: поведение this\nconst user = {\n  name: 'Алексей',\n  // Regular: this = user (объект вызова)\n  sayHi() { console.log(this.name); },  // 'Алексей'\n  // Arrow: this = внешний контекст (window/undefined)\n  sayBye: () => { console.log(this.name); }  // undefined!\n};",
+            "title": "4 вида функций: Declaration, Expression, Arrow, Method",
+            "explanation": "Declaration поднимается целиком. Expression поднимает только переменную (TDZ для const). Arrow наследует this лексически — нельзя использовать как метод объекта, где нужен this."
+          }
+        },
+        {
+          "title": "Scope Chain: глобальная, функциональная и блочная область видимости",
+          "content": "Область видимости (Scope) определяет, какие переменные доступны в конкретном месте кода. JavaScript использует лексическую (статическую) область видимости — она определяется при НАПИСАНИИ кода, а не при выполнении.\n\nТри уровня scope:\n\n1. Global Scope — переменные, объявленные вне любой функции или блока. Доступны везде. В браузере привязаны к объекту `window`.\nОпасность: загрязнение глобальной области видимости (Global Scope Pollution) приводит к конфликтам имён между библиотеками.\n\n2. Function Scope — переменные внутри функции. Создаётся заново при каждом вызове функции. `var` имеет function scope.\n\n3. Block Scope (ES6+) — переменные внутри блока `{ }`: if, for, while, обычный блок. `let` и `const` имеют block scope.\n\nScope Chain (цепочка областей видимости):\nКогда движок V8 встречает переменную, он ищет её последовательно:\n1. В текущем скоупе\n2. В родительском скоупе\n3. В глобальном скоупе\n4. Если не найдена — `ReferenceError`\n\nПоиск идёт ВВЕРХ по цепочке (от внутреннего к внешнему), но НИКОГДА вниз. Функция может читать переменные родителя, но родитель не может читать переменные дочерней функции.\n\n`var` vs `let`/`const` — ключевые отличия:\n- `var`: function scope, hoisting с `undefined`, можно переобъявить\n- `let`: block scope, TDZ (Temporal Dead Zone), нельзя переобъявить\n- `const`: block scope, TDZ, нельзя переприсвоить ссылку (но свойства объекта мутабельны!)",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Scope Chain демонстрация\nconst globalVar = 'Я глобальная';  // Global scope\n\nfunction outer() {\n  const outerVar = 'Я из outer';  // Function scope\n\n  function inner() {\n    const innerVar = 'Я из inner';  // Function scope\n\n    if (true) {\n      const blockVar = 'Я блочная';  // Block scope\n      // Доступно всё: blockVar, innerVar, outerVar, globalVar\n      console.log(globalVar);  // ✅ Scope Chain ↑\n      console.log(outerVar);   // ✅ Scope Chain ↑\n      console.log(innerVar);   // ✅ Текущий function scope\n      console.log(blockVar);   // ✅ Текущий block scope\n    }\n\n    // console.log(blockVar); // ❌ ReferenceError!\n  }\n\n  inner();\n  // console.log(innerVar); // ❌ ReferenceError!\n}\n\nouter();\n\n// var vs let в цикле\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log('var:', i), 100);  // 3, 3, 3\n}\nfor (let j = 0; j < 3; j++) {\n  setTimeout(() => console.log('let:', j), 100);  // 0, 1, 2\n}",
+            "title": "Scope Chain и var vs let в цикле",
+            "explanation": "Scope Chain ищет переменные вверх по цепочке вложенности. var i — один экземпляр для всего цикла (function scope), setTimeout замыкается на финальное значение 3. let j — новый экземпляр для каждой итерации (block scope), корректно замыкается."
+          }
+        },
+        {
+          "title": "Замыкания (Closures): приватность, фабрики и каррирование",
+          "content": "Замыкание (Closure) — это фундаментальная концепция JavaScript. Замыкание возникает, когда функция запоминает и продолжает иметь доступ к переменным своей лексической области видимости, даже после того как родительская функция завершила выполнение.\n\nТехнически: при создании функции движок V8 сохраняет ссылку на Lexical Environment родительского скоупа. Эта ссылка НЕ очищается сборщиком мусора (Garbage Collector), пока замыкающая функция существует.\n\nПрактическое применение замыканий:\n\n1. Приватные переменные — инкапсуляция состояния, недоступного извне:\nФункция-фабрика возвращает объект/функцию с доступом к внутренним переменным, при этом сами переменные скрыты от внешнего кода.\n\n2. Функции-фабрики — создание настроенных функций:\n`function createMultiplier(factor)` возвращает функцию, которая умножает на factor.\n\n3. Каррирование (Currying) — трансформация функции с несколькими аргументами в последовательность функций с одним:\n`const add = (a) => (b) => a + b; add(5)(3) // 8`\n\n4. Мемоизация — кэширование результатов вычислений в замыкании.\n\n5. Event handlers и callback-ы — обработчики событий замыкаются на переменные из окружающего скоупа.\n\n6. React Hooks — useState, useEffect, useCallback — все основаны на замыканиях. Каждый рендер создаёт новое замыкание с актуальным состоянием.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Приватный счётчик (инкапсуляция)\nfunction createCounter(initial = 0) {\n  let count = initial;  // Приватная переменная\n\n  return {\n    increment: () => ++count,\n    decrement: () => --count,\n    getCount: () => count,\n    reset: () => { count = initial; }\n  };\n}\n\nconst counter = createCounter(10);\ncounter.increment(); // 11\ncounter.increment(); // 12\n// counter.count — undefined! Приватная!\n\n// 2. Фабрика функций\nconst createGreeter = (greeting) => {\n  return (name) => `${greeting}, ${name}!`;\n};\nconst helloRu = createGreeter('Привет');\nconst helloEn = createGreeter('Hello');\nhelloRu('Алексей');  // 'Привет, Алексей!'\nhelloEn('Alex');      // 'Hello, Alex!'\n\n// 3. Мемоизация\nfunction memoize(fn) {\n  const cache = new Map();\n  return (...args) => {\n    const key = JSON.stringify(args);\n    if (cache.has(key)) return cache.get(key);\n    const result = fn(...args);\n    cache.set(key, result);\n    return result;\n  };\n}\nconst expensiveCalc = memoize((n) => {\n  console.log('Вычисляю...');\n  return n * n;\n});\nexpensiveCalc(5); // 'Вычисляю...' → 25\nexpensiveCalc(5); // из кэша → 25",
+            "title": "Замыкания: приватность, фабрики и мемоизация",
+            "explanation": "createCounter замыкает count — она приватна и недоступна извне. createGreeter замыкает greeting — каждый вызов фабрики создаёт новое замыкание. memoize замыкает cache (Map) — кэш живёт между вызовами."
+          }
+        },
+        {
+          "title": "ES6+ синтаксис: деструктуризация, rest/spread, параметры по умолчанию",
+          "content": "ES6 (ECMAScript 2015) и последующие версии значительно расширили синтаксис JavaScript. Эти фичи — стандарт в продакшен-коде и React-разработке.\n\nДеструктуризация — извлечение значений из объектов и массивов в отдельные переменные:\n\nОбъектная деструктуризация: `const { name, age } = user;`\n- Переименование: `const { name: userName } = user;`\n- Значения по умолчанию: `const { role = 'intern' } = user;`\n- Вложенная: `const { address: { city } } = user;`\n\nМассивная деструктуризация: `const [first, second, ...rest] = items;`\n- Пропуск элементов: `const [, second] = items;`\n- Обмен значений: `[a, b] = [b, a];`\n\nRest-параметры (`...args`) — сбор оставшихся аргументов в массив:\n`function sum(...numbers) { return numbers.reduce((a, b) => a + b, 0); }`\n\nSpread-оператор (`...`) — разворачивание массивов и объектов:\n- Копирование массива: `const copy = [...original]`\n- Объединение: `const merged = [...arr1, ...arr2]`\n- Копирование объекта: `const copy = { ...original }`\n- Расширение: `const updated = { ...user, role: 'senior' }` — shallow copy!\n\nПараметры по умолчанию:\n`function createUser(name, role = 'intern', active = true) { ... }`\nВычисляются при каждом вызове. Могут зависеть от предыдущих параметров:\n`function createId(prefix, index = 0) { return prefix + '-' + index; }`\n\nОператор Optional Chaining (`?.`):\n`user?.address?.city` — безопасный доступ к вложенным свойствам. Возвращает `undefined` вместо TypeError.\n\nNullish Coalescing (`??`):\n`const name = user.name ?? 'Аноним'` — возвращает правую часть ТОЛЬКО при `null` или `undefined` (в отличие от `||`, который также реагирует на `0`, `''`, `false`).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Деструктуризация в параметрах функции\nfunction displayProfile({\n  name,\n  role = 'Intern',\n  skills = [],\n  contact: { email, phone = 'не указан' } = {}\n}) {\n  console.log(`${name} (${role})`);\n  console.log(`Email: ${email}, Тел: ${phone}`);\n  console.log(`Навыки: ${skills.join(', ')}`);\n}\n\ndisplayProfile({\n  name: 'Алексей',\n  skills: ['HTML', 'CSS', 'JS'],\n  contact: { email: 'alex@dev.ru' }\n});\n\n// Rest + Spread\nconst [lead, ...team] = ['Мария', 'Олег', 'Анна'];\nconsole.log(lead);  // 'Мария'\nconsole.log(team);  // ['Олег', 'Анна']\n\n// Immutable update (React-паттерн)\nconst state = { count: 5, theme: 'dark' };\nconst newState = { ...state, count: state.count + 1 };\n// { count: 6, theme: 'dark' }\n\n// Optional Chaining + Nullish Coalescing\nconst city = user?.address?.city ?? 'Не указан';\nconst score = response?.data?.score ?? 0;",
+            "title": "Деструктуризация, rest/spread и optional chaining",
+            "explanation": "Деструктуризация в параметрах функции — стандартный паттерн React-компонентов ({ props }). Spread для immutable updates — основа Redux и React state. ?. и ?? — безопасный доступ к вложенным данным."
           }
         }
       ],
       "seniorTips": [
-        "Всегда используйте строгое равенство `===` вместо `==`."
+        "Arrow functions наследуют this лексически. Никогда не используйте arrow для методов объекта, где нужен this (obj.method = () => {} — антипаттерн).",
+        "Замыкания в цикле с var — классический вопрос на собеседовании. Используйте let (block scope) или IIFE для создания нового скоупа на каждой итерации.",
+        "Spread-оператор создаёт SHALLOW (неглубокую) копию. Для deep copy используйте structuredClone() (ES2022) или рекурсию.",
+        "Деструктуризация параметров с default values — стандарт React-компонентов: function Button({ variant = 'primary', size = 'md', children }) {...}"
       ],
       "commonMistakes": [
         {
-          "bad": "if (userId == 5)",
-          "good": "if (userId === 5)",
-          "reason": "Нестрогое сравнение == неявно приводит типы, порождая баги."
+          "bad": "const user = {\n  name: 'Алексей',\n  greet: () => {\n    console.log(this.name); // undefined!\n  }\n};",
+          "good": "const user = {\n  name: 'Алексей',\n  greet() {\n    console.log(this.name); // 'Алексей'\n  }\n};",
+          "reason": "Arrow function не имеет собственного this — она наследует его из внешнего лексического контекста (в данном случае window/global). Для методов объекта используйте сокращённый синтаксис метода."
+        },
+        {
+          "bad": "for (var i = 0; i < 5; i++) {\n  setTimeout(() => console.log(i), 100);\n  // Выведет: 5, 5, 5, 5, 5\n}",
+          "good": "for (let i = 0; i < 5; i++) {\n  setTimeout(() => console.log(i), 100);\n  // Выведет: 0, 1, 2, 3, 4\n}",
+          "reason": "var имеет function scope — одна переменная i для всего цикла. К моменту выполнения setTimeout, i === 5. let создаёт новый block scope на каждой итерации — замыкание захватывает актуальное значение."
+        },
+        {
+          "bad": "const copy = original;\ncopy.name = 'Новое имя';\n// original.name тоже изменился!",
+          "good": "const copy = { ...original };\ncopy.name = 'Новое имя';\n// original.name не изменился",
+          "reason": "Присвоение объекта копирует ССЫЛКУ, а не данные. Оба имени указывают на один объект в памяти. Spread создаёт новый объект с копиями свойств (shallow copy)."
         }
       ],
       "keyTakeaways": [
-        "В JS 7 примитивов и тип Object.",
-        "=== сравнивает значение и тип.",
-        "?? защищает значение 0."
+        "Function Declaration поднимается целиком (hoisting), Expression и Arrow — нет. Arrow не имеет собственного `this` и `arguments`.",
+        "Scope Chain ищет переменные от текущего скоупа вверх: Block → Function → Global. `let`/`const` — block scope, `var` — function scope.",
+        "Замыкание (Closure) — функция сохраняет доступ к переменным родительского скоупа даже после его завершения. Применение: приватность, фабрики, мемоизация, React hooks.",
+        "Деструктуризация, rest (`...args`), spread (`{...obj}`) и optional chaining (`?.`) — стандартный синтаксис ES6+ в продакшен-коде.",
+        "`??` (nullish coalescing) реагирует только на `null`/`undefined`, в отличие от `||`, который также проглатывает `0`, `''` и `false`."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"type-demo\"><h3>Проверка типов</h3><button id=\"btn-type\">Проверить typeof</button><pre id=\"type-log\"></pre></div>",
-      "initialCss": ".type-demo { padding: 20px; background: white; border-radius: 12px; }\n#type-log { margin-top: 10px; background: #f8fafc; padding: 12px; border-radius: 6px; font-family: monospace; }",
-      "initialJs": "document.getElementById('btn-type').addEventListener('click', () => {\n  const log = document.getElementById('type-log');\n  log.textContent = `typeof 42: ${typeof 42}\ntypeof 'text': ${typeof 'text'}\ntypeof true: ${typeof true}`;\n});",
-      "instructions": "Нажмите кнопку для просмотра работы оператора typeof."
+      "initialHtml": "<div id=\"output\"></div>",
+      "initialCss": "#output { font-family: monospace; white-space: pre-wrap; padding: 16px; color: #2dff8a; background: #0a0e13; min-height: 200px; }",
+      "initialJs": "const out = document.getElementById('output');\nconst log = (msg) => out.textContent += msg + '\\n';\n\n// Задание: создайте функцию createCounter\n// с методами increment, decrement, getCount, reset\n\n// const counter = createCounter(10);\n// log(counter.increment()); // 11\n// log(counter.increment()); // 12\n// log(counter.decrement()); // 11\n// log(counter.getCount());  // 11\n// counter.reset();\n// log(counter.getCount());  // 10",
+      "instructions": "Реализуйте функцию-фабрику createCounter с замыканием:\n1. Принимает начальное значение (default = 0)\n2. Возвращает объект с методами: increment, decrement, getCount, reset\n3. Переменная count должна быть приватной (недоступной извне)\n4. Раскомментируйте тестовый код и проверьте результат"
     },
     "task": {
-      "title": "Безопасная установка настроек через ??",
-      "scenario": "Напишите функцию, возвращающую значение по умолчанию через оператор ??.",
+      "title": "Модуль валидации форм на замыканиях",
+      "scenario": "Вам поручили создать модуль валидации форм с использованием замыканий. Модуль должен создавать валидаторы для разных полей формы, кэшировать результаты и предоставлять API для проверки.",
       "criteria": [
-        "Использован оператор ??"
+        "Функция createValidator(rules) принимает объект с правилами валидации",
+        "Возвращает объект с методом validate(fieldName, value) → { valid, errors }",
+        "Правила поддерживают: required, minLength, maxLength, pattern (regex), custom (функция)",
+        "Результаты кэшируются в замыкании (мемоизация) — повторная проверка того же значения берётся из кэша",
+        "Используйте деструктуризацию в параметрах и rest/spread операторы",
+        "Метод getErrors() возвращает все текущие ошибки"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "function createValidator(rules) {\n  // Ваш код здесь\n  // Используйте замыкание для хранения кэша и ошибок\n}"
       },
       "hints": [
-        "Используйте современные стандарты ES6+."
+        "Используйте Map() в замыкании для кэширования: const cache = new Map()",
+        "Ключ кэша: JSON.stringify({ field, value })",
+        "Деструктурируйте правила: const { required, minLength, ...rest } = rules[fieldName]",
+        "Каждое правило — отдельная проверка, ошибки собираются в массив"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "function getPort(customPort) {\n  return customPort ?? 3000;\n}\nconsole.log(getPort(8080)); // 8080\nconsole.log(getPort(null)); // 3000",
-        "explanation": "Оператор ?? надежно подставляет дефолтные значения."
+        "js": "function createValidator(rules) {\n  const cache = new Map();\n  const allErrors = {};\n\n  return {\n    validate(field, value) {\n      const key = JSON.stringify({ field, value });\n      if (cache.has(key)) return cache.get(key);\n\n      const { required, minLength, maxLength, pattern, custom } = rules[field] ?? {};\n      const errors = [];\n\n      if (required && !value?.trim()) errors.push('Обязательное поле');\n      if (minLength && value.length < minLength) errors.push(`Минимум ${minLength} символов`);\n      if (maxLength && value.length > maxLength) errors.push(`Максимум ${maxLength} символов`);\n      if (pattern && !pattern.test(value)) errors.push('Неверный формат');\n      if (custom && !custom(value)) errors.push('Не прошло проверку');\n\n      const result = { valid: errors.length === 0, errors };\n      cache.set(key, result);\n      allErrors[field] = errors;\n      return result;\n    },\n    getErrors: () => ({ ...allErrors }),\n    clearCache: () => cache.clear()\n  };\n}",
+        "explanation": "cache (Map) и allErrors хранятся в замыкании — приватные. validate деструктурирует правила из rules[field]. Каждая проверка добавляет ошибку в массив. Результат кэшируется по ключу field+value. getErrors возвращает shallow copy через spread."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j2-q1",
-          "question": "Что вернет выражение (0 ?? 50)?",
+          "id": "js2-q1",
+          "question": "В чём ключевое отличие Arrow Function от Function Declaration?",
           "options": [
-            "50",
-            "0",
-            "null",
-            "NaN"
+            "Arrow Function быстрее выполняется",
+            "Arrow Function не имеет собственного this — наследует его лексически",
+            "Arrow Function не может принимать параметры",
+            "Arrow Function автоматически возвращает undefined"
           ],
           "correctIndex": 1,
-          "explanation": "Оператор ?? возвращает правый операнд только для null и undefined. Число 0 сохраняется."
+          "explanation": "Arrow Function не создаёт собственный this, arguments, super и new.target. Она наследует this из окружающего лексического контекста. Это делает arrow идеальной для callback-ов, но непригодной для методов объектов."
+        },
+        {
+          "id": "js2-q2",
+          "question": "Что такое замыкание (Closure) в JavaScript?",
+          "options": [
+            "Блокировка доступа к переменным",
+            "Функция, которая сохраняет доступ к переменным родительского скоупа после его завершения",
+            "Автоматическое удаление неиспользуемых переменных",
+            "Механизм наследования между классами"
+          ],
+          "correctIndex": 1,
+          "explanation": "Замыкание возникает, когда внутренняя функция сохраняет ссылку на Lexical Environment родительского скоупа. Даже после завершения родительской функции, внутренняя продолжает иметь доступ к её переменным."
+        },
+        {
+          "id": "js2-q3",
+          "question": "Что выведет код: for (var i = 0; i < 3; i++) { setTimeout(() => console.log(i), 0); }",
+          "options": [
+            "0, 1, 2",
+            "3, 3, 3",
+            "undefined, undefined, undefined",
+            "0, 0, 0"
+          ],
+          "correctIndex": 1,
+          "explanation": "var имеет function scope — одна переменная i для всего цикла. setTimeout callback-и выполняются после завершения цикла, когда i === 3. Все три вызова замыкаются на одну и ту же переменную i. Решение: используйте let."
+        },
+        {
+          "id": "js2-q4",
+          "question": "Что возвращает выражение: 0 || 'default' и 0 ?? 'default'?",
+          "options": [
+            "Оба возвращают 'default'",
+            "|| возвращает 'default', ?? возвращает 0",
+            "Оба возвращают 0",
+            "|| возвращает 0, ?? возвращает 'default'"
+          ],
+          "correctIndex": 1,
+          "explanation": "|| (OR) проверяет на falsy: 0, '', false, null, undefined, NaN. 0 — falsy, поэтому возвращает 'default'. ?? (nullish coalescing) проверяет только null и undefined. 0 — не null и не undefined, поэтому возвращает 0."
+        },
+        {
+          "id": "js2-q5",
+          "question": "Что делает оператор ...args в параметрах функции: function sum(...args) {}?",
+          "options": [
+            "Разворачивает массив args в отдельные аргументы",
+            "Собирает все переданные аргументы в массив args (rest parameter)",
+            "Создаёт копию объекта args",
+            "Удаляет первый аргумент из массива"
+          ],
+          "correctIndex": 1,
+          "explanation": "В параметрах функции ...args — это rest parameter, он собирает все оставшиеся аргументы в массив. В вызове функции или в литералах массивов/объектов ... — это spread operator, он разворачивает массив/объект."
         }
       ]
     }

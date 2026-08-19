@@ -206,120 +206,194 @@ export const proLessons: Lesson[] = [
     "id": "pro-2",
     "moduleId": "pro",
     "level": 2,
-    "title": "Современный инструментарий разработчика",
-    "subtitle": "Git, ветвление, Conventional Commits, сборщики Vite/Webpack, npm/pnpm и CI/CD",
-    "description": "Профессиональный арсенал: ветвление feature-branch в Git, стандарты коммитов Conventional Commits, сборщики проектов (Vite, Rollup), пакетные менеджеры npm/pnpm и пайплайны CI/CD.",
-    "estimatedMinutes": 45,
+    "title": "Git, ветвление и инструменты сборки",
+    "subtitle": "Git Flow, Conventional Commits, разрешение конфликтов, Vite, npm/pnpm и CI/CD пайплайн",
+    "description": "Освойте профессиональный Git-воркфлоу: создание и мерж веток, разрешение конфликтов, стандарт Conventional Commits. Изучите экосистему инструментов: Vite, npm, pnpm, ESLint, Prettier и основы CI/CD.",
+    "estimatedMinutes": 60,
     "difficulty": "intermediate",
     "tags": [
-      "Pro",
-      "Git",
-      "Vite",
-      "BuildTools",
-      "CICD",
-      "Workflow"
+      "git",
+      "branching",
+      "conventional-commits",
+      "vite",
+      "npm",
+      "ci-cd",
+      "eslint"
     ],
     "theory": {
-      "overview": "Современный фронтенд давно перерос простую правку файлов в блокноте. Сегодня это зрелая инженерная дисциплина с развитой экосистемой сборщиков, автоматизированным тестированием, пакетными менеджерами и непрерывной интеграцией (CI/CD).\n\nВладение Git и инструментами сборки отличает профессионального разработчика от любителя.",
+      "overview": "В первом уроке модуля Pro мы познакомились с ролями в команде и Agile-методологиями. Теперь пришло время освоить инструменты, которые вы будете использовать ЕЖЕДНЕВНО: систему контроля версий Git и экосистему сборки frontend-проекта.\n\nGit — не просто утилита для сохранения кода. Это система СОВМЕСТНОЙ РАБОТЫ, которая позволяет десяткам разработчиков параллельно работать над одним проектом без конфликтов. Понимание Git на глубоком уровне — обязательный навык для прохождения любого технического собеседования.",
       "sections": [
         {
-          "title": "Система контроля версий Git и Feature-Branch Workflow",
-          "content": "- **Git**: распределенная система контроля версий, хранящая полную историю всех изменений кодовой базы.\n- **Feature-Branch подход**:\n  1. Основная ветка: `main` или `master` (всегда стабильный продакшен код).\n  2. Для новой задачи создается отдельная ветка: `git checkout -b feature/cart-modal`.\n  3. Вносятся изменения и коммитятся: `git commit -m 'feat(cart): add checkout modal'`.\n  4. Ветка пушится на сервер: `git push origin feature/cart-modal`.\n  5. Создается Pull Request (Merge Request) в `main` для проверки и слияния.",
+          "title": "Git: Feature-Branch Workflow и работа с ветками",
+          "content": "Feature-Branch Workflow — стандарт в индустрии. Его суть: каждая новая фича, баг-фикс или задача разрабатывается в ОТДЕЛЬНОЙ ветке, а затем вливается в main через Pull Request (PR) с обязательным Code Review.\n\nОсновные команды Git для ежедневной работы:\n\nСоздание и переключение веток:\n`git checkout -b feature/user-profile` — создать и переключиться на новую ветку\n`git switch -c feature/user-profile` — современный аналог (Git 2.23+)\n`git branch` — список локальных веток\n`git branch -a` — список всех веток (включая remote)\n\nРабота с изменениями:\n`git status` — текущее состояние рабочей директории\n`git diff` — различия в незафиксированных файлах\n`git add .` — добавить все изменения в staging area\n`git add -p` — интерактивный staging (по хункам) — РЕКОМЕНДУЕТСЯ для атомарных коммитов\n`git commit -m 'feat(profile): add avatar upload'` — коммит с Conventional Commits\n`git commit --amend` — изменить последний коммит (сообщение или добавить файлы)\n\nСинхронизация с remote:\n`git push origin feature/user-profile` — отправить ветку на remote\n`git pull origin main` — получить последние изменения из main\n`git fetch` — скачать данные из remote без merge\n\nМерж и rebase:\n`git merge main` — влить main в текущую ветку (merge commit)\n`git rebase main` — перенести коммиты поверх main (линейная история)\n\nОтмена изменений:\n`git stash` — сохранить незакоммиченные изменения во временное хранилище\n`git stash pop` — восстановить сохранённые изменения\n`git reset --soft HEAD~1` — отменить последний коммит (изменения сохранятся в staging)",
+          "image": {
+            "src": "/images/lessons/git-branch-workflow.jpg",
+            "alt": "Git Feature-Branch Workflow: создание ветки, коммиты, Pull Request и мерж в main",
+            "caption": "Feature-Branch Workflow: каждая задача — отдельная ветка → Pull Request → Code Review → Merge в main"
+          },
           "codeExample": {
             "language": "bash",
-            "title": "Базовые команды Git для ежедневной работы",
-            "code": "git status                  # Проверить статус измененных файлов\ngit pull origin main        # Подтянуть свежие изменения из главной ветки\ngit checkout -b feature/nav # Создать и перейти в новую ветку\ngit add .                   # Добавить файлы в индекс\ngit commit -m \"feat: add mobile navigation\"\ngit push origin feature/nav # Отправить ветку на GitHub/GitLab",
-            "explanation": "Ежедневный рабочий пайплайн разработчика."
+            "code": "# 1. Создать ветку от main\ngit checkout main\ngit pull origin main\ngit checkout -b feature/login-form\n\n# 2. Разработка: файлы → staging → commit\ngit add -p\ngit commit -m \"feat(auth): add login form component\"\n\n# 3. Push ветки на remote\ngit push origin feature/login-form\n\n# 4. Создать Pull Request на GitHub/GitLab\n# → Code Review → Approve\n\n# 5. Merge в main (через UI или CLI)\ngit checkout main\ngit pull origin main\ngit merge feature/login-form\ngit push origin main\n\n# 6. Удалить ветку\ngit branch -d feature/login-form\ngit push origin --delete feature/login-form",
+            "title": "Полный цикл Feature-Branch Workflow",
+            "explanation": "Всегда начинайте от актуального main. git add -p для атомарных коммитов. Push ветку → PR → Code Review → Merge → Удалить ветку. Это стандартный цикл в продуктовых командах."
           }
         },
         {
-          "title": "Стандарт коммитов Conventional Commits",
-          "content": "В профессиональных командах коммиты пишутся по международному стандарту `type(scope): description`:\n- `feat`: новая функциональность (`feat(auth): add google login`).\n- `fix`: исправление бага (`fix(button): prevent multiple clicks`).\n- `refactor`: рефакторинг кода без изменения логики (`refactor(api): simplify fetch client`).\n- `style`: правки форматирования, пробелов, CSS (`style(header): fix mobile alignment`).\n- `docs`: обновление документации (`docs(readme): add installation guide`).\n- `test`: добавление или правка тестов (`test(user): add unit tests for validation`).",
+          "title": "Conventional Commits и разрешение Git-конфликтов",
+          "content": "Conventional Commits — стандартизированный формат сообщений коммитов, принятый в индустрии. Он позволяет автоматически генерировать CHANGELOG, определять семантическую версию (SemVer) и упрощает навигацию по истории.\n\nФормат: `<type>(<scope>): <description>`\n\nТипы коммитов:\n`feat:` — новая функциональность (MINOR версия)\n`fix:` — исправление бага (PATCH версия)\n`refactor:` — рефакторинг без изменения функциональности\n`docs:` — изменения документации\n`style:` — форматирование, пробелы, запятые (не CSS!)\n`test:` — добавление или исправление тестов\n`chore:` — обновление зависимостей, конфигов, CI\n`perf:` — оптимизация производительности\n`ci:` — изменения CI/CD пайплайна\n\nПримеры хороших коммитов:\n`feat(auth): add JWT token refresh mechanism`\n`fix(cart): prevent double submit on checkout`\n`refactor(api): extract validation into middleware`\n`docs(readme): add deployment instructions`\n\nРазрешение Git-конфликтов:\nКонфликты возникают, когда два разработчика изменили одну и ту же строку в одном файле. Git маркирует конфликт специальными маркерами:\n\n`<<<<<<< HEAD` — ваши изменения\n`=======` — разделитель\n`>>>>>>> feature/other-branch` — чужие изменения\n\nАлгоритм разрешения:\n1. Открыть файл в VS Code (встроенный Merge Editor)\n2. Выбрать: принять ваши (Accept Current), принять чужие (Accept Incoming), принять оба (Accept Both), или отредактировать вручную\n3. Удалить маркеры конфликта\n4. `git add .` + `git commit` (без -m — Git предложит сообщение)\n5. Проверить, что код работает (npm run build)",
           "codeExample": {
             "language": "bash",
-            "title": "Примеры качественных коммитов",
-            "code": "feat(catalog): add price range filter slider\nfix(cart): resolve NaN calculation on empty discount\nrefactor(auth): migrate token storage to secure cookies",
-            "explanation": "По таким коммитам легко строить автоматические списки изменений (Changelog)."
+            "code": "# Conventional Commits — примеры\ngit commit -m \"feat(profile): add avatar upload with drag-and-drop\"\ngit commit -m \"fix(login): handle 401 response with redirect\"\ngit commit -m \"refactor(api): migrate from axios to fetch\"\ngit commit -m \"test(cart): add unit tests for discount calculation\"\ngit commit -m \"chore(deps): upgrade react to 19.1.0\"\n\n# Breaking Change (MAJOR версия)\ngit commit -m \"feat(api)!: change auth endpoint from /login to /auth/sign-in\n\nBREAKING CHANGE: /login endpoint removed.\nMigrate to /auth/sign-in.\"\n\n# Разрешение конфликта\ngit merge main\n# CONFLICT in src/App.tsx\n# Открыть в VS Code → Merge Editor\n# Разрешить → сохранить\ngit add src/App.tsx\ngit commit  # Авто-сообщение: 'Merge branch main into...'",
+            "title": "Conventional Commits и разрешение конфликтов",
+            "explanation": "feat! с BREAKING CHANGE в теле — для мажорных изменений. При конфликте Git маркирует проблемные строки. VS Code Merge Editor визуально показывает оба варианта. После разрешения — add + commit."
           }
         },
         {
-          "title": "Сборщики проектов (Vite) и пакетные менеджеры",
-          "content": "- **Пакетные менеджеры (npm, pnpm, yarn)**:\n  • `package.json`: манифест проекта со списком зависимостей (`dependencies`, `devDependencies`) и скриптами (`npm run dev`, `npm run build`).\n  • `node_modules`: папка со всеми установленными внешними библиотеками.\n  • `package-lock.json` / `pnpm-lock.yaml`: фиксирует точные версии пакетов для воспроизводимости сборки на сервере.\n- **Сборщик Vite**:\n  • Быстрый современный бандлер на основе нативных ES-модулей (ESM) и компилятора Rollup/esbuild.\n  • Предоставляет моментальный Hot Module Replacement (HMR) при сохранении файлов.\n  • Команда `npm run build` компилирует TypeScript, минифицирует CSS и генерирует оптимизированный бандл в папку `dist/`.",
+          "title": "Vite, пакетные менеджеры (npm/pnpm) и конфигурация проекта",
+          "content": "Современный frontend-проект состоит из множества инструментов. Разберём ключевые.\n\nVite — современный сборщик и dev-server:\n- Dev-режим: мгновенный Hot Module Replacement (HMR) через нативные ES-модули — без бандлинга!\n- Продакшен: оптимизированная сборка через Rollup (tree-shaking, code splitting, минификация)\n- Поддерживает: TypeScript, JSX/TSX, CSS Modules, PostCSS, SASS из коробки\n- `npm create vite@latest my-app -- --template react-ts` — создание проекта\n\nСтруктура Vite-проекта:\n`package.json` — манифест проекта: зависимости, скрипты, метаданные\n`vite.config.ts` — конфигурация Vite: алиасы, плагины, proxy для API\n`tsconfig.json` — конфигурация TypeScript\n`index.html` — входная точка (в корне, не в public!)\n`src/` — исходный код приложения\n`public/` — статические файлы (копируются as-is)\n`dist/` — продакшен-сборка (git-ignored)\n\nПакетные менеджеры:\n`npm` — встроен в Node.js. `package.json` + `package-lock.json`\n`pnpm` — альтернатива. Экономит диск: shared store, жёсткие ссылки. `pnpm-lock.yaml`\n`yarn` — альтернатива от Facebook. `yarn.lock`\n\nКлючевые команды:\n`npm install` / `pnpm install` — установить все зависимости из lock-файла\n`npm install react` — добавить dependency\n`npm install -D vitest` — добавить devDependency\n`npm run dev` — запустить dev-server\n`npm run build` — продакшен-сборка\n`npm run preview` — превью продакшен-билда\n\n`dependencies` vs `devDependencies`:\n- `dependencies`: react, react-dom, zustand — нужны в runtime\n- `devDependencies`: vite, typescript, eslint, prettier — только для разработки",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// package.json — манифест проекта\n{\n  \"name\": \"my-app\",\n  \"version\": \"1.0.0\",\n  \"type\": \"module\",\n  \"scripts\": {\n    \"dev\": \"vite\",\n    \"build\": \"tsc && vite build\",\n    \"preview\": \"vite preview\",\n    \"lint\": \"eslint src/\",\n    \"format\": \"prettier --write src/\"\n  },\n  \"dependencies\": {\n    \"react\": \"^19.1.0\",\n    \"react-dom\": \"^19.1.0\"\n  },\n  \"devDependencies\": {\n    \"vite\": \"^6.0.0\",\n    \"typescript\": \"^5.7.0\",\n    \"@types/react\": \"^19.1.0\",\n    \"eslint\": \"^9.0.0\",\n    \"prettier\": \"^3.0.0\"\n  }\n}",
+            "title": "Структура package.json и скрипты проекта",
+            "explanation": "type: module — ES-модули. scripts — npm run команды. dependencies — runtime. devDependencies — инструменты разработки. Версии с ^ (caret) разрешают minor/patch обновления."
+          }
+        },
+        {
+          "title": "ESLint, Prettier и основы CI/CD пайплайна",
+          "content": "ESLint — статический анализатор JavaScript/TypeScript. Находит потенциальные ошибки, антипаттерны и нарушения стиля ДО запуска кода.\n\nОсновные категории правил:\n- Ошибки: `no-unused-vars` (неиспользуемые переменные), `no-undef` (необъявленные переменные)\n- Лучшие практики: `eqeqeq` (строгое сравнение ===), `no-var` (используйте let/const)\n- Стиль: делегируйте Prettier\n\nPrettier — форматтер кода. В отличие от ESLint, Prettier НЕ находит ошибки — он автоматически форматирует код по единому стилю:\n- Отступы, кавычки, точки с запятой, длина строки\n- Поддерживает: JS, TS, JSX, CSS, HTML, JSON, Markdown\n- Интеграция с VS Code: Format On Save\n\nПринцип: ESLint ищет ошибки, Prettier форматирует стиль.\n\nCI/CD (Continuous Integration / Continuous Deployment):\nCI/CD-пайплайн — автоматизированная цепочка проверок, запускаемая при каждом push или PR:\n\n1. Install — установка зависимостей (npm ci — детерминированная установка из lock-файла)\n2. Lint — ESLint проверяет код на ошибки и антипаттерны\n3. Type Check — tsc --noEmit проверяет TypeScript-типы\n4. Test — запуск unit-тестов (Vitest, Jest)\n5. Build — продакшен-сборка (vite build)\n6. Deploy — автоматический деплой на staging/production (Vercel, Netlify)\n\nЕсли ЛЮБОЙ шаг падает — PR не может быть смержен. Это защищает main от сломанного кода.\n\nGitHub Actions — CI/CD-сервис GitHub:\n`.github/workflows/ci.yml` — YAML-конфиг пайплайна\nЗапускается при push, pull_request или по расписанию (cron)",
           "codeExample": {
             "language": "bash",
-            "title": "Скрипты в package.json",
-            "code": "{\n  \"scripts\": {\n    \"dev\": \"vite\",             # Запуск локального сервера разработки\n    \"build\": \"tsc && vite build\",# Компиляция TypeScript и прод-сборка\n    \"lint\": \"eslint src/\",       # Проверка чистоты кода линтером\n    \"test\": \"vitest\"            # Запуск автотестов\n  }\n}",
-            "explanation": "Стандартные команды автоматизации в веб-проекте."
+            "code": "# .github/workflows/ci.yml\nname: CI Pipeline\n\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\n\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 22\n          cache: 'npm'\n\n      - run: npm ci          # Установка\n      - run: npm run lint     # ESLint\n      - run: npx tsc --noEmit # TypeScript\n      - run: npm run build    # Сборка",
+            "title": "GitHub Actions CI/CD пайплайн",
+            "explanation": "CI запускается на каждый push и PR. npm ci — детерминированная установка (без обновления lock-файла). Последовательно: lint → type check → build. Если хоть один шаг падает — PR блокируется."
           }
         }
       ],
       "seniorTips": [
-        "Пишите атомарные коммиты: один коммит — одно логическое изменение. Не коммитьте в одну кучу верстку шапки, правку багов в корзине и обновление конфига!",
-        "Никогда не коммитьте папку `node_modules` и файлы с секретами `.env` — они обязательно должны быть в `.gitignore`."
+        "git add -p (patch mode) — золотой стандарт: позволяет коммитить изменения по хункам, создавая атомарные коммиты. Один коммит = одно логическое изменение.",
+        "Никогда не делайте force push (git push -f) в main. Это перезаписывает историю и ломает работу всей команды.",
+        "npm ci вместо npm install в CI/CD — детерминированная установка строго по lock-файлу, без обновления зависимостей.",
+        "Husky + lint-staged — автоматический запуск ESLint и Prettier при каждом git commit (pre-commit hook). Предотвращает попадание невалидного кода в репозиторий."
       ],
       "commonMistakes": [
         {
-          "bad": "git commit -m 'fix' /* Бессмысленное сообщение */",
-          "good": "git commit -m 'fix(checkout): validate promo code on input'",
-          "reason": "Четкие сообщения коммитов экономят часы времени при поиске причин регрессионных багов (git bisect)."
+          "bad": "git add .\ngit commit -m \"fix\"",
+          "good": "git add -p\ngit commit -m \"fix(cart): prevent\n  negative quantity on decrement\"",
+          "reason": "Коммит 'fix' без scope и описания бесполезен в истории. git add . коммитит ВСЁ, включая отладочные console.log. Используйте git add -p и Conventional Commits."
+        },
+        {
+          "bad": "git push -f origin main",
+          "good": "git push origin feature/my-task",
+          "reason": "Force push в main перезаписывает историю и ломает работу ВСЕЙ команды. Force push допустим ТОЛЬКО в вашей личной feature-ветке для cleanup перед PR."
+        },
+        {
+          "bad": "// Зависимости в dependencies\n\"devDependencies\": {\n  \"react\": \"^19.1.0\"\n}",
+          "good": "\"dependencies\": {\n  \"react\": \"^19.1.0\"\n},\n\"devDependencies\": {\n  \"vite\": \"^6.0.0\"\n}",
+          "reason": "react нужен в runtime — он должен быть в dependencies. devDependencies не попадают в бандл при npm install --production. Путаница приводит к 'Module not found' в продакшене."
         }
       ],
       "keyTakeaways": [
-        "Git хранит историю изменений и позволяет безопасно вести параллельную разработку в ветках.",
-        "Conventional Commits структурирует историю проекта (feat, fix, refactor, style).",
-        "Vite собирает TypeScript и модули в оптимизированный production-бандл."
+        "Feature-Branch Workflow: каждая задача в отдельной ветке → Push → Pull Request → Code Review → Merge в main.",
+        "Conventional Commits (`feat:`, `fix:`, `refactor:`, `docs:`, `chore:`) стандартизируют историю и позволяют автоматически генерировать CHANGELOG.",
+        "Vite обеспечивает мгновенный HMR в dev-режиме и оптимизированную сборку через Rollup в продакшене.",
+        "`dependencies` — runtime (react, zustand), `devDependencies` — инструменты (vite, eslint, prettier). Путаница ведёт к ошибкам в продакшене.",
+        "CI/CD пайплайн (lint → type check → test → build → deploy) защищает main от сломанного кода. Если шаг падает — PR блокируется.",
+        "`git add -p` для атомарных коммитов. Никогда не используйте `git push -f` в main."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"git-tree-demo\"><div class=\"git-branch\"><span class=\"branch-tag\">main</span> — v1.0.0 (Production)</div><div class=\"git-branch feat\"><span class=\"branch-tag feat-tag\">feature/quiz</span> — Добавление тестов</div></div>",
-      "initialCss": ".git-tree-demo { padding: 20px; background: #0f172a; color: white; border-radius: 12px; font-family: monospace; }\n.git-branch { margin-bottom: 10px; padding: 10px; background: #1e293b; border-radius: 6px; }\n.branch-tag { background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }\n.feat-tag { background: #6366f1; }",
-      "initialJs": "console.log('Tools demo loaded');",
-      "instructions": "Посмотрите визуализацию веток Git."
+      "initialHtml": "<div id=\"terminal\"></div>",
+      "initialCss": "#terminal { background: #0a0e13; color: #2dff8a; font-family: 'JetBrains Mono', monospace; padding: 20px; min-height: 300px; border-radius: 8px; white-space: pre-wrap; }",
+      "initialJs": "const term = document.getElementById('terminal');\nconst log = (msg) => term.textContent += '$ ' + msg + '\\n';\n\n// Симулируйте Git-воркфлоу\nlog('git checkout main');\nlog('git pull origin main');\n// Добавьте команды для создания ветки, коммитов и PR",
+      "instructions": "Симулируйте полный Feature-Branch Workflow в терминале:\n1. Переключитесь на main и обновите\n2. Создайте ветку feature/todo-list\n3. Сделайте 3 коммита с Conventional Commits: feat, fix, style\n4. Push ветку\n5. Симулируйте merge в main\n6. Удалите ветку"
     },
     "task": {
-      "title": "Форматирование коммита по стандарту",
-      "scenario": "Напишите функцию formatCommit(type, scope, message), возвращающую строку Conventional Commit.",
+      "title": "Настройка CI/CD для Vite-проекта",
+      "scenario": "Вам поручили настроить CI/CD пайплайн для нового Vite + React + TypeScript проекта. Пайплайн должен автоматически проверять код при каждом PR.",
       "criteria": [
-        "Функция формирует строку формата type(scope): message"
+        "GitHub Actions workflow: .github/workflows/ci.yml",
+        "Триггеры: push в main и pull_request в main",
+        "Шаги: checkout, setup-node (v22), npm ci, lint, type check (tsc --noEmit), build",
+        "package.json содержит скрипты: dev, build, lint, format",
+        "ESLint конфиг с правилами: no-unused-vars, eqeqeq, no-var",
+        "Prettier конфиг: singleQuote: true, semi: true, tabWidth: 2"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Инженерные задачи</div>",
-        "js": "// Напишите решение\n"
+        "html": "<!-- Создайте .github/workflows/ci.yml -->",
+        "js": "// Создайте package.json с правильными скриптами"
       },
       "hints": [
-        "Следуйте инженерным стандартам и культуре чистого кода."
+        "Используйте actions/checkout@v4 и actions/setup-node@v4",
+        "npm ci вместо npm install для детерминированной установки",
+        "tsc --noEmit — проверка типов без генерации файлов",
+        "Добавьте cache: 'npm' в setup-node для ускорения CI"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Инженерные задачи</div>",
-        "js": "const formatCommit = (type, scope, message) => `${type}(${scope}): ${message}`;\nconsole.log(formatCommit('feat', 'navbar', 'add user profile dropdown'));",
-        "explanation": "Стандартизированное форматирование коммитов."
+        "html": "name: CI\non:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: 22\n          cache: 'npm'\n      - run: npm ci\n      - run: npm run lint\n      - run: npx tsc --noEmit\n      - run: npm run build",
+        "explanation": "CI запускается на push и PR в main. npm ci — из lock-файла. Линтинг → Type Check → Build — любой падающий шаг блокирует мерж."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "p2-q1",
-          "question": "Какой префикс в Conventional Commits используется для новой функциональности?",
+          "id": "pro2-q1",
+          "question": "Какой Git-команде вы отдадите предпочтение для добавления изменений в staging area при создании атомарных коммитов?",
           "options": [
-            "bugfix:",
-            "feat:",
-            "patch:",
-            "update:"
-          ],
-          "correctIndex": 1,
-          "explanation": "Префикс feat: обозначает новую фичу (Feature)."
-        },
-        {
-          "id": "p2-q2",
-          "question": "Какая папка содержит скомпилированные production-файлы после npm run build?",
-          "options": [
-            "node_modules/",
-            "src/",
-            "dist/ (или build/)",
-            ".git/"
+            "git add .",
+            "git add -A",
+            "git add -p",
+            "git commit -a"
           ],
           "correctIndex": 2,
-          "explanation": "Сборщики (Vite/Webpack) выводят готовый оптимизированный бандл в папку dist/."
+          "explanation": "git add -p (patch mode) позволяет интерактивно выбирать хунки (фрагменты изменений) для staging. Это ключевой инструмент для создания атомарных коммитов — один коммит = одно логическое изменение."
+        },
+        {
+          "id": "pro2-q2",
+          "question": "Какой формат коммита соответствует стандарту Conventional Commits для нового функционала в модуле авторизации?",
+          "options": [
+            "add login form",
+            "feat(auth): add login form with validation",
+            "FEATURE: login form added",
+            "new: auth login form"
+          ],
+          "correctIndex": 1,
+          "explanation": "Conventional Commits: type(scope): description. feat — новая функциональность, auth — модуль, после : — описание на английском в imperative mood. Позволяет автоматизировать CHANGELOG и SemVer."
+        },
+        {
+          "id": "pro2-q3",
+          "question": "В чём разница между npm install и npm ci?",
+          "options": [
+            "Нет разницы — синонимы",
+            "npm ci устанавливает строго по lock-файлу без обновлений, npm install может обновлять зависимости",
+            "npm ci работает быстрее, но не создаёт node_modules",
+            "npm install используется только в CI/CD"
+          ],
+          "correctIndex": 1,
+          "explanation": "npm ci (clean install) удаляет node_modules и устанавливает строго по package-lock.json — детерминированная установка. npm install может обновлять зависимости и менять lock-файл. В CI/CD всегда используйте npm ci."
+        },
+        {
+          "id": "pro2-q4",
+          "question": "Куда следует поместить библиотеку react в package.json?",
+          "options": [
+            "devDependencies — это инструмент разработки",
+            "dependencies — react нужен в runtime",
+            "peerDependencies — пусть пользователь сам поставит",
+            "optionalDependencies — не обязательная зависимость"
+          ],
+          "correctIndex": 1,
+          "explanation": "react нужен в runtime — приложение не работает без него. dependencies попадают в бандл. devDependencies (vite, eslint, typescript) — только инструменты, не попадают в бандл при npm install --production."
+        },
+        {
+          "id": "pro2-q5",
+          "question": "Что произойдёт, если один из шагов CI/CD пайплайна (например, npm run lint) завершится с ошибкой?",
+          "options": [
+            "Следующие шаги всё равно выполнятся",
+            "Pull Request будет автоматически смержен",
+            "Пайплайн остановится, PR будет заблокирован для мержа",
+            "Ошибка будет проигнорирована"
+          ],
+          "correctIndex": 2,
+          "explanation": "CI/CD пайплайн работает по принципу fail fast. Если любой шаг завершается с exit code !== 0, пайплайн останавливается. PR получает статус 'Checks failed' и блокируется для мержа. Это защищает main от сломанного кода."
         }
       ]
     }

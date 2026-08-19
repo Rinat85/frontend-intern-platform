@@ -5,97 +5,194 @@ export const cssLessons: Lesson[] = [
     "id": "css-1",
     "moduleId": "css",
     "level": 1,
-    "title": "Основы CSS: Селекторы и правила",
-    "subtitle": "Синтаксис CSS3, базовые и комбинаторные селекторы",
-    "description": "Фундамент стилизации: анатомия правила, классы, идентификаторы, универсальный селектор, селекторы потомков, дочерние, соседние и атрибутные селекторы.",
-    "estimatedMinutes": 30,
+    "title": "Основы CSS: Селекторы, Каскад и Специфичность",
+    "subtitle": "Синтаксис CSS3, каскад, наследование, комбинаторы и математика специфичности",
+    "description": "Глубокое освоение фундамента стилизации: анатомия CSS-правила, классификация селекторов, комбинаторы (> + ~), расчёт весов специфичности (Specificity Matrix), управление наследованием и глобальный сброс стилей.",
+    "estimatedMinutes": 45,
     "difficulty": "beginner",
     "tags": [
-      "CSS",
+      "CSS3",
       "Selectors",
-      "Syntax",
-      "Styling"
+      "Specificity",
+      "Cascade",
+      "Inheritance",
+      "Box Sizing"
     ],
     "theory": {
-      "overview": "CSS (Cascading Style Sheets) отвечает за визуальное представление HTML. Каждое CSS-правило состоит из Селектора и Блока объявлений { property: value; }.",
+      "overview": "CSS (`Cascading Style Sheets` — каскадные таблицы стилей) — это декларативный язык, отвечающий за визуальное представление, типографику, цвета и раскладку веб-документов. В то время как HTML задает *смысл и структуру*, CSS определяет *как эта структура выглядит на экране*.\n\nАрхитектура CSS строится на трёх фундаментальных концепциях:\n- **1. Каскад (The Cascade)**: набор строгих правил, по которым браузер разрешает конфликты, когда к одному и тому же элементу применяются взаимоисключающие стили из разных источников.\n- **2. Специфичность (Specificity)**: математический вес селектора, определяющий, какое правило имеет наивысший приоритет.\n- **3. Наследование (Inheritance)**: механизм автоматической передачи значений свойств (например, цвета текста `color` и шрифта `font-family`) от родительских элементов к дочерним.",
       "sections": [
         {
-          "title": "Базовые селекторы",
-          "content": "- `*` (универсальный): выбирает все элементы.\n- `tag` (теговый): выбирает по тегу (`h1`, `p`).\n- `.class` (классовый): основной инструмент (`.card`, `.btn`).\n- `#id` (идентификатор): уникальный выбор (высокий вес).\n- `A, B` (группировка): общие стили для нескольких селекторов.",
+          "title": "Анатомия CSS-правила и способы подключения стилей",
+          "content": "Каждое CSS-правило (Rule Set) состоит из двух частей:\n- **Селектор (Selector)**: указывает браузеру, к каким именно элементам в DOM-дереве применить стили.\n- **Блок объявлений (Declaration Block)**: обрамлён фигурными скобками `{ ... }` и содержит одно или несколько объявлений.\n- **Объявление (Declaration)**: состоит из имени свойства (`Property`), двоеточия, значения (`Value`) и обязательной точки с запятой (`;`).\n\nВ современной веб-разработке используются три способа подключения CSS:\n- 1. **Внешний файл (External Stylesheet — Best Practice)**: `<link rel=\"stylesheet\" href=\"style.css\">`. Стили кэшируются браузером, отделены от разметки и переиспользуются на всех страницах проекта.\n- 2. **Внутренний блок (Internal Styles)**: тег `<style>` в секции `<head>`. Применяется для критического CSS (Critical CSS) для ускорения первого экрана.\n- 3. **Встроенные стили (Inline Styles — Anti-pattern)**: атрибут `style=\"...\"` прямо в HTML-теге. Запрещены в промышленной разработке, так как создают гигантский вес специфичности и нарушают принцип разделения ответственности.",
           "codeExample": {
             "language": "css",
-            "title": "Примеры",
-            "code": "* { box-sizing: border-box; }\n.btn { padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }\n.btn.btn-primary { background: #4f46e5; color: white; }",
-            "explanation": "Классы создают переиспользуемые UI-компоненты."
+            "title": "Синтаксис CSS-правила и оформление компонента кнопки",
+            "code": "/* Селектор класса с блоком свойств */\n.btn-primary {\n  background-color: #2dff8a;\n  color: #03060a;\n  padding: 10px 20px;\n  border: 1px solid #2dff8a;\n  border-radius: 4px;\n  font-family: 'JetBrains Mono', monospace;\n  font-size: 13px;\n  font-weight: 700;\n  cursor: pointer;\n  transition: all 0.2s ease;\n}\n\n/* Псевдокласс состояния наведения */\n.btn-primary:hover {\n  background-color: #14b365;\n  box-shadow: 0 0 15px rgba(45, 255, 138, 0.4);\n}",
+            "explanation": "Классы создают переиспользуемые UI-компоненты с четкой семантикой и состояниями."
           }
         },
         {
-          "title": "Комбинаторы",
-          "content": "- `A B`: потомок на любой глубине.\n- `A > B`: прямой потомок 1-го уровня.\n- `A + B`: смежный сосед сразу за элементом.\n- `A ~ B`: все соседи после элемента.\n- `[attr=\"val\"]`: по значению атрибута.",
+          "title": "Полная классификация селекторов: Базовые, Комбинаторы и Атрибуты",
+          "content": "Селекторы позволяют точечно выбирать элементы любой сложности:\n- **Универсальный (`*`)**: выбирает абсолютно все элементы на странице (используется для сброса стилей).\n- **По тегу (`h1`, `p`, `button`)**: задает базовую типографику и стили по умолчанию.\n- **По классу (`.card`, `.badge`)**: основной инструмент фронтенд-инженера. Классы можно комбинировать и переиспользовать.\n- **По идентификатору (`#user-profile`)**: выбирает уникальный элемент. Имеет избыточно высокий вес специфичности, поэтому в современном CSS для стилизации не рекомендуется.\n\n**Комбинаторы связей между элементами:**\n- **Потомок (пробел `A B`)**: выбирает любой элемент `B`, вложенный внутрь `A` на любую глубину.\n- **Прямой дочерний (`A > B`)**: выбирает только непосредственных детей первого уровня. Защищает от случайного проваливания стилей во вложенные блоки.\n- **Смежный соседний (`A + B`)**: выбирает элемент `B`, который идет непосредственно сразу после `A` на том же уровне.\n- **Общий родственный (`A ~ B`)**: выбирает все элементы `B`, идущие после `A` внутри общего родителя.\n\n**Атрибутные селекторы:**\n- `[disabled]` — наличие атрибута.\n- `[type=\"email\"]` — точное совпадение значения.\n- `[href^=\"https\"]`: значение начинается с `https`.\n- `[href$=\".pdf\"]`: значение заканчивается на `.pdf`.\n- `[class*=\"icon-\"]`: значение содержит подстроку `icon-`.",
           "codeExample": {
             "language": "css",
-            "title": "Комбинаторы",
-            "code": ".card-list > .card-item { border-bottom: 1px solid #e2e8f0; }\np + p { margin-top: 16px; }",
-            "explanation": "Комбинаторы точно выбирают элементы в DOM."
+            "title": "Практическое применение комбинаторов и атрибутных селекторов",
+            "code": "/* Прямые дети карточки */\n.card-container > .card-item {\n  border: 1px solid #1a2230;\n  padding: 16px;\n}\n\n/* Заголовок, идущий сразу после баннера */\n.hero-banner + h1 {\n  margin-top: 24px;\n}\n\n/* Внешние защищенные ссылки */\n[target=\"_blank\"][rel*=\"noopener\"] {\n  color: #29e7ff;\n  text-decoration: underline;\n}\n\n/* Инпуты в состоянии ошибки */\ninput[data-valid=\"false\"] {\n  border-color: #ff3b5c;\n  background: rgba(255, 59, 92, 0.05);\n}",
+            "explanation": "Комбинатор > выбирает прямых детей первого уровня, защищая вложенные компоненты от случайного наследования стилей."
+          }
+        },
+        {
+          "title": "Специфичность (Specificity): Математика приоритетов в CSS",
+          "content": "Когда несколько правил претендуют на стилизацию одного свойства, браузер рассчитывает вектор специфичности из 4 уровней `(Inline, ID, Class, Element)`:\n- **Уровень 1 (Inline-стили, вес 1-0-0-0)**: атрибут `style=\"...\"` в HTML.\n- **Уровень 2 (Идентификаторы ID, вес 0-1-0-0)**: селекторы `#header`, `#nav`.\n- **Уровень 3 (Классы, Атрибуты, Псевдоклассы, вес 0-0-1-0)**: `.btn`, `[type=\"text\"]`, `:hover`, `:focus`.\n- **Уровень 4 (Теги и Псевдоэлементы, вес 0-0-0-1)**: `div`, `span`, `h1`, `::before`, `::after`.\n\n**Примеры расчета веса:**\n- `p` = `(0, 0, 0, 1)` (1 тег)\n- `.content p` = `(0, 0, 1, 1)` (1 класс + 1 тег)\n- `.sidebar .nav-list li.active a` = `(0, 0, 3, 2)` (3 класса + 2 тега)\n- `#main-nav .menu-item a:hover` = `(0, 1, 2, 1)` (1 ID + 1 класс + 1 псевдокласс + 1 тег)\n\n**Правило каскада при равном весе:**\nЕсли два селектора имеют абсолютно одинаковую специфичность, побеждает то правило, которое написано в коде **ниже (позже)**.\n\n**Опасность `!important`:**\nДиректива `!important` ломает нормальный каскад и перебивает любые веса. Её использование считается антипаттерном в архитектуре приложений, за исключением редких утилитных классов-хелперов.",
+          "codeExample": {
+            "language": "css",
+            "title": "Демонстрация разрешения конфликтов специфичности",
+            "code": "/* Вес: (0, 0, 0, 1) — проиграет */\np {\n  color: #a8c8b6;\n}\n\n/* Вес: (0, 0, 1, 0) — победит тег */\n.text-highlight {\n  color: #ffb02e;\n}\n\n/* Вес: (0, 1, 0, 0) — ID побеждает классы */\n#lead-paragraph {\n  color: #2dff8a;\n}\n\n/* Вес: (0, 1, 1, 1) — наивысший вес без !important */\n#main-content .card-body p {\n  color: #29e7ff;\n}",
+            "explanation": "ID побеждает классы, а комбинация классов и тегов побеждает одиночные базовые селекторы."
+          }
+        },
+        {
+          "title": "Универсальный сброс стилей и модель Box-Sizing: Border-Box",
+          "content": "Каждый браузер поставляется со встроенной таблицей стилей по умолчанию (`User Agent Stylesheet`). В разных браузерах (Chrome, Safari, Firefox) отступы заголовков, списков и кнопок по умолчанию различаются, создавая визуальную нестабильность.\n\n**Современный сброс стилей (CSS Reset):**\nПрофессиональные проекты начинаются с обязательного глобального правила:\n```css\n*, *::before, *::after {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n```\n\n**Почему `box-sizing: border-box` критически важен?**\n- По умолчанию в CSS действует `content-box`: ширина элемента (`width`) задает только ширину контента. Если добавить `padding: 20px` и `border: 2px`, итоговая ширина элемента составит `width + 40px + 4px`, что приводит к вылезанию блоков за пределы экрана и горизонтальному скроллу.\n- В режиме `border-box` указанная ширина `width` фиксирует **внешний размер блока**, а внутренние отступы (`padding`) и рамка (`border`) вдавливаются внутрь, сохраняя предсказуемую геометрию верстки.",
+          "codeExample": {
+            "language": "css",
+            "title": "Глобальный нормализатор стилей проекта",
+            "code": "/* 1. Идеальный сброс боксовой модели */\n*, *::before, *::after {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\n/* 2. Базовые глобальные параметры типографики */\nhtml {\n  font-size: 16px;\n  -webkit-font-smoothing: antialiased;\n}\n\nbody {\n  font-family: 'Inter', system-ui, sans-serif;\n  line-height: 1.5;\n  background-color: #06090d;\n  color: #d6f5e3;\n}\n\n/* 3. Медиа-элементы не должны вылезать за ширину контейнера */\nimg, picture, video, canvas, svg {\n  display: block;\n  max-width: 100%;\n  height: auto;\n}",
+            "explanation": "border-box фиксирует внешние габариты элемента, предотвращая поломку макета при добавлении padding и border."
           }
         }
       ],
       "seniorTips": [
-        "Стилизуйте компоненты исключительно через классы (.class-name).",
-        "Не делайте селекторы длиннее 2–3 уровней."
+        "Старайтесь держать специфичность минимальной и плоской: стройте архитектуру стилей на одиночных классах (BEM: .block__element--modifier).",
+        "Никогда не используйте идентификаторы (#id) для стилизации интерфейса. ID предназначены для JS-скриптов и якорей.",
+        "Категорически избегайте использования !important в компонентах. Если стили не применяются — найдите и исправьте причину в специфичности селекторов.",
+        "Используйте комбинатор прямого потомка (>), чтобы изолировать стили родителя от непреднамеренного влияния на вложенные дочерние компоненты.",
+        "Помните о наследуемых свойствах: цвет (color), шрифт (font-family, font-size, font-weight) и межстрочный интервал (line-height) наследуются автоматически.",
+        "Всегда включайте box-sizing: border-box для псевдоэлементов (*::before, *::after) тоже — иначе кастомные декоративные плашки сломают геометрию."
       ],
       "commonMistakes": [
         {
-          "bad": "#btn { background: blue; }",
-          "good": ".btn { background: blue; }",
-          "reason": "ID сложно переопределить из-за высокого веса."
+          "bad": "/* Селектор избыточной глубины */\n#main-wrapper div.container ul.menu-list li.item a.link span.text {\n  color: #2dff8a;\n}",
+          "good": "/* Чистый компонентный класс по БЭМ */\n.menu-item__text {\n  color: #2dff8a;\n}",
+          "reason": "Глубокая цепочка селекторов создает огромный вес специфичности, который невозможно переопределить, и замедляет работу парсера стилей браузера."
+        },
+        {
+          "bad": ".modal-btn {\n  color: #ffffff !important;\n  background: #2dff8a !important;\n}",
+          "good": ".modal-btn {\n  color: #ffffff;\n  background: #2dff8a;\n}",
+          "reason": "Использование !important порождает «гонку вооружений» в CSS. В дальнейшем вам придется писать еще более перегруженный селектор с !important для любого изменения темы или состояния."
+        },
+        {
+          "bad": "div {\n  width: 100%;\n  padding: 20px;\n  border: 5px solid #2dff8a;\n  /* Без box-sizing элемент станет шире 100% и вызовет горизонтальный скролл */\n}",
+          "good": "div {\n  box-sizing: border-box;\n  width: 100%;\n  padding: 20px;\n  border: 5px solid #2dff8a;\n}",
+          "reason": "При стандартном content-box padding и border прибавляются к 100% ширины, что ломает контейнерную верстку на мобильных экранах."
+        },
+        {
+          "bad": "/* Использование ID в CSS */\n#submit-btn {\n  background: #29e7ff;\n}",
+          "good": "/* Использование класса */\n.submit-button {\n  background: #29e7ff;\n}",
+          "reason": "ID невозможно переиспользовать для второй кнопки на странице, а его вес (0, 1, 0, 0) перебивает любые классовые модификаторы состояния."
         }
       ],
       "keyTakeaways": [
-        "Классы — основа масштабируемой верстки.",
-        "Комбинатор > выбирает прямых детей."
+        "CSS-правило состоит из Селектора и Блока объявлений с парами свойство: значение.",
+        "Специфичность рассчитывается по 4 уровням: (Inline, ID, Class, Element). Чем выше вес, тем приоритетнее правило.",
+        "При равном весе специфичности побеждает правило, объявленное в CSS-файле ниже.",
+        "Комбинатор > выбирает прямых детей, пробел выбирает всех потомков, + выбирает первого соседа, ~ выбирает всех соседей.",
+        "box-sizing: border-box включает padding и border в общую ширину элемента, предотвращая выпадение за экран.",
+        "Свойства типографики (color, font, line-height) наследуются дочерними узлами автоматически."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"demo\"><h2 class=\"title\">Каталог</h2><ul class=\"list\"><li class=\"item\"><a href=\"#\">HTML</a></li></ul></div>",
-      "initialCss": ".demo { padding: 20px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; }\n.title { color: #1e293b; }\n.list { list-style: none; padding: 0; }\n.list > .item { padding: 8px 12px; background: #f8fafc; border-radius: 6px; }\n.list a { color: #4f46e5; font-weight: 600; text-decoration: none; }",
-      "initialJs": "console.log('Selectors loaded');",
-      "instructions": "Попробуйте изменить цвет .title."
+      "initialHtml": "<div class=\"product-card\">\n  <span class=\"badge badge-sale\">Sale -30%</span>\n  <h2 class=\"product-title\">Cyberpunk Terminal Keyboard</h2>\n  <p class=\"product-category\">Категория: <span>Периферия и аксессуары</span></p>\n  <p class=\"product-desc\">\n    Механическая клавиатура с RGB-подсветкой и переключателями Hot-Swap.\n  </p>\n  <div class=\"price-block\">\n    <span class=\"old-price\">$149</span>\n    <span class=\"new-price\">$99</span>\n  </div>\n  <button type=\"button\" class=\"btn btn-buy\">Добавить в корзину</button>\n</div>",
+      "initialCss": "/* Базовый сброс */\n* { box-sizing: border-box; margin: 0; padding: 0; }\n\n.product-card {\n  background: #0a0e13;\n  border: 1px solid #1a2230;\n  padding: 24px;\n  border-radius: 8px;\n  color: #d6f5e3;\n  font-family: 'Inter', sans-serif;\n  max-width: 400px;\n}\n\n.badge {\n  display: inline-block;\n  padding: 3px 8px;\n  font-size: 11px;\n  font-weight: 700;\n  text-transform: uppercase;\n  border-radius: 3px;\n  margin-bottom: 12px;\n}\n\n.badge-sale {\n  background: rgba(255, 43, 214, 0.15);\n  color: #ff2bd6;\n  border: 1px solid rgba(255, 43, 214, 0.3);\n}\n\n.product-title {\n  font-size: 20px;\n  margin-bottom: 6px;\n  color: #ffffff;\n}\n\n.product-category {\n  font-size: 12px;\n  color: #6c8a7b;\n  margin-bottom: 12px;\n}\n\n.product-category span {\n  color: #29e7ff;\n  font-weight: 600;\n}\n\n.product-desc {\n  font-size: 13px;\n  line-height: 1.6;\n  color: #a8c8b6;\n  margin-bottom: 16px;\n}\n\n.price-block {\n  display: flex;\n  align-items: baseline;\n  gap: 10px;\n  margin-bottom: 20px;\n}\n\n.old-price {\n  font-size: 14px;\n  color: #6c8a7b;\n  text-decoration: line-through;\n}\n\n.new-price {\n  font-size: 22px;\n  font-weight: 800;\n  color: #2dff8a;\n  font-family: 'JetBrains Mono', monospace;\n}\n\n.btn-buy {\n  width: 100%;\n  background: #2dff8a;\n  color: #03060a;\n  border: none;\n  padding: 12px;\n  border-radius: 4px;\n  font-weight: 700;\n  font-size: 13px;\n  cursor: pointer;\n  transition: all 0.2s ease;\n}\n\n.btn-buy:hover {\n  background: #14b365;\n  box-shadow: 0 0 15px rgba(45, 255, 138, 0.4);\n}",
+      "initialJs": "console.log('Песочница CSS Уровень 1: Стили успешно применились!');",
+      "instructions": "Попробуйте изменить селектор .new-price, перекрасить бейдж в другой цвет с помощью rgba() и настроить hover-эффект кнопки!"
     },
     "task": {
-      "title": "Стилизация карточки товара",
-      "scenario": "Оформите карточку товара с ценой, скидкой и кнопкой покупки.",
+      "title": "Стилизация карточки товара интернет-магазина",
+      "scenario": "Вам поручено стилизовать карточку товара для маркетплейса электроники. Необходимо применить классовые селекторы, настроить модель box-sizing, задать контрастные цвета цен и оформить кнопку покупки с плавным состоянием наведения :hover.",
       "criteria": [
-        "Стилизован .product-card",
-        "Цене .price задан жирный шрифт",
-        "Кнопка .btn-buy оформлена"
+        "Задан глобальный сброс box-sizing: border-box для всех элементов",
+        "Карточка .product-card имеет темный фон #0a0e13 и рамку #1a2230",
+        "Заголовок .product-title окрашен в белый цвет #ffffff",
+        "Новая цена .new-price выделена неоновым цветом #2dff8a и увеличенным шрифтом",
+        "Кнопка покупки .btn-buy имеет фон #2dff8a и состояние :hover"
       ],
       "starterCode": {
-        "html": "<div class=\"product-card\"><span class=\"badge-sale\">-20%</span><h3>Наушники</h3><p class=\"price\">12 990 ₽</p><button class=\"btn-buy\">Купить</button></div>",
-        "css": "/* Стили */\n"
+        "html": "<div class=\"product-card\">\n  <h2 class=\"product-title\">Беспроводные наушники</h2>\n  <p class=\"product-desc\">Hi-Res звук с активным шумоподавлением ANC.</p>\n  <div class=\"price-box\">\n    <span class=\"new-price\">$79</span>\n  </div>\n  <button type=\"button\" class=\"btn-buy\">Купить сейчас</button>\n</div>",
+        "css": "/* Напишите ваши стили для карточки */\n* {\n  box-sizing: border-box;\n}\n\n.product-card {\n  \n}\n"
       },
       "hints": [
-        "Используйте классы .product-card, .badge-sale, .price, .btn-buy."
+        "Используйте свойство cursor: pointer для кнопки покупки.",
+        "Для плавного изменения цвета при :hover добавьте transition: all 0.2s ease.",
+        "Используйте font-family: 'JetBrains Mono', monospace для форматирования цены."
       ],
       "solution": {
-        "html": "<div class=\"product-card\"><span class=\"badge-sale\">-20%</span><h3>Наушники</h3><p class=\"price\">12 990 ₽</p><button class=\"btn-buy\">Купить</button></div>",
-        "css": ".product-card { padding: 20px; border-radius: 12px; background: white; border: 1px solid #e2e8f0; }\n.badge-sale { background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }\n.price { font-size: 20px; font-weight: bold; color: #4f46e5; margin: 12px 0; }\n.btn-buy { width: 100%; padding: 10px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; }",
-        "explanation": "Чистая стилизация карточки."
+        "html": "<div class=\"product-card\">\n  <h2 class=\"product-title\">Беспроводные наушники</h2>\n  <p class=\"product-desc\">Hi-Res звук с активным шумоподавлением ANC.</p>\n  <div class=\"price-box\">\n    <span class=\"new-price\">$79</span>\n  </div>\n  <button type=\"button\" class=\"btn-buy\">Купить сейчас</button>\n</div>",
+        "css": "* { box-sizing: border-box; margin: 0; padding: 0; }\n.product-card { background: #0a0e13; border: 1px solid #1a2230; padding: 24px; border-radius: 8px; color: #d6f5e3; font-family: sans-serif; }\n.product-title { font-size: 20px; color: #ffffff; margin-bottom: 8px; }\n.product-desc { font-size: 14px; color: #a8c8b6; line-height: 1.5; margin-bottom: 16px; }\n.price-box { margin-bottom: 16px; }\n.new-price { font-size: 24px; font-weight: bold; color: #2dff8a; font-family: monospace; }\n.btn-buy { width: 100%; background: #2dff8a; color: #03060a; border: none; padding: 10px 16px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: background 0.2s; }\n.btn-buy:hover { background: #14b365; }",
+        "explanation": "Чистая стилизация карточки с соблюдением box-sizing, селекторов классов и оформлением интерактивного состояния :hover."
       }
     },
     "quiz": {
       "questions": [
         {
           "id": "c1-q1",
-          "question": "Какой комбинатор выбирает только прямых детей?",
+          "question": "Какой селектор выберет только те элементы <p>, которые являются ПРЯМЫМИ дочерними элементами <div class=\"article\"> первого уровня?",
           "options": [
-            ".a .b",
-            ".a > .b",
-            ".a + .b",
-            ".a ~ .b"
+            ".article p",
+            ".article > p",
+            ".article + p",
+            ".article ~ p"
           ],
           "correctIndex": 1,
-          "explanation": "Комбинатор > выбирает прямых детей первого уровня."
+          "explanation": "Комбинатор > выбирает исключительно прямых детей первого уровня, не затрагивая глубже вложенные теги <p>."
+        },
+        {
+          "id": "c1-q2",
+          "question": "Какой из представленных селекторов обладает НАИБОЛЬШИМ весом специфичности?",
+          "options": [
+            "body div.container p.text",
+            "#header .nav-link",
+            ".header .menu-item.active a:hover",
+            "div#main-header"
+          ],
+          "correctIndex": 1,
+          "explanation": "#header .nav-link имеет вес (0, 1, 1, 0) — наличие ID перебивает любое количество классов и тегов."
+        },
+        {
+          "id": "c1-q3",
+          "question": "Что произойдет с геометрией блока шириной width: 200px при добавлении padding: 20px и border: 2px в режиме box-sizing: border-box?",
+          "options": [
+            "Итоговая ширина увеличится до 244px",
+            "Итоговая ширина останется ровно 200px, а отступы и рамка ужмутся внутрь блока",
+            "Ширина уменьшится до 156px",
+            "Браузер выдаст синтаксическую ошибку в консоль"
+          ],
+          "correctIndex": 1,
+          "explanation": "В режиме border-box указанная ширина фиксирует внешний контур, а padding и border размещаются внутри этой ширины."
+        },
+        {
+          "id": "c1-q4",
+          "question": "Какое из перечисленных свойств НЕ наследуется дочерними элементами от родителя автоматически?",
+          "options": [
+            "color",
+            "font-family",
+            "margin",
+            "line-height"
+          ],
+          "correctIndex": 2,
+          "explanation": "Свойства внешних и внутренних отступов (margin, padding) и границ (border) не наследуются, в отличие от шрифтов и цвета текста."
+        },
+        {
+          "id": "c1-q5",
+          "question": "Какое правило победит, если два селектора .card-title { color: red; } и .card-title { color: green; } имеют одинаковую специфичность?",
+          "options": [
+            "Победит правило, объявленное в CSS-файле позже (ниже по коду) — цвет green",
+            "Победит первое правило — цвет red",
+            "Цвета смешаются и дадут коричневый оттенок",
+            "Браузер отменит оба правила и применит цвет по умолчанию"
+          ],
+          "correctIndex": 0,
+          "explanation": "По правилу каскада (Cascade), при абсолютно равном весе специфичности всегда побеждает правило, объявленное в коде ниже (позже)."
         }
       ]
     }

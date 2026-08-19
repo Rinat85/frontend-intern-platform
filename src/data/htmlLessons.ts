@@ -6,131 +6,161 @@ export const htmlLessons: Lesson[] = [
     "moduleId": "html",
     "level": 1,
     "title": "Знакомство с HTML",
-    "subtitle": "Как устроен веб, клиент-серверная архитектура и роль HTML",
-    "description": "Глубокое погружение в основы интернета: как работают браузеры, что такое DNS, HTTP/HTTPS, как строится DOM-дерево и почему HTML является фундаментом фронтенда.",
-    "estimatedMinutes": 35,
+    "subtitle": "Как устроен веб, клиент-серверная архитектура, Critical Rendering Path и анатомия HTML",
+    "description": "Глубокое погружение в основы интернета: как работают браузеры, что такое DNS, TCP/TLS, HTTP-запросы, как строится DOM-дерево, как работает Critical Rendering Path и почему HTML является фундаментом современного фронтенда.",
+    "estimatedMinutes": 45,
     "difficulty": "beginner",
     "tags": [
-      "HTML",
-      "Web",
-      "HTTP",
+      "HTML5",
+      "Web Architecture",
+      "HTTP/HTTPS",
       "DOM",
-      "Architecture"
+      "Critical Rendering Path",
+      "Browser Engine"
     ],
     "theory": {
-      "overview": "HTML (HyperText Markup Language — язык гипертекстовой разметки) — это базовый стандарт, на котором держится вся Всемирная паутина. Каждый раз, когда вы открываете любой сайт в браузере, от ленты новостей до сложнейшего банковского интерфейса, первым делом клиент загружает и парсит именно HTML-документ.\n\nHTML не является языком программирования — в нём нет переменных, циклов или математических функций. Это декларативный язык разметки, задача которого — описать структуру, смысл и иерархию элементов на странице. Он говорит браузеру: «это главный заголовок», «это абзац текста», «это навигационная ссылка», а «это форма авторизации пользователя».",
+      "overview": "HTML (`HyperText Markup Language` — язык гипертекстовой разметки) — это глобальный фундамент, на котором построена вся Всемирная паутина. Каждый раз, когда вы открываете любой веб-сервис — от поисковика до высоконагруженного финтех-интерфейса — первым делом браузер получает и парсит именно HTML-документ.\n\nHTML не является языком программирования — в нём нет переменных, вычислений или циклов. Это **декларативный язык семантической разметки**, задача которого — строго описать структуру, смысл и иерархию информации. Он сообщает браузеру, поисковым роботам и скринридерам (системам экранного доступа для людей с ограниченными возможностями): «это главный заголовок документа», «это навигационное меню», «это форма оплаты», а «это таблица с финансовыми данными».",
       "sections": [
         {
-          "title": "Как браузер получает и открывает сайт (Клиент-Сервер)",
-          "content": "Взаимодействие пользователя с сайтом строится по модели «Клиент — Сервер»:\n- 1. Пользователь вводит адрес (URL) в браузере, например `https://company.com`.\n- 2. Браузер обращается к DNS-серверу (Domain Name System), чтобы перевести доменное имя в цифровой IP-адрес сервера (например, 192.0.2.1).\n- 3. Устанавливается защищённое TCP-соединение и TLS-рукопожатие по протоколу HTTPS.\n- 4. Браузер отправляет HTTP-запрос (GET) на сервер.\n- 5. Сервер возвращает ответ со статус-кодом (200 OK) и телом ответа — строкой HTML-кода.\n- 6. Браузерный движок (Blink в Chrome, Gecko в Firefox, WebKit в Safari) начинает посимвольный парсинг полученного документа.",
+          "title": "Как браузер загружает и открывает сайт: Полный цикл Request-Response",
+          "content": "Взаимодействие пользователя с веб-сайтом строится по фундаментальной модели «Клиент — Сервер» через цепочку последовательных этапов:\n- 1. **Парсинг URL**: пользователь вводит адрес (например, `https://octo-intern.vercel.app/lessons`). Браузер извлекает протокол (`https`), доменное имя хоста (`octo-intern.vercel.app`) и путь к ресурсу (`/lessons`).\n- 2. **DNS-резолвинг (Domain Name System)**: браузер проверяет локальный DNS-кэш, обращается к системному резолверу и иерархии DNS-серверов, чтобы преобразовать человекочитаемый домен в IP-адрес сервера (например, `76.76.21.21`).\n- 3. **Установка сетевого соединения (TCP + TLS Handshake)**: выполняется тройное рукопожатие TCP (`SYN` -> `SYN-ACK` -> `ACK`) и шифрованное согласование ключей TLS 1.3 по защищённому протоколу HTTPS (порт 443).\n- 4. **Отправка HTTP-запроса**: браузер формирует и отправляет на сервер HTTP-запрос (метод `GET /lessons`, заголовки `Host`, `User-Agent`, `Accept`, `Cookie`).\n- 5. **Ответ сервера**: веб-сервер обрабатывает запрос и возвращает статус-код (`200 OK`), заголовки (`Content-Type: text/html; charset=UTF-8`) и тело ответа — поток байтов HTML-документа.",
           "codeExample": {
             "language": "html",
-            "title": "Минимальный валидный HTML-документ",
-            "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <title>Мой первый сайт</title>\n  </head>\n  <body>\n    <h1>Добро пожаловать в веб-разработку!</h1>\n    <p>Браузер прочитал этот HTML и отобразил текст.</p>\n  </body>\n</html>",
+            "title": "Минимальный валидный HTML5-документ",
+            "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Мой первый сайт</title>\n  </head>\n  <body>\n    <h1>Добро пожаловать в веб-разработку!</h1>\n    <p>Браузер прочитал этот HTML и отобразил текст.</p>\n  </body>\n</html>",
             "explanation": "DOCTYPE объявляет стандарт HTML5, html lang задает язык, head хранит метаданные для браузера, а body содержит видимый контент."
           }
         },
         {
-          "title": "Что такое DOM (Document Object Model)",
-          "content": "Браузер не может работать с голым текстом HTML напрямую. В процессе парсинга он преобразует текст HTML в древовидную объектную структуру в оперативной памяти — Document Object Model (DOM):\n- HTML-код превращается в набор узлов (Nodes) и элементов (Elements).\n- Корнем дерева всегда является объект `document` (и тег `<html>`).\n- Каждый вложенный тег становится дочерним узлом (Child Node).\n- JavaScript взаимодействует со страницей именно через DOM, динамически добавляя, удаляя и модифицируя элементы.",
+          "title": "Critical Rendering Path: Как браузер превращает HTML в пиксели на экране",
+          "content": "Браузерный движок (Blink в Chrome/Edge, Gecko в Firefox, WebKit в Safari) не может отобразить голый текст напрямую. Он выполняет конвейер Critical Rendering Path (CRP):\n- 1. **Bytes -> Characters -> Tokens -> Nodes -> DOM**: Браузер считывает байты из сети, декодирует символы по UTF-8, токенизирует теги и строит в оперативной памяти древовидную объектную модель — `Document Object Model (DOM)`.\n- 2. **CSSOM Construction**: Параллельно парсятся CSS-стили и создаётся `CSS Object Model (CSSOM)`.\n- 3. **Render Tree (Дерево рендеринга)**: DOM и CSSOM объединяются в единое дерево. Элементы с `display: none` и теги `<head>` исключаются из Render Tree, так как не занимают места на экране.\n- 4. **Layout (Reflow / Компоновка)**: Браузер рассчитывает точные геометрические координаты (`x, y, width, height`) каждого прямоугольного бокса в пикселях экрана.\n- 5. **Paint (Растеризация)**: Векторные боксы, текст, тени и цвета отрисовываются в пиксели в памяти графических слоёв.\n- 6. **Composite (Композитинг)**: Слои сводятся графическим процессором (GPU) и выводятся на физический монитор с частотой 60/120 кадров в секунду.",
           "codeExample": {
             "language": "html",
-            "title": "Иерархия тегов и вложенность DOM",
-            "code": "<div class=\"user-card\">\n  <h2 class=\"user-name\">Иван Иванов</h2>\n  <p class=\"user-role\">Frontend Developer</p>\n</div>",
-            "explanation": "Элемент <div> является родителем (parent) для <h2> и <p>, которые являются соседями (siblings) в DOM-дереве."
+            "title": "Иерархия элементов и построение DOM-дерева",
+            "code": "<div class=\"card\">\n  <h2 class=\"card-title\">Объектная модель DOM</h2>\n  <p class=\"card-desc\">Каждый тег становится узлом (Node) в памяти браузера.</p>\n  <button class=\"card-btn\" type=\"button\">Подробнее</button>\n</div>",
+            "explanation": "Элемент <div> является родителем (parent) для <h2>, <p> и <button>, которые являются дочерними узлами (children) и соседями (siblings) в DOM-дереве."
           }
         },
         {
-          "title": "Анатомия HTML-элемента: Теги, контент и атрибуты",
-          "content": "Элемент состоит из открывающего тега, атрибутов, текстового или вложенного содержимого и закрывающего тега:\n- Открывающий тег: `<tagname>` — сообщает браузеру о начале элемента.\n- Атрибуты: `name=\"value\"` — дополнительные свойства и настройки элемента (например, `class`, `id`, `src`, `href`).\n- Содержимое: текст или другие теги внутри.\n- Закрывающий тег: `</tagname>` — завершает границы элемента.\n- Одиночные (Void) теги: не имеют закрывающего тега и содержимого (`<meta>`, `<img>`, `<input>`, `<br>`, `<hr>`).",
+          "title": "Анатомия HTML-элемента: Теги, Атрибуты и Void Elements",
+          "content": "Любая разметка состоит из строительных кирпичиков — HTML-элементов:\n- **Открывающий тег (`<tagname>`)**: обозначает начало элемента и может содержать атрибуты.\n- **Закрывающий тег (`</tagname>`)**: обозначает конец элемента (содержит косую черту `/`).\n- **Содержимое (Content)**: вложенный текст или другие дочерние элементы между тегами.\n- **Атрибуты (`name=\"value\"`)**: пары имя-значение, передающие браузеру дополнительные параметры (например, адрес ссылки `href`, путь к картинке `src`, классы для стилизации `class`).\n- **Булевы атрибуты (Boolean attributes)**: атрибуты, значение которых определяется самим фактом их присутствия (`disabled`, `required`, `checked`, `readonly`, `hidden`, `defer`).\n- **Void Elements (Одиночные теги)**: элементы, которые не имеют закрывающего тега и не могут содержать текста или вложенных тегов: `<img>`, `<input>`, `<meta>`, `<link>`, `<br>`, `<hr>`, `<source>`.\n- **Дата-атрибуты (`data-*`)**: кастомные атрибуты для безопасной передачи параметров в JavaScript без нарушения спецификации HTML (например, `data-user-id=\"101\"`, `data-role=\"admin\"`).",
           "codeExample": {
             "language": "html",
-            "title": "Пример тега с атрибутами",
-            "code": "<a href=\"https://google.com\" target=\"_blank\" class=\"external-link\" title=\"Перейти в Google\">\n  Поисковая система Google\n</a>",
-            "explanation": "Тег <a> (ссылка) содержит атрибут href (адрес), target (открытие в новой вкладке), class (для стилей) и всплывающую подсказку title."
+            "title": "Комплексный пример тега со всеми типами атрибутов",
+            "code": "<a href=\"https://github.com/octo\"\n   target=\"_blank\"\n   rel=\"noopener noreferrer\"\n   class=\"profile-link btn-primary\"\n   id=\"octo-profile-btn\"\n   data-user-id=\"4092\"\n   data-analytics=\"profile_click\"\n   title=\"Перейти в GitHub профиль\">\n  <span>Открыть профиль инженера</span>\n</a>",
+            "explanation": "Тег <a> (ссылка) содержит адрес href, атрибуты безопасности rel, идентификатор id, CSS-классы, пользовательские дата-атрибуты data-* и всплывающую подсказку title."
+          }
+        },
+        {
+          "title": "Обязательный скелет документа HTML5 и метаданные в <head>",
+          "content": "Каждый профессиональный веб-документ обязан содержать стандартный каркас:\n- `<!DOCTYPE html>` — директива, сообщающая браузеру, что документ написан по современному стандарту HTML5. Без неё браузер переходит в режим обратной совместимости (`Quirks Mode`), что приводит к багам отрисовки и ломает блочную модель CSS.\n- `<html lang=\"ru\">` — корневой элемент. Атрибут `lang` критически важен для скринридеров (выбор правильного голосового движка), поисковых систем и систем автоматического перевода.\n- `<meta charset=\"UTF-8\">` — объявляет универсальную кодировку символов Unicode (поддерживает кириллицу, латиницу, эмодзи). Должен идти первым в теге `<head>`.\n- `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">` — включает корректную адаптивную верстку на смартфонах и планшетах, синхронизируя ширину вьюпорта с физическим экраном устройства.\n- `<title>` — задает название вкладки в браузере, имя в закладках и заголовок сниппета в поисковой выдаче.\n- `<link rel=\"stylesheet\" href=\"styles.css\">` — подключает внешнюю таблицу стилей.\n- `<script defer src=\"app.js\">` — подключает JavaScript. Атрибут `defer` загружает скрипт асинхронно в фоне и выполняет его строго после построения DOM-дерева, не блокируя начальный рендеринг страницы.",
+          "codeExample": {
+            "language": "html",
+            "title": "Промышленный шаблон HTML5-документа",
+            "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Личный кабинет стажёра — Frontend Academy</title>\n    <link rel=\"stylesheet\" href=\"styles/main.css\">\n    <script defer src=\"scripts/app.js\"></script>\n  </head>\n  <body>\n    <header class=\"app-header\">\n      <h1>Frontend Intern Academy</h1>\n    </header>\n    <main class=\"app-content\">\n      <p>Добро пожаловать в учебную программу!</p>\n    </main>\n  </body>\n</html>",
+            "explanation": "Стили подключаются в <head> через <link>, а скрипты с атрибутом defer выполняются после построения DOM, не блокируя рендеринг."
           }
         }
       ],
       "seniorTips": [
-        "Всегда соблюдайте строгую вложенность тегов (LIFO: Last In, First Out). Нельзя закрывать родительский тег раньше дочернего.",
-        "Имена тегов и стандартных атрибутов всегда пишите в нижнем регистре (lowercase) — это индустриальный стандарт.",
-        "Значения всех атрибутов всегда оборачивайте в двойные кавычки (например: class=\"card-title\")."
+        "Всегда соблюдайте строгую иерархию вложенности тегов (LIFO: Last In, First Out). Тег, открытый последним, обязан закрываться первым.",
+        "Имена всех тегов и стандартных атрибутов всегда пишите строго в нижнем регистре (lowercase) — это общепринятый стандарт индустрии и спецификации WHATWG.",
+        "Значения всех атрибутов всегда оборачивайте в двойные кавычки: class=\"card-header\", а не class=card-header.",
+        "Всегда указывайте директиву <!DOCTYPE html> первой строкой файла, чтобы предотвратить включение Quirks Mode (режима багов 90-х годов).",
+        "Никогда не забывайте указывать атрибут lang в теге <html> — это базовое требование доступности (Web Accessibility) и международного стандарта WCAG 2.1.",
+        "Подключайте внешние скрипты в <head> с атрибутом defer — это устраняет блокировку парсинга HTML и ускоряет метрику First Contentful Paint (FCP)."
       ],
       "commonMistakes": [
         {
           "bad": "<h1>Заголовок <p>Текст абзаца</h1></p>",
           "good": "<h1>Заголовок</h1>\n<p>Текст абзаца</p>",
-          "reason": "Перекрещивание тегов ломает построение DOM-дерева и заставляет браузер включать механизм исправления ошибок (Error Recovery)."
+          "reason": "Перекрещивание тегов ломает построение DOM-дерева и заставляет браузер включать механизм исправления ошибок (Error Recovery), что замедляет рендеринг и приводит к непредсказуемым багам."
         },
         {
-          "bad": "<IMG SRC=photo.jpg ALIGN=CENTER>",
-          "good": "<img src=\"photo.jpg\" alt=\"Фотография профиля\" class=\"profile-photo\" />",
-          "reason": "Теги в верхнем регистре и атрибуты без кавычек считаются устаревшим стилем 90-х годов и нарушают чистоту кода."
+          "bad": "<IMG SRC=photo.jpg ALIGN=CENTER WIDTH=300>",
+          "good": "<img src=\"photo.jpg\" alt=\"Фотография профиля стажёра\" width=\"300\" height=\"300\" class=\"profile-photo\" />",
+          "reason": "Теги в верхнем регистре и атрибуты без кавычек нарушают чистоту кода. Отсутствие обязательного атрибута alt ломает доступность для незрячих пользователей со скринридерами."
+        },
+        {
+          "bad": "<html>\n<head>\n  <title>Страница</title>\n</head>\n<body>...</body>\n</html>",
+          "good": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Страница</title>\n</head>\n<body>...</body>\n</html>",
+          "reason": "Отсутствие DOCTYPE включает режим Quirks Mode. Отсутствие meta charset приводит к кракозябрам на серверах с нестандартной кодировкой, а отсутствие meta viewport ломает мобильное отображение."
+        },
+        {
+          "bad": "<head>\n  <script src=\"heavy-bundle.js\"></script>\n</head>",
+          "good": "<head>\n  <script defer src=\"heavy-bundle.js\"></script>\n</head>",
+          "reason": "Синхронный скрипт без defer или async полностью останавливает HTML-парсер до тех пор, пока файл не скачается по сети и не выполнится, создавая белый экран для пользователя."
         }
       ],
       "keyTakeaways": [
-        "HTML отвечает за структуру и смысл документа, а не за визуальное оформление.",
-        "Браузер считывает HTML-код по протоколу HTTP и строит в памяти дерево DOM.",
-        "Корректный синтаксис, правильная вложенность и указание DOCTYPE гарантируют стандартизированный рендеринг во всех браузерах."
+        "HTML отвечает исключительно за семантическую структуру и смысл документа, а CSS — за его визуальное представление.",
+        "Браузер считывает HTML по протоколу HTTP(S) и строит в оперативной памяти древовидную объектную модель — DOM (Document Object Model).",
+        "Critical Rendering Path состоит из последовательных шагов: Bytes -> Tokens -> DOM + CSSOM -> Render Tree -> Layout -> Paint -> Composite.",
+        "Директива <!DOCTYPE html> обязательна в первой строке для включения стандартного режима рендеринга Standards Mode.",
+        "Атрибуты meta charset=\"UTF-8\" и meta viewport критически важны для корректной кодировки и адаптивности на мобильных устройствах.",
+        "Для безопасного хранения пользовательских данных в DOM используются кастомные data-* атрибуты."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"welcome-box\">\n  <h1>Привет, стажёр! 👋</h1>\n  <p>Это твоя первая интерактивная песочница.</p>\n  <p>Измени этот текст, нажми <strong>«Запустить»</strong> и наблюдай изменения в реальном времени!</p>\n  <button class=\"action-btn\">Нажми на меня</button>\n</div>",
-      "initialCss": ".welcome-box {\n  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);\n  color: white;\n  padding: 24px;\n  border-radius: 12px;\n  box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);\n}\nh1 { margin-top: 0; font-size: 22px; }\np { font-size: 14px; line-height: 1.6; opacity: 0.95; }\n.action-btn {\n  background: #ffffff; color: #4f46e5; border: none;\n  padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;\n}",
-      "initialJs": "console.log('Песочница Уровня 1 готова к работе!');",
-      "instructions": "Попробуйте изменить текст заголовка <h1>, добавить новый параграф <p> и нажать «Запустить»."
+      "initialHtml": "<div class=\"developer-card\">\n  <div class=\"badge\">Junior Engineer</div>\n  <h1 class=\"dev-name\">Алексей Смирнов</h1>\n  <p class=\"dev-role\">Frontend Developer Intern @ Octo Platform</p>\n  <p class=\"dev-bio\">\n    Изучаю фундаментальный стек веб-разработки: <strong>HTML5</strong>, <strong>CSS3</strong> и <strong>JavaScript ES6+</strong>.\n  </p>\n  <div class=\"tech-stack\">\n    <span class=\"tech-tag\">HTML5</span>\n    <span class=\"tech-tag\">CSS Grid</span>\n    <span class=\"tech-tag\">TypeScript</span>\n    <span class=\"tech-tag\">React</span>\n  </div>\n  <button class=\"action-btn\" id=\"status-btn\" data-active=\"true\" onclick=\"toggleStatus()\">\n    ⚡ Проверить статус онбординга\n  </button>\n  <div id=\"status-output\" class=\"status-box\">Статус: Активный стажёр курса</div>\n</div>",
+      "initialCss": ".developer-card {\n  background: #0a0e13;\n  border: 1px solid #1a2230;\n  border-left: 4px solid #2dff8a;\n  color: #d6f5e3;\n  padding: 24px;\n  border-radius: 8px;\n  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);\n  font-family: 'Inter', sans-serif;\n  max-width: 480px;\n}\n.badge {\n  display: inline-block;\n  background: rgba(45, 255, 138, 0.12);\n  color: #2dff8a;\n  border: 1px solid rgba(45, 255, 138, 0.3);\n  padding: 3px 8px;\n  font-size: 11px;\n  font-weight: 700;\n  text-transform: uppercase;\n  letter-spacing: 0.08em;\n  border-radius: 4px;\n  margin-bottom: 12px;\n}\n.dev-name {\n  margin: 0 0 4px 0;\n  font-size: 24px;\n  font-weight: 800;\n  color: #ffffff;\n}\n.dev-role {\n  font-size: 13px;\n  color: #29e7ff;\n  margin: 0 0 16px 0;\n  font-weight: 500;\n}\n.dev-bio {\n  font-size: 14px;\n  line-height: 1.6;\n  color: #a8c8b6;\n  margin-bottom: 18px;\n}\n.tech-stack {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 8px;\n  margin-bottom: 20px;\n}\n.tech-tag {\n  background: #0f141a;\n  border: 1px solid #233044;\n  color: #d6f5e3;\n  font-family: 'JetBrains Mono', monospace;\n  font-size: 12px;\n  padding: 4px 10px;\n  border-radius: 4px;\n}\n.action-btn {\n  background: #2dff8a;\n  color: #03060a;\n  border: none;\n  padding: 10px 18px;\n  border-radius: 4px;\n  font-weight: 700;\n  font-size: 13px;\n  cursor: pointer;\n  transition: all 0.2s ease;\n  width: 100%;\n}\n.action-btn:hover {\n  background: #14b365;\n  box-shadow: 0 0 15px rgba(45, 255, 138, 0.4);\n}\n.status-box {\n  margin-top: 14px;\n  padding: 10px 14px;\n  background: #0f141a;\n  border: 1px dashed #2dff8a;\n  font-size: 12px;\n  font-family: 'JetBrains Mono', monospace;\n  color: #2dff8a;\n  text-align: center;\n  border-radius: 4px;\n}",
+      "initialJs": "function toggleStatus() {\n  const box = document.getElementById('status-output');\n  const btn = document.getElementById('status-btn');\n  const isActive = btn.getAttribute('data-active') === 'true';\n  \n  if (isActive) {\n    btn.setAttribute('data-active', 'false');\n    box.innerText = '🚀 Статус: Выполняет практическое задание уровня 1';\n    box.style.borderColor = '#29e7ff';\n    box.style.color = '#29e7ff';\n  } else {\n    btn.setAttribute('data-active', 'true');\n    box.innerText = 'Статус: Активный стажёр курса';\n    box.style.borderColor = '#2dff8a';\n    box.style.color = '#2dff8a';\n  }\n}\nconsole.log('Песочница Уровня 1: DOM и события готовы!');",
+      "instructions": "Попробуйте изменить имя стажера в <h1>, добавьте новые теги в стек технологий <span class=\"tech-tag\">, нажмите «Запустить» и протестируйте клик по кнопке!"
     },
     "task": {
-      "title": "Создание визитки стажера",
-      "scenario": "Вам необходимо создать персональную карточку-визитку стажёра на HTML с именем, должностью и кратким описанием целей обучения.",
+      "title": "Разработка карточки-профиля стажёра платформы",
+      "scenario": "Команда онбординга поручила вам создать персональную семантическую карточку стажёра на чистом HTML для отображения в корпоративном реестре инженеров. Карточка должна строго следовать стандартам W3C, содержать корректную семантическую структуру, дата-атрибуты и теги выделения текста.",
       "criteria": [
-        "Присутствует главный заголовок <h1> с вашим именем",
-        "Использован параграф <p> с должностью «Junior Frontend Developer»",
-        "Использован параграф <p> со списком ключевых технологий (HTML, CSS, JavaScript)"
+        "Контейнер карточки обёрнут в тег <div> с классом business-card",
+        "Присутствует главный заголовок <h1> с вашим именем и фамилией",
+        "Добавлена должность в параграфе <p> с использованием тега <strong>",
+        "Добавлен список ключевых технологий с тегами <span> и классами tech-badge",
+        "Присутствует кнопка <button> с атрибутом type=\"button\" и кастомным data-статусом"
       ],
       "starterCode": {
-        "html": "<!-- Создайте карточку-визитку -->\n<div class=\"business-card\">\n  \n</div>",
-        "css": "/* Стили задания */\n"
+        "html": "<!-- Создайте семантическую карточку стажёра -->\n<div class=\"business-card\">\n  \n</div>",
+        "css": "/* Стили карточки */\n.business-card {\n  background: #0a0e13;\n  border: 1px solid #1a2230;\n  padding: 24px;\n  border-radius: 8px;\n  color: #d6f5e3;\n}\n.tech-badge {\n  background: rgba(45, 255, 138, 0.1);\n  color: #2dff8a;\n  padding: 2px 8px;\n  border-radius: 4px;\n  margin-right: 6px;\n  font-size: 12px;\n}\n"
       },
       "hints": [
-        "Используйте теги <h1>, <p> и <strong> для выделения ключевых слов.",
-        "Оберните всю карточку в тег <div> с классом business-card."
+        "Используйте теги <h1>, <p>, <strong> и <span> для соблюдения семантической иерархии.",
+        "Не забудьте указать атрибут type=\"button\" у тега <button>, чтобы кнопка не вызывала непреднамеренную отправку формы.",
+        "Добавьте data-атрибут, например data-status=\"intern\", для передачи параметров в JavaScript."
       ],
       "solution": {
-        "html": "<div class=\"business-card\">\n  <h1>Алексей Смирнов</h1>\n  <p><strong>Должность:</strong> Стажёр Frontend-разработчик</p>\n  <p><strong>Цель:</strong> Освоить современный стек веб-разработки (HTML5, CSS3, ES6+, React).</p>\n</div>",
-        "css": "/* Решение */\n",
-        "explanation": "Разметка содержит чёткую семантическую структуру: заголовок h1 для имени и абзацы p со strong для логических акцентов."
+        "html": "<div class=\"business-card\" data-user-role=\"intern\">\n  <h1>Иван Петров</h1>\n  <p><strong>Должность:</strong> Junior Frontend Developer</p>\n  <p><strong>Цель:</strong> Освоить архитектуру веб-приложений (HTML5, CSS3, ES6+, TypeScript, React).</p>\n  <div class=\"skills-row\">\n    <span class=\"tech-badge\">HTML5</span>\n    <span class=\"tech-badge\">CSS3</span>\n    <span class=\"tech-badge\">JavaScript</span>\n    <span class=\"tech-badge\">Git</span>\n  </div>\n  <button type=\"button\" class=\"action-btn\" data-action=\"contact\">Связаться с наставником</button>\n</div>",
+        "css": ".business-card { background: #0a0e13; border: 1px solid #2dff8a; padding: 24px; border-radius: 8px; color: #d6f5e3; }\n.tech-badge { background: rgba(45, 255, 138, 0.15); color: #2dff8a; padding: 3px 8px; border-radius: 4px; margin-right: 6px; font-size: 12px; }\n.action-btn { margin-top: 16px; background: #2dff8a; color: #03060a; border: none; padding: 8px 16px; font-weight: 700; border-radius: 4px; cursor: pointer; }",
+        "explanation": "Разметка содержит чёткую семантическую структуру: заголовок h1 для имени, абзацы со strong для ключевых данных, теги span для навыков и кнопку с атрибутом type=button."
       }
     },
     "quiz": {
       "questions": [
         {
           "id": "h1-q1",
-          "question": "Что означает аббревиатура HTML?",
+          "question": "Что означает аббревиатура HTML и в чём его ключевое назначение?",
           "options": [
-            "HighText Machine Language",
-            "HyperText Markup Language",
-            "Hyperlink and Text Management Language",
-            "Home Tool Markup Language"
+            "HighText Machine Language — компилируемый язык для создания веб-серверов",
+            "HyperText Markup Language — декларативный язык для описания структуры и смысла веб-документа",
+            "Hyperlink and Text Management Language — язык запросов к базам данных в браузере",
+            "Home Tool Markup Language — формат конфигурационных файлов для сборщиков"
           ],
           "correctIndex": 1,
-          "explanation": "HTML расшифровывается как HyperText Markup Language (язык гипертекстовой разметки)."
+          "explanation": "HTML расшифровывается как HyperText Markup Language (язык гипертекстовой разметки) и отвечает за семантическую структуру веб-страницы."
         },
         {
           "id": "h1-q2",
-          "question": "Какую древовидную структуру строит браузер из HTML-кода?",
+          "question": "Какую древовидную структуру в оперативной памяти строит браузерный движок в процессе парсинга HTML?",
           "options": [
-            "JSON Tree",
+            "JSON-RPC Tree",
             "DOM (Document Object Model)",
-            "CSSOM",
-            "AST (Abstract Syntax Tree)"
+            "AST (Abstract Syntax Tree)",
+            "Shadow Virtual Stack"
           ],
           "correctIndex": 1,
-          "explanation": "Браузер парсит HTML и формирует в памяти объектную модель документа — DOM."
+          "explanation": "Браузер парсит байты HTML и формирует в оперативной памяти древовидную объектную модель документа — DOM."
         },
         {
           "id": "h1-q3",
-          "question": "Какой из перечисленных тегов является одиночным (void element)?",
+          "question": "Какой из перечисленных тегов является одиночным (void element) и НЕ может иметь закрывающего тега?",
           "options": [
             "<p>",
             "<div>",
@@ -138,7 +168,31 @@ export const htmlLessons: Lesson[] = [
             "<span>"
           ],
           "correctIndex": 2,
-          "explanation": "Тег <img> не имеет закрывающего тега и содержимого (является void-элементом)."
+          "explanation": "Тег <img> является void-элементом (самозакрывающимся). Он не имеет содержимого и закрывающего тега."
+        },
+        {
+          "id": "h1-q4",
+          "question": "Что произойдёт, если не указать директиву <!DOCTYPE html> в первой строке документа?",
+          "options": [
+            "Браузер выдаст фатальную ошибку 500 и откажется открывать страницу",
+            "Браузер перейдёт в режим Quirks Mode (режим обратной совместимости со старыми багами 90-х годов)",
+            "Весь JavaScript-код будет автоматически отключен из соображений безопасности",
+            "Страница автоматически переключится в полноэкранный режим"
+          ],
+          "correctIndex": 1,
+          "explanation": "Директива <!DOCTYPE html> сообщает браузеру о стандарте HTML5. Без неё включается Quirks Mode, ломающий блочную модель CSS и стандарты отображения."
+        },
+        {
+          "id": "h1-q5",
+          "question": "Зачем в теге <script> рекомендуется указывать атрибут defer при подключении в <head>?",
+          "options": [
+            "Чтобы скрипт выполнялся только в фоновом сервис-воркере",
+            "Чтобы скрипт загружался асинхронно и выполнялся строго после завершения парсинга DOM, не блокируя начальный рендеринг страницы",
+            "Чтобы полностью отключить обработку ошибок в скрипте",
+            "Чтобы автоматически преобразовать JavaScript в WebAssembly"
+          ],
+          "correctIndex": 1,
+          "explanation": "Атрибут defer гарантирует, что скрипт скачивается параллельно с парсингом HTML и запускается строго после того, как DOM-дерево полностью построено."
         }
       ]
     }

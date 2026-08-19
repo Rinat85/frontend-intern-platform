@@ -6,85 +6,195 @@ export const jsLessons: Lesson[] = [
     "moduleId": "javascript",
     "level": 1,
     "title": "Знакомство с JavaScript и среда исполнения",
-    "subtitle": "Движок V8, вывод логов, переменные let, const и var",
-    "description": "Язык веба: как движок V8 исполняет код, консоль разработчика console.log, разница между let, const и устаревшим var, строгий режим use strict.",
-    "estimatedMinutes": 30,
+    "subtitle": "Движок V8, модель памяти, типы данных и эволюция переменных ES6+",
+    "description": "Фундаментальное погружение в JavaScript: как движок V8 исполняет код, Call Stack и Memory Heap, строгий режим 'use strict', 8 типов данных, разница между передачей по значению и по ссылке, а также let/const против устаревшего var.",
+    "estimatedMinutes": 45,
     "difficulty": "beginner",
     "tags": [
       "JavaScript",
-      "V8",
-      "Variables",
-      "ES6"
+      "V8 Engine",
+      "Memory Model",
+      "Data Types",
+      "let/const",
+      "Hoisting",
+      "TDZ"
     ],
     "theory": {
-      "overview": "JavaScript — единственный язык программирования, нативно поддерживаемый всеми браузерами мира. Он обеспечивает реакцию на действия пользователя и общение с сервером.",
+      "overview": "JavaScript — это высокоуровневый, однопоточный, динамически типизированный язык программирования с неблокирующим циклом событий (`Event Loop`). Это единственный язык в мире, который нативно исполняется всеми браузерами без необходимости установки сторонних плагинов.\n\nВ современной разработке JavaScript запускается внутри сред исполнения (`Runtime Environment`):\n- **В браузере (Client-side)**: среда предоставляет доступ к `Web APIs` — DOM-дереву, сетевым запросам `fetch`, таймерам `setTimeout` и локальному хранилищу `localStorage`.\n- **На сервере (Node.js / Bun / Deno)**: среда предоставляет доступ к файловой системе (`fs`), операционной системе и сетевым сокетам.\n\nВ основе Chrome, Edge и Node.js лежит сверхбыстрый движок **Google V8**, который транслирует исходный JavaScript-код в оптимизированный машинный код процессора с помощью JIT-компиляции (`Just-In-Time Compilation`).",
       "sections": [
         {
-          "title": "Движок V8 и переменные let / const",
-          "content": "- `const`: объявление константы (по умолчанию для 90% переменных!).\n- `let`: объявление изменяемой переменной (счетчики, флаги).\n- `var`: устарел, имеет функциональную область видимости и hoisting.\n- `console.log()`: вывод в консоль DevTools.",
+          "title": "Как работает движок V8: Call Stack, Memory Heap и консоль DevTools",
+          "content": "Исполнение кода внутри движка V8 опирается на две ключевые структуры данных:\n- **1. Call Stack (Стек вызовов)**: структура данных, работающая по принципу LIFO (`Last In, First Out` — последним вошел, первым вышел). В стек помещаются контексты выполнения функций в момент их вызова. JavaScript однопоточен — у него ровно один стек вызовов, поэтому в один момент времени выполняется только одна операция.\n- **2. Memory Heap (Куча памяти)**: неструктурированная область оперативной памяти, в которой выделяется место под сложные объекты, массивы и функции.\n\n**Инструменты отладки Console API:**\n- `console.log(...)` — базовый вывод информации.\n- `console.warn(...)` — предупреждение (желтый фон в консоли браузера).\n- `console.error(...)` — ошибка с трассировкой стека (Stack Trace).\n- `console.table(data)` — форматированный вывод массива объектов в виде наглядной таблицы.\n- `console.time('timer')` и `console.timeEnd('timer')` — точный замер времени выполнения участка кода в миллисекундах.",
           "codeExample": {
             "language": "javascript",
-            "title": "Объявление переменных",
-            "code": "const appName = 'Intern Academy';\nlet userScore = 0;\nuserScore += 10;\nconsole.log(`Пользователь в ${appName} набрал ${userScore} баллов`);",
-            "explanation": "const для неизменяемых сущностей, let для счетчиков."
+            "title": "Отладка с помощью Console API",
+            "code": "// 1. Замер скорости выполнения цикла\nconsole.time('array-generation');\nconst internList = [\n  { id: 101, name: 'Алексей', score: 95, status: 'Active' },\n  { id: 102, name: 'Мария', score: 88, status: 'Active' }\n];\nconsole.timeEnd('array-generation');\n\n// 2. Красивый табличный вывод в консоль\nconsole.table(internList);\n\n// 3. Предупреждение и логирование\nconsole.warn('Внимание: Проверяется статус готовности к стажировке');",
+            "explanation": "Console API предоставляет профессиональные методы отладки: табличный вывод console.table и высокоточные таймеры производительности console.time."
+          }
+        },
+        {
+          "title": "Переменные в современном JS: const, let против устаревшего var",
+          "content": "В стандарте ES6 (ECMAScript 2015) были представлены ключевые слова `const` и `let`, полностью заменившие устаревший `var`:\n- **`const` (Константа)**: объявляет неизменяемую привязку идентификатора к значению. Переприсвоить переменную нельзя (`TypeError`). **Индустриальный стандарт: объявляйте через const 90% всех переменных по умолчанию!**\n- **`let` (Изменяемая переменная)**: объявляет переменную, значение которой можно перезаписывать (счётчики циклов, флаги состояния, накапливаемые суммы).\n\n**Почему `var` категорически запрещён в современном коде?**\n- 1. **Область видимости (Scope)**: `const` и `let` имеют **блочную область видимости** (`Block Scope` — ограничены фигурными скобками `{ ... }` блоков `if`, `for`, `while`). Переменная `var` имеет функциональную область видимости и игнорирует блоки условий и циклов, протекая наружу.\n- 2. **Поднятие (Hoisting) и TDZ**: переменная `var` при поднятии инициализируется со значением `undefined`, что скрывает баги. Переменные `let` и `const` также поднимаются, но попадают во **Временную мёртвую зону (Temporal Dead Zone, TDZ)**: попытка обратиться к ним до строки объявления вызовет мгновенную ошибку `ReferenceError`.\n- 3. **Загрязнение глобального объекта**: объявление `var name = 'Alex'` на верхнем уровне создает глобальное свойство `window.name`, перезаписывая системные свойства браузера.",
+          "codeExample": {
+            "language": "javascript",
+            "title": "Разница между блочной областью видимости и мутацией объектов",
+            "code": "// 1. const фиксирует ссылку, но свойства объекта можно мутировать\nconst intern = {\n  name: 'Иван',\n  level: 1\n};\nintern.level = 2; // ✅ Разрешено: мутация внутреннего свойства\n// intern = {};   // ❌ Ошибка TypeError: Assignment to constant variable\n\n// 2. Блочная область видимости let\nlet totalScore = 0;\nif (true) {\n  const bonusPoints = 15;\n  totalScore += bonusPoints;\n}\n// console.log(bonusPoints); // ❌ Ошибка ReferenceError: bonusPoints is not defined",
+            "explanation": "const для неизменяемых сущностей, let для счетчиков. const запрещает переприсваивание ссылки, но позволяет изменять внутренние свойства объектов."
+          }
+        },
+        {
+          "title": "Система 8 типов данных в JavaScript: Примитивы vs Объекты",
+          "content": "Все значения в JavaScript делятся на 8 типов данных (7 примитивов + 1 ссылочный тип):\n\n**7 Примитивных типов данных (Хранятся в Stack, передаются по значению):**\n- 1. `string` — строки текста (`'Hello'`, `\"World\"`, шаблонные строки `` `Score: ${score}` ``).\n- 2. `number` — 64-битные числа с плавающей точкой по стандарту IEEE 754 (целые, дробные, а также спецзначения `NaN` и `Infinity`).\n- 3. `bigint` — целые числа произвольной точности для криптографии и финансов (`9007199254740991n`).\n- 4. `boolean` — логические значения (`true` или `false`).\n- 5. `null` — специальное значение, обозначающее явное и намеренное отсутствие объекта.\n- 6. `undefined` — значение переменной, которой еще не было присвоено значение.\n- 7. `symbol` — уникальный и неизменяемый идентификатор (используется для скрытых свойств объектов).\n\n**1 Ссылочный тип данных (Хранится в Heap, передается по ссылке):**\n- 8. `object` — комплексные структуры данных (простые объекты `{}`, массивы `[]`, функции `function`, даты `Date`, коллекции `Map` и `Set`).\n\n**Критическая разница:**\n- Примитивы сравниваются и копируются **по значению** (`by value`).\n- Объекты сравниваются и копируются **по ссылке** (`by reference`) на ячейку в памяти.",
+          "codeExample": {
+            "language": "javascript",
+            "title": "Сравнение передачи по значению и по ссылке",
+            "code": "// 1. Примитивы: копирование по значению\nlet a = 42;\nlet b = a;\nb = 100;\nconsole.log(a); // 42 (оригинал не изменился)\n\n// 2. Объекты: копирование по ссылке на один и тот же адрес в Heap\nconst user1 = { name: 'Алексей', score: 10 };\nconst user2 = user1; // user2 указывает на тот же объект в памяти!\nuser2.score = 99;\nconsole.log(user1.score); // 99 (оригинал мутировал!)",
+            "explanation": "Примитивы копируются по значению, а объекты по ссылке в оперативной памяти."
+          }
+        },
+        {
+          "title": "Оператор typeof, исторические особенности и строгий режим 'use strict'",
+          "content": "Для проверки типа значения используется оператор `typeof`:\n- `typeof 'text'` -> `'string'`\n- `typeof 42` -> `'number'`\n- `typeof true` -> `'boolean'`\n- `typeof undefined` -> `'undefined'`\n- `typeof {}` -> `'object'`\n- `typeof []` -> `'object'` (массивы в JS — это разновидность объектов)\n- `typeof function(){}` -> `'function'` (специальный подтип объекта)\n- `typeof null` -> `'object'` ⚠️ **Исторический баг JavaScript с 1995 года**, который невозможно исправить из-за обратной совместимости всего интернета.\n\n**Строгий режим (`'use strict'`):**\nДиректива `'use strict'` в начале файла или функции включает современный строгий режим:\n- Запрещает случайное создание глобальных переменных при опечатке (`mistypedVar = 10` вызовет ошибку, а не создаст переменную в `window`).\n- Превращает скрытые неудачные операции (например, запись в `read-only` свойство) в фатальные ошибки.\n- Запрещает дублирование имен параметров в функциях.\n*В современных ES6-модулях (`import/export`) и React строгий режим включен по умолчанию.*",
+          "codeExample": {
+            "language": "javascript",
+            "title": "Безопасная проверка типов и строгий режим",
+            "code": "'use strict';\n\nfunction checkType(value) {\n  // Корректная проверка на null (обход бага typeof)\n  if (value === null) {\n    return 'null';\n  }\n  // Проверка на массив\n  if (Array.isArray(value)) {\n    return 'array';\n  }\n  return typeof value;\n}\n\nconsole.log(checkType(null));        // 'null'\nconsole.log(checkType([1, 2, 3]));   // 'array'\nconsole.log(checkType('Octo'));      // 'string'",
+            "explanation": "Оператор typeof корректно определяет примитивы, а для массивов и null требуются специальные проверки Array.isArray и прямое сравнение."
           }
         }
       ],
       "seniorTips": [
-        "Всегда объявляйте переменные через const. Используйте let только для перезаписываемых."
+        "Всегда пишите const по умолчанию. Используйте let только тогда, когда переменная действительно будет перезаписана (например, счетчик i в цикле for).",
+        "Никогда не используйте var. В современных проектах линтер ESLint обязан быть настроен с правилом no-var: error.",
+        "Для проверки массивов всегда используйте статический метод Array.isArray(val), так как typeof [] возвращает 'object'.",
+        "Для проверки на null используйте прямое строгое равенство val === null, так как typeof null возвращает 'object'.",
+        "Всегда используйте строгое равенство (===) вместо нестрогого (==), чтобы исключить неявное приведение типов (Type Coercion).",
+        "Помните, что const защищает только саму ссылку на объект. Чтобы сделать объект по-настоящему неизменяемым, используйте Object.freeze(obj)."
       ],
       "commonMistakes": [
         {
-          "bad": "var total = 100;",
-          "good": "const total = 100;",
-          "reason": "var приводит к утечкам в глобальный объект window."
+          "bad": "/* Использование var и утечка из блока */\nfor (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 100);\n}\n// Выведет: 3, 3, 3",
+          "good": "/* Использование let создает новую переменную на каждой итерации */\nfor (let i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 100);\n}\n// Выведет: 0, 1, 2",
+          "reason": "var имеет функциональную область видимости — все замыкания в setTimeout ссылаются на одну и ту же переменную i. let имеет блочную область видимости и создает отдельную привязку для каждого шага цикла."
+        },
+        {
+          "bad": "/* Неявное создание глобальной переменной */\nfunction calculateTotal(price) {\n  tax = price * 0.2; // забыли const/let — утечка в window.tax!\n  return price + tax;\n}",
+          "good": "function calculateTotal(price) {\n  'use strict';\n  const tax = price * 0.2;\n  return price + tax;\n}",
+          "reason": "Без 'use strict' присваивание необъявленной переменной не выдает ошибки, а неявно создает свойство в глобальном объекте window, порождая трудноуловимые баги."
+        },
+        {
+          "bad": "const original = { theme: 'dark', score: 100 };\nconst duplicate = original;\nduplicate.score = 200; // Мутировал original!",
+          "good": "const original = { theme: 'dark', score: 100 };\nconst duplicate = { ...original }; // Поверхностное иммутабельное копирование\nduplicate.score = 200; // original.score остался 100",
+          "reason": "Копирование объекта через знак = копирует только ссылку в памяти. Изменение дубликата неизбежно мутирует исходный объект."
+        },
+        {
+          "bad": "if (typeof data === 'object') {\n  console.log(data.length); // Упадет с TypeError, если data === null!\n}",
+          "good": "if (data !== null && typeof data === 'object') {\n  console.log(Array.isArray(data) ? data.length : Object.keys(data).length);\n}",
+          "reason": "Исторический баг typeof null === 'object' приводит к падению приложения при попытке прочитать свойства у значения null."
         }
       ],
       "keyTakeaways": [
-        "const защищает от переназначения.",
-        "let имеет блочную область видимости { }.",
-        "console.log — главный инструмент отладки."
+        "JavaScript — однопоточный язык с единым Call Stack и асинхронным циклом событий Event Loop.",
+        "Движок V8 преобразует JS в машинный код с помощью JIT-компиляции (Ignition + TurboFan).",
+        "В JS существует 7 примитивных типов (передаются по значению) и 1 ссылочный тип Object (передается по ссылке).",
+        "const объявляет константу (90% кода), let объявляет изменяемую переменную с блочной областью видимости.",
+        "var устарел и опасен из-за функциональной области видимости и поднятия без Temporal Dead Zone.",
+        "typeof null возвращает 'object' — это исторический баг языка, требующий проверки val === null."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"js-demo\"><h3>JS Демо</h3><button id=\"btn-hello\">Поздороваться</button><p id=\"js-out\"></p></div>",
-      "initialCss": ".js-demo { padding: 20px; background: white; border-radius: 12px; text-align: center; }\n#btn-hello { padding: 10px 20px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }\n#js-out { margin-top: 12px; font-weight: bold; color: #4f46e5; }",
-      "initialJs": "const btn = document.getElementById('btn-hello');\nconst out = document.getElementById('js-out');\nbtn.addEventListener('click', () => {\n  const name = 'Стажёр';\n  out.textContent = `Привет, ${name}! JavaScript успешно работает.`;\n  console.log('Кнопка нажата!');\n});",
-      "instructions": "Нажмите кнопку «Поздороваться» и посмотрите вывод в консоль."
+      "initialHtml": "<div class=\"js-inspector-card\">\n  <h2>Инспектор типов и памяти V8</h2>\n  <p class=\"desc\">Тестирование типов данных, мутации ссылок и работы 'use strict'.</p>\n  \n  <div class=\"controls-grid\">\n    <button type=\"button\" class=\"btn\" onclick=\"runPrimitivesDemo()\">1. Примитивы (По значению)</button>\n    <button type=\"button\" class=\"btn\" onclick=\"runObjectsDemo()\">2. Объекты (По ссылке)</button>\n    <button type=\"button\" class=\"btn\" onclick=\"runTypeofInspector()\">3. Проверить 8 типов</button>\n  </div>\n\n  <div class=\"console-window\">\n    <div class=\"console-title\">Терминал вывода DevTools:</div>\n    <pre id=\"js-log\" class=\"log-output\">Нажмите кнопку для запуска кода...</pre>\n  </div>\n</div>",
+      "initialCss": ".js-inspector-card {\n  background: #0a0e13;\n  border: 1px solid #1a2230;\n  border-left: 4px solid #eab308;\n  padding: 24px;\n  border-radius: 8px;\n  color: #d6f5e3;\n  font-family: 'Inter', sans-serif;\n  max-width: 540px;\n}\nh2 { font-size: 20px; margin-bottom: 6px; color: #ffffff; }\n.desc { font-size: 13px; color: #a8c8b6; margin-bottom: 20px; line-height: 1.5; }\n.controls-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }\n.btn {\n  background: #0f141a;\n  border: 1px solid #233044;\n  color: #2dff8a;\n  padding: 10px 16px;\n  border-radius: 4px;\n  font-family: 'JetBrains Mono', monospace;\n  font-size: 12px;\n  font-weight: 600;\n  cursor: pointer;\n  text-align: left;\n  transition: all 0.2s;\n}\n.btn:hover {\n  background: rgba(45, 255, 138, 0.1);\n  border-color: #2dff8a;\n}\n.console-window {\n  background: #03060a;\n  border: 1px solid #1a2230;\n  border-radius: 4px;\n  overflow: hidden;\n}\n.console-title {\n  background: #0f141a;\n  padding: 6px 12px;\n  font-size: 11px;\n  font-family: 'JetBrains Mono', monospace;\n  color: #6c8a7b;\n  text-transform: uppercase;\n  border-bottom: 1px solid #1a2230;\n}\n.log-output {\n  padding: 14px;\n  font-family: 'JetBrains Mono', monospace;\n  font-size: 12px;\n  line-height: 1.6;\n  color: #2dff8a;\n  margin: 0;\n  white-space: pre-wrap;\n  max-height: 180px;\n  overflow-y: auto;\n}",
+      "initialJs": "function log(msg) {\n  document.getElementById('js-log').innerText = msg;\n}\n\nfunction runPrimitivesDemo() {\n  let x = 100;\n  let y = x;\n  y = 500;\n  log('[Примитив number - по значению]\\nlet x = 100;\\nlet y = x;\\ny = 500;\\n\\nРезультат: x = ' + x + ', y = ' + y + '\\nОригинал x остался 100!');\n}\n\nfunction runObjectsDemo() {\n  const userA = { name: 'Ольга', score: 50 };\n  const userB = userA;\n  userB.score = 99;\n  log('[Объект object - по ссылке]\\nconst userA = { score: 50 };\\nconst userB = userA;\\nuserB.score = 99;\\n\\nРезультат: userA.score = ' + userA.score + '\\nuserA изменился, так как userB ссылается на тот же объект!');\n}\n\nfunction runTypeofInspector() {\n  const results = [\n    'typeof \\'hello\\'      -> ' + typeof 'hello',\n    'typeof 42           -> ' + typeof 42,\n    'typeof true         -> ' + typeof true,\n    'typeof undefined    -> ' + typeof undefined,\n    'typeof null         -> ' + typeof null + ' (⚠️ баг JS)',\n    'typeof Symbol(\\'id\\') -> ' + typeof Symbol('id'),\n    'typeof [1, 2]       -> ' + typeof [1, 2] + ' (массив)',\n    'typeof function(){} -> ' + typeof function(){}\n  ].join('\\n');\n  log('[Инспекция 8 типов данных]\\n' + results);\n}\nconsole.log('Песочница JavaScript Уровень 1 готова к тестам!');",
+      "instructions": "Нажимайте на интерактивные кнопки песочницы, чтобы наглядно увидеть разницу между передачей примитивов по значению и объектов по ссылке."
     },
     "task": {
-      "title": "Первый скрипт с переменными",
-      "scenario": "Объявите константу курса и изменяемую переменную прогресса, выведите результат в консоль.",
+      "title": "Разработка модуля валидации стажёра на ES6+",
+      "scenario": "Вам необходимо написать чистую функцию инициализации и валидации профиля стажёра. Функция должна строго использовать const и let, проверять типы входных данных с помощью typeof и Array.isArray, и возвращать иммутабельный объект карточки инженера.",
       "criteria": [
-        "Использованы const и let",
-        "Выполнен вывод console.log"
+        "Использован строгий режим 'use strict'",
+        "Все переменные объявлены исключительно через const или let (без var)",
+        "Реализована проверка типов (name — string, score — number, skills — массив)",
+        "Функция возвращает новый объект профиля без мутации входных данных"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "html": "<div id=\"app\"></div>",
+        "css": "body { font-family: monospace; padding: 20px; background: #0a0e13; color: #2dff8a; }",
+        "js": "'use strict';\n\nfunction createInternProfile(name, score, skills) {\n  // 1. Проверьте типы данных\n  \n  // 2. Верните иммутабельный объект профиля\n}\n\nconst profile = createInternProfile('Алексей', 95, ['HTML5', 'CSS3', 'JS']);\nconsole.log(profile);\n"
       },
       "hints": [
-        "Используйте современные стандарты ES6+."
+        "Для проверки массива используйте Array.isArray(skills).",
+        "Для создания копии массива навыков используйте спред-оператор [...skills].",
+        "Выбрасывайте исключение throw new TypeError(...) при некорректных типах аргументов."
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const course = 'JavaScript Master';\nlet progress = 1;\nconsole.log(`Курс: ${course}, Уровень: ${progress}`);",
-        "explanation": "Использование const и let по стандартам ES6+."
+        "html": "<div id=\"app\">Профиль успешно создан</div>",
+        "css": "body { font-family: monospace; color: #2dff8a; }",
+        "js": "'use strict';\n\nfunction createInternProfile(name, score, skills) {\n  if (typeof name !== 'string') {\n    throw new TypeError('Имя должно быть строкой');\n  }\n  if (typeof score !== 'number' || Number.isNaN(score)) {\n    throw new TypeError('Баллы должны быть валидным числом');\n  }\n  if (!Array.isArray(skills)) {\n    throw new TypeError('Навыки должны быть массивом');\n  }\n\n  return {\n    name,\n    score,\n    skills: [...skills],\n    createdAt: new Date().toISOString(),\n    status: score >= 70 ? 'passed' : 'in-progress'\n  };\n}\n\nconst intern = createInternProfile('Алексей', 95, ['HTML5', 'CSS3', 'ES6+']);\nconsole.log('Создан профиль:', intern);",
+        "explanation": "Использование const и let по стандартам ES6+, строгая проверка типов и иммутабельное создание структуры данных."
       }
     },
     "quiz": {
       "questions": [
         {
           "id": "j1-q1",
-          "question": "Какое ключевое слово следует использовать по умолчанию для объявления переменных?",
+          "question": "В чем ключевое отличие const от let в стандарте ES6+?",
           "options": [
-            "var",
-            "const",
-            "let",
-            "def"
+            "const работает только в серверном Node.js, а let — только в браузере",
+            "const запрещает переприсваивание привязки к значению, а let позволяет перезаписывать переменную",
+            "const имеет глобальную область видимости, а let — функциональную",
+            "const автоматически замораживает все вложенные свойства объектов от мутации"
           ],
           "correctIndex": 1,
-          "explanation": "const предотвращает случайное переопределение и является стандартом."
+          "explanation": "const запрещает повторное присваивание переменной (Assignment to constant variable), но позволяет мутировать внутренние свойства объектов, если объект не заморожен через Object.freeze."
+        },
+        {
+          "id": "j1-q2",
+          "question": "Что выведет в консоль выражение: typeof null?",
+          "options": [
+            "'null'",
+            "'undefined'",
+            "'object'",
+            "'boolean'"
+          ],
+          "correctIndex": 2,
+          "explanation": "typeof null возвращает 'object' — это широко известный исторический баг в первой реализации JavaScript 1995 года, оставленный ради обратной совместимости."
+        },
+        {
+          "id": "j1-q3",
+          "question": "Что произойдет при попытке обратиться к переменной let myVar = 10 ДО строки её объявления в коде?",
+          "options": [
+            "Вернется значение undefined",
+            "Переменная автоматически создастся в глобальном объекте window",
+            "Выбросится фатальная ошибка ReferenceError из-за нахождения переменной в Temporal Dead Zone (TDZ)",
+            "Код молча проигнорирует команду и вернет null"
+          ],
+          "correctIndex": 2,
+          "explanation": "Переменные let и const попадают во Временную мертвую зону (TDZ) от начала блока до строки объявления. Обращение к ним до инициализации вызывает ReferenceError."
+        },
+        {
+          "id": "j1-q4",
+          "question": "Какой метод является единственно надежным стандартом для проверки, является ли переменная массивом?",
+          "options": [
+            "typeof val === 'array'",
+            "Array.isArray(val)",
+            "val instanceof String",
+            "val.getType() === 'array'"
+          ],
+          "correctIndex": 1,
+          "explanation": "Статический метод Array.isArray(val) — стандарт языка для точной проверки массивов, так как оператор typeof [] возвращает 'object'."
+        },
+        {
+          "id": "j1-q5",
+          "question": "Что произойдет при выполнении следующего кода: const x = [1, 2]; const y = x; y.push(3); console.log(x.length);?",
+          "options": [
+            "Выведет 2 (массив x останется без изменений)",
+            "Выведет 3 (массив x мутирует, так как массивы передаются по ссылке)",
+            "Выбросится ошибка TypeError: Assignment to constant variable",
+            "Выведет undefined"
+          ],
+          "correctIndex": 1,
+          "explanation": "Массивы являются ссылочным типом данных. Переменные x и y указывают на один и тот же участок в Memory Heap, поэтому мутация через y.push(3) изменит и x."
         }
       ]
     }

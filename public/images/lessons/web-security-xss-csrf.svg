@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="100%" height="100%" style="background:#0a0e13; font-family:'JetBrains Mono', Consolas, monospace;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <text x="500" y="45" fill="#2dff8a" font-size="24" font-weight="bold" text-anchor="middle" letter-spacing="1">Frontend Security: XSS, CSRF и CORS</text>
+  <text x="500" y="72" fill="#8b949e" font-size="13" text-anchor="middle">Уязвимости веб-приложений и архитектурные механизмы защиты</text>
+
+  <!-- Left: XSS (Cross-Site Scripting) -->
+  <g transform="translate(40, 95)" filter="url(#shadow)">
+    <rect width="440" height="435" rx="8" fill="#0d1117" stroke="#f85149" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#1f1315"/>
+    <text x="20" y="25" fill="#f85149" font-size="15" font-weight="bold">XSS (Cross-Site Scripting)</text>
+
+    <g transform="translate(20, 50)">
+      <rect width="400" height="120" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="15" y="24" fill="#f85149" font-size="12" font-weight="bold">Уязвимый код:</text>
+      <text x="15" y="48" fill="#ff7b72" font-size="11">element.innerHTML = userInput;</text>
+      <text x="15" y="70" fill="#8b949e" font-size="10">// Если userInput = '&lt;img src=x onerror=stealToken()&gt;'</text>
+      <text x="15" y="92" fill="#f85149" font-size="10">// Злоумышленник крадет токены из localStorage!</text>
+    </g>
+
+    <g transform="translate(20, 185)">
+      <rect width="400" height="230" rx="4" fill="#0d2b26" stroke="#2dff8a" stroke-width="1"/>
+      <text x="15" y="24" fill="#2dff8a" font-size="12" font-weight="bold">Комплексная защита от XSS:</text>
+      <text x="15" y="52" fill="#e6edf3" font-size="11">1. textContent вместо innerHTML</text>
+      <text x="15" y="72" fill="#8b949e" font-size="10">   (JSX в React экранирует по умолчанию)</text>
+      <text x="15" y="98" fill="#e6edf3" font-size="11">2. Санитизация через DOMPurify</text>
+      <text x="15" y="118" fill="#8b949e" font-size="10">   DOMPurify.sanitize(dirtyHtml)</text>
+      <text x="15" y="144" fill="#e6edf3" font-size="11">3. Content Security Policy (CSP)</text>
+      <text x="15" y="164" fill="#8b949e" font-size="10">   Запрет inline-скриптов и eval</text>
+      <text x="15" y="190" fill="#e6edf3" font-size="11">4. HttpOnly Cookies для токенов</text>
+      <text x="15" y="210" fill="#8b949e" font-size="10">   JS не может прочитать document.cookie</text>
+    </g>
+  </g>
+
+  <!-- Right: CSRF & CORS -->
+  <g transform="translate(520, 95)" filter="url(#shadow)">
+    <rect width="440" height="435" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#161b22"/>
+    <text x="20" y="25" fill="#29e7ff" font-size="15" font-weight="bold">CSRF &amp; Механизм CORS</text>
+
+    <!-- CSRF Block -->
+    <g transform="translate(20, 50)">
+      <rect width="400" height="175" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="15" y="24" fill="#ffb02e" font-size="12" font-weight="bold">CSRF (Cross-Site Request Forgery):</text>
+      <text x="15" y="48" fill="#e6edf3" font-size="11">Вредоносный сайт тайно отправляет POST</text>
+      <text x="15" y="68" fill="#e6edf3" font-size="11">на ваш банк, используя сохранённые куки!</text>
+      
+      <text x="15" y="100" fill="#2dff8a" font-size="12" font-weight="bold">Защита от CSRF:</text>
+      <text x="15" y="122" fill="#7ee787" font-size="11">✔ SameSite=Strict или SameSite=Lax у куки</text>
+      <text x="15" y="144" fill="#7ee787" font-size="11">✔ Анти-CSRF токен в кастомном заголовке</text>
+      <text x="15" y="164" fill="#7ee787" font-size="11">✔ Двухфакторное подтверждение опасных действий</text>
+    </g>
+
+    <!-- CORS Block -->
+    <g transform="translate(20, 240)">
+      <rect width="400" height="175" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="15" y="24" fill="#29e7ff" font-size="12" font-weight="bold">CORS (Cross-Origin Resource Sharing):</text>
+      <text x="15" y="48" fill="#8b949e" font-size="11">Защита в БРАУЗЕРЕ на основе Same-Origin Policy</text>
+      <text x="15" y="70" fill="#8b949e" font-size="11">(Origin = Protocol + Domain + Port)</text>
+
+      <text x="15" y="100" fill="#e6edf3" font-size="11">Сервер должен ответить заголовками:</text>
+      <text x="15" y="122" fill="#79c0ff" font-size="11">Access-Control-Allow-Origin: https://app.dev</text>
+      <text x="15" y="144" fill="#79c0ff" font-size="11">Access-Control-Allow-Methods: GET, POST</text>
+      <text x="15" y="164" fill="#ff7b72" font-size="10">⚠ CORS настраивается на БЭКЕНДЕ, а не в клиенте!</text>
+    </g>
+  </g>
+</svg>

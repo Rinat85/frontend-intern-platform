@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="100%" height="100%" style="background:#0a0e13; font-family:'JetBrains Mono', Consolas, monospace;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <text x="500" y="45" fill="#2dff8a" font-size="24" font-weight="bold" text-anchor="middle" letter-spacing="1">CSS: display vs visibility vs opacity vs a11y</text>
+  <text x="500" y="72" fill="#8b949e" font-size="13" text-anchor="middle">Сравнение поведения при скрытии элементов: геометрия, события мыши и доступность (a11y)</text>
+
+  <!-- 4 Columns of Hiding Techniques -->
+  <!-- 1. display: none -->
+  <g transform="translate(30, 95)" filter="url(#shadow)">
+    <rect width="215" height="435" rx="8" fill="#0d1117" stroke="#f85149" stroke-width="1.5"/>
+    <rect width="215" height="38" rx="8" fill="#1f1315"/>
+    <text x="15" y="24" fill="#f85149" font-size="13" font-weight="bold">display: none</text>
+
+    <text x="15" y="65" fill="#f85149" font-size="12">❌ Место в Layout:</text>
+    <text x="15" y="85" fill="#8b949e" font-size="11">0px (удалён из потока)</text>
+
+    <text x="15" y="125" fill="#f85149" font-size="12">❌ Клики мышью:</text>
+    <text x="15" y="145" fill="#8b949e" font-size="11">Не кликабелен</text>
+
+    <text x="15" y="185" fill="#f85149" font-size="12">❌ Скринридеры (a11y):</text>
+    <text x="15" y="205" fill="#8b949e" font-size="11">Удалён из Accessibility Tree</text>
+
+    <text x="15" y="245" fill="#79c0ff" font-size="12">⚡ Анимации:</text>
+    <text x="15" y="265" fill="#8b949e" font-size="11">Не анимируется (дискретно)</text>
+
+    <rect x="15" y="295" width="185" height="120" rx="4" fill="#03060a" stroke="#30363d"/>
+    <text x="25" y="325" fill="#ff7b72" font-size="11">Идеален для:</text>
+    <text x="25" y="350" fill="#e6edf3" font-size="10">• Закрытых вкладок</text>
+    <text x="25" y="372" fill="#e6edf3" font-size="10">• Скрытых модалок</text>
+    <text x="25" y="394" fill="#e6edf3" font-size="10">• Мобильного меню</text>
+  </g>
+
+  <!-- 2. visibility: hidden -->
+  <g transform="translate(265, 95)" filter="url(#shadow)">
+    <rect width="215" height="435" rx="8" fill="#0d1117" stroke="#ffb02e" stroke-width="1.5"/>
+    <rect width="215" height="38" rx="8" fill="#2d2814"/>
+    <text x="15" y="24" fill="#ffb02e" font-size="13" font-weight="bold">visibility: hidden</text>
+
+    <text x="15" y="65" fill="#2dff8a" font-size="12">✔ Место в Layout:</text>
+    <text x="15" y="85" fill="#e6edf3" font-size="11">СОХРАНЯЕТСЯ (занимает)</text>
+
+    <text x="15" y="125" fill="#f85149" font-size="12">❌ Клики мышью:</text>
+    <text x="15" y="145" fill="#8b949e" font-size="11">Не кликабелен</text>
+
+    <text x="15" y="185" fill="#f85149" font-size="12">❌ Скринридеры (a11y):</text>
+    <text x="15" y="205" fill="#8b949e" font-size="11">Скрыт от скринридеров</text>
+
+    <text x="15" y="245" fill="#79c0ff" font-size="12">⚡ Анимации:</text>
+    <text x="15" y="265" fill="#8b949e" font-size="11">Анимируется с задержкой</text>
+
+    <rect x="15" y="295" width="185" height="120" rx="4" fill="#03060a" stroke="#30363d"/>
+    <text x="25" y="325" fill="#ffb02e" font-size="11">Идеален для:</text>
+    <text x="25" y="350" fill="#e6edf3" font-size="10">• Сохранения сетки</text>
+    <text x="25" y="372" fill="#e6edf3" font-size="10">• Плейсхолдеров</text>
+    <text x="25" y="394" fill="#e6edf3" font-size="10">• Плавных dropdown</text>
+  </g>
+
+  <!-- 3. opacity: 0 -->
+  <g transform="translate(500, 95)" filter="url(#shadow)">
+    <rect width="215" height="435" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+    <rect width="215" height="38" rx="8" fill="#162638"/>
+    <text x="15" y="24" fill="#29e7ff" font-size="13" font-weight="bold">opacity: 0</text>
+
+    <text x="15" y="65" fill="#2dff8a" font-size="12">✔ Место в Layout:</text>
+    <text x="15" y="85" fill="#e6edf3" font-size="11">СОХРАНЯЕТСЯ (занимает)</text>
+
+    <text x="15" y="125" fill="#ffb02e" font-size="12">⚠ Клики мышью:</text>
+    <text x="15" y="145" fill="#ffb02e" font-size="11">КЛИКАБЕЛЕН (!)</text>
+
+    <text x="15" y="185" fill="#ffb02e" font-size="12">⚠ Скринридеры (a11y):</text>
+    <text x="15" y="205" fill="#ffb02e" font-size="11">ЧИТАЕТСЯ (фокусируется)</text>
+
+    <text x="15" y="245" fill="#2dff8a" font-size="12">⚡ Анимации:</text>
+    <text x="15" y="265" fill="#7ee787" font-size="11">Идеально (GPU composite)</text>
+
+    <rect x="15" y="295" width="185" height="120" rx="4" fill="#03060a" stroke="#30363d"/>
+    <text x="25" y="325" fill="#29e7ff" font-size="11">Идеален для:</text>
+    <text x="25" y="350" fill="#e6edf3" font-size="10">• Плавных fade-in</text>
+    <text x="25" y="372" fill="#e6edf3" font-size="10">• Кастомных input[file]</text>
+    <text x="25" y="394" fill="#e6edf3" font-size="10">• Нужен pointer-events</text>
+  </g>
+
+  <!-- 4. .visually-hidden -->
+  <g transform="translate(735, 95)" filter="url(#shadow)">
+    <rect width="235" height="435" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-width="2"/>
+    <rect width="235" height="38" rx="8" fill="#0d2b26"/>
+    <text x="15" y="24" fill="#2dff8a" font-size="13" font-weight="bold">.visually-hidden (a11y)</text>
+
+    <text x="15" y="65" fill="#f85149" font-size="12">❌ Место в Layout:</text>
+    <text x="15" y="85" fill="#8b949e" font-size="11">1x1px clip (не сдвигает)</text>
+
+    <text x="15" y="125" fill="#f85149" font-size="12">❌ Клики мышью:</text>
+    <text x="15" y="145" fill="#8b949e" font-size="11">Не кликабелен</text>
+
+    <text x="15" y="185" fill="#2dff8a" font-size="12">✔ Скринридеры (a11y):</text>
+    <text x="15" y="205" fill="#7ee787" font-size="11">ПОЛНОСТЬЮ ЧИТАЕТСЯ</text>
+
+    <text x="15" y="245" fill="#8b949e" font-size="12">⚡ Анимации:</text>
+    <text x="15" y="265" fill="#8b949e" font-size="11">Для скрытого текста</text>
+
+    <rect x="15" y="295" width="205" height="120" rx="4" fill="#03060a" stroke="#30363d"/>
+    <text x="25" y="325" fill="#2dff8a" font-size="11">Идеален для:</text>
+    <text x="25" y="350" fill="#e6edf3" font-size="10">• Скрытых заголовков h2</text>
+    <text x="25" y="372" fill="#e6edf3" font-size="10">• Описаний для кнопок</text>
+    <text x="25" y="394" fill="#e6edf3" font-size="10">• Пропуска навигации</text>
+  </g>
+</svg>

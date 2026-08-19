@@ -600,112 +600,192 @@ export const htmlLessons: Lesson[] = [
     "id": "html-4",
     "moduleId": "html",
     "level": 4,
-    "title": "Анатомия HTML-документа",
-    "subtitle": "DOCTYPE, head, meta-теги, body и глобальные атрибуты",
-    "description": "Полный разбор каркаса HTML5: зачем нужен DOCTYPE, как работают метатеги viewport и charset, что хранится в head, а что в body, и как устроены глобальные атрибуты (id, class, data-*).",
-    "estimatedMinutes": 35,
+    "title": "Анатомия HTML-документа и метаданные",
+    "subtitle": "DOCTYPE, head, meta-теги, Open Graph, Favicons, body и глобальные атрибуты",
+    "description": "Изучите фундаментальное строение HTML-документа: режимы рендеринга Standards vs Quirks Mode, теги заголовка <head>, протокол Open Graph для красивых превью в соцсетях и мессенджерах, фавиконки и глобальные атрибуты HTML5.",
+    "estimatedMinutes": 55,
     "difficulty": "beginner",
     "tags": [
-      "HTML",
-      "DOCTYPE",
-      "Head",
-      "Meta",
-      "Attributes"
+      "doctype",
+      "head",
+      "meta",
+      "opengraph",
+      "seo",
+      "favicon",
+      "global-attributes"
     ],
     "theory": {
-      "overview": "Каждый HTML-документ имеет строгую иерархическую структуру, состоящую из двух главных зон: служебной части `<head>` (метаданные для браузера и поисковиков) и контентной части `<body>` (всё, что видит пользователь на экране).\n\nНарушение базового скелета приводит к тому, что браузер переходит в так называемый **Quirks Mode** (режим совместимости), где верстка может отображаться непредсказуемо, ломаются шрифты и адаптивность.",
+      "overview": "Каждая веб-страница начинается с технического фундамента — тегов заголовка `<head>` и декларации `<!DOCTYPE html>`. Пользователь почти не видит эти теги в окне браузера (за исключением вкладки и фавиконки), но именно они определяют, как поисковые системы индексируют сайт, как мессенджеры (Telegram, WhatsApp, VK) генерируют красивые карточки-превью при шеринге ссылок, как страница масштабируется на мобильных устройствах и в каком режиме браузерный движок рендерит DOM.\n\nВ этом уроке мы разберём каждый элемент идеального `<head>`, микроразметку Open Graph, настройку иконок для всех платформ и глобальные атрибуты HTML5, которые работают на любых элементах.",
       "sections": [
         {
-          "title": "Строение базового шаблона HTML5",
-          "content": "Разбор ключевых элементов каркаса:\n- `<!DOCTYPE html>` — обязательный пролог, указывающий браузеру рендерить страницу по стандарту HTML5 (Standards Mode).\n- `<html lang=\"ru\">` — корневой элемент. Атрибут `lang` критически важен: он помогает скринридерам правильно озвучивать буквы и подсказывает поисковикам язык страницы.\n- `<head>` — контейнер служебной информации:\n  • `<meta charset=\"UTF-8\">` — кодировка символов (поддерживает кириллицу, эмодзи и спецсимволы).\n  • `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">` — включает корректный масштаб на мобильных устройствах.\n  • `<title>` — заголовок вкладки браузера и сниппета в поисковой выдаче.\n- `<body>` — тело документа, где размещается весь видимый интерфейс.",
+          "title": "DOCTYPE, режимы рендеринга и корневой тег <html>",
+          "content": "Декларация `<!DOCTYPE html>` — обязательная первая строка любого HTML-документа.\n\nЗачем нужен DOCTYPE:\nВ 1990-х годах браузеры рендерили страницы по старым нестандартным правилам (Netscape/IE). Чтобы сохранить обратную совместимость со старыми сайтами и одновременно внедрить стандарты W3C, создатели браузеров ввели два режима рендеринга:\n1. Standards Mode (Режим стандартов) — включается при наличии `<!DOCTYPE html>`. Браузер строго следует спецификациям W3C/WHATWG.\n2. Quirks Mode (Режим совместимости / «причуд») — включается, если DOCTYPE забыт или опечатан. Браузер эмулирует поведение Internet Explorer 5: ломается Box Model, не работают современные CSS-свойства, размеры шрифтов плывут.\n\nКорневой элемент `<html lang=\"ru\">`:\nАтрибут `lang` критически важен:\n- Скринридеры используют `lang` для переключения языкового движка и правильного синтеза речи (правильные ударения и интонации).\n- Поисковые системы (Google, Yandex) используют `lang` для геотаргетинга и языковой выдачи.\n- Браузеры (Chrome) определяют, нужно ли предлагать встроенный перевод страницы.\n\nРазделение `<head>` и `<body>`:\n- `<head>` — контейнер метаданных для браузера, поисковиков и соцсетей (не отображается на экране).\n- `<body>` — видимое тело документа со всем контентом и интерфейсом.",
           "codeExample": {
             "language": "html",
-            "title": "Эталонный шаблон HTML5",
-            "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <meta name=\"description\" content=\"Обучающая платформа для фронтенд-стажёров\">\n  <title>Frontend Intern Academy</title>\n  <link rel=\"icon\" href=\"/favicon.ico\">\n  <link rel=\"stylesheet\" href=\"/css/style.css\">\n</head>\n<body>\n  <main>\n    <h1>Привет, мир!</h1>\n  </main>\n</body>\n</html>",
-            "explanation": "Полная валидная структура страницы со всеми обязательными мета-тегами для десктопов и мобильных устройств."
+            "code": "<!DOCTYPE html>\n<html lang=\"ru\" dir=\"ltr\">\n  <head>\n    <!-- Метаданные страницы -->\n    <meta charset=\"UTF-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n    <title>Анатомия документа — Frontend Academy</title>\n  </head>\n  <body>\n    <!-- Видимый контент страницы -->\n    <main>\n      <h1>Стандарты HTML5</h1>\n    </main>\n  </body>\n</html>",
+            "title": "Минимальный валидный каркас HTML5 документа",
+            "explanation": "DOCTYPE гарантирует Standards Mode. lang='ru' сообщает скринридерам и поисковикам язык контента. dir='ltr' указывает направление письма (слева направо)."
           }
         },
         {
-          "title": "Глобальные атрибуты HTML-элементов",
-          "content": "Глобальные атрибуты можно применять абсолютно к любому HTML-тегу:\n- `id` — уникальный идентификатор элемента на странице (не должен повторяться!). Используется для якорей и обращения из JS.\n- `class` — список классов через пробел (`class=\"btn btn-primary\"`), используется для стилизации в CSS и группировки элементов.\n- `title` — всплывающая текстовая подсказка (tooltip) при наведении курсора мыши.\n- `data-*` — пользовательские атрибуты для хранения данных прямо в DOM (например: `data-user-id=\"42\"`, `data-status=\"active\"`), легко читаются через JS (`element.dataset.userId`).\n- `hidden` — логический атрибут, скрывающий элемент от отображения (эквивалентен `display: none`).\n- `tabindex` — управляет порядком фокусировки элемента при нажатии клавиши `Tab`.",
+          "title": "Метатеги <head>: Charset, Viewport, SEO и Фавиконки",
+          "content": "Тег `<head>` сообщает браузеру технические параметры страницы до начала парсинга контента.\n\nОбязательные метатеги:\n\n1. `<meta charset=\"UTF-8\">` — кодировка символов. UTF-8 поддерживает все языки мира, эмодзи и спецсимволы. Должен стоять ПЕРВЫМ внутри `<head>` (в пределах первых 1024 байт), чтобы браузер не начал парсить текст в неверной кодировке (знаменитые «кракозябры» Windows-1251 / ISO-8859).\n\n2. `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">` — адаптивный viewport:\n- `width=device-width` — ширина области просмотра равна физической ширине экрана устройства в CSS-пикселях.\n- `initial-scale=1.0` — начальный масштаб 1:1 без зума.\n- Без этого тега мобильные браузеры откроют сайт в виртуальном разрешении 980px с микроскопическим текстом!\n\n3. `<title>` — заголовок страницы:\n- Отображается на вкладке браузера, в закладках и как главный заголовок ссылки в поисковой выдаче Google/Яндекс.\n- Длина: 50–60 символов. Ключевые слова ставьте в начало.\n\n4. `<meta name=\"description\" content=\"...\">` — краткое описание страницы (150–160 символов). Используется поисковиками для формирования сниппета под ссылкой в результатах поиска.\n\n5. `<link rel=\"canonical\" href=\"https://...\">` — указывает поисковому роботу основной (канонический) URL страницы, предотвращая пессимизацию сайта за дубли контента (например, версии с UTM-метками).\n\nФавиконки и иконки для устройств:\n- `<link rel=\"icon\" href=\"/favicon.ico\" sizes=\"any\">` — классический favicon\n- `<link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\">` — векторный масштабируемый SVG favicon\n- `<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">` — иконка для домашнего экрана iOS\n- `<link rel=\"manifest\" href=\"/manifest.webmanifest\">` — манифест для PWA (Progressive Web Apps)",
+          "image": {
+            "src": "/images/lessons/html-meta-opengraph.svg",
+            "alt": "Анатомия тегов head и протокол Open Graph для превью",
+            "caption": "Метаданные head обеспечивают корректный рендеринг, мобильную адаптивность и красивые превью в соцсетях"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Пример использования глобальных атрибутов",
-            "code": "<button \n  id=\"submit-order-btn\"\n  class=\"btn btn-success ripple\"\n  data-order-id=\"1084\"\n  data-action=\"checkout\"\n  title=\"Нажмите для подтверждения заказа\"\n>\n  Оформить заказ\n</button>",
-            "explanation": "Кнопка содержит id для скрипта, классы для CSS, data-атрибуты для передачи параметров заказа и подсказку title."
+            "code": "<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>Курс Frontend-разработки — Академия Стажёров</title>\n  <meta\n    name=\"description\"\n    content=\"Практический интенсивный курс по HTML5, CSS3, JavaScript и React с нуля до реального оффера.\"\n  />\n  <link rel=\"canonical\" href=\"https://intern-academy.ru/courses/frontend\" />\n\n  <!-- Иконки для всех платформ -->\n  <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"any\" />\n  <link rel=\"icon\" href=\"/favicon.svg\" type=\"image/svg+xml\" />\n  <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\" />\n  <meta name=\"theme-color\" content=\"#0a0e13\" />\n</head>",
+            "title": "Идеальная секция <head> для современного продакшена",
+            "explanation": "Полный набор метатегов для SEO, векторные и растровые фавиконки, канонический URL и theme-color для окрашивания адресной строки мобильного браузера."
+          }
+        },
+        {
+          "title": "Протоколы Open Graph и Twitter Cards: Красивые превью ссылок",
+          "content": "Когда пользователь отправляет ссылку на ваш сайт в Telegram, VK, WhatsApp, Discord, Slack или Twitter, мессенджер отправляет фоновый бот-запрос (crawler) к вашей странице, чтобы извлечь метаданные Open Graph и сгенерировать визуальную карточку (Rich Snippet).\n\nОсновные теги протокола Open Graph (`og:`):\n\n`og:title` — заголовок карточки в соцсети (обычно совпадает с `<title>` или короче и кликабельнее).\n`og:description` — краткое пояснение к ссылке (1–2 предложения).\n`og:image` — абсолютный URL изображения для баннера (Обязательно абсолютный: `https://site.ru/og.png`, а не `/og.png`!). Рекомендуемый размер: `1200 × 630 px` (соотношение 1.91:1).\n`og:image:alt` — текстовое описание картинки для скринридеров.\n`og:url` — канонический адрес страницы.\n`og:type` — тип контента (`website`, `article`, `video.movie`, `book`).\n`og:site_name` — название бренда/портала.\n\nTwitter Cards (`twitter:`):\n`twitter:card` — тип отображения карточки (`summary_large_image` — большой баннер, `summary` — квадратная миниатюра слева).\n`twitter:title`, `twitter:description`, `twitter:image`.",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Open Graph метаданные (Telegram, VK, Facebook, Discord) -->\n<meta property=\"og:type\" content=\"website\" />\n<meta property=\"og:url\" content=\"https://intern.dev/lessons/html-4\" />\n<meta property=\"og:title\" content=\"Анатомия HTML-документа — Практический урок\" />\n<meta\n  property=\"og:description\"\n  content=\"Разбор DOCTYPE, Open Graph, meta-тегов и глобальных атрибутов в интерактивном тренажёре.\"\n/>\n<meta property=\"og:image\" content=\"https://intern.dev/images/og-html-4.jpg\" />\n<meta property=\"og:image:width\" content=\"1200\" />\n<meta property=\"og:image:height\" content=\"630\" />\n<meta property=\"og:site_name\" content=\"Frontend Intern Academy\" />\n\n<!-- Twitter Cards -->\n<meta name=\"twitter:card\" content=\"summary_large_image\" />\n<meta name=\"twitter:title\" content=\"Анатомия HTML-документа\" />\n<meta name=\"twitter:image\" content=\"https://intern.dev/images/og-html-4.jpg\" />",
+            "title": "Разметка Open Graph и Twitter Cards для привлекательных превью",
+            "explanation": "og:image с размером 1200x630 гарантирует чёткое отображение баннера на экранах Retina. og:url защищает от потери статистики шеринга."
+          }
+        },
+        {
+          "title": "Глобальные атрибуты HTML5: id, class, data-*, tabindex и hidden",
+          "content": "Глобальные атрибуты (Global Attributes) — это атрибуты, которые допустимо указывать на АБСОЛЮТНО ЛЮБОМ элементе HTML5.\n\nКлючевые глобальные атрибуты:\n\n1. `id` — уникальный идентификатор элемента на всей странице. Используется для: якорей в URL (`#section-3`), связки `<label for=\"id\">`, ARIA-атрибутов (`aria-labelledby=\"id\"`) и точечных скриптов. Дублирование id — грубая ошибка валидации.\n\n2. `class` — список CSS-классов через пробел для стилизации и группировки элементов.\n\n3. `data-*` (Пользовательские data-атрибуты) — механизм сохранения произвольных данных прямо в DOM-узле. В JavaScript доступны через объект `element.dataset`:\n`<button data-user-id=\"42\" data-role=\"admin\">` → `btn.dataset.userId === '42'`, `btn.dataset.role === 'admin'`.\n\n4. `tabindex` — управление порядком фокуса при навигации клавишей `Tab`:\n- `tabindex=\"0\"` — делает обычный элемент (например, `<div>`) фокусируемым в естественном порядке потока документа.\n- `tabindex=\"-1\"` — делает элемент фокусируемым ТОЛЬКО программно через `element.focus()`, но исключает из обхода клавишей Tab.\n- `tabindex=\"1..N\"` (положительные числа) — СТРОГИЙ АНТИПАТТЕРН! Ломает естественный порядок навигации для людей с клавиатурой.\n\n5. `hidden` (булев атрибут) — скрывает элемент от пользователя и скринридеров (эквивалентен `display: none`).\n\n6. `title` — всплывающая подсказка при наведении мыши (НЕ используйте как замену доступному тексту, так как недоступен на тач-устройствах).\n\n7. `contenteditable=\"true\"` — превращает любой элемент в поле редактируемого текста.\n\n8. `inputmode` — переключает виртуальную клавиатуру на смартфонах (`numeric`, `decimal`, `tel`, `email`, `url`).",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Пример использования глобальных атрибутов -->\n<div\n  id=\"card-profile-101\"\n  class=\"user-card user-card--active\"\n  data-user-id=\"101\"\n  data-status=\"online\"\n  data-points=\"450\"\n  tabindex=\"0\"\n  role=\"region\"\n  aria-label=\"Карточка пользователя\"\n>\n  <h3>Алексей Смирнов</h3>\n  <p>Статус: В сети</p>\n</div>\n\n<!-- Поле только для чисел без стрелок спиннера -->\n<input\n  type=\"text\"\n  inputmode=\"numeric\"\n  pattern=\"[0-9]*\"\n  placeholder=\"Код из СМС\"\n/>",
+            "title": "Глобальные атрибуты data-*, tabindex и inputmode",
+            "explanation": "data-* сохраняет метаданные для JS. tabindex='0' делает карточку доступной для клавиатурного фокуса. inputmode='numeric' открывает цифровую клавиатуру на мобильных телефонах."
           }
         }
       ],
       "seniorTips": [
-        "Всегда проверяйте наличие `<meta name=\"viewport\">` — без него мобильные браузеры отобразят сайт в масштабе 980px как уменьшенную копию десктопа.",
-        "Никогда не дублируйте `id` на одной странице — валидатор выдаст ошибку, а `document.getElementById` найдет только первый элемент."
+        "Всегда ставьте `<meta charset=\"UTF-8\">` первой строкой внутри `<head>`, до тегов `<title>` и скриптов. Это исключает перепарсинг документа браузером.",
+        "В атрибуте `og:image` всегда указывайте абсолютный URL с протоколом (`https://...`). Относительные пути (`/og.png`) не распознаются ботами Telegram и VK.",
+        "Никогда не используйте положительный `tabindex` (`tabindex=\"1\"`, `tabindex=\"5\"`). Если нужно настроить порядок фокуса — измените физический порядок элементов в DOM.",
+        "Используйте `inputmode=\"numeric\"` в комбинации с `pattern=\"[0-9]*\"` для полей ввода номеров банковских карт и СМС-кодов — это даёт идеальный UX на смартфонах без багов числового `type=\"number\"`."
       ],
       "commonMistakes": [
         {
-          "bad": "<div id=\"btn\"></div>\n<div id=\"btn\"></div> <!-- Дублирование id -->",
-          "good": "<button class=\"btn\"></button>\n<button class=\"btn\"></button>",
-          "reason": "ID обязан быть уникальным в пределах всей страницы. Для множественных элементов используйте class."
+          "bad": "<!-- Отсутствие DOCTYPE -->\n<html>\n  <head><title>Сайт</title></head>\n  <body>...</body>\n</html>",
+          "good": "<!DOCTYPE html>\n<html lang=\"ru\">\n  <head><title>Сайт</title></head>\n  <body>...</body>\n</html>",
+          "reason": "Без <!DOCTYPE html> браузер переключается в Quirks Mode, где Box Model работает по устаревшим правилам IE5, а современные CSS-свойства ведут себя непредсказуемо."
+        },
+        {
+          "bad": "<meta property=\"og:image\" content=\"/images/preview.jpg\" />",
+          "good": "<meta property=\"og:image\" content=\"https://academy.dev/images/preview.jpg\" />",
+          "reason": "Относительный путь в og:image приводит к тому, что краулеры мессенджеров (Telegram, VK, WhatsApp) не могут загрузить картинку и карточка ссылки отображается без баннера."
+        },
+        {
+          "bad": "<button tabindex=\"3\">Кнопка 1</button>\n<button tabindex=\"1\">Кнопка 2</button>",
+          "good": "<button>Кнопка 1</button>\n<button>Кнопка 2</button>",
+          "reason": "Положительный tabindex ломает естественный порядок клавиатурного фокуса страницы, создавая катастрофический пользовательский опыт для незрячих пользователей и управления с клавиатуры."
         }
       ],
       "keyTakeaways": [
-        "DOCTYPE html переключает браузер в стандартизированный режим рендеринга.",
-        "Тег <head> содержит метаданные, <title> и ссылки на ресурсы; <body> — видимую часть.",
-        "Атрибуты class и data-* — основные инструменты взаимодействия с CSS и JS."
+        "`<!DOCTYPE html>` переводит браузер в Standards Mode, гарантируя строгое следование спецификациям W3C.",
+        "`<html lang=\"ru\">` необходим для правильного синтеза речи скринридерами, корректного переноса слов и поисковой оптимизации.",
+        "`<meta name=\"viewport\">` предотвращает сжатие верстки на мобильных экранах, устанавливая масштаб 1:1 по ширине устройства.",
+        "Протокол Open Graph (`og:title`, `og:description`, `og:image`) формирует привлекательные визуальные карточки ссылок в соцсетях и мессенджерах.",
+        "Глобальные атрибуты (`id`, `class`, `data-*`, `tabindex=\"0\"/\"-1\"`, `hidden`, `inputmode`) работают на любых элементах HTML5."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"user-profile\" data-user-role=\"admin\">\n  <h2 id=\"profile-name\">Александр Петров</h2>\n  <p class=\"badge\">Администратор</p>\n  <p>Email: alex@example.com</p>\n</div>",
-      "initialCss": ".user-profile {\n  padding: 20px;\n  background: #ffffff;\n  border-radius: 12px;\n  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);\n}\n.badge {\n  display: inline-block;\n  background: #dbeafe;\n  color: #1d4ed8;\n  padding: 4px 8px;\n  border-radius: 4px;\n  font-size: 12px;\n  font-weight: 600;\n}",
-      "initialJs": "const profile = document.querySelector('.user-profile');\nconsole.log('Роль пользователя:', profile.dataset.userRole);",
-      "instructions": "Изучите, как в консоли выводится значение data-атрибута dataset.userRole."
+      "initialHtml": "<!-- Изучите работу dataset и inputmode: -->\n<div class=\"user-item\"\n     data-id=\"usr_99\"\n     data-role=\"Senior\"\n     data-salary=\"250000\"\n     tabindex=\"0\">\n  <span>Нажмите на карточку или используйте Tab + Enter</span>\n</div>\n\n<div id=\"console-log\"></div>",
+      "initialCss": ".user-item {\n  padding: 16px 20px;\n  background: #0d1117;\n  border: 1px solid #30363d;\n  border-radius: 8px;\n  color: #2dff8a;\n  font-family: monospace;\n  cursor: pointer;\n  transition: all 0.2s ease;\n}\n.user-item:focus-visible {\n  outline: 2px solid #29e7ff;\n  outline-offset: 3px;\n}\n#console-log {\n  margin-top: 16px;\n  padding: 12px;\n  background: #03060a;\n  border: 1px dashed #2dff8a;\n  color: #e6edf3;\n  font-family: monospace;\n  white-space: pre-wrap;\n}",
+      "initialJs": "const card = document.querySelector('.user-item');\nconst log = document.getElementById('console-log');\n\ncard.addEventListener('click', () => {\n  log.textContent = 'Данные из dataset:\\n' +\n    JSON.stringify(card.dataset, null, 2);\n});\n\ncard.addEventListener('keydown', (e) => {\n  if (e.key === 'Enter' || e.key === ' ') {\n    card.click();\n  }\n});",
+      "instructions": "Практика с DOM и атрибутами:\n1. Кликните по карточке или перейдите на неё клавишей Tab и нажмите Enter\n2. Добавьте к карточке атрибуты data-team=\"Platform\" и data-skills=\"HTML,CSS,JS\"\n3. Проверьте, как обновился объект dataset в окне вывода"
     },
     "task": {
-      "title": "Создание базового каркаса страницы",
-      "scenario": "Напишите полный валидный скелет HTML5-документа с заголовком вкладки, кодировкой UTF-8 и метатегом viewport.",
+      "title": "Комплексная настройка метаданных и Open Graph для портала",
+      "scenario": "Вы запускаете новый образовательный портал. Маркетинговый отдел требует, чтобы при шеринге ссылки в Telegram и VK появлялся фирменный баннер с логотипом, заголовок и описание курса. SEO-специалист требует канонические ссылки и идеальный мобильный viewport, а отдел доступности — корректный тег языка и фавиконки.",
       "criteria": [
-        "Указан <!DOCTYPE html>",
-        "Тег <html> содержит lang=\"ru\"",
-        "В <head> присутствуют meta charset, viewport и title",
-        "В <body> размещен заголовок первого уровня <h1>"
+        "Корректный <!DOCTYPE html> и тег <html> с атрибутом lang='ru'",
+        "Секция <head> содержит charset='UTF-8' и адаптивный meta viewport",
+        "Присутствуют метатеги title (до 60 символов) и meta description (до 160 символов)",
+        "Полный набор Open Graph тегов: og:title, og:description, og:image (абсолютный URL!), og:url, og:type, og:site_name",
+        "Twitter Card метатег summary_large_image",
+        "Канонический тег <link rel='canonical'>",
+        "Фавиконки для браузера и Apple touch icon"
       ],
       "starterCode": {
-        "html": "<!-- Напишите полный HTML5 скелет -->\n",
-        "css": "/* Стили задания */\n"
+        "html": "<!DOCTYPE html>\n<!-- Настройте метаданные страницы -->\n<html>\n<head>\n</head>\n<body>\n  <h1>Frontend Academy</h1>\n</body>\n</html>"
       },
       "hints": [
-        "Используйте <!DOCTYPE html>, <html>, <head>, <meta charset=\"UTF-8\">, <meta name=\"viewport\"...>, <title>, <body>."
+        "Всегда указывайте абсолютный протокол в og:image: https://academy.dev/og.jpg",
+        "Добавьте <meta name='viewport' content='width=device-width, initial-scale=1.0'>",
+        "Используйте <link rel='canonical' href='https://academy.dev/course'>"
       ],
       "solution": {
-        "html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n  <title>Моя первая страница</title>\n</head>\n<body>\n  <h1>Добро пожаловать!</h1>\n  <p>Страница сверстана по стандартам HTML5.</p>\n</body>\n</html>",
-        "css": "/* Решение */\n",
-        "explanation": "Идеальный каркас со всеми обязательными стандартами W3C."
+        "html": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>Frontend Intern Academy — Онлайн-курс с нуля</title>\n  <meta\n    name=\"description\"\n    content=\"Интерактивная платформа подготовки frontend-разработчиков: HTML5, CSS3, JavaScript и архитектура проекта.\"\n  />\n  <link rel=\"canonical\" href=\"https://intern-academy.dev/\" />\n  \n  <!-- Open Graph -->\n  <meta property=\"og:type\" content=\"website\" />\n  <meta property=\"og:site_name\" content=\"Frontend Academy\" />\n  <meta property=\"og:url\" content=\"https://intern-academy.dev/\" />\n  <meta property=\"og:title\" content=\"Frontend Intern Academy — Онлайн-курс\" />\n  <meta\n    property=\"og:description\"\n    content=\"Интерактивная платформа подготовки frontend-разработчиков.\"\n  />\n  <meta property=\"og:image\" content=\"https://intern-academy.dev/images/og-banner.jpg\" />\n  <meta property=\"og:image:width\" content=\"1200\" />\n  <meta property=\"og:image:height\" content=\"630\" />\n\n  <!-- Twitter Cards -->\n  <meta name=\"twitter:card\" content=\"summary_large_image\" />\n  <meta name=\"twitter:image\" content=\"https://intern-academy.dev/images/og-banner.jpg\" />\n\n  <!-- Icons -->\n  <link rel=\"icon\" href=\"/favicon.ico\" sizes=\"any\" />\n  <link rel=\"icon\" href=\"/icon.svg\" type=\"image/svg+xml\" />\n  <link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\" />\n</head>\n<body>\n  <h1>Frontend Academy</h1>\n</body>\n</html>",
+        "explanation": "Секция head полностью укомплектована по мировым стандартам: содержит DOCTYPE, lang, viewport, SEO-описание, канонический URL, абсолютные ссылки Open Graph и фавиконки для всех типов устройств."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h4-q1",
-          "question": "Зачем в начале документа указывается <!DOCTYPE html>?",
+          "id": "html4-q1",
+          "question": "Что произойдёт с браузерным рендерингом, если в самом начале HTML-файла забыть объявить <!DOCTYPE html>?",
           "options": [
-            "Для подключения стилей",
-            "Чтобы переключить браузер в современный режим рендеринга (Standards Mode)",
-            "Для загрузки картинок",
-            "Для отправки на сервер"
+            "Страница вообще не загрузится и покажет белый экран",
+            "Браузер переключится в Quirks Mode (режим совместимости), где Box Model и шрифты работают по устаревшим правилам IE5",
+            "Браузер автоматически исправит ошибку без каких-либо последствий",
+            "Скрипты JavaScript перестанут выполняться"
           ],
           "correctIndex": 1,
-          "explanation": "DOCTYPE объявляет версию HTML5 и предотвращает Quirks Mode."
+          "explanation": "Без DOCTYPE браузер активирует Quirks Mode для обратной совместимости с сайтами 1990-х годов. В этом режиме ширина и высота элементов вычисляются по старой блочной модели IE5, а многие современные CSS-правила игнорируются."
         },
         {
-          "id": "h4-q2",
-          "question": "Какой атрибут позволяет безопасно хранить пользовательские данные в теге для JS?",
+          "id": "html4-q2",
+          "question": "Почему в метатеге <meta property='og:image' content='...'> необходимо указывать строго абсолютный URL?",
           "options": [
-            "href",
-            "src",
-            "data-*",
-            "style"
+            "Абсолютный URL загружается быстрее",
+            "Краулеры и парсеры соцсетей/мессенджеров (Telegram, VK, Discord) работают вне контекста страницы и не умеют резолвить относительные пути",
+            "Относительные пути запрещены стандартом W3C",
+            "Для защиты от взлома"
           ],
-          "correctIndex": 2,
-          "explanation": "Префикс data-* предназначен специально для хранения кастомных данных в DOM."
+          "correctIndex": 1,
+          "explanation": "Боты мессенджеров и соцсетей скачивают разметку для построения сниппета и требуют полный абсолютный URL (с https://), чтобы скачать изображение баннера напрямую со стороннего сервера."
+        },
+        {
+          "id": "html4-q3",
+          "question": "Как в JavaScript получить значение пользовательского data-атрибута: <div id='card' data-user-role='admin'>?",
+          "options": [
+            "card.dataset.userRole",
+            "card.data.user_role",
+            "card.getAttributeData('role')",
+            "card.userRole"
+          ],
+          "correctIndex": 0,
+          "explanation": "HTML5 DataSet API автоматически конвертирует дефис-нотацию data-* в camelCase: 'data-user-role' становится свойством 'element.dataset.userRole'."
+        },
+        {
+          "id": "html4-q4",
+          "question": "Что делает атрибут tabindex='-1' на элементе?",
+          "options": [
+            "Делает элемент невидимым",
+            "Исключает элемент из последовательного обхода клавишей Tab, но позволяет фокусировать его программно через JS: element.focus()",
+            "Перемещает элемент в конец страницы",
+            "Блокирует клики мышью"
+          ],
+          "correctIndex": 1,
+          "explanation": "tabindex='-1' удаляет элемент из естественного порядка навигации клавиатуры (клавиша Tab его пропускает), однако позволяет установить на него фокус из кода через element.focus() (идеально для открывающихся модалок и сообщений об ошибках)."
+        },
+        {
+          "id": "html4-q5",
+          "question": "Какое значение тега <meta name='viewport'> предотвращает нежелательное автоматическое уменьшение масштаба страницы на смартфонах?",
+          "options": [
+            "content='scale=none'",
+            "content='width=device-width, initial-scale=1.0'",
+            "content='responsive=true'",
+            "content='mobile-first'"
+          ],
+          "correctIndex": 1,
+          "explanation": "Директива 'width=device-width, initial-scale=1.0' указывает мобильному браузеру установить ширину области просмотра равной физической ширине экрана устройства и установить базовый масштаб 1:1."
         }
       ]
     }

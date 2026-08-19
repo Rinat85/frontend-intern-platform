@@ -594,83 +594,191 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-4",
     "moduleId": "javascript",
     "level": 4,
-    "title": "Функции: Declaration, Expression, Arrow",
-    "subtitle": "Стрелочные функции, параметры по умолчанию, rest-параметры и чистые функции",
-    "description": "Фундамент функционального программирования: Function Declaration vs Expression, стрелочные функции () => {}, лексический this, rest ...args и чистые функции.",
-    "estimatedMinutes": 35,
+    "title": "Функции: Pure Functions, HOF и функциональный подход",
+    "subtitle": "Параметры по умолчанию, Rest/Spread, Pure Functions, Side Effects, HOF и композиция",
+    "description": "Освойте функциональную парадигму в JavaScript: принципы чистых функций (Pure Functions) и иммутабельности, работу с побочными эффектами (Side Effects), функции высшего порядка (map/filter/reduce, compose, pipe) и продвинутую работу с аргументами.",
+    "estimatedMinutes": 60,
     "difficulty": "beginner",
     "tags": [
-      "JavaScript",
-      "Functions",
-      "ArrowFunctions"
+      "functions",
+      "pure-functions",
+      "side-effects",
+      "hof",
+      "functional-programming",
+      "immutability",
+      "rest-spread"
     ],
     "theory": {
-      "overview": "Функции — главные строительные блоки программ в JavaScript.",
+      "overview": "В JavaScript функции — это объекты первого класса (First-Class Citizens). Это означает, что функции можно присваивать переменным, сохранять в массивах и объектах, передавать как аргументы в другие функции и возвращать из функций.\n\nФункциональный подход (Functional Programming) лежит в основе всей современной экосистемы React (хуки, чистые компоненты, useMemo/useCallback), Redux (редьюсеры — чистые функции), RxJS и Node.js middleware. В этом уроке мы глубоко разберём разницу между чистыми функциями и побочными эффектами, научимся проектировать функции высшего порядка (HOF) и применять продвинутые техники передачи аргументов.",
       "sections": [
         {
-          "title": "Стрелочные функции",
-          "content": "- `const sum = (a, b) => a + b;`\n- Не имеют собственного `this` (берут из внешнего контекста).\n- Параметры по умолчанию: `(name = 'Гость') => ...`\n- Rest: `(...args) => ...`",
+          "title": "Анатомия функции и First-Class Citizens",
+          "content": "Функция в JavaScript — это вызываемый объект (Callable Object), инкапсулирующий блок инструкций.\n\nКлючевые концепции:\n\n1. First-Class Functions (Функции первого класса):\n- Присваивание переменной: `const sum = (a, b) => a + b;`\n- Передача аргументом (Callback): `[1, 2, 3].map(x => x * 2)`\n- Возврат из другой функции (Фабрика/Замыкание): `const createMultiplier = (x) => (y) => x * y;`\n- Хранение в структурах данных: `const actions = [fn1, fn2, fn3];`\n\n2. Parameters vs Arguments:\n- Параметры (Parameters) — имена переменных, указанные в объявлении функции (`function greet(name, role) {}`).\n- Аргументы (Arguments) — реальные значения, переданные функции при вызове (`greet('Иван', 'Senior')`).\n\n3. Return Statement:\n- Инструкция `return` немедленно завершает выполнение функции и возвращает значение.\n- Если `return` не указан или пуст — функция неявно возвращает `undefined`.\n- Автоматическая вставка точки с запятой (ASI): никогда не переносить возвращаемое выражение на новую строку после `return` без круглых скобок `return (`!",
           "codeExample": {
             "language": "javascript",
-            "title": "Стрелочная функция",
-            "code": "const multiply = (x, y = 2) => x * y;\nconsole.log(multiply(5)); // 10",
-            "explanation": "Краткий синтаксис стрелочной функции."
+            "code": "// Функции как объекты первого класса\n\n// 1. Массив функций-трансформеров строки\nconst pipeline = [\n  (s) => s.trim(),\n  (s) => s.toLowerCase(),\n  (s) => s.replace(/\\s+/g, '-')\n];\n\n// 2. Применение цепочки через reduce\nconst slugify = (input) => pipeline.reduce((text, fn) => fn(text), input);\nconsole.log(slugify('  Урок 4: Чистые Функции в JS  '));\n// Результат: 'урок-4:-чистые-функции-в-js'",
+            "title": "Пайплайн обработки данных на массиве функций",
+            "explanation": "Функции хранятся в массиве pipeline и последовательно применяются через reduce. Это классический пример First-Class Functions."
+          }
+        },
+        {
+          "title": "Чистые функции (Pure Functions) и побочные эффекты (Side Effects)",
+          "content": "Чистая функция (Pure Function) — это функция, удовлетворяющая двум строгим математическим критериям:\n\n1. Детерминированность (Determinism):\nПри одинаковых входных аргументах функция ВСЕГДА возвращает одинаковый результат. Она не зависит от внешнего состояния, системного времени `Date.now()`, случайных чисел `Math.random()` или глобальных переменных.\n\n2. Отсутствие побочных эффектов (No Side Effects):\nФункция не изменяет внешнее окружение при выполнении:\n- НЕ мутирует переданные аргументы (соблюдает Immutability)\n- НЕ изменяет глобальные переменные\n- НЕ делает сетевых запросов (`fetch`, `WebSocket`)\n- НЕ мутирует DOM-дерево и не пишет в `localStorage`/куки\n- НЕ вызывает `console.log()` (технически лог в консоль — это I/O Side Effect!)\n\nПочему чистые функции критически важны:\n- 100% тестируемость: чтобы протестировать чистую функцию, не нужны моки и подготовка окружения (просто `expect(fn(a)).toBe(b)`).\n- Предсказуемость и защита от багов «эффекта бабочки».\n- Мемоизация и оптимизация: результат можно безопасно кэшировать по аргументам.\n- Параллелизм и React Concurrent Mode: чистые функции можно вызывать повторно без риска сломать состояние.",
+          "image": {
+            "src": "/images/lessons/js-pure-functions-hof.svg",
+            "alt": "Сравнение Pure Functions и Higher-Order Functions HOF",
+            "caption": "Чистые функции детерминированы и не имеют побочных эффектов. HOF принимают и возвращают функции"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// ❌ Нечистая функция (мутирует аргумент и зависит от внешнего state)\nlet bonus = 500;\nfunction calculateSalaryBad(user, baseRate) {\n  user.lastCalculated = Date.now(); // ❌ Side Effect: мутация аргумента\n  return baseRate + bonus;          // ❌ Зависимость от глобальной переменной\n}\n\n// ✅ Чистая функция (Pure Function)\nfunction calculateSalaryPure(baseRate, bonusAmount) {\n  return baseRate + bonusAmount;\n}\n\n// Добавление элемента без мутации исходного массива:\nconst addItem = (cart, newItem) => [...cart, { ...newItem, addedAt: '2026-08-19' }];",
+            "title": "Чистая функция vs функция с побочными эффектами",
+            "explanation": "calculateSalaryPure зависит исключительно от переданных аргументов и ничего не меняет вне своей области видимости. addItem возвращает новый массив через spread-оператор."
+          }
+        },
+        {
+          "title": "Функции высшего порядка (Higher-Order Functions / HOF)",
+          "content": "Функция высшего порядка (HOF) — это функция, которая принимает одну или несколько функций в качестве аргументов ИЛИ возвращает новую функцию.\n\nВстроенные HOF в JavaScript:\n- `Array.prototype.map(fn)` — трансформация элементов\n- `Array.prototype.filter(fn)` — отбор элементов по предикату\n- `Array.prototype.reduce(fn, init)` — агрегация массива в единое значение\n- `Array.prototype.find()`, `some()`, `every()`, `sort()`\n\nСоздание собственных HOF:\n1. Паттерн Декоратора (Decorator / Wrapper):\nОборачивает целевую функцию, добавляя логирование, замер времени или обработку ошибок.\n\n2. Мемоизация (Memoization):\nКэширование результатов вычислений функции в замыкании.\n\n3. Каррирование (Currying) и частичное применение (Partial Application):\nТрансформация функции `f(a, b, c)` в цепочку `f(a)(b)(c)`.\n\n4. Debounce и Throttle:\nHOF для ограничения частоты вызова функций при скролле, ресайзе окна или вводе текста в поисковую строку.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. HOF-декоратор для безопасного выполнения с fallback:\nfunction withErrorHandling(fn, fallbackValue = null) {\n  return (...args) => {\n    try {\n      return fn(...args);\n    } catch (error) {\n      console.error(`Ошибка при выполнении ${fn.name}:`, error.message);\n      return fallbackValue;\n    };\n  };\n}\n\nconst parseJSON = withErrorHandling(JSON.parse, {});\nconsole.log(parseJSON('{\"valid\": true}')); // { valid: true }\nconsole.log(parseJSON('НЕВАЛИДНЫЙ JSON')); // {} (без падения приложения!)\n\n// 2. Функциональная композиция (pipe: слева направо)\nconst pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);\nconst double = (x) => x * 2;\nconst addTen = (x) => x + 10;\nconst format = (x) => `$${x}`;\n\nconst calculate = pipe(double, addTen, format);\nconsole.log(calculate(5)); // 5 * 2 = 10 -> 10 + 10 = 20 -> '$20'",
+            "title": "Создание HOF: декоратор обработки ошибок и утилита pipe",
+            "explanation": "withErrorHandling оборачивает опасную функцию, предотвращая сбои. pipe объединяет независимые чистые функции в конвейер вычислений."
+          }
+        },
+        {
+          "title": "Продвинутая работа с аргументами: Rest, Defaults и Options Pattern",
+          "content": "Современный JavaScript предоставляет мощные механизмы для гибкой передачи параметров:\n\n1. Параметры по умолчанию (Default Parameters):\n- Вычисляются в момент вызова (runtime evaluation).\n- Могут ссылаться на предыдущие параметры функции: `function createUser(name, nickname = name.toLowerCase()) {}`.\n- Срабатывают ТОЛЬКО при значении `undefined` (значения `null`, `false`, `0`, `''` НЕ вызывают замену на дефолт!).\n\n2. Rest-параметры (`...args`):\n- Собирают произвольное число оставшихся аргументов в настоящий массив `Array`.\n- Заменили устаревший объект `arguments` (который не работал в стрелочных функциях и не был массивом).\n\n3. Паттерн Options Object (Именованные параметры через деструктуризацию):\nКогда функция принимает более 2–3 параметров, передача их позиционно (`createModal('Вход', true, false, 300, 'red', null)`) приводит к ошибкам. Паттерн Options Object передаёт один объект конфигурации с деструктуризацией и дефолтными значениями:\n`function createModal({ title, isOpen = false, width = 400, theme = 'dark' } = {}) {}`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Паттерн Options Object с вложенными дефолтами\nfunction fetchUserData({\n  endpoint,\n  method = 'GET',\n  headers = {},\n  timeout = 5000,\n  retries = 3\n} = {}) {\n  if (!endpoint) throw new Error('Endpoint обязателен!');\n  \n  return {\n    url: `https://api.dev${endpoint}`,\n    config: { method, headers: { 'Content-Type': 'application/json', ...headers } },\n    timeout,\n    retries\n  };\n}\n\n// Вызов: параметры именованы, порядок не имеет значения!\nconst request = fetchUserData({\n  endpoint: '/users/42',\n  retries: 5,\n  headers: { 'Authorization': 'Bearer token123' }\n});\nconsole.log(request);",
+            "title": "Паттерн Options Object для масштабируемых функций",
+            "explanation": "Именованные параметры через объект избавляют от необходимости помнить порядок аргументов и передавать null/undefined для пропуска промежуточных параметров."
           }
         }
       ],
       "seniorTips": [
-        "Пишите чистые функции (Pure Functions) без побочных эффектов."
+        "Стремитесь к тому, чтобы 80% вашей кодовой базы составляли Чистые Функции (Pure Functions). Это делает приложение масштабируемым и тривиальным для unit-тестирования.",
+        "Для функций с 3+ параметрами ВСЕГДА используйте паттерн Options Object (`function fn({ a, b, c } = {})`). Это исключает ошибки порядка аргументов на код-ревью.",
+        "Помните: параметры по умолчанию срабатывают ТОЛЬКО при значении `undefined`. Если передать `null`, дефолт НЕ применится!",
+        "Используйте `Object.freeze()` в тестах для гарантии того, что ваша чистая функция случайно не мутирует входные объекты-аргументы."
       ],
       "commonMistakes": [
         {
-          "bad": "function add(a, b) { window.total = a + b; }",
-          "good": "const add = (a, b) => a + b;",
-          "reason": "Чистые функции легко тестировать."
+          "bad": "function addTag(item, tag) {\n  item.tags.push(tag); // ❌ Мутация входного объекта!\n  return item;\n}",
+          "good": "function addTag(item, tag) {\n  return {\n    ...item,\n    tags: [...(item.tags || []), tag]\n  };\n}",
+          "reason": "Мутация аргументов (Side Effect) приводит к скрытым багам в React/Redux, когда интерфейс не обновляется из-за того, что ссылка на объект осталась прежней."
+        },
+        {
+          "bad": "function connect(url, port = 8080) {}\nconnect('http://localhost', null); // port останется null!",
+          "good": "function connect(url, port) {\n  const finalPort = port ?? 8080;\n}",
+          "reason": "Дефолтные параметры в сигнатуре функции срабатывают только на undefined. Передача null перезаписывает дефолт значением null."
+        },
+        {
+          "bad": "// Функция с 6 позиционными аргументами\ninitSlider(true, 500, false, 3, true, 'slide');",
+          "good": "initSlider({\n  autoplay: true,\n  speed: 500,\n  slidesToShow: 3,\n  effect: 'slide'\n});",
+          "reason": "Позиционные булевы аргументы (Boolean Trap) делают код абсолютно нечитаемым. Невозможно понять, что значит true, false, 3 без перехода к объявлению функции."
         }
       ],
       "keyTakeaways": [
-        "Стрелочные функции не имеют своего this.",
-        "Rest собирает аргументы в массив."
+        "Функции в JS являются First-Class Citizens: их можно сохранять в переменные, передавать как аргументы и возвращать из функций.",
+        "Чистая функция (Pure Function) строго детерминирована и не имеет побочных эффектов (Side Effects) — основа стабильности React и Redux.",
+        "Функции высшего порядка (HOF) принимают функции как аргументы или возвращают их (map, filter, reduce, pipe, debounce).",
+        "Паттерн Options Object (`function fn({ a, b = 1 } = {})`) обеспечивает именованные аргументы и защищает от ошибок сигнатуры.",
+        "Параметры по умолчанию активируются только при значении `undefined`."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"fn-demo\"><h3>Калькулятор</h3><p>5 * 8 = <strong id=\"fn-res\"></strong></p></div>",
-      "initialCss": ".fn-demo { padding: 20px; background: white; border-radius: 12px; }\n#fn-res { color: #4f46e5; font-size: 20px; }",
-      "initialJs": "const multiply = (a, b) => a * b;\ndocument.getElementById('fn-res').textContent = multiply(5, 8);",
-      "instructions": "Посмотрите вычисление результата."
+      "initialHtml": "<div id=\"js-output\"></div>",
+      "initialCss": "#js-output {\n  font-family: 'JetBrains Mono', monospace;\n  background: #0a0e13;\n  color: #2dff8a;\n  padding: 16px;\n  border-radius: 8px;\n  border: 1px solid #30363d;\n  min-height: 220px;\n  white-space: pre-wrap;\n}",
+      "initialJs": "const out = document.getElementById('js-output');\nconst log = (text) => out.textContent += text + '\\n';\n\n// Задание: функциональный конвейер (pipe)\nconst pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);\n\nconst cleanString = (s) => s.trim();\nconst capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();\nconst addGreeting = (name) => `Привет, ${name}!`;\n\nconst greetUser = pipe(cleanString, capitalize, addGreeting);\n\nlog(greetUser('   иВАН   ')); // 'Привет, Иван!'\nlog(greetUser('  аЛЕКСЕЙ ')); // 'Привет, Алексей!'",
+      "instructions": "Практика с чистыми функциями и HOF:\n1. Запустите код и посмотрите на результат работы утилиты pipe\n2. Напишите чистую функцию calculateDiscount(price, percent), возвращающую число\n3. Напишите HOF withCurrency(fn, currency = '₽'), которая форматирует результат в строку '1 000 ₽'"
     },
     "task": {
-      "title": "Функция форматирования цены",
-      "scenario": "Напишите стрелочную функцию formatPrice(amount, currency = '₽').",
+      "title": "Разработка функционального ядра обработки данных каталога",
+      "scenario": "Вы разрабатываете модуль фильтрации, сортировки и форматирования каталога товаров интернет-магазина. Модуль должен быть построен строго на чистых функциях (Pure Functions), иммутабельности и композиции HOF-функций без мутации исходного массива товаров.",
       "criteria": [
-        "Создана стрелочная функция с параметром по умолчанию"
+        "Функция createFilter({ minPrice, maxPrice, inStockOnly, category }) возвращает чистую функцию-предикат",
+        "Функция createSorter(field, order = 'asc') возвращает функцию сравнения для Array.prototype.sort",
+        "Утилита pipe(...fns) объединяет функции трансформации в единый конвейер",
+        "Все операции должны быть иммутабельными (исходный массив товаров не мутируется)",
+        "Применить паттерн Options Object для передачи параметров конфигурации",
+        "Покрыть код проверками на пустые массивы и некорректные параметры"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Исходный массив товаров\nconst products = [\n  { id: 1, title: 'Клавиатура', price: 8000, inStock: true, category: 'tech' },\n  { id: 2, title: 'Мышь', price: 4000, inStock: false, category: 'tech' },\n  { id: 3, title: 'Книга CSS', price: 1500, inStock: true, category: 'books' }\n];\n\n// Напишите функциональные утилиты\nfunction processCatalog(items, filterOptions, sortOptions) {\n  // Ваш чистый код\n}"
       },
       "hints": [
-        "Используйте современные стандарты ES6+."
+        "Для сортировки без мутации создайте копию: [...items].sort()",
+        "Используйте Array.prototype.filter() с предикатом, сгенерированным через createFilter",
+        "Используйте Options Object с дефолтными значениями: function processCatalog(items = [], filterOpts = {}, sortOpts = {})"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const formatPrice = (amount, currency = '₽') => `${amount.toLocaleString('ru-RU')} ${currency}`;\nconsole.log(formatPrice(15000)); // '15 000 ₽'",
-        "explanation": "Стрелочная функция с параметром по умолчанию."
+        "js": "const pipe = (...fns) => (x) => fns.reduce((v, f) => f(v), x);\n\nconst createFilter = ({\n  minPrice = 0,\n  maxPrice = Infinity,\n  inStockOnly = false,\n  category = null\n} = {}) => (item) => {\n  if (!item || typeof item !== 'object') return false;\n  if (item.price < minPrice || item.price > maxPrice) return false;\n  if (inStockOnly && !item.inStock) return false;\n  if (category && item.category !== category) return false;\n  return true;\n};\n\nconst createSorter = (field = 'id', order = 'asc') => (a, b) => {\n  const valA = a[field] ?? 0;\n  const valB = b[field] ?? 0;\n  if (valA === valB) return 0;\n  const diff = valA > valB ? 1 : -1;\n  return order === 'desc' ? -diff : diff;\n};\n\nfunction processCatalog(items = [], filterOpts = {}, sortOpts = {}) {\n  const filterFn = createFilter(filterOpts);\n  const sortFn = createSorter(sortOpts.field, sortOpts.order);\n\n  return [...items]\n    .filter(filterFn)\n    .sort(sortFn);\n}",
+        "explanation": "Код написан по канонам FP: createFilter и createSorter являются HOF-фабриками чистых функций. Исходный массив не мутируется благодаря спреду [...items].filter().sort()."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j4-q1",
-          "question": "Чем стрелочные функции отличаются от обычных?",
+          "id": "js4-q1",
+          "question": "Какая функция называется чистой (Pure Function)?",
           "options": [
-            "Работают медленнее",
-            "Не имеют собственного this",
-            "Не возвращают значения",
-            "Ничем"
+            "Функция, написанная без использования ключевого слова function",
+            "Функция, которая при одинаковых аргументах всегда возвращает одинаковый результат и не имеет побочных эффектов (Side Effects)",
+            "Функция, которая не содержит комментариев",
+            "Функция, выполняющаяся асинхронно"
           ],
           "correctIndex": 1,
-          "explanation": "Стрелочные функции не создают собственного контекста this."
+          "explanation": "Чистая функция удовлетворяет двум свойствам: детерминированность (одинаковый вход -> одинаковый выход) и отсутствие побочных эффектов (не мутирует аргументы, внешние переменные, DOM и хранилища)."
+        },
+        {
+          "id": "js4-q2",
+          "question": "Что произойдёт при вызове функции: function init(mode = 'dark') {}; init(null)?",
+          "options": [
+            "Переменная mode получит значение 'dark'",
+            "Переменная mode получит значение null",
+            "Произойдёт ошибка TypeError",
+            "Переменная mode станет undefined"
+          ],
+          "correctIndex": 1,
+          "explanation": "Параметры по умолчанию срабатывают ИСКЛЮЧИТЕЛЬНО при передаче undefined (или при отсутствии аргумента). Значение null считается явно переданным значением и перезаписывает дефолт."
+        },
+        {
+          "id": "js4-q3",
+          "question": "Что такое функция высшего порядка (Higher-Order Function / HOF)?",
+          "options": [
+            "Функция, которая выполняется быстрее всех остальных",
+            "Функция, которая принимает другие функции в качестве аргументов или возвращает новую функцию",
+            "Функция с наивысшим приоритетом в Call Stack",
+            "Функция, объявленная на глобальном уровне"
+          ],
+          "correctIndex": 1,
+          "explanation": "HOF (Higher-Order Function) — это функция, которая оперирует другими функциями: принимает их как колбэки (map, filter, reduce) или возвращает новые функции в результате своей работы (фабрики, замыкания, pipe)."
+        },
+        {
+          "id": "js4-q4",
+          "question": "В чём главное преимущество паттерна Options Object перед позиционными параметрами функции?",
+          "options": [
+            "Options Object уменьшает размер JavaScript-файла",
+            "Параметры передаются по именам свойств объекта, что исключает ошибки порядка аргументов и позволяет легко задавать дефолты",
+            "Options Object запрещает передачу строк",
+            "Функция автоматически становится чистой"
+          ],
+          "correctIndex": 1,
+          "explanation": "Options Object ({ a, b, c } = {}) даёт именованные параметры: разработчик видит, какое значение за что отвечает, может передавать их в любом порядке и не обязан передавать null для пропуска параметров."
+        },
+        {
+          "id": "js4-q5",
+          "question": "Что делает утилита композиции pipe(f, g, h)(x)?",
+          "options": [
+            "Вызывает функции параллельно",
+            "Последовательно передаёт результат работы функции слева направо: h(g(f(x)))",
+            "Удаляет дубликаты из массива",
+            "Останавливает выполнение программы"
+          ],
+          "correctIndex": 1,
+          "explanation": "Утилита pipe выстраивает конвейер функций слева направо: сначала выполняется f(x), затем результат передаётся в g, а затем результат g передаётся в h: h(g(f(x)))."
         }
       ]
     }

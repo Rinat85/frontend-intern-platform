@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="100%" height="100%" style="background:#0a0e13; font-family:'JetBrains Mono', Consolas, monospace;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <text x="500" y="45" fill="#2dff8a" font-size="24" font-weight="bold" text-anchor="middle" letter-spacing="1">Чистые функции &amp; Функции высшего порядка (HOF)</text>
+  <text x="500" y="72" fill="#8b949e" font-size="13" text-anchor="middle">Детерминированность, отсутствие Side Effects и функциональная композиция</text>
+
+  <!-- Left: Pure Function vs Impure Function -->
+  <g transform="translate(40, 95)" filter="url(#shadow)">
+    <rect width="440" height="435" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#161b22"/>
+    <text x="20" y="25" fill="#2dff8a" font-size="15" font-weight="bold">Pure Function (Чистая функция)</text>
+
+    <!-- Formula Box -->
+    <g transform="translate(20, 50)">
+      <rect width="400" height="115" rx="6" fill="#03060a" stroke="#30363d"/>
+      <text x="15" y="25" fill="#79c0ff" font-size="12">// 1. Детерминированность:</text>
+      <text x="15" y="48" fill="#e6edf3" font-size="11">sum(2, 3) ── всегда ──&gt; 5</text>
+      <text x="15" y="75" fill="#79c0ff" font-size="12">// 2. Без Side Effects (побочных эффектов):</text>
+      <text x="15" y="98" fill="#7ee787" font-size="11">Не мутирует аргументы, DOM, localStorage</text>
+    </g>
+
+    <!-- Code Sample Pure -->
+    <g transform="translate(20, 180)">
+      <rect width="400" height="105" rx="6" fill="#0d2b26" stroke="#2dff8a" stroke-width="1"/>
+      <text x="15" y="22" fill="#2dff8a" font-size="12" font-weight="bold">✔ Чистая функция (Immutability):</text>
+      <text x="15" y="45" fill="#ff7b72" font-size="11">const</text>
+      <text x="55" y="45" fill="#e6edf3" font-size="11"> addItem = (list, item) =&gt; [</text>
+      <text x="245" y="45" fill="#79c0ff" font-size="11">...list</text>
+      <text x="290" y="45" fill="#e6edf3" font-size="11">, item];</text>
+      <text x="15" y="68" fill="#8b949e" font-size="10">// Создает НОВЫЙ массив, старый не тронут</text>
+      <text x="15" y="90" fill="#7ee787" font-size="11">Легко тестировать: expect(addItem([1], 2)).toEqual([1, 2])</text>
+    </g>
+
+    <!-- Code Sample Impure -->
+    <g transform="translate(20, 300)">
+      <rect width="400" height="115" rx="6" fill="#1f1315" stroke="#f85149" stroke-width="1"/>
+      <text x="15" y="22" fill="#f85149" font-size="12" font-weight="bold">❌ Нечистая функция (Side Effect):</text>
+      <text x="15" y="45" fill="#ff7b72" font-size="11">function</text>
+      <text x="75" y="45" fill="#e6edf3" font-size="11"> addItemBad(list, item) {</text>
+      <text x="15" y="68" fill="#e6edf3" font-size="11">  list.push(item); </text>
+      <text x="135" y="68" fill="#f85149" font-size="10">// Мутирует внешний аргумент!</text>
+      <text x="15" y="90" fill="#e6edf3" font-size="11">  localStorage.setItem('cart', list); </text>
+      <text x="275" y="90" fill="#f85149" font-size="10">// Side Effect</text>
+      <text x="15" y="108" fill="#8b949e" font-size="10">}</text>
+    </g>
+  </g>
+
+  <!-- Right: Higher-Order Functions (HOF) -->
+  <g transform="translate(520, 95)" filter="url(#shadow)">
+    <rect width="440" height="435" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#161b22"/>
+    <text x="20" y="25" fill="#29e7ff" font-size="15" font-weight="bold">Higher-Order Functions (HOF)</text>
+
+    <g transform="translate(20, 50)">
+      <rect width="400" height="160" rx="6" fill="#03060a" stroke="#30363d"/>
+      <text x="15" y="24" fill="#29e7ff" font-size="12" font-weight="bold">1. Принимают функции как аргументы:</text>
+      <text x="15" y="48" fill="#a5d6ff" font-size="11">numbers.map(x =&gt; x * 2)</text>
+      <text x="15" y="70" fill="#a5d6ff" font-size="11">users.filter(user =&gt; user.isActive)</text>
+      <text x="15" y="92" fill="#a5d6ff" font-size="11">cart.reduce((sum, item) =&gt; sum + item.price, 0)</text>
+      <text x="15" y="120" fill="#7ee787" font-size="11">✔ Не мутируют исходные массивы</text>
+      <text x="15" y="142" fill="#7ee787" font-size="11">✔ Декларативный код без ручных индексов</text>
+    </g>
+
+    <g transform="translate(20, 225)">
+      <rect width="400" height="190" rx="6" fill="#03060a" stroke="#30363d"/>
+      <text x="15" y="24" fill="#29e7ff" font-size="12" font-weight="bold">2. Возвращают новые функции (Фабрики):</text>
+      <text x="15" y="48" fill="#ff7b72" font-size="11">const</text>
+      <text x="55" y="48" fill="#e6edf3" font-size="11"> withLogging = (fn) =&gt; (...args) =&gt; {</text>
+      <text x="15" y="70" fill="#79c0ff" font-size="11">  console.time('exec');</text>
+      <text x="15" y="92" fill="#ff7b72" font-size="11">  const</text>
+      <text x="55" y="92" fill="#e6edf3" font-size="11"> res = fn(...args);</text>
+      <text x="15" y="114" fill="#79c0ff" font-size="11">  console.timeEnd('exec');</text>
+      <text x="15" y="136" fill="#ff7b72" font-size="11">  return</text>
+      <text x="105" y="136" fill="#e6edf3" font-size="11"> res;</text>
+      <text x="15" y="158" fill="#8b949e" font-size="11">};</text>
+      <text x="15" y="180" fill="#7ee787" font-size="10">Паттерн Декоратора и Middleware в действии</text>
+    </g>
+  </g>
+</svg>

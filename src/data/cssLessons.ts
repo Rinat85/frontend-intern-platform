@@ -600,82 +600,191 @@ export const cssLessons: Lesson[] = [
     "moduleId": "css",
     "level": 4,
     "title": "Типы отображения: display",
-    "subtitle": "Block, inline, inline-block, none и visibility",
-    "description": "Поведение потока: отличия строчных и блочных элементов, создание inline-block кнопок, сокрытие через display: none vs visibility: hidden.",
-    "estimatedMinutes": 30,
+    "subtitle": "Block, Inline, Inline-Block, None vs Visibility, Contents и доступное скрытие",
+    "description": "Освойте свойство display в деталях: поведение блочных, строчных и строчно-блочных элементов, 4 способа скрытия элементов и их влияние на Layout/a11y, современные значения display: contents и display: flow-root.",
+    "estimatedMinutes": 55,
     "difficulty": "beginner",
     "tags": [
-      "CSS",
-      "Display",
-      "Layout"
+      "display",
+      "inline",
+      "block",
+      "inline-block",
+      "visibility",
+      "opacity",
+      "a11y",
+      "visually-hidden"
     ],
     "theory": {
-      "overview": "Свойство display определяет поведение элемента в потоке страницы и управление его размерами.",
+      "overview": "Свойство `display` — один из главных регуляторов рендеринга в CSS. Оно определяет, как элемент ведёт себя во внешнем контексте форматирования (начинается ли с новой строки, занимает ли всю ширину) и как организует пространство для своих дочерних элементов.\n\nВ этом уроке мы разберём классическую триаду `block` / `inline` / `inline-block`, решим проблему фантомных пробелов, сравним все техники скрытия элементов (`display: none` vs `visibility: hidden` vs `opacity: 0` vs класс `.visually-hidden` для скринридеров) и изучим современные значения `display: contents` и `display: flow-root`.",
       "sections": [
         {
-          "title": "Block vs Inline vs Inline-Block",
-          "content": "- `block`: на всю строку, принимает width/height.\n- `inline`: в строке по контенту, игнорирует width/height.\n- `inline-block`: в строке, но принимает width/height/padding.",
+          "title": "Block vs Inline vs Inline-Block: Полное сравнение",
+          "content": "Каждый HTML-элемент имеет значение `display` по умолчанию (User Agent Stylesheet).\n\n1. `display: block` (`<div>`, `<p>`, `<h1>`-`<h6>`, `<section>`, `<article>`, `<header>`):\n- Всегда начинается с НОВОЙ строки в макете.\n- По умолчанию занимает 100% доступной ширины родителя (`width: auto`).\n- Полноценно принимает свойства `width`, `height`, `min-width`, `max-width`.\n- Все 4 отступа (`margin-top/bottom/left/right`, `padding`) работают корректно и раздвигают соседние блоки.\n\n2. `display: inline` (`<span>`, `<a>`, `<strong>`, `<em>`, `<code>`):\n- Располагается В СТРОКЕ вместе с окружающим текстом, не переносясь на новую строку.\n- Ширина и высота определяются исключительно контентом — свойства `width` и `height` ИГНОРИРУЮТСЯ!\n- Вертикальные отступы (`margin-top`, `margin-bottom`) НЕ РАБОТАЮТ.\n- Вертикальный `padding` визуально рисует фон, но НЕ раздвигает строки текста (текст наползает друг на друга!).\n- Горизонтальные `margin-left/right` и `padding-left/right` работают нормально.\n\n3. `display: inline-block` (`<img>`, `<input>`, `<button>`, `<select>`):\n- «Гибридный» режим: располагается в строке (inline), но внутри ведёт себя как блок (block)!\n- Находится в строке с текстом без принудительного переноса.\n- Полноценно поддерживает `width`, `height`, вертикальные и горизонтальные `margin` и `padding`.\n\nПроблема «Фантомных пробелов» (Whitespace Bug) у `inline-block`:\nПоскольку `inline-block` элементы являются частью текста, перенос строки или пробел между тегами в HTML рендерится как реальный пробел шириной ~4px! Если выставить двум карточкам `width: 50%` — они не поместятся в одну строку и перенесутся. Решения: Flexbox (лучшее решение), удаление пробелов в HTML или `font-size: 0` на родителе.",
           "codeExample": {
             "language": "css",
-            "title": "inline-block",
-            "code": "a.btn { display: inline-block; padding: 10px 20px; background: #4f46e5; color: white; border-radius: 6px; }",
-            "explanation": "Кнопка в строке с отступами."
+            "code": "/* Сравнение типов отображения */\n\n/* 1. Блочный элемент — заголовок/секция */\n.block-element {\n  display: block;\n  width: 100%;\n  padding: 16px;\n  margin-bottom: 20px;\n}\n\n/* 2. Строчный элемент — подсветка ключевого слова */\n.inline-badge {\n  display: inline;\n  color: #2dff8a;\n  /* width, height, margin-top здесь игнорируются */\n}\n\n/* 3. Строчно-блочный элемент — интерактивная кнопка */\n.btn-action {\n  display: inline-block;\n  width: 160px;\n  height: 44px;\n  padding: 10px 20px;\n  margin-right: 12px;\n  text-align: center;\n  background: #29e7ff;\n}",
+            "title": "Block vs Inline vs Inline-Block в стилях",
+            "explanation": "Кнопка с display: inline-block остаётся в строке с другими кнопками, но чётко соблюдает заданные размеры width: 160px и высоту height: 44px."
+          }
+        },
+        {
+          "title": "4 способа скрыть элемент: display:none, visibility, opacity и a11y",
+          "content": "Во фронтенде скрытие элементов требуется постоянно: закрытие модалок, скрытие выпадающих меню, табы, лоадеры. Однако выбор неверного способа может разрушить доступность (a11y) или сломать анимации.\n\nСравнительный анализ 4 техник скрытия:\n\n1. `display: none`:\n- Геометрия: 0×0 px, полностью удаляется из Normal Flow макета (Layout).\n- События: невозможно кликнуть, недоступен для фокуса с клавиатуры.\n- Доступность: ПОЛНОСТЬЮ удаляется из Accessibility Tree (скринридеры его игнорируют).\n- Анимация: НЕ анимируется плавно через `transition` (переключение дискретно).\n\n2. `visibility: hidden`:\n- Геометрия: СОХРАНЯЕТСЯ! Элемент становится невидимым, но продолжает занимать своё физическое место в макете.\n- События: клики не проходят, клавиатурный фокус не получает.\n- Доступность: скрыт от скринридеров.\n- Анимация: поддерживает transition с задержкой (идеально для выпадающих меню в связке с opacity).\n\n3. `opacity: 0`:\n- Геометрия: СОХРАНЯЕТСЯ на экране.\n- События: КЛИКАБЕЛЕН! Пользователь может случайно нажать на невидимую кнопку!\n- Доступность: СКРИНРИДЕР ЧИТАЕТ! Пользователь с клавиатурой может перейти на невидимый инпут.\n- Анимация: идеально анимируется на GPU (Composite layer, 60/120 FPS).\n- Важно: при `opacity: 0` всегда добавляйте `pointer-events: none;`, если клики не должны срабатывать.\n\n4. Класс `.visually-hidden` (sr-only — доступное скрытие для скринридеров):\n- Скрывает элемент визуально для зрячих пользователей (схлопывает в 1x1px с `clip-path`), но ПОЛНОСТЬЮ сохраняет для чтения скринридерами (необходим для скрытых заголовков `<h2>`, подписей иконок и ссылок «Skip to content»).",
+          "image": {
+            "src": "/images/lessons/css-display-visibility.svg",
+            "alt": "Сравнение техник скрытия display: none, visibility, opacity и visually-hidden",
+            "caption": "Четыре способа скрытия: display:none убирает из потока, visibility сохраняет место, .visually-hidden сохраняет доступность"
+          },
+          "codeExample": {
+            "language": "css",
+            "code": "/* Стандартный класс доступного скрытия (WCAG / Tailwind sr-only) */\n.visually-hidden {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  padding: 0;\n  margin: -1px;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  white-space: nowrap;\n  border: 0;\n}\n\n/* Плавное появление выпадающего меню без кликабельности в скрытом состоянии */\n.dropdown-menu {\n  opacity: 0;\n  visibility: hidden;\n  pointer-events: none;\n  transform: translateY(-8px);\n  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;\n}\n\n.dropdown:hover .dropdown-menu,\n.dropdown:focus-within .dropdown-menu {\n  opacity: 1;\n  visibility: visible;\n  pointer-events: auto;\n  transform: translateY(0);\n}",
+            "title": "Паттерн доступного скрытия и безопасной анимации меню",
+            "explanation": "Комбинация opacity: 0 + visibility: hidden + pointer-events: none обеспечивает плавную анимацию, блокирует случайные клики и предотвращает ложный фокус с клавиатуры."
+          }
+        },
+        {
+          "title": "Современные типы display: contents и display: flow-root",
+          "content": "В современном CSS появились новые значения `display`, решающие сложные архитектурные задачи макетов.\n\n1. `display: contents`:\n- Элемент-обёртка визуально «растворяется» в DOM-дереве!\n- Сам контейнер не генерирует собственный бокс (Box Model), не имеет фона, рамок и отступов.\n- Все его прямые дочерние элементы становятся элементами родительского контейнера на уровень выше!\n- Применение: семантическая группировка тегов (`<section>`, `<form>`) внутри CSS Grid или Flexbox без нарушения сетки.\n- Внимание: будьте осторожны с доступностью в старых браузерах (может сбрасывать роли в Accessibility Tree).\n\n2. `display: flow-root`:\n- Создаёт новый Block Formatting Context (BFC).\n- Изолирует внутренние margin (предотвращает Margin Collapse).\n- Автоматически содержит внутри себя плавающие элементы (`float`).\n- Не имеет побочных эффектов обрезки контента, в отличие от `overflow: hidden`.",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Пример display: contents в CSS Grid -->\n<div class=\"parent-grid\">\n  <div class=\"item\">1</div>\n  <!-- form растворяется, а ее дети становятся прямыми колонками грида -->\n  <form class=\"subgrid-form\" style=\"display: contents;\">\n    <input type=\"text\" placeholder=\"Поиск...\" />\n    <button type=\"submit\">Найти</button>\n  </form>\n  <div class=\"item\">4</div>\n</div>\n\n<style>\n  .parent-grid {\n    display: grid;\n    grid-template-columns: repeat(4, 1fr);\n    gap: 16px;\n  }\n</style>",
+            "title": "Растворение контейнера с display: contents в сетке Grid",
+            "explanation": "Свойство display: contents позволяет сохранить семантический тег <form>, при этом input и button ведут себя как прямые дочерние ячейки parent-grid."
+          }
+        },
+        {
+          "title": "Двухключевой синтаксис display (Multi-keyword display)",
+          "content": "Современная спецификация CSS Display Module Level 3 разделяет значение `display` на два параметра:\n1. Внешний тип отображения (Outer display type) — как элемент участвует в потоке родителя (`block` или `inline`).\n2. Внутренний тип форматирования (Inner display type) — как форматируются дочерние элементы (`flow`, `flex`, `grid`).\n\nДвухключевой синтаксис:\n- `display: block flex;` (эквивалент `display: flex`) — блочный элемент снаружи, flex-контейнер внутри.\n- `display: inline flex;` (эквивалент `display: inline-flex`) — строчный элемент снаружи, flex-контейнер внутри.\n- `display: block grid;` (эквивалент `display: grid`).\n- `display: inline grid;` (эквивалент `display: inline-grid`).\n- `display: block flow;` (эквивалент `display: block`).\n- `display: inline flow-root;` — строчный элемент с собственным BFC (современный аналог `inline-block`).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Двухключевой синтаксис display */\n.inline-flex-badge {\n  /* Строчный элемент в строке текста, */\n  /* но с выравниванием иконки и текста через flex внутри */\n  display: inline-flex; /* или display: inline flex; */\n  align-items: center;\n  gap: 6px;\n  padding: 4px 10px;\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  border-radius: 20px;\n}",
+            "title": "Практическое использование inline-flex для бейджей",
+            "explanation": "inline-flex позволяет идеально отцентрировать иконку и текст внутри компактного бейджа, не разрывая строку окружающего абзаца."
           }
         }
       ],
       "seniorTips": [
-        "Превращайте ссылки в кнопки через inline-block или inline-flex."
+        "Никогда не используйте `opacity: 0` для полного скрытия элементов без `pointer-events: none` — невидимые элементы будут перехватывать клики мыши.",
+        "Для скрытых заголовков страниц и секций используйте класс `.visually-hidden` вместо `display: none` — это сохраняет семантическую структуру для скринридеров и повышает Accessibility Score до 100.",
+        "Для горизонтальных списков кнопок и меню используйте `display: flex` с `gap` вместо `display: inline-block` — это навсегда решает проблему паразитных пробелов в HTML.",
+        "Если вам нужно, чтобы выпадающее меню плавно анимировалось, комбинируйте `opacity: 0` + `visibility: hidden` + `pointer-events: none`."
       ],
       "commonMistakes": [
         {
-          "bad": "span { width: 100px; } /* Игнорируется на inline */",
-          "good": "span { display: inline-block; width: 100px; }",
-          "reason": "inline элементы игнорируют размеры."
+          "bad": "/* Попытка скрыть элемент с сохранением чтения скринридером */\n.screen-reader-text {\n  display: none; /* ❌ Скринридер НЕ прочитает! */\n}",
+          "good": ".screen-reader-text {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  overflow: hidden;\n  clip-path: inset(50%);\n  white-space: nowrap;\n}",
+          "reason": "display: none и visibility: hidden полностью исключают элемент из Accessibility Tree. Скринридер физически не видит этот текст. Для a11y используйте технику .visually-hidden."
+        },
+        {
+          "bad": "<span style=\"width: 200px; height: 100px; padding-top: 30px;\">\n  Текст кнопки\n</span>",
+          "good": "<span style=\"display: inline-block; width: 200px; height: 100px; padding-top: 30px;\">\n  Текст кнопки\n</span>",
+          "reason": "Строчные элементы (display: inline по умолчанию) игнорируют width, height и вертикальные отступы. Требуется явный display: inline-block или inline-flex."
+        },
+        {
+          "bad": "/* Скрытие меню только через opacity */\n.modal {\n  opacity: 0;\n  /* Модалка невидима, но блокирует клики по всему экрану! */\n}",
+          "good": ".modal {\n  opacity: 0;\n  visibility: hidden;\n  pointer-events: none;\n}",
+          "reason": "Элемент с opacity: 0 остаётся физически на экране и перехватывает клики и фокус. visibility: hidden и pointer-events: none блокируют взаимодействие."
         }
       ],
       "keyTakeaways": [
-        "block на всю строку, inline в строке без размеров, inline-block в строке с размерами."
+        "`display: block` начинает с новой строки и занимает 100% ширины. `display: inline` обтекается текстом и игнорирует width/height.",
+        "`display: inline-block` сочетает поведение в строке с полной поддержкой размеров и отступов блочной модели.",
+        "`display: none` полностью удаляет узел из дерева рендеринга и a11y. `visibility: hidden` скрывает, но сохраняет занимаемое место.",
+        "`opacity: 0` делает элемент прозрачным, но оставляет его кликабельным (требует `pointer-events: none`).",
+        "Класс `.visually-hidden` скрывает контент визуально, но на 100% сохраняет его доступность для скринридеров."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"demo\"><span class=\"ib\">Inline-block</span><div class=\"b\">Block</div></div>",
-      "initialCss": ".demo { padding: 16px; background: white; border-radius: 8px; }\n.ib { display: inline-block; padding: 8px 16px; background: #c7d2fe; color: #3730a3; border-radius: 6px; font-weight: bold; margin-bottom: 10px; }\n.b { display: block; padding: 12px; background: #e0e7ff; color: #312e81; border-radius: 6px; }",
-      "initialJs": "console.log('Display loaded');",
-      "instructions": "Измените display у .ib."
+      "initialHtml": "<div class=\"display-playground\">\n  <div class=\"demo-box box-block\">display: block</div>\n  <span class=\"demo-box box-inline\">display: inline (игнорирует width)</span>\n  <span class=\"demo-box box-inline-block\">display: inline-block</span>\n  <div class=\"demo-box box-hidden\">visibility: hidden (держит место)</div>\n  <div class=\"demo-box\">Следующий блок в потоке</div>\n</div>",
+      "initialCss": ".display-playground {\n  padding: 16px;\n  background: #0a0e13;\n  color: #e6edf3;\n  font-family: monospace;\n}\n.demo-box {\n  background: #161b22;\n  border: 2px solid #2dff8a;\n  padding: 10px;\n  margin: 6px;\n}\n.box-block {\n  display: block;\n  width: 200px;\n}\n.box-inline {\n  display: inline;\n  width: 300px; /* Игнорируется! */\n  border-color: #ffb02e;\n}\n.box-inline-block {\n  display: inline-block;\n  width: 220px;\n  border-color: #29e7ff;\n}\n.box-hidden {\n  visibility: hidden;\n  border-color: #f85149;\n}",
+      "initialJs": "// Проверка вычисленных стилей:\nconst boxes = document.querySelectorAll('.demo-box');\nboxes.forEach((b) => {\n  console.log(`${b.className} -> display: ${getComputedStyle(b).display}`);\n});",
+      "instructions": "Практика со свойством display:\n1. Посмотрите, как ведут себя block, inline и inline-block в предпросмотре\n2. Замените у .box-hidden свойство с visibility: hidden на display: none — обратите внимание, как следующий блок мгновенно подтянется вверх\n3. Создайте кнопку с display: inline-flex и добавьте к ней выравнивание иконки"
     },
     "task": {
-      "title": "Теги в одну строку",
-      "scenario": "Оформите список плашек через inline-block.",
+      "title": "Разработка доступного анимированного Dropdown-меню",
+      "scenario": "Вам необходимо сверстать выпадающее меню пользователя с аватаркой. Меню должно плавно появляться при наведении и фокусе с клавиатуры, не ломать поток документа, блокировать случайные клики в скрытом состоянии и содержать скрытый для скринридеров заголовок (.visually-hidden).",
       "criteria": [
-        "Задан display: inline-block",
-        "Применены padding"
+        "Кнопка-триггер меню оформлена как inline-flex с выравниванием по центру",
+        "Выпадающий список скрыт через комбинацию opacity: 0 + visibility: hidden + pointer-events: none",
+        "При наведении (:hover) и фокусе (:focus-within) список плавно появляется с анимацией transform и opacity",
+        "Использовать класс .visually-hidden для заголовка меню, доступного скринридерам",
+        "Корректный порядок фокуса клавишей Tab при открытии меню"
       ],
       "starterCode": {
-        "html": "<div class=\"tags\"><span class=\"t\">React</span><span class=\"t\">TS</span></div>",
-        "css": "/* Стили */\n"
+        "html": "<div class=\"user-menu\">\n  <button class=\"user-btn\">Профиль</button>\n  <ul class=\"menu-list\">\n    <li><a href=\"#\">Настройки</a></li>\n    <li><a href=\"#\">Выход</a></li>\n  </ul>\n</div>",
+        "css": "/* Напишите стили для доступного меню */"
       },
       "hints": [
-        "Задайте .t { display: inline-block; padding: 6px 12px; }"
+        "Используйте transform: translateY(-10px) в скрытом состоянии и translateY(0) в активном",
+        "Добавьте transition: opacity 0.2s, visibility 0.2s, transform 0.2s",
+        "Селектор открытия: .user-menu:hover .menu-list, .user-menu:focus-within .menu-list"
       ],
       "solution": {
-        "html": "<div class=\"tags\"><span class=\"t\">React</span><span class=\"t\">TS</span></div>",
-        "css": ".t { display: inline-block; padding: 6px 12px; background: #e0e7ff; color: #4338ca; border-radius: 16px; font-weight: bold; margin-right: 6px; }",
-        "explanation": "Теги в одну строку."
+        "css": ".visually-hidden {\n  position: absolute;\n  width: 1px;\n  height: 1px;\n  padding: 0;\n  margin: -1px;\n  overflow: hidden;\n  clip: rect(0, 0, 0, 0);\n  border: 0;\n}\n.user-menu {\n  position: relative;\n  display: inline-block;\n}\n.user-btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 8px;\n  padding: 8px 16px;\n  background: #161b22;\n  color: #2dff8a;\n  border: 1px solid #30363d;\n  border-radius: 6px;\n  cursor: pointer;\n}\n.menu-list {\n  position: absolute;\n  top: 100%;\n  left: 0;\n  min-width: 180px;\n  margin-top: 8px;\n  padding: 8px 0;\n  background: #0d1117;\n  border: 1px solid #30363d;\n  border-radius: 8px;\n  list-style: none;\n  opacity: 0;\n  visibility: hidden;\n  pointer-events: none;\n  transform: translateY(-8px);\n  transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;\n}\n.user-menu:hover .menu-list,\n.user-menu:focus-within .menu-list {\n  opacity: 1;\n  visibility: visible;\n  pointer-events: auto;\n  transform: translateY(0);\n}\n.menu-list a {\n  display: block;\n  padding: 8px 16px;\n  color: #e6edf3;\n  text-decoration: none;\n}\n.menu-list a:hover {\n  background: #161b22;\n  color: #29e7ff;\n}",
+        "explanation": "Меню использует связку opacity: 0 + visibility: hidden + pointer-events: none для плавного появления без фантомных кликов. Селектор :focus-within обеспечивает доступность для навигации с клавиатуры."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c4-q1",
-          "question": "Какой display принимает размеры в строке?",
+          "id": "css4-q1",
+          "question": "Какое поведение характерно для элемента со свойством display: inline?",
           "options": [
-            "inline",
-            "block",
-            "inline-block",
-            "none"
+            "Начинается с новой строки и занимает 100% ширины родителя",
+            "Располагается в одной строке с текстом, а свойства width, height и вертикальные margin игнорируются",
+            "Полностью исчезает со страницы",
+            "Создаёт гибкую flex-сетку"
           ],
-          "correctIndex": 2,
-          "explanation": "inline-block принимает размеры и остается в строке."
+          "correctIndex": 1,
+          "explanation": "Строчные элементы (display: inline) встраиваются в текстовую строку, не создают разрывов строк и не реагируют на попытки задать width, height или вертикальные внешние отступы (margin-top/bottom)."
+        },
+        {
+          "id": "css4-q2",
+          "question": "В чём заключается ключевое отличие display: none от visibility: hidden?",
+          "options": [
+            "display: none удаляет элемент из потока макета (0px), а visibility: hidden скрывает элемент визуально, но сохраняет занимаемое им физическое место",
+            "visibility: hidden удаляет элемент из DOM",
+            "display: none работает только на ссылках",
+            "Между ними нет никакой разницы"
+          ],
+          "correctIndex": 0,
+          "explanation": "При display: none элемент не генерирует бокс и не занимает места на странице (соседние блоки сдвигаются). При visibility: hidden элемент невидим, но продолжает занимать свою изначальную ширину и высоту в макете."
+        },
+        {
+          "id": "css4-q3",
+          "question": "Почему скрытие интерактивных кнопок только с помощью opacity: 0 без дополнительных свойств является грубой ошибкой?",
+          "options": [
+            "opacity: 0 замедляет работу процессора",
+            "Элемент с opacity: 0 остаётся физически на экране, кликабелен мышью и фокусируется с клавиатуры",
+            "opacity нельзя анимировать",
+            "opacity не поддерживается мобильными браузерами"
+          ],
+          "correctIndex": 1,
+          "explanation": "opacity: 0 делает элемент полностью прозрачным, но он остаётся интерактивным: пользователь может случайно нажать невидимую кнопку, а клавиатурный фокус Tab будет попадать в пустое место экрана."
+        },
+        {
+          "id": "css4-q4",
+          "question": "Для чего применяется CSS-класс .visually-hidden (sr-only)?",
+          "options": [
+            "Для ускорения загрузки изображений",
+            "Для скрытия элементов от зрячих пользователей с полным сохранением их доступности для чтения скринридерами (a11y)",
+            "Для создания 3D-анимаций",
+            "Для удаления скриптов из страницы"
+          ],
+          "correctIndex": 1,
+          "explanation": "Класс .visually-hidden сжимает элемент до 1x1 пикселя с clip: rect(0,0,0,0), делая его невидимым на экране, но оставляя в дереве доступности (Accessibility Tree) для скринридеров незрячих пользователей."
+        },
+        {
+          "id": "css4-q5",
+          "question": "Что происходит с элементом при применении свойства display: contents?",
+          "options": [
+            "Элемент становится модальным окном",
+            "Сам контейнер перестаёт генерировать прямоугольный бокс, а его дочерние элементы ведут себя так, будто они напрямую вложены в родителя уровнем выше",
+            "Все шрифты внутри элемента становятся полужирными",
+            "Элемент масштабируется на весь экран"
+          ],
+          "correctIndex": 1,
+          "explanation": "display: contents визуально «растворяет» сам тег-контейнер: он не имеет собственных рамок, фона и отступов, а его дети поднимаются на уровень выше в сетках Grid и Flexbox."
         }
       ]
     }

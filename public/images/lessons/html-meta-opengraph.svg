@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 560" width="100%" height="100%" style="background:#0a0e13; font-family:'JetBrains Mono', Consolas, monospace;">
+  <defs>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <text x="500" y="45" fill="#2dff8a" font-size="24" font-weight="bold" text-anchor="middle" letter-spacing="1">Анатомия &lt;head&gt; и Open Graph протокол</text>
+  <text x="500" y="72" fill="#8b949e" font-size="13" text-anchor="middle">Метаданные документа: SEO, адаптивность viewport и превью в соцсетях/мессенджерах</text>
+
+  <!-- Left: Head Metadata -->
+  <g transform="translate(40, 95)" filter="url(#shadow)">
+    <rect width="440" height="435" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#161b22"/>
+    <text x="20" y="25" fill="#29e7ff" font-size="15" font-weight="bold">Базовые метатеги &lt;head&gt;</text>
+
+    <g transform="translate(20, 50)">
+      <rect width="400" height="42" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="12" y="26" fill="#79c0ff" font-size="12">&lt;meta charset="UTF-8"&gt;</text>
+      <text x="220" y="26" fill="#8b949e" font-size="11">Кодировка (UTF-8)</text>
+    </g>
+
+    <g transform="translate(20, 100)">
+      <rect width="400" height="56" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="12" y="24" fill="#79c0ff" font-size="11">&lt;meta name="viewport"</text>
+      <text x="12" y="42" fill="#a5d6ff" font-size="11"> content="width=device-width, initial-scale=1.0"&gt;</text>
+    </g>
+
+    <g transform="translate(20, 164)">
+      <rect width="400" height="50" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="12" y="22" fill="#79c0ff" font-size="11">&lt;title&gt;Каталог курсов — Academy&lt;/title&gt;</text>
+      <text x="12" y="40" fill="#7ee787" font-size="10">✔ 50–60 символов, ключевые слова в начале</text>
+    </g>
+
+    <g transform="translate(20, 222)">
+      <rect width="400" height="56" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="12" y="22" fill="#79c0ff" font-size="11">&lt;meta name="description"</text>
+      <text x="12" y="40" fill="#a5d6ff" font-size="11"> content="Интерактивные курсы фронтенда..."&gt;</text>
+    </g>
+
+    <g transform="translate(20, 286)">
+      <rect width="400" height="50" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="12" y="22" fill="#79c0ff" font-size="11">&lt;link rel="canonical" href="https://..."&gt;</text>
+      <text x="12" y="40" fill="#8b949e" font-size="10">Защита от дублей страниц в поисковиках</text>
+    </g>
+
+    <g transform="translate(20, 344)">
+      <rect width="400" height="50" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="12" y="22" fill="#79c0ff" font-size="11">&lt;link rel="icon" href="/favicon.ico"&gt;</text>
+      <text x="12" y="40" fill="#8b949e" font-size="10">Favicon, Apple touch icon, manifest.json</text>
+    </g>
+  </g>
+
+  <!-- Right: Open Graph Preview -->
+  <g transform="translate(520, 95)" filter="url(#shadow)">
+    <rect width="440" height="435" rx="8" fill="#0d1117" stroke="#ffb02e" stroke-width="2"/>
+    <rect width="440" height="38" rx="8" fill="#161b22"/>
+    <text x="20" y="25" fill="#ffb02e" font-size="15" font-weight="bold">Open Graph Превью (Telegram / VK)</text>
+
+    <!-- Social Card Mockup -->
+    <g transform="translate(20, 50)">
+      <rect width="400" height="230" rx="6" fill="#161b22" stroke="#30363d"/>
+      <!-- Image box -->
+      <rect x="1" y="1" width="398" height="130" rx="6" fill="#03060a"/>
+      <text x="200" y="65" fill="#2dff8a" font-size="16" font-weight="bold" text-anchor="middle">og:image (1200 × 630 px)</text>
+      <text x="200" y="88" fill="#8b949e" font-size="11" text-anchor="middle">Превью баннер страницы</text>
+      
+      <!-- Text snippet -->
+      <text x="15" y="155" fill="#79c0ff" font-size="11">ACADEMY.DEV</text>
+      <text x="15" y="178" fill="#e6edf3" font-size="13" font-weight="bold">og:title — Frontend Intern Academy</text>
+      <text x="15" y="202" fill="#8b949e" font-size="11">og:description — Интерактивный тренажёр с нуля</text>
+    </g>
+
+    <!-- Open Graph tags list -->
+    <g transform="translate(20, 290)">
+      <rect width="400" height="130" rx="4" fill="#03060a" stroke="#30363d"/>
+      <text x="12" y="24" fill="#ff7b72" font-size="11">&lt;meta property="og:type" content="website"&gt;</text>
+      <text x="12" y="48" fill="#ff7b72" font-size="11">&lt;meta property="og:title" content="..."&gt;</text>
+      <text x="12" y="72" fill="#ff7b72" font-size="11">&lt;meta property="og:description" content="..."&gt;</text>
+      <text x="12" y="96" fill="#ff7b72" font-size="11">&lt;meta property="og:image" content="https://..."&gt;</text>
+      <text x="12" y="118" fill="#ff7b72" font-size="11">&lt;meta property="og:url" content="https://..."&gt;</text>
+    </g>
+  </g>
+</svg>

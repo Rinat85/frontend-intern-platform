@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Check, Copy, Terminal } from 'lucide-react';
 
 interface CodeBlockProps {
@@ -7,140 +7,126 @@ interface CodeBlockProps {
   title?: string;
 }
 
-/**
- * Syntax highlighter for HTML, CSS, and JS in Cyberpunk aesthetic
- */
-function highlightHtmlLine(line: string): React.ReactNode {
-  // Check for HTML comment
-  if (line.trim().startsWith('<!--') && line.trim().endsWith('-->')) {
-    return <span className="syn-comment">{line}</span>;
-  }
-
-  // Tokenize HTML tags, attributes, strings, comments
-  // Matches tags <...> and content
-  const tokens: React.ReactNode[] = [];
-  const tagRegex = /(<!--[\s\S]*?-->|<!DOCTYPE\s+html>|<!DOCTYPE>|<\/?[a-zA-Z0-9_-]+(?:\s+[^>]*)?>|[^<]+)/g;
-  let match: RegExpExecArray | null;
-  let key = 0;
-
-  while ((match = tagRegex.exec(line)) !== null) {
-    const part = match[0];
-
-    if (part.startsWith('<!--')) {
-      tokens.push(<span key={key++} className="syn-comment">{part}</span>);
-    } else if (part.toUpperCase().startsWith('<!DOCTYPE')) {
-      tokens.push(<span key={key++} className="syn-doctype">{part}</span>);
-    } else if (part.startsWith('<') && part.endsWith('>')) {
-      // Inside a tag: parse tag name, attributes, and string values
-      tokens.push(parseTagContent(part, key++));
-    } else {
-      // Plain text content
-      tokens.push(<span key={key++} className="syn-text">{part}</span>);
-    }
-  }
-
-  return tokens.length > 0 ? tokens : line;
+interface Token {
+  type: string;
+  text: string;
 }
 
-function parseTagContent(tagStr: string, baseKey: number): React.ReactNode {
-  // E.g. <html lang="ru"> or </h1> or <meta charset="UTF-8">
-  const isClosing = tagStr.startsWith('</');
-  const inner = isClosing ? tagStr.slice(2, -1) : tagStr.startsWith('<') ? tagStr.slice(1, -1) : tagStr;
+function tokenizeCode(rawCode: string, lang: string): Token[][] {
+  const normalizedLang = (lang || 'html').toLowerCase();
+  const tokens: Token[] = [];
 
-  const parts: React.ReactNode[] = [];
-  parts.push(<span key="open" className="syn-bracket">{isClosing ? '</' : '<'}</span>);
-
-  // Sub-tokenize tagName, attributes, and strings
-  const subRegex = /([a-zA-Z0-9_-]+)(?:=("[^"]*"|'[^']*'))?|("[^"]*"|'[^']*')|\s+/g;
-  let subMatch: RegExpExecArray | null;
-  let isFirst = true;
-  let subKey = 0;
-
-  while ((subMatch = subRegex.exec(inner)) !== null) {
-    const full = subMatch[0];
-    const attrName = subMatch[1];
-    const attrVal = subMatch[2] || subMatch[3];
-
-    if (isFirst && attrName) {
-      // Tag name
-      parts.push(<span key={'t' + subKey++} className="syn-tag">{attrName}</span>);
-      isFirst = false;
-      if (attrVal) {
-        parts.push(<span key={'e' + subKey++} className="syn-operator">=</span>);
-        parts.push(<span key={'v' + subKey++} className="syn-string">{attrVal}</span>);
-      }
-    } else if (attrName) {
-      // Attribute
-      parts.push(' ');
-      parts.push(<span key={'a' + subKey++} className="syn-attr">{attrName}</span>);
-      if (attrVal) {
-        parts.push(<span key={'e' + subKey++} className="syn-operator">=</span>);
-        parts.push(<span key={'v' + subKey++} className="syn-string">{attrVal}</span>);
-      }
-    } else if (attrVal) {
-      parts.push(<span key={'s' + subKey++} className="syn-string">{attrVal}</span>);
-    } else {
-      parts.push(full);
-    }
-  }
-
-  parts.push(<span key="close" className="syn-bracket">&gt;</span>);
-  return <span key={baseKey} className="syn-tag-wrapper">{parts}</span>;
-}
-
-function highlightCssLine(line: string): React.ReactNode {
-  if (line.trim().startsWith('/*')) {
-    return <span className="syn-comment">{line}</span>;
-  }
-  // Property: value;
-  const propVal = line.match(/^(\s*)([a-zA-Z0-9_-]+)(\s*:\s*)([^;]+)(;?.*)$/);
-  if (propVal) {
-    return (
-      <>
-        {propVal[1]}
-        <span className="syn-attr">{propVal[2]}</span>
-        <span className="syn-operator">{propVal[3]}</span>
-        <span className="syn-string">{propVal[4]}</span>
-        {propVal[5]}
-      </>
+  if (normalizedLang === 'html' || normalizedLang === 'xml') {
+    const htmlRegex = new RegExp(
+      '(<!--[\\s\\S]*?-->|<!DOCTYPE[\\s\\S]*?>|<\\/?[a-zA-Z0-9_-]+|[a-zA-Z0-9_:-]+=(?:"[^"]*"|\'[^\']*\')|[a-zA-Z0-9_:-]+|"[^"]*"|\'[^\']*\'|\\/?>|>|[^<\\s"\'=]+|\\s+)',
+      'g'
     );
-  }
-  // Selector
-  if (line.includes('{')) {
-    const selMatch = line.match(/^([^{]+)(\{.*)$/);
-    if (selMatch) {
-      return (
-        <>
-          <span className="syn-tag">{selMatch[1]}</span>
-          <span className="syn-bracket">{selMatch[2]}</span>
-        </>
-      );
+    let match: RegExpExecArray | null;
+    let inTag = false;
+
+    while ((match = htmlRegex.exec(rawCode)) !== null) {
+      const text = match[0];
+      if (text.startsWith('<!--')) {
+        tokens.push({ type: 'syn-comment', text });
+      } else if (text.toUpperCase().startsWith('<!DOCTYPE')) {
+        tokens.push({ type: 'syn-doctype', text });
+      } else if (text.startsWith('</')) {
+        tokens.push({ type: 'syn-bracket', text: '</' });
+        tokens.push({ type: 'syn-tag', text: text.slice(2) });
+        inTag = true;
+      } else if (text.startsWith('<')) {
+        tokens.push({ type: 'syn-bracket', text: '<' });
+        tokens.push({ type: 'syn-tag', text: text.slice(1) });
+        inTag = true;
+      } else if (text === '>' || text === '/>') {
+        tokens.push({ type: 'syn-bracket', text });
+        inTag = false;
+      } else if (inTag && text.includes('=')) {
+        const eqIdx = text.indexOf('=');
+        const name = text.slice(0, eqIdx);
+        const val = text.slice(eqIdx + 1);
+        tokens.push({ type: 'syn-attr', text: name });
+        tokens.push({ type: 'syn-operator', text: '=' });
+        tokens.push({ type: 'syn-string', text: val });
+      } else if (inTag && (text.startsWith('"') || text.startsWith("'"))) {
+        tokens.push({ type: 'syn-string', text });
+      } else if (inTag && /^[a-zA-Z0-9_:-]+$/.test(text)) {
+        tokens.push({ type: 'syn-attr', text });
+      } else {
+        tokens.push({ type: 'syn-text', text });
+      }
+    }
+  } else if (normalizedLang === 'css') {
+    const cssRegex = new RegExp(
+      '(\\/\\*[\\s\\S]*?\\*\\/|"[^"]*"|\'[^\']*\'|[a-zA-Z0-9_-]+(?=\\s*:)|:[^;{}]+|[{};:,]|@[a-zA-Z0-9_-]+|\\.[a-zA-Z0-9_-]+|#[a-zA-Z0-9_-]+|[a-zA-Z0-9_-]+|\\s+|[^\\s])',
+      'g'
+    );
+    let match: RegExpExecArray | null;
+    while ((match = cssRegex.exec(rawCode)) !== null) {
+      const text = match[0];
+      if (text.startsWith('/*')) {
+        tokens.push({ type: 'syn-comment', text });
+      } else if (text.startsWith('"') || text.startsWith("'")) {
+        tokens.push({ type: 'syn-string', text });
+      } else if (text.startsWith('.')) {
+        tokens.push({ type: 'syn-tag', text });
+      } else if (text.startsWith('#')) {
+        tokens.push({ type: 'syn-attr', text });
+      } else if (text.startsWith('@')) {
+        tokens.push({ type: 'syn-keyword', text });
+      } else if (text === '{' || text === '}' || text === ';' || text === ':') {
+        tokens.push({ type: 'syn-bracket', text });
+      } else {
+        tokens.push({ type: 'syn-text', text });
+      }
+    }
+  } else {
+    // JavaScript / TypeScript / Bash / JSON / Default
+    const jsKeywords = new Set([
+      'const', 'let', 'var', 'function', 'return', 'import', 'export', 'from',
+      'async', 'await', 'class', 'extends', 'super', 'new', 'if', 'else', 'for',
+      'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch',
+      'finally', 'throw', 'typeof', 'instanceof', 'in', 'of', 'this', 'null',
+      'undefined', 'true', 'false', 'NaN', 'default', 'git', 'npm', 'yarn', 'pnpm'
+    ]);
+    const jsRegex = new RegExp(
+      '(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/|`[^`]*`|"[^"]*"|\'[^\']*\'|\\b[a-zA-Z0-9_$]+\\b|[{}()\\[\\].,;:+\\-*\\/%=<>!&|^~?]+|\\s+)',
+      'g'
+    );
+    let match: RegExpExecArray | null;
+    while ((match = jsRegex.exec(rawCode)) !== null) {
+      const text = match[0];
+      if (text.startsWith('//') || text.startsWith('/*')) {
+        tokens.push({ type: 'syn-comment', text });
+      } else if (text.startsWith('`') || text.startsWith('"') || text.startsWith("'")) {
+        tokens.push({ type: 'syn-string', text });
+      } else if (jsKeywords.has(text)) {
+        tokens.push({ type: 'syn-keyword', text });
+      } else if (/^[0-9]+(\.[0-9]+)?$/.test(text)) {
+        tokens.push({ type: 'syn-string', text });
+      } else if (/^[{}()[\],;:+\-*\/%=<>!&|^~?]+$/.test(text)) {
+        tokens.push({ type: 'syn-bracket', text });
+      } else {
+        tokens.push({ type: 'syn-text', text });
+      }
     }
   }
-  return line;
-}
 
-function highlightJsLine(line: string): React.ReactNode {
-  if (line.trim().startsWith('//') || line.trim().startsWith('/*')) {
-    return <span className="syn-comment">{line}</span>;
-  }
-  // Simple JS keyword highlighting
-  const jsKeywords = /\b(const|let|var|function|return|import|export|from|async|await|class|extends|super|new|if|else|try|catch|throw|typeof)\b/g;
-  const parts: React.ReactNode[] = [];
-  let lastIdx = 0;
-  let m: RegExpExecArray | null;
-
-  while ((m = jsKeywords.exec(line)) !== null) {
-    if (m.index > lastIdx) {
-      parts.push(line.slice(lastIdx, m.index));
+  // Split tokens into lines for numbering
+  const lines: Token[][] = [[]];
+  for (const token of tokens) {
+    const parts = token.text.split('\n');
+    for (let i = 0; i < parts.length; i++) {
+      if (i > 0) {
+        lines.push([]);
+      }
+      if (parts[i]) {
+        lines[lines.length - 1].push({ type: token.type, text: parts[i] });
+      }
     }
-    parts.push(<span key={'kw' + m.index} className="syn-keyword">{m[1]}</span>);
-    lastIdx = m.index + m[0].length;
   }
-  if (lastIdx < line.length) {
-    parts.push(line.slice(lastIdx));
-  }
-  return parts.length > 0 ? parts : line;
+
+  return lines;
 }
 
 export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'html', title }) => {
@@ -152,8 +138,7 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'html', t
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const lines = code.split('\n');
-  const lang = language.toLowerCase();
+  const lines = tokenizeCode(code, language);
 
   return (
     <div className="code-block">
@@ -169,25 +154,18 @@ export const CodeBlock: React.FC<CodeBlockProps> = ({ code, language = 'html', t
       </div>
       <div className="code-block-body">
         <pre className="code-block-pre">
-          {lines.map((line, idx) => {
-            let highlighted: React.ReactNode;
-            if (lang === 'html') {
-              highlighted = highlightHtmlLine(line);
-            } else if (lang === 'css') {
-              highlighted = highlightCssLine(line);
-            } else if (lang === 'javascript' || lang === 'js') {
-              highlighted = highlightJsLine(line);
-            } else {
-              highlighted = line;
-            }
-
-            return (
-              <div key={idx} className="code-block-line">
-                <span className="code-block-line-num">{idx + 1}</span>
-                <span className="code-block-line-text">{highlighted}</span>
-              </div>
-            );
-          })}
+          {lines.map((lineTokens, lineIdx) => (
+            <div key={lineIdx} className="code-block-line">
+              <span className="code-block-line-num">{lineIdx + 1}</span>
+              <span className="code-block-line-text">
+                {lineTokens.map((t, tokenIdx) => (
+                  <span key={tokenIdx} className={t.type}>
+                    {t.text}
+                  </span>
+                ))}
+              </span>
+            </div>
+          ))}
         </pre>
       </div>
     </div>

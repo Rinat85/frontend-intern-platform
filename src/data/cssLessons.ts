@@ -2146,84 +2146,189 @@ export const cssLessons: Lesson[] = [
     "id": "css-12",
     "moduleId": "css",
     "level": 12,
-    "title": "CSS Grid: Раскладка и области",
-    "subtitle": "Grid-template-areas, auto-fit, auto-fill и minmax()",
-    "description": "Продвинутый Grid: именованные области grid-template-areas, адаптивная сетка без медиа-запросов auto-fit + minmax().",
-    "estimatedMinutes": 40,
+    "title": "CSS Grid: Раскладка, области (grid-template-areas) и наложение",
+    "subtitle": "grid-template-areas, grid-area, grid-column / grid-row, span, линии 1 / -1 и наложение слоев",
+    "description": "Освойте архитектурную раскладку на CSS Grid: визуальное проектирование макетов страниц через grid-template-areas, позиционирование по именованным областям grid-area, точное управление линиями сетки (grid-column: 1 / -1, span 2) и наложение элементов (Grid Overlap) без position: absolute.",
+    "estimatedMinutes": 65,
     "difficulty": "advanced",
     "tags": [
-      "CSS",
-      "Grid",
-      "Areas",
-      "Responsive"
+      "css-grid",
+      "grid-template-areas",
+      "grid-area",
+      "grid-lines",
+      "span",
+      "grid-overlap",
+      "layout"
     ],
     "theory": {
-      "overview": "Grid позволяет создавать адаптивные каталоги без единого медиа-запроса через связку auto-fit + minmax().",
+      "overview": "В предыдущем уроке мы изучили фундамент CSS Grid (fr, repeat, minmax, auto-fit). Теперь мы переходим к самому выразительному инструменту Grid — **раскладке по именованным областям (`grid-template-areas`)** и точному позиционированию элементов по линиям сетки.\n\n`grid-template-areas` позволяет декларативно описывать геометрию всей веб-страницы в виде ASCII-арт схемы прямо в CSS, а также легко менять расположение сайдбаров, шапок и контента для мобильных экранов в одну строчку. Кроме того, Grid предоставляет нативный механизм **наложения элементов (Grid Overlap)** без ломких костылей `position: absolute`.",
       "sections": [
         {
-          "title": "auto-fit + minmax",
-          "content": "- `grid-template-columns: repeat(auto-fit, minmax(280px, 1fr))`.\n- Карточки автоматически перестраиваются: 1 на мобилке, 2 на планшете, 4 на десктопе.",
+          "title": "Визуальная раскладка макета через grid-template-areas",
+          "content": "Свойство `grid-template-areas` позволяет нарисовать карту страницы словами:\n\n1. Декларация областей на контейнере:\n```css\n.page-layout {\n  display: grid;\n  grid-template-columns: 260px 1fr;\n  grid-template-rows: 64px 1fr 50px;\n  grid-template-areas:\n    \"header  header\"\n    \"sidebar main\"\n    \"footer  footer\";\n  min-height: 100vh;\n}\n```\n- Каждая строка в кавычках `\"...\"` представляет одну строку сетки.\n- Каждое слово задает имя ячейки.\n- Повторение имени (`\"header header\"`) объединяет ячейки в единую неразрывную область на 2 колонки!\n\n2. Привязка дочерних элементов через `grid-area`:\n- `.site-header { grid-area: header; }`\n- `.site-sidebar { grid-area: sidebar; }`\n- `.site-main { grid-area: main; }`\n- `.site-footer { grid-area: footer; }`\n\n3. Пустые ячейки (Пропуски):\nТочка `.` обозначает пустую ячейку без контента: `\"sidebar . main\"`.",
+          "image": {
+            "src": "/images/lessons/css-grid-areas-layout.svg",
+            "alt": "CSS Grid раскладка макета через grid-template-areas и наложение слоев",
+            "caption": "grid-template-areas рисует визуальный макет страницы, grid-column: 1 / -1 растягивает на всю ширину, а Grid Overlap заменяет position: absolute"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Адаптивная сетка",
-            "code": ".gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }",
-            "explanation": "Адаптив без медиа-запросов."
+            "code": "/* Десктопный макет портала */\n.app-layout {\n  display: grid;\n  grid-template-columns: 280px 1fr;\n  grid-template-rows: auto 1fr auto;\n  grid-template-areas:\n    \"header  header\"\n    \"sidebar content\"\n    \"footer  footer\";\n  min-height: 100vh;\n  gap: 16px;\n}\n\n.header  { grid-area: header;  background: #161b22; }\n.sidebar { grid-area: sidebar; background: #0d1117; }\n.content { grid-area: content; background: #0a0e13; }\n.footer  { grid-area: footer;  background: #161b22; }\n\n/* Мобильная адаптация — перестройка в 1 колонку одной строкой! */\n@media (max-width: 768px) {\n  .app-layout {\n    grid-template-columns: 1fr;\n    grid-template-areas:\n      \"header\"\n      \"content\"\n      \"sidebar\"\n      \"footer\";\n  }\n}",
+            "title": "Макет страницы на grid-template-areas с адаптацией под мобилки",
+            "explanation": "В @media блоке порядок блоков перестраивается одной текстовой схемой: sidebar перемещается ПОД content без изменения HTML-кода."
+          }
+        },
+        {
+          "title": "Позиционирование по линиям сетки (Grid Lines) и ключевое слово span",
+          "content": "Координатная сетка Grid нумеруется линиями (Grid Lines) от `1` до `N+1` (а также отрицательными индексами от `-1` с правого края):\n\n1. Синтаксис `grid-column: start / end;`:\n- `grid-column: 1 / 3;` — элемент занимает ячейки от 1-й до 3-й вертикальной линии (2 колонки).\n- `grid-row: 2 / 4;` — элемент занимает ячейки со 2-й по 4-ю горизонтальную линию.\n\n2. Растяжение на ВСЮ ширину сетки (`1 / -1`):\n- **`grid-column: 1 / -1;`** — мощнейший приём: элемент растягивается от САМОЙ ПЕРВОЙ (1) до САМОЙ ПОСЛЕДНЕЙ (-1) линии сетки, независимо от того, сколько колонок в сетке (3, 6 или 12)!\n- Идеально для полноэкранных баннеров (Hero Banner) и футеров.\n\n3. Ключевое слово `span` (Охват):\n- `grid-column: span 2;` — растянуть элемент на 2 колонки вправо от текущей позиции.\n- `grid-row: span 3;` — растянуть элемент на 3 строки вниз.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Сетка дашборда с карточками разного размера */\n.dashboard {\n  display: grid;\n  grid-template-columns: repeat(4, 1fr);\n  gap: 16px;\n}\n\n/* Большая главная аналитическая карточка (на 2 колонки и 2 строки) */\n.main-chart {\n  grid-column: span 2;\n  grid-row: span 2;\n  background: #161b22;\n  border: 1px solid #2dff8a;\n}\n\n/* Полноширинный баннер уведомления */\n.alert-banner {\n  grid-column: 1 / -1; /* На все 4 колонки! */\n  background: #ffb02e22;\n  border: 1px solid #ffb02e;\n}",
+            "title": "Использование grid-column: span 2 и grid-column: 1 / -1",
+            "explanation": "span 2 объединяет две ячейки для графика, а 1 / -1 гарантирует, что alert-banner займет 100% ширины сетки."
+          }
+        },
+        {
+          "title": "Наложение элементов (Grid Overlap) без position: absolute",
+          "content": "В CSS Grid несколько элементов могут занимать ОДНУ И ТУ ЖЕ ячейку сетки, накладываясь друг на друга слоями!\n\nПочему это лучше `position: absolute`:\n- При `position: absolute` родитель теряет высоту (Height Collapse), из-за чего нижележащий контент наезжает на баннер.\n- В CSS Grid контейнер автоматически рассчитывает высоту по содержимому обоих слоев!\n\nКак реализовать Grid Overlap:\n1. Задаем одинаковые координаты ячейки для обоих элементов: `grid-area: 1 / 1;` (или `grid-column: 1 / 2; grid-row: 1 / 2;`).\n2. Фоновое изображение: `.banner-img { grid-area: 1 / 1; width: 100%; object-fit: cover; }`.\n3. Текстовый блок поверх: `.banner-text { grid-area: 1 / 1; z-index: 2; align-self: center; justify-self: center; }`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Карточка промо-баннера с текстом поверх картинки */\n.hero-card {\n  display: grid;\n  grid-template-columns: 1fr;\n  grid-template-rows: 1fr;\n  border-radius: 12px;\n  overflow: hidden;\n}\n\n/* Слой 1: Фоновое изображение */\n.hero-bg {\n  grid-area: 1 / 1; /* Первая ячейка */\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}\n\n/* Слой 2: Градиентный оверлей */\n.hero-overlay {\n  grid-area: 1 / 1; /* Та же самая ячейка! */\n  background: linear-gradient(to top, rgba(10,14,19,0.9), transparent);\n  z-index: 1;\n}\n\n/* Слой 3: Текст и кнопка */\n.hero-content {\n  grid-area: 1 / 1; /* Та же самая ячейка! */\n  z-index: 2;\n  align-self: end; /* Прижат к низу карточки */\n  padding: 24px;\n  color: #e6edf3;\n}",
+            "title": "Grid Overlap: Картинка + Затемнение + Текст в одной ячейке",
+            "explanation": "Все 3 слоя привязаны к grid-area: 1 / 1 и упорядочены по z-index без использования position: absolute."
+          }
+        },
+        {
+          "title": "Плотная упаковка сетки (grid-auto-flow: dense)",
+          "content": "Управление алгоритмом авторазмещения элементов:\n\n1. `grid-auto-flow: row;` (по умолчанию) — элементы заполняют строки слева направо. Если элемент `span 2` не помещается в текущей строке, браузер переносит его на следующую строку, оставляя в предыдущей строке «дыру» (пустую ячейку).\n\n2. **`grid-auto-flow: dense;` (Плотная упаковка)**:\n- Браузер включает умный алгоритм: если в сетке образовалась пустая ячейка, он ищет дальше по DOM-дереву меньшие элементы (размером в 1 ячейку) и **заполняет ими образовавшиеся пустоты**!\n- Идеально для: фотогалерей (Pinterest-style), каталогов с баннерами и медиа-плиток.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Плотная галерея без дырок */\n.masonry-gallery {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));\n  grid-auto-rows: 150px;\n  /* dense заполняет все пустые ячейки маленькими карточками */\n  grid-auto-flow: dense;\n  gap: 12px;\n}\n\n.photo-landscape { grid-column: span 2; }\n.photo-portrait  { grid-row: span 2; }\n.photo-featured  { grid-column: span 2; grid-row: span 2; }",
+            "title": "Плотная раскладка плитки через grid-auto-flow: dense",
+            "explanation": "grid-auto-flow: dense устраняет дыры в сетке, автоматически переставляя маленькие фотографии в свободные ячейки."
           }
         }
       ],
       "seniorTips": [
-        "Используйте repeat(auto-fit, minmax(280px, 1fr)) для всех каталогов."
+        "Используйте `grid-template-areas` для макета всей страницы — это делает код самодокументируемым и позволяет мгновенно менять расположение сайдбаров на мобилках в `@media`.",
+        "Для растяжения элементов на всю ширину сетки (Header, Footer, Alert) используйте `grid-column: 1 / -1;` вместо хардкода номеров колонок.",
+        "Применяйте Grid Overlap (`grid-area: 1 / 1`) для карточек с текстом поверх картинки — это предотвращает схлопывание высоты, характерное для `position: absolute`.",
+        "Используйте `grid-auto-flow: dense` для галерей и каталогов с разноразмерными баннерами, чтобы избежать пустых дыр в сетке."
       ],
       "commonMistakes": [
         {
-          "bad": "Писать 10 медиа-запросов для колонок",
-          "good": "grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));",
-          "reason": "auto-fit перестраивает колонки математически."
+          "bad": "/* Ошибочная форма grid-template-areas (не прямоугольник) */\n.grid {\n  grid-template-areas:\n    \"header header\"\n    \"sidebar\"\n    \"footer footer\"; /* ❌ Ошибка! Разное число колонок */\n}",
+          "good": ".grid {\n  grid-template-areas:\n    \"header  header\"\n    \"sidebar main\"\n    \"footer  footer\"; /* ✅ Ровно по 2 колонки в каждой строке */\n}",
+          "reason": "grid-template-areas требует строгой прямоугольной матрицы: каждая строка обязана содержать одинаковое количество ячеек."
+        },
+        {
+          "bad": "/* Использование position: absolute для текста на картинке */\n.card-text { position: absolute; bottom: 0; } /* Высота карточки схлопывается в 0! */",
+          "good": ".card-img, .card-text { grid-area: 1 / 1; }",
+          "reason": "Grid Overlap автоматически растягивает контейнер по максимальной высоте любого из слоев."
+        },
+        {
+          "bad": "/* Попытка сделать L-образную область в grid-template-areas */\n\"nav main\"\n\"nav nav\" /* ❌ Область nav не может быть L-образной, только прямоугольной! */",
+          "good": "/* Разделяйте L-образные зоны на отдельные именованные блоки */",
+          "reason": "Спецификация CSS Grid строго запрещает непрямоугольные области в grid-template-areas."
         }
       ],
       "keyTakeaways": [
-        "repeat(auto-fit, minmax(...)) создает автоматический адаптив."
+        "`grid-template-areas` описывает геометрию страницы в виде читаемого ASCII-арт макета.",
+        "Элементы привязываются к областям через `grid-area: areaName;`.",
+        "`grid-column: 1 / -1` растягивает блок на всю ширину сетки от первой до последней линии.",
+        "Grid Overlap (`grid-area: 1 / 1`) позволяет накладывать слои друг на друга без потери высоты контейнера.",
+        "`grid-auto-flow: dense` автоматически заполняет дыры в сетке меньшими элементами."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"g-auto\"><div class=\"c\">A</div><div class=\"c\">B</div><div class=\"c\">C</div></div>",
-      "initialCss": ".g-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; padding: 20px; background: white; border-radius: 12px; }\n.c { padding: 20px; background: #c7d2fe; color: #312e81; border-radius: 8px; font-weight: bold; text-align: center; }",
-      "initialJs": "console.log('Grid advanced loaded');",
-      "instructions": "Измените размер окна для проверки переноса."
+      "initialHtml": "<div class=\"areas-sandbox\">\n  <div class=\"layout-box\">\n    <header class=\"box-h\">HEADER (1 / -1)</header>\n    <aside class=\"box-s\">SIDEBAR</aside>\n    <main class=\"box-m\">MAIN CONTENT</main>\n    <footer class=\"box-f\">FOOTER</footer>\n  </div>\n</div>",
+      "initialCss": ".areas-sandbox { padding: 16px; background: #0a0e13; font-family: monospace; }\n.layout-box {\n  display: grid;\n  grid-template-columns: 140px 1fr;\n  grid-template-rows: 40px 100px 35px;\n  grid-template-areas:\n    \"header  header\"\n    \"sidebar main\"\n    \"footer  footer\";\n  gap: 8px;\n  color: #0a0e13;\n  font-weight: bold;\n  font-size: 12px;\n  text-align: center;\n}\n.box-h { grid-area: header;  background: #2dff8a; padding: 10px; border-radius: 4px; }\n.box-s { grid-area: sidebar; background: #ffb02e; padding: 10px; border-radius: 4px; }\n.box-m { grid-area: main;    background: #29e7ff; padding: 10px; border-radius: 4px; }\n.box-f { grid-area: footer;  background: #d2a8ff; padding: 8px;  border-radius: 4px; }",
+      "initialJs": "console.log('Песочница Grid Areas активна');",
+      "instructions": "Практика с Grid Areas:\n1. Измените схему grid-template-areas: поменяйте местами sidebar и main\n2. Добавьте пустую ячейку через точку: 'sidebar . main'\n3. Сделайте карточку с наложением текста поверх фонового цвета через grid-area: 1 / 1"
     },
     "task": {
-      "title": "Адаптивный каталог",
-      "scenario": "Создайте адаптивную сетку с auto-fit и minmax(200px, 1fr).",
+      "title": "Верстка сложного адаптивного дашборда на grid-template-areas с оверлеем",
+      "scenario": "Вам необходимо сверстать дашборд аналитики: шапка header (на всю ширину), сайдбар sidebar слева, основной контент main по центру, блок виджетов widgets справа, и футер footer внизу. Кроме того, внутри main должна быть Hero-карточка с эффектом Grid Overlap (картинка + темный оверлей + текст поверх в ячейке 1 / 1).",
       "criteria": [
-        "Задан display: grid",
-        "Использован repeat(auto-fit, minmax(200px, 1fr))"
+        "Использовано свойство grid-template-areas для 3-колоночного макета (sidebar, main, widgets)",
+        "Header и Footer растянуты на всю ширину макета",
+        "Применен эффект Grid Overlap (картинка и текст в grid-area: 1 / 1) внутри Hero-блока",
+        "На мобильных разрешениях (@media max-width: 768px) макет перестраивается в одну колонку через переопределение grid-template-areas"
       ],
       "starterCode": {
-        "html": "<div class=\"cat\"><div>A</div><div>B</div></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили дашборда на Grid Areas */\n.dashboard-layout {\n}\n.dash-header {\n}\n.dash-sidebar {\n}\n.dash-main {\n}\n.dash-widgets {\n}\n.dash-footer {\n}"
       },
       "hints": [
-        "Задайте .cat { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }"
+        "Схема: 'header header header' 'sidebar main widgets' 'footer footer footer'",
+        "Для оверлея: .hero-img, .hero-txt { grid-area: 1 / 1; }",
+        "На мобилках: grid-template-columns: 1fr; grid-template-areas: 'header' 'main' 'widgets' 'sidebar' 'footer';"
       ],
       "solution": {
-        "html": "<div class=\"cat\"><div>Товар 1</div><div>Товар 2</div></div>",
-        "css": ".cat { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; padding: 16px; background: white; border-radius: 8px; }\n.cat > div { padding: 24px; background: #e0e7ff; color: #3730a3; border-radius: 8px; text-align: center; font-weight: bold; }",
-        "explanation": "Адаптивная сетка."
+        "css": ".dashboard-layout {\n  display: grid;\n  grid-template-columns: 240px 1fr 280px;\n  grid-template-rows: 60px 1fr 40px;\n  grid-template-areas:\n    \"header  header  header\"\n    \"sidebar main    widgets\"\n    \"footer  footer  footer\";\n  min-height: 100vh;\n  gap: 16px;\n  padding: 16px;\n  background: #0a0e13;\n  color: #e6edf3;\n}\n\n.dash-header  { grid-area: header;  background: #161b22; border-radius: 8px; padding: 16px; }\n.dash-sidebar { grid-area: sidebar; background: #161b22; border-radius: 8px; padding: 16px; }\n.dash-main    { grid-area: main;    background: #0d1117; border-radius: 8px; padding: 16px; }\n.dash-widgets { grid-area: widgets; background: #161b22; border-radius: 8px; padding: 16px; }\n.dash-footer  { grid-area: footer;  background: #161b22; border-radius: 8px; padding: 10px; text-align: center; }\n\n/* Hero Banner с Grid Overlap */\n.hero-banner {\n  display: grid;\n  grid-template-columns: 1fr;\n  grid-template-rows: 160px;\n  border-radius: 8px;\n  overflow: hidden;\n}\n.hero-banner-img { grid-area: 1 / 1; width: 100%; height: 100%; object-fit: cover; }\n.hero-banner-txt { grid-area: 1 / 1; z-index: 2; align-self: center; padding: 20px; color: #2dff8a; font-weight: bold; }\n\n@media (max-width: 900px) {\n  .dashboard-layout {\n    grid-template-columns: 1fr;\n    grid-template-areas:\n      \"header\"\n      \"main\"\n      \"widgets\"\n      \"sidebar\"\n      \"footer\";\n  }\n}",
+        "explanation": "Дашборд безупречно структурирован: grid-template-areas наглядно описывает 3-колоночный каркас, Hero-баннер использует Grid Overlap без absolute, а адаптация под мобилки выполнена декларативно."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c12-q1",
-          "question": "Какая функция Grid задает диапазон размера колонки?",
+          "id": "css12-q1",
+          "question": "Какое главное правило необходимо соблюдать при составлении схемы grid-template-areas?",
           "options": [
-            "clamp()",
-            "minmax(min, max)",
-            "range()",
-            "bound()"
+            "Названия областей должны быть написаны заглавными буквами",
+            "Каждая строка схемы обязана содержать одинаковое количество ячеек, образуя строгую прямоугольную матрицу",
+            "Схема не может содержать больше 3 строк",
+            "В схеме запрещены точки"
           ],
           "correctIndex": 1,
-          "explanation": "minmax(min, max) задает диапазон трека."
+          "explanation": "Спецификация CSS Grid требует, чтобы каждая строка в grid-template-areas имела равное число столбцов, а все именованные области были прямоугольными."
+        },
+        {
+          "id": "css12-q2",
+          "question": "Что делает запись grid-column: 1 / -1; на элементе сетки?",
+          "options": [
+            "Скрывает элемент с экрана",
+            "Растягивает элемент на ВСЮ ширину сетки от самой первой (1) до самой последней (-1) направляющей линии",
+            "Уменьшает элемент на 1 пиксель",
+            "Перемещает элемент в левый верхний угол"
+          ],
+          "correctIndex": 1,
+          "explanation": "Отрицательный индекс -1 указывает на последнюю линию сетки. grid-column: 1 / -1 заставляет блок занять 100% ширины колонок."
+        },
+        {
+          "id": "css12-q3",
+          "question": "В чём преимущество Grid Overlap (grid-area: 1 / 1) перед position: absolute для наложения текста поверх картинки?",
+          "options": [
+            "Grid Overlap не работает в Safari",
+            "При position: absolute родительский блок схлопывается по высоте в 0, а в Grid Overlap контейнер автоматически сохраняет правильную высоту по содержимому",
+            "Grid Overlap автоматически анимирует слои",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "position: absolute вырывает элемент из потока, ломая геометрию страницы. Grid Overlap держит все слои в потоке ячейки, вычисляя правильную высоту."
+        },
+        {
+          "id": "css12-q4",
+          "question": "Что делает свойство grid-auto-flow: dense?",
+          "options": [
+            "Увеличивает плотность пикселей",
+            "Включает алгоритм плотной упаковки: браузер автоматически заполняет пустые дыры в сетке меньшими элементами, идущими дальше по DOM-дереву",
+            "Запрещает перенос элементов",
+            "Сжимает изображения"
+          ],
+          "correctIndex": 1,
+          "explanation": "dense устраняет пустоты, образующиеся при переносе крупных элементов span 2, аккуратно подтягивая на их место компактные ячейки."
+        },
+        {
+          "id": "css12-q5",
+          "question": "Что означает символ точки '.' в свойстве grid-template-areas: 'header header' 'sidebar .' 'footer footer';?",
+          "options": [
+            "Синтаксическая ошибка",
+            "Пустая незаполненная ячейка (пропуск в сетке)",
+            "Точка останова адаптивности",
+            "Конец строки"
+          ],
+          "correctIndex": 1,
+          "explanation": "Точка . в спецификации grid-template-areas служит заполнителем для пустых ячеек, в которые не привязывается ни одна именованная область."
         }
       ]
     }

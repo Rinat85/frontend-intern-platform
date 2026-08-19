@@ -2135,5 +2135,196 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-12",
+    "moduleId": "pro",
+    "level": 12,
+    "title": "Архитектура Frontend-приложений: Feature-Sliced Design (FSD 2.0)",
+    "subtitle": "Слои FSD (app, pages, widgets, features, entities, shared), Public API (index.ts) и правила зависимостей",
+    "description": "Освойте архитектурный стандарт разработки масштабных фронтенд-приложений — Feature-Sliced Design (FSD 2.0): 6 слоев архитектуры, строгое правило однонаправленных зависимостей сверху-вниз, изоляцию через Public API (index.ts), сегментацию (ui, model, api, lib) и защиту архитектуры линтерами.",
+    "estimatedMinutes": 65,
+    "difficulty": "advanced",
+    "tags": [
+      "architecture",
+      "fsd",
+      "feature-sliced-design",
+      "clean-architecture",
+      "modularity",
+      "scalability",
+      "best-practices"
+    ],
+    "theory": {
+      "overview": "Когда проект разрастается с 5 компонентов до 500, классическая структура папок (`/components`, `/containers`, `/utils`, `/services`) превращается в неконтролируемый «спагетти-код»: компоненты запутаны циклическими зависимостями, изменение кнопки в одном месте ломает другой экран, а новый разработчик тратит недели на онбординг.\n\nИндустриальным стандартом решения этой проблемы стала методология **Feature-Sliced Design (FSD 2.0)**. В этом уроке мы изучим иерархию 6 слоев FSD, закон однонаправленных зависимостей, концепцию Public API и научимся проектировать приложения, легко масштабируемые на команды из десятков инженеров.",
+      "sections": [
+        {
+          "title": "Проблема хаоса в кодовой базе и зачем нужен FSD",
+          "content": "Эволюция архитектурных подходов во фронтенде:\n\n1. **«Наивная» структура по типам файлов** (`/components`, `/api`, `/hooks`, `/redux`):\n- Все компоненты лежат в одной куче. Непонятно, какие компоненты относятся к пользователю, какие — к корзине, а какие — к кнопкам UI-kit.\n- Высокая связность (High Coupling) и циклические импорты (`ComponentA` импортирует `ComponentB`, а тот — `ComponentA`).\n\n2. **Feature-Sliced Design (FSD 2.0)**:\n- Архитектурная методология, разделяющая кодовую базу на **6 строго упорядоченных слоев (Layers)** по степени бизнес-ценности и переиспользуемости.\n- **Предсказуемость**: любой разработчик за 10 секунд находит нужный файл.\n- **Изоляция**: модули не зависят друг от друга горизонтально, исключая сайд-эффекты и циклические ссылки.\n- **Масштабируемость**: приложение легко делить на микрофронтенды или независимые фиче-команды.",
+          "image": {
+            "src": "/images/lessons/web-fsd-architecture.svg",
+            "alt": "Архитектура Feature-Sliced Design FSD 2.0: слои, Public API и зависимости",
+            "caption": "Иерархия FSD: app → pages → widgets → features → entities → shared. Импорты разрешены ТОЛЬКО сверху вниз. Доступ через Public API (index.ts)"
+          },
+          "codeExample": {
+            "language": "bash",
+            "code": "# Эталонная файловая структура проекта по стандарту FSD 2.0:\nsrc/\n├── app/         # Инициализация: провайдеры, роутер, глобальные стили\n├── pages/       # Экраны приложения (HomePage, ProfilePage, CatalogPage)\n├── widgets/     # Крупные блоки UI (Header, Sidebar, OrderSummary)\n├── features/    # Пользовательские сценарии (AuthByEmail, AddToCart, SearchBar)\n├── entities/    # Бизнес-сущности (User, Product, Order, Course)\n└── shared/      # Базовый переиспользуемый код (UI-Kit, API-клиент, хелперы)",
+            "title": "Иерархия директорий Feature-Sliced Design (FSD 2.0)",
+            "explanation": "Каждый слой решает строго определенную архитектурную задачу, устраняя путаницу между бизнес-логикой и переиспользуемыми компонентами."
+          }
+        },
+        {
+          "title": "Иерархия 6 слоев FSD: от App до Shared",
+          "content": "Детальный разбор каждого из 6 слоев FSD (сверху вниз):\n\n1. **`app/` (Приложение)**:\n- Самый верхний слой. Содержит точку входа (`index.tsx`), глобальные CSS-стили, провайдеры контекста (Redux Store, TanStack Query Client), конфигурацию роутинга.\n\n2. **`pages/` (Страницы)**:\n- Маршрутизируемые экраны приложения. Страница НЕ содержит сложной логики — она лишь собирает крупные `widgets` в единый макет страницы.\n\n3. **`widgets/` (Виджеты)**:\n- Самодостаточные крупные блоки интерфейса: `Header`, `Sidebar`, `FeedList`, `ProductCatalogGrid`. Собираются из фич и сущностей.\n\n4. **`features/` (Фичи / Сценарии)**:\n- Действия пользователя, приносящие прямую бизнес-ценность (User Actions): `AuthByEmail`, `LikePost`, `FilterCatalog`, `DownloadInvoice`.\n\n5. **`entities/` (Бизнес-сущности)**:\n- Модели реального мира: `User`, `Article`, `Product`, `Comment`. Содержат карточку сущности (`UserCard`), типы (`UserType`) и стейт (`userModel`).\n\n6. **`shared/` (Общие ресурсы)**:\n- Базовый слой БЕЗ бизнес-логики: UI-kit (`Button`, `Input`, `Modal`), обертка над `fetch/axios`, хелперы дат, шрифты.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Пример страницы LoginPage (слой pages)\n// Страница только компонует виджеты и фичи:\nimport { AuthFormWidget } from '@/widgets/auth-form';\nimport { AuthLayout } from '@/shared/ui/layouts';\n\nexport const LoginPage = () => {\n  return (\n    <AuthLayout>\n      <AuthFormWidget />\n    </AuthLayout>\n  );\n};",
+            "title": "Композиция страницы в FSD без прямой бизнес-логики",
+            "explanation": "Слой pages остается тонким и чистым, делегируя логику авторизации виджету AuthFormWidget и базовую верстку слою shared."
+          }
+        },
+        {
+          "title": "Фундаментальные правила FSD: Однонаправленность и Public API",
+          "content": "3 Железных закона архитектуры FSD:\n\n1. **Правило однонаправленных зависимостей (Unidirectional Flow)**:\n- Модуль может импортировать модули ТОЛЬКО из слоев, лежащих СТРОГО НИЖЕ него в иерархии:\n  `pages` → `widgets` → `features` → `entities` → `shared`.\n- ❌ ЗАПРЕЩЕНО: `entities/user` НЕ МОЖЕТ импортировать ничего из `features` или `widgets`!\n- ❌ ЗАПРЕЩЕНО: Модули на одном слое НЕ МОГУТ импортировать друг друга (`entities/user` не может импортировать `entities/product`!).\n\n2. **Изоляция через Public API (`index.ts`)**:\n- Каждый слайс (папка) ОБЯЗАН иметь файл `index.ts`, объявляющий его публичный интерфейс.\n- Снаружи разрешено импортировать ТОЛЬКО через `index.ts`:\n  `import { UserCard, userModel } from '@/entities/user';`\n- ❌ ЗАПРЕЩЕНЫ глубокие импорты: `import { helper } from '@/entities/user/ui/internal/helper';`.\n\n3. **Анатомия слайса (Сегменты)**:\nКаждый слайс внутри делится на стандартные сегменты:\n- `ui/` — React-компоненты.\n- `model/` — стейт (Redux slice, Zustand store, типы).\n- `api/` — функции сетевых запросов.\n- `lib/` — вспомогательные утилиты слайса.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// entities/user/index.ts — Public API слайса User\n// Экспортируем ТОЛЬКО то, что нужно внешнему миру:\nexport { UserCard } from './ui/UserCard';\nexport { UserAvatar } from './ui/UserAvatar';\nexport { useUserStore } from './model/userStore';\nexport type { User, UserRole } from './model/types';\nexport { fetchUserById } from './api/userApi';\n\n// Все внутренние вспомогательные файлы в ui/internal остаются скрытыми!",
+            "title": "Public API слайса entities/user/index.ts",
+            "explanation": "Public API четко разделяет публичный контракт модуля и его внутренние приватные детали реализации."
+          }
+        },
+        {
+          "title": "Автоматический контроль архитектуры через ESLint Boundaries",
+          "content": "Как гарантировать соблюдение FSD правил в команде из десятков разработчиков:\n\n1. Человеческий Code Review не всегда успевает отследить случайный неправильный импорт (`import from '@/features/...'` внутри `entities`).\n\n2. Плагин **`eslint-plugin-boundaries`**:\n- Настраивает строгие правила проверки зависимостей прямо в IDE и в CI/CD конвейере:\n- При попытке запрещенного импорта снизу вверх линтер моментально выдает ошибку: `Rule violation: Cannot import features from entities layer` и блокирует коммит/мерж!\n\n3. Абсолютные пути через `@/`:\nНастройка TypeScript Path Aliases (`@/app/*`, `@/shared/*`) в `tsconfig.json` делает импорты читаемыми и независимыми от вложенности папок.",
+          "codeExample": {
+            "language": "json",
+            "code": "// .eslintrc.json — конфигурация boundaries для FSD\n{\n  \"plugins\": [\"boundaries\"],\n  \"settings\": {\n    \"boundaries/elements\": [\n      { \"type\": \"app\", \"pattern\": \"src/app\" },\n      { \"type\": \"pages\", \"pattern\": \"src/pages/*\" },\n      { \"type\": \"widgets\", \"pattern\": \"src/widgets/*\" },\n      { \"type\": \"features\", \"pattern\": \"src/features/*\" },\n      { \"type\": \"entities\", \"pattern\": \"src/entities/*\" },\n      { \"type\": \"shared\", \"pattern\": \"src/shared/*\" }\n    ]\n  }\n}",
+            "title": "Автоматическая валидация слоев FSD через eslint-plugin-boundaries",
+            "explanation": "Линтер автоматически предотвращает нарушение архитектурных границ на этапе компиляции и в CI конвейере."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Строго соблюдайте правило однонаправленных импортов сверху вниз: `app → pages → widgets → features → entities → shared`. Никогда не нарушайте этот порядок.",
+        "Всегда создавайте `index.ts` для каждого слайса и импортируйте компоненты ТОЛЬКО через этот Public API.",
+        "Если вам кажется, что двум сущностям (`entities/user` и `entities/order`) нужно импортировать друг друга — вынесите общую логику в `features` или свяжите их на уровне `widgets`.",
+        "Подключайте `eslint-plugin-boundaries` на самом старте проекта — это защитит кодовую базу от архитектурной деградации при росте команды."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Импорт снизу вверх (грубейшее нарушение FSD!)\n// Внутри entities/user/ui/UserCard.tsx:\nimport { AddToCartButton } from '@/features/add-to-cart'; // ❌ Ошибка!",
+          "good": "// Композиция на уровне widgets/user-profile:\nimport { UserCard } from '@/entities/user';\nimport { AddToCartButton } from '@/features/add-to-cart';",
+          "reason": "entities — это чистые данные. Они не должны знать о конкретных фичах. Композиция фич и сущностей происходит на слое widgets или pages."
+        },
+        {
+          "bad": "// Глубокий импорт в обход Public API\nimport { helper } from '@/entities/user/ui/components/sub/helper';",
+          "good": "import { helper } from '@/entities/user';",
+          "reason": "Глубокие импорты ломают инкапсуляцию. При рефакторинге внутренней структуры слайса все глубокие импорты сломаются."
+        },
+        {
+          "bad": "// Бизнес-логика в shared\n// shared/ui/UserAvatar.tsx (знает про поле user.vipStatus)",
+          "good": "// shared/ui/Avatar.tsx (чистый UI-компонент, принимающий src и size)",
+          "reason": "Слой shared не должен содержать никакой бизнес-специфики. Аватарка конкретного юзера должна лежать в entities/user."
+        }
+      ],
+      "keyTakeaways": [
+        "FSD 2.0 делит приложение на 6 слоев: app, pages, widgets, features, entities, shared.",
+        "Импорты разрешены ТОЛЬКО сверху вниз (Unidirectional Flow), исключая циклические зависимости.",
+        "Public API (`index.ts`) скрывает внутренние детали реализации каждого слайса.",
+        "Слайсы делятся на стандартные сегменты: ui, model, api, lib.",
+        "`eslint-plugin-boundaries` автоматически защищает архитектуру в CI/CD конвейере."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"fsd-app\">\n  <h3>FSD Архитектурный Валидатор Импортов</h3>\n  <div style=\"margin-bottom:8px;\">\n    <label>Откуда импортируем (Слой A):</label>\n    <select id=\"from-layer\" style=\"background:#161b22; color:#2dff8a; border:1px solid #30363d; padding:4px 8px;\">\n      <option value=\"pages\">pages</option>\n      <option value=\"widgets\">widgets</option>\n      <option value=\"features\">features</option>\n      <option value=\"entities\" selected>entities</option>\n      <option value=\"shared\">shared</option>\n    </select>\n  </div>\n  <div style=\"margin-bottom:12px;\">\n    <label>Что импортируем (Слой B):</label>\n    <select id=\"to-layer\" style=\"background:#161b22; color:#29e7ff; border:1px solid #30363d; padding:4px 8px;\">\n      <option value=\"pages\">pages</option>\n      <option value=\"widgets\">widgets</option>\n      <option value=\"features\" selected>features</option>\n      <option value=\"entities\">entities</option>\n      <option value=\"shared\">shared</option>\n    </select>\n  </div>\n  <button id=\"check-import\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 16px; font-weight:bold; cursor:pointer;\">Проверить валидность импорта</button>\n  <div id=\"import-result\" style=\"margin-top:12px; font-size:13px; font-weight:bold;\"></div>\n</div>",
+      "initialCss": "#fsd-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const hierarchy = ['app', 'pages', 'widgets', 'features', 'entities', 'shared'];\nconst fromSelect = document.getElementById('from-layer');\nconst toSelect = document.getElementById('to-layer');\nconst resEl = document.getElementById('import-result');\n\ndocument.getElementById('check-import').onclick = () => {\n  const from = fromSelect.value;\n  const to = toSelect.value;\n  const fromIdx = hierarchy.indexOf(from);\n  const toIdx = hierarchy.indexOf(to);\n  \n  if (fromIdx < toIdx) {\n    resEl.style.color = '#2dff8a';\n    resEl.textContent = `✅ ВАЛИДНО: ${from} (уровень ${fromIdx}) может импортировать из ${to} (уровень ${toIdx}) — импорт направлен вниз!`;\n  } else if (fromIdx === toIdx) {\n    resEl.style.color = '#f85149';\n    resEl.textContent = `❌ ЗАПРЕЩЕНО: Горизонтальные импорты внутри одного слоя ${from} запрещены в FSD!`;\n  } else {\n    resEl.style.color = '#f85149';\n    resEl.textContent = `❌ АРХИТЕКТУРНАЯ ОШИБКА: ${from} НЕ МОЖЕТ импортировать из вышележащего слоя ${to}!`;\n  }\n};",
+      "instructions": "Практика с архитектурой FSD:\n1. Проверьте импорт из entities в features — увидите ошибку импорта снизу вверх\n2. Проверьте импорт из pages в widgets — получите подтверждение валидности\n3. Проверьте кросс-импорт entities в entities"
+    },
+    "task": {
+      "title": "Проектирование структуры каталога интернет-магазина по методологии FSD 2.0",
+      "scenario": "Вам необходимо спроектировать модульную архитектуру интернет-магазина по стандарту FSD 2.0: распределить компоненты, модели данных, API-запросы и кнопки по 6 слоям (app, pages, widgets, features, entities, shared) и оформить Public API для сущности Product.",
+      "criteria": [
+        "Четко разграничены 6 слоев FSD (app, pages, widgets, features, entities, shared)",
+        "Слой entities/product содержит ui (ProductCard), model (types, store), api (fetchProducts)",
+        "Оформлен файл Public API entities/product/index.ts",
+        "Соблюдено правило зависимостей сверху-вниз (entities не зависят от features)"
+      ],
+      "starterCode": {
+        "js": "// Спроектируйте структуру и оформите entities/product/index.ts\n// Ваш код"
+      },
+      "hints": [
+        "В entities/product создайте сегменты ui, model, api",
+        "В index.ts экспортируйте: export { ProductCard } from './ui/ProductCard';",
+        "Экспортируйте типы: export type { Product } from './model/types';"
+      ],
+      "solution": {
+        "js": "// 1. Файловая структура слайса entities/product:\n// src/entities/product/\n// ├── ui/\n// │   ├── ProductCard.tsx\n// │   └── ProductPrice.tsx\n// ├── model/\n// │   ├── types.ts\n// │   └── productSlice.ts\n// ├── api/\n// │   └── productApi.ts\n// └── index.ts (Public API)\n\n// 2. entities/product/index.ts (Public API):\nexport { ProductCard } from './ui/ProductCard';\nexport { ProductPrice } from './ui/ProductPrice';\nexport { fetchProductById, fetchAllProducts } from './api/productApi';\nexport { useProductStore } from './model/productSlice';\nexport type { Product, ProductCategory, ProductRating } from './model/types';\n\n// 3. Использование в виджете Каталога (widgets/product-catalog):\n// import { ProductCard, type Product } from '@/entities/product';\n// import { AddToCartButton } from '@/features/add-to-cart';\n// import { Container } from '@/shared/ui/layout';",
+        "explanation": "Слайс entities/product строго изолирован: инкапсулирует UI, стейт и сетевые запросы, предоставляя лаконичный Public API index.ts без утечки внутренних деталей."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro12-q1",
+          "question": "В каком направлении разрешены импорты между слоями в архитектуре Feature-Sliced Design (FSD 2.0)?",
+          "options": [
+            "В любом направлении",
+            "СТРОГО СВЕРХУ ВНИЗ: app → pages → widgets → features → entities → shared",
+            "Строго снизу вверх",
+            "Только горизонтально"
+          ],
+          "correctIndex": 1,
+          "explanation": "Закон однонаправленных зависимостей FSD разрешает модулям импортировать код только из слоев, лежащих строго ниже них по иерархии."
+        },
+        {
+          "id": "pro12-q2",
+          "question": "Может ли компонент из слоя entities (например, entities/user) импортировать компонент из слоя features (например, features/auth)?",
+          "options": [
+            "Да, без ограничений",
+            "НЕТ, это грубейшее нарушение FSD: entities находятся ниже features в иерархии и не могут зависеть от фич!",
+            "Только если это TypeScript тип",
+            "Только через setTimeout"
+          ],
+          "correctIndex": 1,
+          "explanation": "entities представляют собой чистые бизнес-сущности и не могут зависеть от действий пользователя (features). Композиция фич и сущностей происходит в виджетах или на страницах."
+        },
+        {
+          "id": "pro12-q3",
+          "question": "Какую роль выполняет файл index.ts в корне каждого слайса FSD?",
+          "options": [
+            "Запускает сервер",
+            "Является Public API слайса: объявляет список публично доступных компонентов и типов, запрещая глубокие импорты во внутреннюю структуру",
+            "Удаляет неиспользуемый код",
+            "Подключает базу данных"
+          ],
+          "correctIndex": 1,
+          "explanation": "Public API (index.ts) инкапсулирует реализацию слайса. Внешний код импортирует только то, что явно выставлено в index.ts."
+        },
+        {
+          "id": "pro12-q4",
+          "question": "Что должно храниться в слое shared в проекте по стандарту FSD?",
+          "options": [
+            "Все бизнес-модели пользователей",
+            "Базовый переиспользуемый код БЕЗ бизнес-логики: UI-kit (Button, Input), сетевой клиент, утилиты, хелперы дат",
+            "Экраны приложения",
+            "Redux стор"
+          ],
+          "correctIndex": 1,
+          "explanation": "Слой shared полностью абстрагирован от предметной области проекта: в нем лежат чистые UI-компоненты дизайн-системы, HTTP-клиент и общие утилиты."
+        },
+        {
+          "id": "pro12-q5",
+          "question": "Какой инструмент позволяет автоматически проверять соблюдение правил импортов FSD в CI/CD конвейере?",
+          "options": [
+            "Prettier",
+            "Плагин eslint-plugin-boundaries, выдающий ошибки при попытке импорта снизу вверх или в обход Public API",
+            "Babel",
+            "Webpack Bundle Analyzer"
+          ],
+          "correctIndex": 1,
+          "explanation": "eslint-plugin-boundaries настраивает правила границ слоев, автоматически блокируя запрещенные импорты в IDE и CI конвейере."
+        }
+      ]
+    }
   }
 ];

@@ -2143,87 +2143,190 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-12",
     "moduleId": "javascript",
     "level": 12,
-    "title": "Асинхронный JS: Promises, Async/Await",
-    "subtitle": "Event Loop, Call Stack, Microtasks, промисы и async/await",
-    "description": "Асинхронное программирование: архитектура Event Loop (Call Stack, Task Queue, Microtasks), состояния промисов pending/fulfilled/rejected, синтаксис async/await, try/catch и Promise.all.",
-    "estimatedMinutes": 45,
+    "title": "Асинхронный JavaScript: Event Loop, Promises и Async/Await",
+    "subtitle": "Event Loop, Call Stack, Microtasks vs Macrotasks, Promise API (all, allSettled, race, any) и Async/Await",
+    "description": "Освойте асинхронную модель JavaScript: работу Event Loop, разницу между микротасками (Promises) и макротасками (Timers), состояния и цепочки промисов, синтаксис async/await с обработкой ошибок через try/catch, а также методы параллелизма Promise.all, Promise.allSettled, Promise.race и Promise.any.",
+    "estimatedMinutes": 65,
     "difficulty": "advanced",
     "tags": [
-      "JavaScript",
-      "Async",
-      "Promises",
-      "AsyncAwait",
-      "EventLoop"
+      "async",
+      "event-loop",
+      "promises",
+      "async-await",
+      "microtasks",
+      "macrotasks",
+      "promise-all",
+      "try-catch"
     ],
     "theory": {
-      "overview": "JavaScript — однопоточный язык, но благодаря механизму **Event Loop** он может выполнять неблокирующие асинхронные операции: сетевые запросы к API, таймеры и чтение файлов.",
+      "overview": "JavaScript является однопоточным языком (Single-Threaded): в один момент времени движок JS может выполнять ровно одну инструкцию в Call Stack.\n\nОднако благодаря архитектуре **Event Loop** и фоновым потокам браузера (Web APIs), JavaScript с легкостью обрабатывает сотни параллельных сетевых запросов `fetch`, таймеров и событий пользователя без блокировки интерфейса. В этом уроке мы досконально разберём устройство Event Loop, очереди Microtasks/Macrotasks, промисы и современный синтаксис `async/await`.",
       "sections": [
         {
-          "title": "Event Loop, Promises и async/await",
-          "content": "- **Call Stack**: стек синхронного выполнения функций.\n- **Microtask Queue (Микротаски)**: промисы (`Promise.then`, `queueMicrotask`) имеют **наивысший приоритет** перед макротасками (`setTimeout`)!\n- **Promise**: объект отложенного результата со статусами `pending` -> `fulfilled` или `rejected`.\n- **async/await**: синтаксический сахар над промисами, делающий асинхронный код линейным и понятным.\n- **Обработка ошибок**: блоки `try { const data = await fetch(...); } catch (err) { ... }`.",
+          "title": "Архитектура Event Loop: Call Stack, Web APIs, Microtasks и Macrotasks",
+          "content": "Как движок V8 выполняет синхронный и асинхронный код:\n\n1. **Call Stack (Стек вызовов)**:\n- Место, где исполняется текущий синхронный JavaScript-код (LIFO — Last In, First Out).\n\n2. **Web APIs (Браузерные API / libuv в Node.js)**:\n- Когда движок встречает асинхронную операцию (`fetch`, `setTimeout`, `addEventListener`), он делегирует её выполнение фоновым системным потокам C++ браузера. Стек не блокируется!\n\n3. **Очереди задач (Queues)**:\n- **Microtask Queue (Очередь микротасок — VIP-приоритет!)**: колбэки промисов (`Promise.then/catch/finally`), `async/await`, `queueMicrotask`.\n- **Task Queue / Macrotask Queue (Очередь макротасок)**: таймеры `setTimeout`, `setInterval`, `setImmediate`, события I/O.\n\n4. **Правило работы Event Loop (Закон приоритетов)**:\n- 1. Полностью выполнить весь синхронный код в Call Stack до конца.\n- 2. **ОПУСТОШИТЬ ВСЮ очередь Microtasks** (все промисы выполняются немедленно!).\n- 3. Выполнить перерисовку страницы (Render / Paint), если подошло время кадра (60/120 fps).\n- 4. Взять **СТРОГО ОДНУ** макротаску из Macrotask Queue (например, один `setTimeout`) и поместить в стек.\n- 5. Повторить цикл заново!",
+          "image": {
+            "src": "/images/lessons/js-async-eventloop.svg",
+            "alt": "Архитектура Event Loop: Call Stack, Web APIs, Microtasks и Promise Combinators",
+            "caption": "Event Loop: Call Stack выполняет код, промисы идут в приоритетную Microtask Queue, а таймеры — в Macrotask Queue"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Асинхронная функция с async/await",
-            "code": "const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));\n\nasync function loadUserData() {\n  try {\n    console.log('Загрузка пользователя...');\n    await delay(1000); // Имитация задержки сети 1 сек\n    return { id: 1, name: 'Елена' };\n  } catch (error) {\n    console.error('Ошибка загрузки:', error);\n  }\n}\n\nloadUserData().then(user => console.log('Готово:', user));",
-            "explanation": "async/await позволяет писать асинхронный код так же просто, как синхронный."
+            "code": "console.log('1. Синхронный старт');\n\nsetTimeout(() => {\n  console.log('4. Макротаска (setTimeout 0мс)');\n}, 0);\n\nPromise.resolve().then(() => {\n  console.log('3. Микротаска (Promise.then)');\n});\n\nconsole.log('2. Синхронный конец');\n\n// ПОРЯДОК ВЫВОДА В КОНСОЛЬ:\n// 1. Синхронный старт\n// 2. Синхронный конец\n// 3. Микротаска (Promise.then) — выполнилась ДО таймера!\n// 4. Макротаска (setTimeout 0мс)",
+            "title": "Классический тест Event Loop на приоритет микротасок и макротасок",
+            "explanation": "Синхронный код выполняется первым (1, 2). Затем Event Loop полностью опустошает очередь микротасок (3). И только потом выполняет макротаску таймера (4)."
+          }
+        },
+        {
+          "title": "Анатомия объекта Promise: состояния, then/catch/finally и чейнинг",
+          "content": "Промис (Promise) — это объект, представляющий результат будущей асинхронной операции:\n\n1. 3 Состояния промиса:\n- `pending` (ожидание) — начальное состояние, операция в процессе.\n- `fulfilled` (выполнен успешно) — операция завершена, доступен результат `value` (вызов `resolve(value)`).\n- `rejected` (отклонен с ошибкой) — операция провалена, доступна причина `error` (вызов `reject(error)`).\n- Промис может изменить состояние ТОЛЬКО ОДИН РАЗ (из pending в fulfilled или rejected)!\n\n2. Методы подписки и Чейнинг (Promise Chaining):\n- `.then(onFulfilled, onRejected)` — вызывается при успехе. Возврат значения из `.then()` автоматически оборачивает его в НОВЫЙ промис, что позволяет строить цепочки без Callback Hell!\n- `.catch(onRejected)` — перехватывает ЛЮБУЮ ошибку, возникшую в любом месте цепочки выше.\n- `.finally(callback)` — выполняется ВСЕГДА (и при успехе, и при ошибке), идеален для выключения спиннера загрузки (`isLoading = false`).",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Функция создания промиса таймера\nfunction wait(ms) {\n  return new Promise((resolve) => setTimeout(resolve, ms));\n}\n\n// Цепочка промисов (Promise Chaining)\nfetch('/api/user/1')\n  .then((response) => {\n    if (!response.ok) throw new Error(`HTTP error: ${response.status}`);\n    return response.json(); // Возвращает промис с распарсенным JSON\n  })\n  .then((user) => {\n    console.log('Пользователь получен:', user.name);\n    return fetch(`/api/posts?userId=${user.id}`); // Новый запрос в цепочке!\n  })\n  .then((postsRes) => postsRes.json())\n  .then((posts) => console.log('Посты пользователя:', posts.length))\n  .catch((error) => console.error('Ошибка в цепочке:', error.message))\n  .finally(() => console.log('Загрузка завершена (выключаем лоадер)'));",
+            "title": "Цепочка промисов с последовательными запросами и обработкой ошибок",
+            "explanation": "Каждый .then возвращает новый промис. Единый .catch в конце перехватывает сбои на любом шаге, а .finally гарантированно выключает спиннер."
+          }
+        },
+        {
+          "title": "Async / Await и элегантная обработка ошибок (try / catch)",
+          "content": "Синтаксис `async/await` (ES2017) — синтаксический сахар над промисами, делающий асинхронный код визуально неотличимым от синхронного:\n\n1. Ключевое слово `async`:\n- Функция, объявленная как `async function foo() { ... }`, ВСЕГДА автоматически возвращает `Promise`.\n- Если функция возвращает простое число `return 42;`, JS обернет его в `Promise.resolve(42)`.\n\n2. Ключевое слово `await`:\n- Используется ТОЛЬКО внутри `async` функций.\n- Приостанавливает выполнение текущей функции до тех пор, пока промис справа не перейдет в состояние `fulfilled` или `rejected`.\n- При этом основной поток браузера НЕ БЛОКИРУЕТСЯ — Call Stack освобождается для других задач!\n\n3. Обработка ошибок:\n- Ошибки промисов (`rejected`) превращаются в нативные исключения, которые легко перехватываются классическим блоком `try { ... } catch (err) { ... }`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "async function loadDashboardData(userId) {\n  setLoading(true);\n  \n  try {\n    // Асинхронный код выглядит как чистый синхронный код!\n    const userRes = await fetch(`/api/users/${userId}`);\n    if (!userRes.ok) throw new Error('Пользователь не найден');\n    const user = await userRes.json();\n\n    const statsRes = await fetch(`/api/stats/${user.id}`);\n    const stats = await statsRes.json();\n\n    return { user, stats };\n  } catch (error) {\n    console.error('Сбой загрузки дашборда:', error.message);\n    showToastNotification(error.message, 'error');\n    throw error; // Пробрасываем ошибку дальше при необходимости\n  } finally {\n    setLoading(false); // Выполняется всегда!\n  }\n}",
+            "title": "Идеальный паттерн async/await с try/catch/finally",
+            "explanation": "Код читается сверху вниз без вложенных колбэков. Блок catch ловит как сетевые ошибки fetch, так и ошибки парсинга json()."
+          }
+        },
+        {
+          "title": "Параллелизм: Promise.all, Promise.allSettled, Promise.race и Promise.any",
+          "content": "Комбинаторы промисов (Promise Combinators) для параллельных операций:\n\n1. **`Promise.all([p1, p2, p3])` (Быстрый параллелизм)**:\n- Запускает ВСЕ промисы параллельно.\n- Возвращает массив результатов `[res1, res2, res3]` только когда ВСЕ завершились успешно.\n- **Fail-fast**: если хотя бы один промис падает с ошибкой — весь `Promise.all` мгновенно отклоняется с этой ошибкой!\n\n2. **`Promise.allSettled([p1, p2, p3])` (Надежный)**:\n- Дожидается завершения ВСЕХ промисов независимо от их исхода!\n- Возвращает массив объектов статусов: `[{ status: 'fulfilled', value }, { status: 'rejected', reason }]`.\n- Идеален для фоновых синхронизаций, где сбой одного запроса не должен ломать остальные.\n\n3. **`Promise.race([p1, p2])` (Гонка)**:\n- Возвращает результат ПЕРВОГО завершившегося промиса (успех или ошибка).\n- Применение: таймаут для запроса (`Promise.race([fetchData(), timeout(5000)])`).\n\n4. **`Promise.any([p1, p2])` (Первый успешный)**:\n- Возвращает результат первого УСПЕШНОГО промиса, игнорируя ошибки остальных.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. Параллельная загрузка (в 3 раза быстрее последовательных await!)\nasync function fetchUserProfile(id) {\n  // Все 3 запроса отправляются ОДНОВРЕМЕННО:\n  const [user, posts, followers] = await Promise.all([\n    fetch(`/api/users/${id}`).then(r => r.json()),\n    fetch(`/api/posts/${id}`).then(r => r.json()),\n    fetch(`/api/followers/${id}`).then(r => r.json())\n  ]);\n  return { user, posts, followers };\n}\n\n// 2. Таймаут для сетевого запроса через Promise.race\nfunction fetchWithTimeout(url, timeoutMs = 5000) {\n  const timeoutPromise = new Promise((_, reject) =>\n    setTimeout(() => reject(new Error('Превышен таймаут запроса')), timeoutMs)\n  );\n  return Promise.race([fetch(url), timeoutPromise]);\n}",
+            "title": "Параллельная загрузка через Promise.all и таймаут через Promise.race",
+            "explanation": "Promise.all выполняет запросы одновременно за время самого долгого запроса (например, 200мс вместо 200+200+200=600мс при последовательном await)."
           }
         }
       ],
       "seniorTips": [
-        "Всегда оборачивайте вызовы `await` в блок `try...catch`, чтобы непредвиденные ошибки сети не роняли всё приложение."
+        "Никогда не используйте последовательные `await` для независимых запросов — объединяйте их в `Promise.all([req1, req2])` для 3–5 кратного ускорения загрузки страниц.",
+        "Помните о приоритете Event Loop: микротаски (`Promise.then`, `async/await`) ВСЕГДА выполняются РАНЬШЕ любых макротасок (`setTimeout`).",
+        "Используйте `Promise.allSettled()` вместо `Promise.all()`, если падение одного второстепенного виджета не должно ломать весь дашборд.",
+        "Всегда оборачивайте код с `await` в блок `try/catch` или обрабатывайте ошибку на уровне вызова, чтобы избежать UnhandledPromiseRejection."
       ],
       "commonMistakes": [
         {
-          "bad": "async function getData() { const res = await fetch('/api'); } /* Без обработки ошибок */",
-          "good": "async function getData() { try { const res = await fetch('/api'); } catch(e) { console.error(e); } }",
-          "reason": "Непойманный rejected промис вызывает UnhandledPromiseRejection."
+          "bad": "// Последовательные независимые await (медленно!)\nconst user = await fetchUser();\nconst config = await fetchConfig(); // Ждет завершения первого!",
+          "good": "const [user, config] = await Promise.all([fetchUser(), fetchConfig()]); // В 2 раза быстрее!",
+          "reason": "Последовательный await удваивает время ожидания. Независимые запросы должны отправляться параллельно."
+        },
+        {
+          "bad": "// Забытый await в async функции\nconst res = fetch('/api/data'); // Возвращает Promise, а не данные!\nconsole.log(res.status); // undefined",
+          "good": "const res = await fetch('/api/data');\nconsole.log(res.status); // 200",
+          "reason": "Без await переменная получает объект Promise в состоянии pending, а не готовый Response."
+        },
+        {
+          "bad": "// await внутри forEach (forEach не ждет промисы!)\nitems.forEach(async (item) => {\n  await saveItem(item);\n});\nconsole.log('Готово'); // Выведется ДО того, как items сохранятся!",
+          "good": "for (const item of items) {\n  await saveItem(item); // Последовательно\n}\n// Или параллельно:\nawait Promise.all(items.map(saveItem));",
+          "reason": "Array.prototype.forEach игнорирует промисы, возвращаемые колбэком. Для асинхронного перебора используйте for...of или Promise.all(map)."
         }
       ],
       "keyTakeaways": [
-        "Event Loop обеспечивает неблокирующий асинхронный ввод/вывод.",
-        "Микротаски (промисы) выполняются раньше таймеров.",
-        "async/await делает асинхронный код читаемым."
+        "Event Loop управляет очередями: Call Stack → ВСЕ Microtasks (Promises) → Рендеринг → 1 Macrotask (Timers).",
+        "Промисы имеют 3 состояния: `pending`, `fulfilled`, `rejected` и поддерживают чейнинг `.then()`.",
+        "`async/await` — удобный синтаксис над промисами, синхронно-читаемый и безопасный с `try/catch`.",
+        "`Promise.all` ускоряет загрузку благодаря параллелизму, а `Promise.allSettled` устойчив к ошибкам.",
+        "`Promise.race` позволяет легко реализовать таймауты сетевых запросов."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"async-demo\"><h3>Асинхронный лоадер</h3><button id=\"btn-async\">Загрузить с задержкой</button><p id=\"async-status\"></p></div>",
-      "initialCss": ".async-demo { padding: 20px; background: white; border-radius: 12px; text-align: center; }\n#async-status { margin-top: 10px; font-weight: bold; color: #4f46e5; }",
-      "initialJs": "document.getElementById('btn-async').addEventListener('click', async () => {\n  const status = document.getElementById('async-status');\n  status.textContent = '⏳ Загрузка (1.5 сек)...';\n  await new Promise(r => setTimeout(r, 1500));\n  status.textContent = '✅ Данные успешно получены через async/await!';\n});",
-      "instructions": "Нажмите кнопку и проверьте асинхронную задержку через await Promise."
+      "initialHtml": "<div id=\"async-app\">\n  <h3>Event Loop & Async/Await Тренажер</h3>\n  <div style=\"display:flex; gap:8px;\">\n    <button id=\"btn-seq\" style=\"background:#ffb02e; color:#0a0e13; border:none; padding:8px 12px; font-weight:bold; cursor:pointer;\">1. Последовательно await</button>\n    <button id=\"btn-par\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 12px; font-weight:bold; cursor:pointer;\">2. Параллельно Promise.all</button>\n  </div>\n  <pre id=\"async-log\" style=\"margin-top:12px; color:#8b949e; font-size:12px; line-height:1.5;\"></pre>\n</div>",
+      "initialCss": "#async-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const logEl = document.getElementById('async-log');\nconst sleep = (ms, name) => new Promise(r => setTimeout(() => r(name), ms));\n\nfunction log(txt) { logEl.textContent += txt + '\\n'; }\n\ndocument.getElementById('btn-seq').onclick = async () => {\n  logEl.textContent = '⏱ Запуск последовательного выполнения...\\n';\n  const t0 = performance.now();\n  const r1 = await sleep(500, 'Запрос 1 (500мс)');\n  log('✓ Получен ' + r1);\n  const r2 = await sleep(500, 'Запрос 2 (500мс)');\n  log('✓ Получен ' + r2);\n  log(`❌ Общее время: ${Math.round(performance.now() - t0)} мс (медленно!)\\n`);\n};\n\ndocument.getElementById('btn-par').onclick = async () => {\n  logEl.textContent = '🚀 Запуск параллельного Promise.all...\\n';\n  const t0 = performance.now();\n  const [r1, r2] = await Promise.all([sleep(500, 'Запрос 1 (500мс)'), sleep(500, 'Запрос 2 (500мс)')]);\n  log(`✓ Получены: ${r1} и ${r2}`);\n  log(`✅ Общее время: ${Math.round(performance.now() - t0)} мс (в 2 раза быстрее!)\\n`);\n};",
+      "instructions": "Практика с асинхронностью:\n1. Нажмите 'Последовательно await' — операция займет ~1000 мс\n2. Нажмите 'Параллельно Promise.all' — операция выполнится параллельно за ~500 мс!\n3. Добавьте тест Promise.race с таймаутом"
     },
     "task": {
-      "title": "Параллельная загрузка через Promise.all",
-      "scenario": "Запустите два промиса параллельно через Promise.all и выведите объединенный результат.",
+      "title": "Разработка асинхронного DataFetcher с параллельной загрузкой, таймаутом и повторными попытками (Retry)",
+      "scenario": "Вам необходимо разработать профессиональный асинхронный модуль DataFetcher: модуль должен выполнять параллельную загрузку нескольких ресурсов через Promise.all, поддерживать отмену по таймауту через Promise.race и реализовывать механизм автоматических повторных попыток (Retry with Backoff) при сбое сети.",
       "criteria": [
-        "Использован Promise.all([p1, p2])",
-        "Обработан массив результатов"
+        "Функция fetchWithRetry(fn, retries, delay) делает повторные попытки при ошибке",
+        "Функция fetchWithTimeout(promise, timeoutMs) отклоняет промис при превышении лимита времени",
+        "Метод fetchDashboard(userId) параллельно загружает пользователя и его заказы через Promise.all",
+        "Реализована корректная обработка ошибок через try/catch/finally"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Реализуйте асинхронный DataFetcher\nclass DataFetcher {\n  // Ваш код\n}"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "Для retry: try { return await fn(); } catch (err) { if (retries <= 0) throw err; await sleep(delay); ... }",
+        "Для timeout: Promise.race([promise, timeoutPromise])",
+        "Для параллелизма: const [u, o] = await Promise.all([this.getUser(id), this.getOrders(id)]);"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const p1 = Promise.resolve('Данные пользователя');\nconst p2 = Promise.resolve('Список заказов');\nPromise.all([p1, p2]).then(([user, orders]) => {\n  console.log(`Получено: ${user} и ${orders}`);\n});",
-        "explanation": "Параллельное выполнение асинхронных задач."
+        "js": "class DataFetcher {\n  static sleep(ms) {\n    return new Promise((resolve) => setTimeout(resolve, ms));\n  }\n\n  static async fetchWithTimeout(asyncOperation, timeoutMs = 3000) {\n    const timeoutPromise = new Promise((_, reject) =>\n      setTimeout(() => reject(new Error(`Timeout: операция превысила ${timeoutMs} мс`)), timeoutMs)\n    );\n    return Promise.race([asyncOperation, timeoutPromise]);\n  }\n\n  static async fetchWithRetry(asyncFn, maxRetries = 3, baseDelay = 500) {\n    let lastError;\n    for (let attempt = 0; attempt <= maxRetries; attempt++) {\n      try {\n        return await asyncFn();\n      } catch (err) {\n        lastError = err;\n        if (attempt < maxRetries) {\n          const delay = baseDelay * Math.pow(2, attempt);\n          console.warn(`Попытка ${attempt + 1} провалена. Повтор через ${delay} мс...`);\n          await DataFetcher.sleep(delay);\n        }\n      }\n    }\n    throw lastError;\n  }\n\n  static async fetchDashboard(userId) {\n    // Имитация параллельных API-запросов\n    const getUser = () => DataFetcher.sleep(100).then(() => ({ id: userId, name: 'Алексей' }));\n    const getOrders = () => DataFetcher.sleep(150).then(() => [{ id: 101, total: 4500 }]);\n    const getStats = () => DataFetcher.sleep(80).then(() => ({ score: 98 }));\n\n    // Параллельная загрузка через Promise.all с общим таймаутом\n    const dashboardOperation = Promise.all([\n      DataFetcher.fetchWithRetry(getUser),\n      DataFetcher.fetchWithRetry(getOrders),\n      DataFetcher.fetchWithRetry(getStats)\n    ]);\n\n    const [user, orders, stats] = await DataFetcher.fetchWithTimeout(dashboardOperation, 2000);\n    return { user, orders, stats };\n  }\n}\n\n// Тест работы\nDataFetcher.fetchDashboard(1)\n  .then((data) => console.log('Дашборд успешно собран:', data))\n  .catch((err) => console.error('Сбой:', err.message));",
+        "explanation": "DataFetcher объединяет все лучшие практики асинхронного JavaScript: параллелизм Promise.all, контроль таймаута через Promise.race и отказоустойчивость с экспоненциальным ретраем."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j12-q1",
-          "question": "Что возвращает любая функция, объявленная с ключевым словом async?",
+          "id": "js12-q1",
+          "question": "В каком порядке Event Loop выполняет синхронный код, микротаски (Promise.then) и макротаски (setTimeout)?",
           "options": [
-            "Строку",
-            "Promise",
-            "Число",
-            "Ошибку"
+            "setTimeout → Promise.then → Синхронный код",
+            "Синхронный код в Call Stack → ВСЕ задачи из Microtask Queue (Promises) → Рендеринг → ОДНА макротаска (setTimeout)",
+            "Порядок определяется случайным образом",
+            "Все задачи выполняются строго одновременно"
           ],
           "correctIndex": 1,
-          "explanation": "Любая async функция автоматически оборачивает возвращаемое значение в Promise."
+          "explanation": "Event Loop сначала выполняет синхронный код, затем полностью опустошает очередь Microtasks (включая Promise.then), и лишь затем переходит к макротаскам."
+        },
+        {
+          "id": "js12-q2",
+          "question": "Что вернет вызов Promise.all([p1, p2, p3]), если промис p2 упадет с ошибкой (reject)?",
+          "options": [
+            "Массив с результатами p1 и p3",
+            "Весь Promise.all мгновенно отклонится с ошибкой промиса p2 (принцип Fail-fast)",
+            "null",
+            "Будет ждать завершения p3"
+          ],
+          "correctIndex": 1,
+          "explanation": "Promise.all работает по принципу 'все или ничего' (Fail-fast): если хоть один промис завершается ошибкой, весь вызов немедленно отклоняется."
+        },
+        {
+          "id": "js12-q3",
+          "question": "Чем метод Promise.allSettled() отличается от Promise.all()?",
+          "options": [
+            "allSettled работает медленнее",
+            "Promise.allSettled дожидается завершения ВСЕХ промисов независимо от того, успешны они или завершились ошибкой, возвращая массив статусов",
+            "allSettled не поддерживает массивы",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "Promise.allSettled никогда не падает при ошибке одного из промисов — он возвращает массив объектов со статусами 'fulfilled' или 'rejected' для каждого запроса."
+        },
+        {
+          "id": "js12-q4",
+          "question": "Что произойдет, если в async функции написать return 100;?",
+          "options": [
+            "Функция вернет число 100",
+            "Функция автоматически вернет Promise.resolve(100)",
+            "Будет ошибка синтаксиса",
+            "Функция ничего не вернет"
+          ],
+          "correctIndex": 1,
+          "explanation": "Любая async функция ВСЕГДА возвращает объект Promise. Любое возвращаемое синхронное значение автоматически упаковывается в Promise.resolve()."
+        },
+        {
+          "id": "js12-q5",
+          "question": "Какой Promise комбинатор идеально подходит для реализации ограничения времени выполнения сетевого запроса (Таймаута)?",
+          "options": [
+            "Promise.race([fetchData(), timeoutPromise]) — вернет результат того промиса, который завершится первым",
+            "Promise.all()",
+            "Promise.resolve()",
+            "Promise.reject()"
+          ],
+          "correctIndex": 0,
+          "explanation": "Promise.race возвращает результат первого завершившегося промиса. Если таймер сработает раньше ответа сервера, запрос прервется по таймауту."
         }
       ]
     }

@@ -984,3 +984,272 @@ a:hover { color: var(--cyan); }
 .text-success { color: var(--neon); }
 .text-accent { color: var(--neon); }
 .text-muted { color: var(--fg-2); }
+
+/* ═══════════════════════════════════════════════════════════════
+   THEORY SECTION STYLING & PARAGRAPH SPACING
+   ═══════════════════════════════════════════════════════════════ */
+.theory-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.theory-overview-card {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  padding: 24px;
+  margin-bottom: 8px;
+}
+
+.theory-overview-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.theory-overview-header h3 {
+  font-size: 15px;
+  font-family: var(--font-mono);
+  color: var(--fg-0);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.theory-overview-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.theory-sections-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.theory-section-block {
+  background: var(--bg-1);
+  border: 1px solid var(--line);
+  padding: 24px;
+  position: relative;
+}
+
+.theory-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.theory-section-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--neon);
+  background: rgba(45, 255, 138, 0.08);
+  color: var(--neon);
+  font-weight: 700;
+  font-size: 11px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+}
+
+.theory-section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fg-0);
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.theory-section-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.theory-text-paragraph {
+  font-size: 14px;
+  line-height: 1.8;
+  color: var(--fg-1);
+  margin-bottom: 0;
+}
+
+.theory-paragraph-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 6px 0;
+}
+
+.theory-bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.theory-bullet-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg-1);
+}
+
+.theory-bullet-list li .inline-icon {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.theory-code-example {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.theory-code-expl {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg-1);
+  margin-top: 8px;
+  padding: 12px 14px;
+  background: var(--bg-2);
+  border-left: 3px solid var(--neon);
+}
+
+.senior-tips-card {
+  background: var(--bg-1);
+  border: 1px solid var(--amber);
+  padding: 24px;
+  margin-top: 8px;
+  box-shadow: 0 0 20px rgba(255, 176, 46, 0.06);
+}
+
+.senior-tips-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.senior-tips-header h3 {
+  font-size: 14px;
+  font-family: var(--font-mono);
+  color: var(--amber);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.senior-tips-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.senior-tips-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg-1);
+}
+
+.mistakes-card {
+  background: var(--bg-1);
+  border: 1px solid var(--red);
+  padding: 24px;
+  margin-top: 8px;
+  box-shadow: 0 0 20px rgba(255, 59, 92, 0.06);
+}
+
+.mistakes-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.mistakes-header h3 {
+  font-size: 14px;
+  font-family: var(--font-mono);
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+
+.mistakes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mistake-item {
+  padding: 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--red);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mistake-bad, .mistake-good {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mistake-bad code, .mistake-good code {
+  background: var(--void);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--fg-0);
+}
+
+.mistake-reason {
+  font-size: 12px;
+  color: var(--fg-2);
+  line-height: 1.5;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+
+.takeaways-card {
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-left: 3px solid var(--neon);
+  padding: 20px;
+  margin-top: 8px;
+}
+
+.takeaways-card h4 {
+  font-size: 13px;
+  font-family: var(--font-mono);
+  color: var(--neon);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}

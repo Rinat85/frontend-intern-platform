@@ -1761,85 +1761,190 @@ export const cssLessons: Lesson[] = [
     "id": "css-10",
     "moduleId": "css",
     "level": 10,
-    "title": "Flexbox: Элементы",
-    "subtitle": "Flex-grow, flex-shrink, flex-basis, align-self и order",
-    "description": "Управление flex-элементами: распределение свободного места grow, сжатие shrink, базовый размер basis, сокращение flex: 1.",
-    "estimatedMinutes": 35,
+    "title": "Flexbox: Свойства элементов (Flex Items)",
+    "subtitle": "flex-grow, flex-shrink, flex-basis, сокращение flex: 1, align-self и order",
+    "description": "Освойте управление дочерними flex-элементами: распределение свободного пространства через flex-grow, защиту от сплющивания аватарок и иконок через flex-shrink: 0, базовый размер flex-basis, сокращения flex: 1 / flex: auto, индивидуальное выравнивание align-self и изменение порядка order.",
+    "estimatedMinutes": 60,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Flexbox",
-      "FlexItems"
+      "flexbox",
+      "flex-grow",
+      "flex-shrink",
+      "flex-basis",
+      "flex-items",
+      "align-self",
+      "order"
     ],
     "theory": {
-      "overview": "Свойства дочерних элементов определяют, как каждый блок растягивается и сжимается.",
+      "overview": "В предыдущем уроке мы изучили flex-контейнер (родителя). Теперь мы переходим к свойствам самих flex-элементов (flex items) — дочерних блоков.\n\nПонимание триады `flex-grow`, `flex-shrink` и `flex-basis` — граница между новичком и опытным фронтенд-инженером. В этом уроке мы научимся точно управлять тем, как элементы делят свободное пространство, защищать иконки и аватарки от сплющивания (`flex-shrink: 0`), выравнивать отдельные элементы через `align-self` и менять визуальный порядок через `order`.",
       "sections": [
         {
-          "title": "grow, shrink, basis",
-          "content": "- `flex-grow: 1`: занимает всё свободное место.\n- `flex-shrink: 0`: запрещает сжиматься (для иконок).\n- `flex: 1`: shorthand для равного деления колонок.\n- `align-self`: индивидуальное выравнивание.",
+          "title": "Триада Flex-элемента: flex-grow, flex-shrink и flex-basis",
+          "content": "Как браузер вычисляет итоговый размер flex-элемента:\n\n1. **`flex-basis` (Базовый размер)**:\n- Задает начальный размер элемента вдоль Main Axis ДО ТОГО, как начнет распределяться свободное пространство.\n- Значения: `auto` (берется свойство `width`/`height` или размер контента), `200px`, `30%`, `0`.\n- Приоритет размеров: `min-width` / `max-width` > `flex-basis` > `width`.\n\n2. **`flex-grow` (Коэффициент расширения)**:\n- Определяет, какую долю ПОЛОЖИТЕЛЬНОГО свободного пространства (если контейнер шире суммы элементов) заберет данный элемент.\n- `flex-grow: 0` (по умолчанию) — элемент не увеличивается, сохраняя свой `flex-basis`.\n- Если у элемента A `flex-grow: 1`, а у B `flex-grow: 2`, то B получит в 2 раза больше свободного места, чем A!\n\n3. **`flex-shrink` (Коэффициент сжатия)**:\n- Определяет, насколько элемент ужмется при ДЕФИЦИТЕ места (если элементы не помещаются в контейнер при `flex-wrap: nowrap`).\n- `flex-shrink: 1` (по умолчанию) — элемент сжимается пропорционально.\n- **`flex-shrink: 0`** — КРИТИЧЕСКИ ВАЖНО: полностью ЗАПРЕЩАЕТ элементу сжиматься меньше его `flex-basis`!",
+          "image": {
+            "src": "/images/lessons/css-flexbox-items.svg",
+            "alt": "CSS Flexbox свойства элементов: flex-grow, flex-shrink, flex-basis, align-self",
+            "caption": "flex-grow забирает свободное место, flex-shrink: 0 защищает аватарки от сплющивания, flex: 1 1 0% создает равные колонки, align-self переопределяет выравнивание"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Строка поиска",
-            "code": ".search { display: flex; gap: 10px; }\n.input { flex-grow: 1; }\n.btn { flex-shrink: 0; }",
-            "explanation": "Инпут растягивается, кнопка фиксирована."
+            "code": "/* Защита иконки от сплющивания при длинном тексте */\n.user-card {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n}\n\n.user-avatar {\n  width: 48px;\n  height: 48px;\n  border-radius: 50%;\n  /* БЕЗ flex-shrink: 0 длинное имя сожмет аватарку в овал! */\n  flex-shrink: 0;\n}\n\n.user-info {\n  /* Занимает всё оставшееся свободное пространство */\n  flex-grow: 1;\n}",
+            "title": "Защита аватарки от сплющивания через flex-shrink: 0",
+            "explanation": "flex-shrink: 0 гарантирует идеальный круг 48x48px даже если текст в user-info очень длинный. flex-grow: 1 отдает тексту всё свободное место."
+          }
+        },
+        {
+          "title": "Сокращение flex: flex: 1 vs flex: auto vs flex: initial vs flex: none",
+          "content": "Спецификация W3C настоятельно рекомендует использовать сокращенное свойство `flex: grow shrink basis;` вместо раздельных свойств:\n\n1. **`flex: 1;` (`flex: 1 1 0%;`)** — САМОЕ ПОПУЛЯРНОЕ СОКРАЩЕНИЕ:\n- `grow: 1, shrink: 1, basis: 0%`.\n- Все элементы делят ширину контейнера СТРОГО ПОРОВНУ, независимо от объема контента внутри них!\n- Идеально для равных колонок сетки (2, 3, 4 колонки).\n\n2. **`flex: auto;` (`flex: 1 1 auto;`)**:\n- `grow: 1, shrink: 1, basis: auto`.\n- Элементы растут и сжимаются, но с учетом исходного размера содержимого (элемент с длинным текстом будет шире).\n\n3. **`flex: initial;` (`flex: 0 1 auto;`)** — поведение по умолчанию:\n- Элемент не растет (`grow: 0`), но может сжиматься (`shrink: 1`), размер по контенту (`basis: auto`).\n\n4. **`flex: none;` (`flex: 0 0 auto;`)**:\n- Элемент абсолютно жесткий: не растет, не сжимается, размер строго по `width`/контенту.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Идеальная 3-колоночная сетка с абсолютно равной шириной колонок */\n.equal-grid {\n  display: flex;\n  gap: 16px;\n}\n\n.equal-grid .column {\n  /* flex: 1 задает flex-basis: 0%, поэтому колонки строго равны! */\n  flex: 1;\n  background: #161b22;\n  padding: 16px;\n  border-radius: 8px;\n}\n\n/* Сайдбар фиксированной ширины + гибкий контент */\n.layout {\n  display: flex;\n  gap: 24px;\n}\n.layout .sidebar {\n  /* Фиксированные 260px, не сжимается и не растет */\n  flex: 0 0 260px;\n}\n.layout .content {\n  /* Забирает всё оставшееся место */\n  flex: 1;\n}",
+            "title": "Сетка с равными колонками flex: 1 и связка фикс-сайдбар + контент",
+            "explanation": "flex: 1 делает все колонки одинаковыми независимо от длины текста внутри. flex: 0 0 260px жестко фиксирует ширину сайдбара."
+          }
+        },
+        {
+          "title": "align-self: Индивидуальное выравнивание отдельного элемента",
+          "content": "Свойство `align-self` позволяет ОДНОМУ конкретному flex-элементу переопределить общее выравнивание `align-items`, заданное на контейнере:\n\nЗначения `align-self`:\n- `auto` (по умолчанию) — наследует значение `align-items` родителя.\n- `flex-start` — прижимает этот конкретный элемент к верху поперечной оси.\n- `flex-end` — прижимает к низу.\n- `center` — центрирует только данный элемент.\n- `stretch` — растягивает элемент на всю высоту.\n- `baseline` — выравнивает по базовой линии.\n\nТипичный сценарий: контейнер имеет `align-items: center`, но кнопка «Закрыть ✕» в углу карточки должна быть прижата к самому верху через `align-self: flex-start`.",
+          "codeExample": {
+            "language": "css",
+            "code": ".notification-banner {\n  display: flex;\n  align-items: center; /* Все центрированы по вертикали */\n  gap: 16px;\n  padding: 16px;\n  background: #161b22;\n}\n\n.notification-text {\n  flex: 1;\n}\n\n/* Кнопка закрытия прижата к верхнему правому углу */\n.close-btn {\n  align-self: flex-start; /* Переопределяет align-items: center! */\n  background: transparent;\n  border: none;\n  color: #8b949e;\n  cursor: pointer;\n}",
+            "title": "Переопределение выравнивания через align-self: flex-start",
+            "explanation": "Все элементы баннера отцентрированы по вертикали, но кнопка close-btn благодаря align-self: flex-start прижата к верхнему краю."
+          }
+        },
+        {
+          "title": "order: Управление порядком и доступность",
+          "content": "Свойство `order` изменяет ВИЗУАЛЬНЫЙ порядок отображения flex-элементов без изменения их позиции в HTML-разметке:\n\n1. Значение: целое число (положительное, отрицательное или 0). По умолчанию у всех элементов `order: 0`.\n2. Элементы с меньшим `order` отображаются раньше: элемент с `order: -1` встанет в самое начало, а с `order: 1` — в конец.\n\n⚠️ Предупреждение Accessibility (a11y):\nСвойство `order` меняет ТОЛЬКО визуальное отображение на экране! Порядок навигации клавишей `Tab` с клавиатуры и порядок чтения скринридером ОСТАЮТСЯ прежними (по DOM-дереву HTML!).\nЗолотое правило: никогда не используйте `order` для исправления кривой HTML-разметки — меняйте порядок в самом HTML, а `order` используйте только для адаптивной смены блоков на мобилках.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Адаптивная смена порядка: на мобилках сайдбар идет ПОД контентом */\n.layout-container {\n  display: flex;\n  gap: 20px;\n}\n\n.main-content {\n  flex: 1;\n  order: 1; /* Контент идет первым */\n}\n\n.sidebar {\n  width: 240px;\n  order: 2; /* Сайдбар идет вторым */\n}\n\n/* На десктопе сайдбар ставим слева */\n@media (min-width: 1024px) {\n  .sidebar {\n    order: 0; /* Сайдбар перемещается влево! */\n  }\n}",
+            "title": "Адаптивное управление визуальным порядком через order",
+            "explanation": "order: 0 перемещает сайдбар влево на больших экранах без дублирования HTML-разметки."
           }
         }
       ],
       "seniorTips": [
-        "Для иконок всегда пишите flex-shrink: 0."
+        "ВСЕГДА ставьте `flex-shrink: 0;` на иконки, аватарки и бейджи внутри flex-контейнеров — это спасет их от сплющивания при переполнении соседнего текста.",
+        "Используйте `flex: 1;` (эквивалент `flex: 1 1 0%`) для создания сеток с абсолютно равными колонками, не зависящими от объема содержимого.",
+        "Для фиксированных колонок (сайдбар) используйте `flex: 0 0 280px;` — это гарантирует точный размер без сжатия и роста.",
+        "Не используйте `order` без крайней необходимости — расхождение визуального порядка и порядка навигации с клавиатуры (Tab) нарушает доступность WCAG."
       ],
       "commonMistakes": [
         {
-          "bad": ".icon { width: 24px; } /* Сожмется при нехватке места */",
-          "good": ".icon { width: 24px; flex-shrink: 0; }",
-          "reason": "flex-shrink: 0 защищает от сплющивания."
+          "bad": "/* Забыли flex-shrink: 0 на аватарке */\n.avatar { width: 50px; height: 50px; border-radius: 50%; }",
+          "good": ".avatar { width: 50px; height: 50px; border-radius: 50%; flex-shrink: 0; }",
+          "reason": "При длинном тексте рядом flex-shrink: 1 по умолчанию сплющит круглую аватарку в овал."
+        },
+        {
+          "bad": "/* flex-grow: 1 для равных колонок с разным контентом */\n.col { flex-grow: 1; } /* Колонки будут разной ширины! */",
+          "good": ".col { flex: 1; } /* flex-basis: 0% гарантирует строго равную ширину */",
+          "reason": "flex-grow: 1 распределяет остаток поверх flex-basis: auto (размера контента). Колонка с 100 словами станет шире колонки с 2 словами. flex: 1 стартует с basis: 0%."
+        },
+        {
+          "bad": "/* Изменение порядка табуляции через order */\n.btn-submit { order: -1; }",
+          "good": "<!-- Измените порядок кнопок в самом HTML-коде -->",
+          "reason": "order меняет только картинку на экране. Пользователь с клавиатуры всё равно попадет на кнопку в порядке DOM."
         }
       ],
       "keyTakeaways": [
-        "flex: 1 делит место поровну.",
-        "flex-shrink: 0 защищает от сжатия."
+        "`flex-basis` — базовый размер, `flex-grow` — расширение, `flex-shrink` — сжатие.",
+        "`flex-shrink: 0` защищает иконки и аватарки от искажения пропорций.",
+        "`flex: 1` (`1 1 0%`) создает идеально равные колонки независимо от длины текста.",
+        "`align-self` позволяет отдельному элементу переопределить родительский `align-items`.",
+        "`order` меняет визуальный порядок, но не влияет на фокус клавиатуры и скринридеры."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"grow-demo\"><div class=\"f-fix\">100px</div><div class=\"f-grow\">flex: 1</div></div>",
-      "initialCss": ".grow-demo { display: flex; gap: 10px; padding: 20px; background: white; border-radius: 12px; }\n.f-fix { width: 100px; flex-shrink: 0; padding: 12px; background: #94a3b8; color: white; border-radius: 6px; text-align: center; }\n.f-grow { flex: 1; padding: 12px; background: #4f46e5; color: white; border-radius: 6px; text-align: center; }",
-      "initialJs": "console.log('Flex items loaded');",
-      "instructions": "Посмотрите растягивание второго блока."
+      "initialHtml": "<div class=\"items-sandbox\">\n  <div class=\"flex-row\">\n    <img src=\"/images/lessons/html-semantic-architecture.svg\" class=\"box-avatar\" alt=\"demo\" />\n    <div class=\"box-content\">\n      <h4 style=\"margin:0; color:#2dff8a;\">Алексей Архитектор</h4>\n      <p style=\"margin:4px 0 0; color:#8b949e; font-size:12px;\">Длинное описание роли разработчика на проекте с Flexbox...</p>\n    </div>\n    <button class=\"box-action\">✕</button>\n  </div>\n</div>",
+      "initialCss": ".items-sandbox { padding: 16px; background: #0a0e13; font-family: monospace; }\n.flex-row {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  background: #161b22;\n  padding: 12px;\n  border-radius: 8px;\n  border: 1px solid #30363d;\n}\n.box-avatar {\n  width: 44px;\n  height: 44px;\n  border-radius: 50%;\n  object-fit: cover;\n  flex-shrink: 0; /* Защита от сжатия! */\n  border: 1px solid #2dff8a;\n}\n.box-content {\n  flex: 1;\n}\n.box-action {\n  align-self: flex-start;\n  background: transparent;\n  border: none;\n  color: #f85149;\n  font-size: 16px;\n  cursor: pointer;\n}",
+      "initialJs": "console.log('Песочница свойств flex-элементов готова');",
+      "instructions": "Практика с flex-элементами:\n1. Удалите flex-shrink: 0 с .box-avatar и добавьте много текста в .box-content — посмотрите на сплющивание\n2. Измените align-self на .box-action: попробуйте center, flex-end\n3. Задайте order: -1 для .box-action и посмотрите на перемещение в начало"
     },
     "task": {
-      "title": "Строка поиска с flex: 1",
-      "scenario": "Сделайте инпут растягивающимся на всю ширину.",
+      "title": "Верстка сложной карточки товара со сплющиванием, бейджами и align-self",
+      "scenario": "Вам необходимо сверстать карточку товара в интернет-магазине: карточка должна содержать защищенную от сжатия миниатюру товара (flex-shrink: 0), гибкий блок описания с flex: 1, ценник, прижатую к верхнему углу иконку избранного через align-self: flex-start, и адаптивную сетку характеристик с равными колонками flex: 1.",
       "criteria": [
-        "Контейнеру задан display: flex",
-        "Инпуту задан flex: 1",
-        "Кнопке задан flex-shrink: 0"
+        "Миниатюра товара защищена от сжатия через flex-shrink: 0",
+        "Текстовый блок занимает свободное пространство через flex: 1 / flex-grow: 1",
+        "Кнопка 'В избранное' прижата к верхнему углу через align-self: flex-start",
+        "Нижний блок характеристик разбит на 3 равные колонки через flex: 1",
+        "Применен правильный шортхэнд flex"
       ],
       "starterCode": {
-        "html": "<div class=\"search\"><input type=\"text\"><button>Поиск</button></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили карточки товара */\n.product-item {\n}\n.product-thumb {\n}\n.product-details {\n}\n.btn-favorite {\n}\n.specs-row {\n}"
       },
       "hints": [
-        "Задайте .search { display: flex; gap: 8px; } .search input { flex: 1; } .search button { flex-shrink: 0; }"
+        "Для миниатюры: width: 80px; height: 80px; flex-shrink: 0;",
+        "Для описания: flex: 1;",
+        "Для избранного: align-self: flex-start;"
       ],
       "solution": {
-        "html": "<div class=\"search\"><input type=\"text\" placeholder=\"Поиск...\"><button>Поиск</button></div>",
-        "css": ".search { display: flex; gap: 8px; padding: 16px; background: white; border-radius: 8px; }\n.search input { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; }\n.search button { flex-shrink: 0; padding: 10px 20px; background: #4f46e5; color: white; border: none; border-radius: 6px; }",
-        "explanation": "Адаптивная строка поиска."
+        "css": ".product-item {\n  display: flex;\n  align-items: center;\n  gap: 16px;\n  padding: 16px;\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 10px;\n  color: #e6edf3;\n}\n\n.product-thumb {\n  width: 80px;\n  height: 80px;\n  border-radius: 8px;\n  object-fit: cover;\n  flex-shrink: 0; /* Не сжимается! */\n  border: 1px solid #30363d;\n}\n\n.product-details {\n  flex: 1; /* Занимает всю ширину */\n  display: flex;\n  flex-direction: column;\n  gap: 4px;\n}\n\n.btn-favorite {\n  align-self: flex-start; /* В верхний правый угол */\n  background: transparent;\n  border: 1px solid #30363d;\n  color: #ffb02e;\n  padding: 6px 10px;\n  border-radius: 6px;\n  cursor: pointer;\n}\n\n.specs-row {\n  display: flex;\n  gap: 8px;\n  margin-top: 8px;\n}\n\n.specs-row .spec-col {\n  flex: 1; /* Равные 3 колонки */\n  background: #0d1117;\n  padding: 6px 8px;\n  border-radius: 4px;\n  font-size: 11px;\n  text-align: center;\n}",
+        "explanation": "Стилистика использует передовые практики Flexbox: flex-shrink: 0 спасает превью от сжатия, flex: 1 отдает место контенту, align-self: flex-start позиционирует кнопку, а spec-col делит сетку строго поровну."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c10-q1",
-          "question": "Как запретить элементу сжиматься?",
+          "id": "css10-q1",
+          "question": "Зачем на круглые аватарки и иконки внутри flex-контейнеров ВСЕГДА нужно ставить flex-shrink: 0?",
           "options": [
-            "flex-grow: 0",
-            "flex-shrink: 0",
-            "width: fixed",
-            "no-shrink"
+            "Чтобы сделать их круглыми",
+            "Чтобы при переполнении соседнего текста flex-shrink: 1 по умолчанию не сплющивал изображение в овал",
+            "Для изменения цвета иконки",
+            "Для ускорения загрузки картинки"
           ],
           "correctIndex": 1,
-          "explanation": "flex-shrink: 0 запрещает сжатие."
+          "explanation": "По умолчанию у flex-элементов flex-shrink: 1. Если текст рядом слишком длинный, браузер сжимает соседние элементы. flex-shrink: 0 гарантирует сохранение точных размеров."
+        },
+        {
+          "id": "css10-q2",
+          "question": "В чём преимущество сокращения flex: 1 (1 1 0%) перед flex-grow: 1 для создания равных колонок сетки?",
+          "options": [
+            "flex: 1 работает в 2 раза быстрее",
+            "flex: 1 сбрасывает flex-basis в 0%, поэтому колонки делят ширину строго поровну независимо от объема текста, в то время как flex-grow: 1 делает колонку с большим текстом шире",
+            "flex-grow: 1 устарел",
+            "Разницы нет"
+          ],
+          "correctIndex": 1,
+          "explanation": "flex: 1 задает flex-basis: 0%, распределяя 100% ширины поровну. flex-grow: 1 сохраняет flex-basis: auto (размер контента), делая колонки с длинным текстом шире остальных."
+        },
+        {
+          "id": "css10-q3",
+          "question": "Какое свойство позволяет ОДНОМУ конкретному flex-элементу переопределить выравнивание align-items контейнера?",
+          "options": [
+            "align-content",
+            "align-self",
+            "justify-self",
+            "vertical-align"
+          ],
+          "correctIndex": 1,
+          "explanation": "Свойство align-self задается непосредственно на flex-элементе и переопределяет родительское правило align-items только для этого узла."
+        },
+        {
+          "id": "css10-q4",
+          "question": "Как задать жесткий сайдбар шириной 280px, который не сжимается и не растет при любых размерах окна?",
+          "options": [
+            "width: 280px;",
+            "flex: 0 0 280px; (или flex: none; width: 280px;)",
+            "flex-grow: 280;",
+            "flex: 1 280px;"
+          ],
+          "correctIndex": 1,
+          "explanation": "flex: 0 0 280px задает flex-grow: 0 (не расти), flex-shrink: 0 (не сжиматься) и flex-basis: 280px, фиксируя размер намертво."
+        },
+        {
+          "id": "css10-q5",
+          "question": "Почему изменение визуального порядка через свойство order может нарушить доступность (Accessibility WCAG)?",
+          "options": [
+            "order удаляет текст",
+            "order меняет только картинку на экране, но порядок навигации с клавиатуры (Tab) и порядок чтения скринридером остаются прежними по DOM-дереву, создавая рассинхрон",
+            "order не поддерживается на мобильных",
+            "order замедляет GPU"
+          ],
+          "correctIndex": 1,
+          "explanation": "Спецификация CSS указывает, что order влияет только на визуальный рендеринг. Фокус клавиатуры Tab и скринридеры следуют порядку узлов в HTML-коде."
         }
       ]
     }

@@ -1768,112 +1768,193 @@ export const htmlLessons: Lesson[] = [
     "id": "html-10",
     "moduleId": "html",
     "level": 10,
-    "title": "Семантическая верстка (HTML5)",
-    "subtitle": "header, nav, main, article, section, aside, footer и доступность a11y",
-    "description": "Переход от «div-верстки» к профессиональной семантической структуре: иерархия блоков, ориентиры страницы (Landmarks), теги figure, details/summary и стандарты доступности WCAG.",
-    "estimatedMinutes": 40,
+    "title": "Семантическая верстка и структура веб-документа",
+    "subtitle": "header, nav, main, article, section, aside, footer, WAI-ARIA ориентиры и SEO-иерархия",
+    "description": "Освойте семантическую архитектуру HTML5: правильное использование структурных ориентиров (header, nav, main, article, section, aside, footer), смысловых тегов (time, address, figure, details), WAI-ARIA Landmark ролей и строгой иерархии заголовков h1-h6 для доступности (WCAG) и максимального SEO-ранжирования.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "HTML",
-      "Semantic",
-      "HTML5",
-      "Accessibility",
-      "A11y",
-      "SEO"
+      "semantics",
+      "html5",
+      "accessibility",
+      "seo",
+      "article",
+      "section",
+      "main",
+      "nav",
+      "wai-aria"
     ],
     "theory": {
-      "overview": "В эпоху HTML4 сайты верстались сплошным нагромождением тегов `<div class=\"header\">`, `<div class=\"content\">`, `<div class=\"footer\">` — так называемый **Div Soup** (суп из дивов). Для браузеров и поисковых роботов такая страница была бессмысленной кашей из прямоугольников.\n\nСтандарт HTML5 ввел семантические элементы, каждый из которых сообщает точный смысл своего содержимого. Семантика — это фундамент **доступности (A11y)**, поискового продвижения (SEO) и чистоты архитектуры веб-приложений.",
+      "overview": "Семантическая верстка (Semantic HTML) — это использование HTML-тегов в строгом соответствии с их смысловым назначением, а не только для визуального оформления.\n\nЗамена бессмысленных `<div>` на семантические ориентиры (`<main>`, `<article>`, `<section>`, `<nav>`, `<aside>`) кардинально улучшает доступность (Accessibility WCAG 2.2) для сотен миллионов людей с программами чтения с экрана (Screen Readers), повышает позиции сайта в поисковых системах Google и Яндекс, активирует режим чтения (Reader Mode в Safari и Firefox) и структурирует кодовую базу для командной разработки.",
       "sections": [
         {
-          "title": "Карта семантических блоков страницы (Landmarks)",
-          "content": "Главные ориентиры страницы:\n- `<header>` — вводная часть страницы или секции (логотип, поиск, навигация, имя автора статьи).\n- `<nav>` — блок основных навигационных ссылок (главное меню, пагинация, хлебные крошки).\n- `<main>` — **главное уникальное содержимое страницы**. **Правило:** на странице может быть строго **один тег `<main>`**, не вложенный в header или footer!\n- `<article>` — самостоятельный, независимый блок контента, который имеет смысл сам по себе (пост в блоге, новость, карточка товара, комментарий пользователя).\n- `<section>` — смысловой раздел документа или статьи (например: секция «О компании», секция «Тарифы», секция «Отзывы»). Обычно содержит заголовок h2–h6.\n- `<aside>` — дополнительный или косвенный контент (боковая панель, похожие статьи, баннер, плашка с подсказкой).\n- `<footer>` — подвал страницы или статьи (копирайт, ссылки на политику конфиденциальности, контакты).",
+          "title": "Зачем нужна семантика: Доступность (a11y), SEO и Safari Reader Mode",
+          "content": "Почему профессиональная разработка не использует «div-ный суп»:\n\n1. **Доступность (Accessibility / WCAG 2.2)**:\n- Незрячие пользователи используют скринридеры (NVDA, VoiceOver, JAWS).\n- Скринридер позволяет мгновенно «перепрыгивать» между ключевыми областями страницы (Landmarks): сразу к `<nav>` (меню), к `<main>` (главному контенту) или к поиску, пропуская десятки повторяющихся ссылок шапки.\n\n2. **Поисковая оптимизация (SEO & Rich Snippets)**:\n- Поисковые роботы Googlebot и Яндекс парсят семантическое дерево документа.\n- Текст внутри `<article>` и `<header>` индексируется с повышенным приоритетом для быстрых ответов и расширенных сниппетов.\n\n3. **Режим чтения (Safari Reader Mode)**:\n- Браузеры автоматически генерируют чистый режим для чтения статьи без рекламы, основываясь на наличии тегов `<article>`, `<header>`, `<h1>` и `<time>`.\n\n4. **Правило единственного `<h1>`**:\nНа странице ДОЛЖЕН быть строго ОДИН тег `<h1>`, выражающий главную тему документа. Все остальные заголовки строго следуют иерархии: `h1 → h2 → h3` (никогда не перепрыгивайте с `h1` сразу на `h3`!).",
+          "image": {
+            "src": "/images/lessons/html-semantic-architecture.svg",
+            "alt": "Семантическая архитектура HTML5: header, nav, main, article, section, aside, footer",
+            "caption": "Анатомия семантической страницы: header (шапка), nav (меню), main (один на страницу), article (автономный пост), section (раздел), aside (сайдбар), footer (подвал)"
+          },
           "codeExample": {
             "language": "html",
-            "title": "Каркас семантической страницы",
-            "code": "<header class=\"header\">\n  <a href=\"/\" class=\"logo\">MyLogo</a>\n  <nav class=\"nav\">\n    <ul><li><a href=\"/catalog\">Каталог</a></li></ul>\n  </nav>\n</header>\n\n<main class=\"main-content\">\n  <article class=\"product-card\">\n    <h2>Курс Frontend Pro</h2>\n    <p>Полная программа стажировки.</p>\n  </article>\n  \n  <aside class=\"sidebar\">\n    <h3>Популярные темы</h3>\n  </aside>\n</main>\n\n<footer class=\"footer\">\n  <p>© 2026 Frontend Academy. Все права защищены.</p>\n</footer>",
-            "explanation": "Четкая разбивка страницы на ориентиры header, nav, main, article, aside и footer."
+            "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n<head>\n  <meta charset=\"UTF-8\" />\n  <title>Руководство по CSS Grid — Академия стажёров</title>\n</head>\n<body>\n  <!-- Шапка сайта с навигацией -->\n  <header role=\"banner\">\n    <a href=\"/\" class=\"logo\">DevAcademy</a>\n    <nav role=\"navigation\" aria-label=\"Основная навигация\">\n      <ul>\n        <li><a href=\"/courses\">Курсы</a></li>\n        <li><a href=\"/blog\">Блог</a></li>\n      </ul>\n    </nav>\n  </header>\n\n  <!-- Главный уникальный контент страницы -->\n  <main id=\"main-content\" role=\"main\">\n    <article>\n      <header>\n        <h1>Полное руководство по CSS Grid 2026</h1>\n        <p>Автор: <a href=\"/authors/alex\">Алекс Смирнов</a></p>\n        <time datetime=\"2026-08-19T14:30:00Z\">19 августа 2026</time>\n      </header>\n      <section>\n        <h2>Концепция двумерной сетки</h2>\n        <p>CSS Grid позволяет строить сложные макеты...</p>\n      </section>\n    </article>\n  </main>\n\n  <!-- Подвал сайта -->\n  <footer role=\"contentinfo\">\n    <p>&copy; 2026 Frontend Intern Academy.</p>\n  </footer>\n</body>\n</html>",
+            "title": "Идеальная семантическая структура страницы документа",
+            "explanation": "header, nav, main, article, section и footer четко размечают зоны. role атрибуты усиливают семантику для старых скринридеров."
           }
         },
         {
-          "title": "Продвинутые семантические теги: figure, details, dialog",
-          "content": "Специализированные интерактивные и контентные теги:\n- `<figure>` и `<figcaption>` — иллюстрация, диаграмма или скриншот с официальной подписью.\n- `<details>` и `<summary>` — **нативный аккордеон (спойлер)** без единой строчки JS! Клик по `<summary>` плавно раскрывает содержимое `<details>`.\n- `<dialog>` — нативное модальное окно с методами JS `.showModal()` и `.close()`.\n- `<time datetime=\"2026-08-18\">18 августа 2026</time>` — машиночитаемая дата для поисковиков.",
+          "title": "Анатомия страницы: <header>, <nav>, <main>, <article>, <section>, <aside>, <tfoot>",
+          "content": "Назначение ключевых ориентиров HTML5:\n\n1. `<header>` — вводная часть страницы или секции. Обычно содержит логотип, поиск, навигацию или заголовок статьи `<h1>`.\n\n2. `<nav>` — блок главных навигационных ссылок сайта или подраздела. Используйте атрибут `aria-label=\"Главное меню\"`, если на странице несколько `<nav>`.\n\n3. `<main>` — ГЛАВНЫЙ уникальный контент страницы. Правило: на странице может быть ТОЛЬКО ОДИН видимый тег `<main>` (он не должен содержать повторяющиеся шапки, футеры или сайдбары)!\n\n4. `<article>` vs `<section>` vs `<div>`:\n- `<article>` — **автономный, самодостаточный материал**, который имеет смысл сам по себе и может быть повторно опубликован на другом ресурсе (пост в блоге, новость, карточка товара, комментарий).\n- `<section>` — **тематический смысловой раздел документа**, который ОБЯЗАТЕЛЬНО должен иметь собственный заголовок (`<h2>`–`<h6>`). Не используйте `<section>` как простую обертку для стилей!\n- `<div>` — чисто визуальный контейнер без семантического значения (для стилизации Flexbox/Grid, анимаций и оберток).\n\n5. `<aside>` — контент, косвенно связанный с основным (сайдбар, блок «Похожие статьи», список популярных тегов, рекламный баннер).\n\n6. `<footer>` — завершающая часть страницы или статьи (копирайты, юридическая информация, ссылки на соцсети, информация об авторе).",
           "codeExample": {
             "language": "html",
-            "title": "Нативный аккордеон (details/summary)",
-            "code": "<details class=\"faq-item\">\n  <summary>Нужно ли знать JavaScript перед началом стажировки?</summary>\n  <p>Желательно знать основы, но мы начинаем с фундаментального HTML и CSS.</p>\n</details>",
-            "explanation": "Элемент details раскрывается и сворачивается нативно силами браузера."
+            "code": "<div class=\"layout-grid\">\n  <!-- 1. Основной поток статьи -->\n  <main>\n    <article class=\"blog-post\">\n      <h1>Архитектура Feature-Sliced Design</h1>\n      <section class=\"content-section\">\n        <h2>Слои приложения</h2>\n        <p>FSD делит кодовую базу на 6 слоев...</p>\n      </section>\n      <section class=\"comments-section\">\n        <h2>Комментарии (2)</h2>\n        <article class=\"comment\">\n          <h4>Иван Иванов</h4>\n          <p>Отличная статья, внедряем на проекте!</p>\n        </article>\n      </section>\n    </article>\n  </main>\n\n  <!-- 2. Боковая панель -->\n  <aside class=\"sidebar\" aria-label=\"Дополнительные материалы\">\n    <section class=\"related-posts\">\n      <h3>Похожие статьи</h3>\n      <ul>\n        <li><a href=\"/fsd-vs-clean\">FSD vs Clean Architecture</a></li>\n      </ul>\n    </section>\n  </aside>\n</div>",
+            "title": "Вложенность article, section и aside внутри main",
+            "explanation": "Каждый комментарий размечен как отдельный вложенный <article>. Секции содержат смысловые заголовки h2/h3. aside вынесен в сайдбар."
+          }
+        },
+        {
+          "title": "Специализированные смысловые теги: time, address, figure, details/summary",
+          "content": "HTML5 содержит богатый набор микро-семантических элементов:\n\n1. `<time datetime=\"2026-08-19T14:00:00Z\">19 августа 2026</time>`:\n- Атрибут `datetime` задает машиночитаемый формат ISO 8601.\n- Позволяет календарям и поисковым роботам безошибочно определять дату публикации статьи или проведения вебинара.\n\n2. `<address>`:\n- Содержит контактную информацию автора статьи или владельца сайта (email, телефон, физический адрес, ссылка на профиль).\n\n3. `<figure>` и `<figcaption>`:\n- Семантическая обертка для иллюстраций, графиков, диаграмм или фрагментов кода с официальной подписью `<figcaption>`.\n\n4. `<details>` и `<summary>` (Нативный аккордеон без JavaScript!):\n- `<details><summary>Часто задаваемые вопросы</summary><p>Ответ на вопрос...</p></details>`.\n- Браузер нативно сворачивает/разворачивает контент по клику и поддерживает атрибут `open`.\n\n5. `<mark>` — подсветка совпадений поискового запроса в тексте.\n6. `<dialog>` — нативное модальное окно с методами `.showModal()` и `.close()`.",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- 1. Иллюстрация с подписью -->\n<figure class=\"diagram-figure\">\n  <img src=\"/images/lessons/html-semantic-architecture.svg\" alt=\"Схема семантических тегов\" width=\"800\" height=\"440\" />\n  <figcaption>Рис. 1: Структурная схема разметки страницы HTML5</figcaption>\n</figure>\n\n<!-- 2. Нативный интерактивный FAQ (аккордеон) -->\n<section class=\"faq-section\">\n  <h2>FAQ для поступающих</h2>\n  <details>\n    <summary>Нужен ли опыт коммерческой разработки?</summary>\n    <p>Нет, программа рассчитана на уверенную базу HTML, CSS и JavaScript.</p>\n  </details>\n</section>\n\n<!-- 3. Контактный блок автора -->\n<footer>\n  <address>\n    Статью подготовил: <a href=\"mailto:lead@dev.ru\">Lead Frontend Architect</a><br />\n    Офис: г. Москва, ул. Разработчиков, д. 42\n  </address>\n</footer>",
+            "title": "Использование figure/figcaption, details/summary и address",
+            "explanation": "figure связывает изображение с подписью. details/summary создает интерактивный аккордеон без единой строчки JS. address размечает контакты."
+          }
+        },
+        {
+          "title": "WAI-ARIA ориентиры (Landmarks) и доступность клавиатуры",
+          "content": "Спецификация WAI-ARIA (Accessible Rich Internet Applications) дополняет HTML5 ролями доступности:\n\n1. **Landmark Roles (Ориентиры страницы)**:\n- `<header>` неявно имеет `role=\"banner\"`.\n- `<nav>` неявно имеет `role=\"navigation\"`.\n- `<main>` неявно имеет `role=\"main\"`.\n- `<aside>` неявно имеет `role=\"complementary\"`.\n- `<footer>` неявно имеет `role=\"contentinfo\"`.\n- `<form role=\"search\">` — явная роль формы поиска.\n\n2. **Skip Links (Ссылка для пропуска навигации)**:\nПервый элемент в `<body>`: `<a href=\"#main-content\" class=\"skip-link\">Перейти к основному контенту</a>`.\nПозволяет незрячим пользователям и людям, управляющим сайтом с клавиатуры (`Tab`), мгновенно перепрыгнуть через 50 ссылок меню прямо к чтению статьи!\n\n3. Правило доступных кнопок и ссылок:\n- `<button>` — выполняет действие на текущей странице (открыть модалку, добавить в корзину, отправить форму).\n- `<a>` — осуществляет ПЕРЕХОД по URL адресу (на новую страницу или якорь `#section`).\n- ❌ Никогда не делайте `<div onclick=\"...\">` или `<a href=\"javascript:void(0)\">`!",
+          "codeExample": {
+            "language": "html",
+            "code": "<body>\n  <!-- 1. Ссылка быстрого перехода для доступности (Skip Link) -->\n  <a href=\"#main-article\" class=\"skip-link\">Перейти к контенту (Tab)</a>\n\n  <header role=\"banner\">\n    <!-- 2. Форма поиска с явной ролью search -->\n    <form role=\"search\" action=\"/search\" method=\"GET\">\n      <label for=\"search-input\" class=\"visually-hidden\">Поиск по платформе:</label>\n      <input id=\"search-input\" type=\"search\" name=\"q\" placeholder=\"Поиск уроков...\" />\n      <button type=\"submit\">Найти</button>\n    </form>\n  </header>\n\n  <main id=\"main-article\" role=\"main\" tabindex=\"-1\">\n    <!-- Контент -->\n  </main>\n</body>\n\n<style>\n  /* Skip-link видна ТОЛЬКО при фокусе с клавиатуры */\n  .skip-link {\n    position: absolute;\n    top: -100px;\n    left: 16px;\n    background: #2dff8a;\n    color: #0a0e13;\n    padding: 8px 16px;\n    font-weight: bold;\n    z-index: 9999;\n  }\n  .skip-link:focus {\n    top: 16px;\n  }\n</style>",
+            "title": "Реализация Skip-Link и формы поиска role='search'",
+            "explanation": "Skip Link появляется в левом верхнем углу при первом нажатии клавиши Tab, позволяя пропустить шапку и сразу перейти к тегу main."
           }
         }
       ],
       "seniorTips": [
-        "Используйте `<div>` только тогда, когда элемент нужен исключительно как обертка для стилей (Flex-контейнер, CSS Grid обертка, декоративная подложка). Если у элемента есть смысловая роль — используйте семантический тег.",
-        "Никогда не вкладывайте тег `<main>` внутрь `<header>`, `<footer>` или `<nav>`."
+        "Строго соблюдайте иерархию заголовков: ровно один `<h1>` на страницу, разделы второго уровня размечаются `<h2>`, подразделы — `<h3>`. Никогда не перепрыгивайте уровни (например, с h1 сразу на h4) ради размера шрифта (размер меняется в CSS!).",
+        "Используйте `<article>` для карточек товаров в каталоге и комментариев — это автономные блоки, которые скринридеры воспринимают как отдельные сущности.",
+        "Добавляйте Skip Link (`<a href=\"#main\" class=\"skip-link\">`) в самом начале `<body>` для мгновенной доступности с клавиатуры.",
+        "Используйте тег `<time datetime=\"2026-08-19\">` для всех дат — это улучшает Rich Snippets в поисковых системах Google и Яндекс."
       ],
       "commonMistakes": [
         {
-          "bad": "<div class=\"header\">\n  <div class=\"menu\">...</div>\n</div>",
-          "good": "<header class=\"site-header\">\n  <nav class=\"site-nav\">...</nav>\n</header>",
-          "reason": "Дивы лишают браузер семантической карты и делают сайт невидимым для скринридеров."
+          "bad": "<!-- Множественные h1 на странице -->\n<section><h1>Новости</h1></section>\n<section><h1>Статьи</h1></section>",
+          "good": "<h1>Блог Академии</h1>\n<section><h2>Новости</h2></section>\n<section><h2>Статьи</h2></section>",
+          "reason": "Множественные h1 разрушают структуру документа для скринридеров и ухудшают SEO-индексацию. Тег h1 должен быть строго один."
+        },
+        {
+          "bad": "<!-- div с onclick вместо кнопки или ссылки -->\n<div class=\"btn\" onclick=\"openModal()\">Подробнее</div>",
+          "good": "<button type=\"button\" class=\"btn\" onclick=\"openModal()\">Подробнее</button>",
+          "reason": "div недоступен с клавиатуры (на него нельзя нажать Tab или Enter) и не распознается скринридером как интерактивный элемент."
+        },
+        {
+          "bad": "<!-- Использование section без заголовка -->\n<section class=\"sidebar-wrapper\"><p>Рекламный блок</p></section>",
+          "good": "<aside aria-label=\"Реклама\"><p>Рекламный блок</p></aside>",
+          "reason": "Тег section по спецификации обязан иметь смысловой заголовок (h2-h6). Для сайдбаров и рекламы предназначен aside, а для декораций — div."
         }
       ],
       "keyTakeaways": [
-        "Семантика HTML5 делает сайт доступным (WCAG) и поднимает его в рейтинге поисковых систем (SEO).",
-        "Ориентиры header, nav, main, article, section, aside, footer задают каркас веб-приложения.",
-        "Теги details/summary и dialog предоставляют нативную интерактивность."
+        "`<header>`, `<nav>`, `<main>`, `<article>`, `<section>`, `<aside>`, `<footer>` задают семантическую структуру веб-страницы.",
+        "На странице должен быть строго один тег `<main>` и строго один тег `<h1>`.",
+        "`<article>` — для независимого контента (посты, карточки, комментарии), `<section>` — для тематических блоков с заголовками.",
+        "`<time datetime=\"...\">` связывает отображаемую дату с машиночитаемым форматом ISO 8601.",
+        "Skip Link и правильные Landmark роли обеспечивают высший уровень доступности WCAG 2.2."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"semantic-demo\">\n  <header style=\"background: #e0e7ff; padding: 12px; border-radius: 8px; margin-bottom: 10px;\">\n    <strong>&lt;header&gt; Шапка страницы</strong>\n  </header>\n  <main style=\"background: #dbeafe; padding: 12px; border-radius: 8px; margin-bottom: 10px;\">\n    <strong>&lt;main&gt; Основной контент</strong>\n    <details style=\"margin-top: 10px; background: white; padding: 8px; border-radius: 6px;\">\n      <summary>Нажмите, чтобы раскрыть &lt;details&gt;</summary>\n      <p style=\"margin-top: 8px;\">Это нативный аккордеон без JavaScript!</p>\n    </details>\n  </main>\n  <footer style=\"background: #f1f5f9; padding: 12px; border-radius: 8px;\">\n    <strong>&lt;footer&gt; Подвал</strong>\n  </footer>\n</div>",
-      "initialCss": ".semantic-demo { font-family: sans-serif; }\ndetails summary { cursor: pointer; font-weight: bold; color: #4f46e5; }",
-      "initialJs": "console.log('Semantic level loaded');",
-      "instructions": "Кликните по аккордеону <summary> и убедитесь в нативной интерактивности."
+      "initialHtml": "<div class=\"semantic-preview\">\n  <header style=\"background:#161b22; padding:12px; border-bottom:1px solid #30363d;\">\n    <h1 style=\"color:#2dff8a; font-size:18px; margin:0;\">Семантический Блог</h1>\n    <nav style=\"margin-top:8px;\">\n      <a href=\"#\" style=\"color:#29e7ff; margin-right:12px;\">Главная</a>\n      <a href=\"#\" style=\"color:#29e7ff;\">Статьи</a>\n    </nav>\n  </header>\n  <main style=\"padding:16px;\">\n    <article style=\"background:#0d1117; border:1px solid #30363d; border-radius:6px; padding:16px;\">\n      <h2 style=\"color:#e6edf3; font-size:16px; margin-top:0;\">Архитектура Web-приложений 2026</h2>\n      <time datetime=\"2026-08-19\" style=\"color:#8b949e; font-size:12px;\">19 августа 2026</time>\n      <p style=\"color:#8b949e; font-size:13px; margin:8px 0;\">Семантика улучшает a11y и SEO...</p>\n      <details style=\"margin-top:12px; color:#2dff8a; cursor:pointer;\">\n        <summary>Подробнее о преимуществах</summary>\n        <p style=\"color:#e6edf3; font-size:12px; margin-top:6px;\">Поддержка скринридеров, Safari Reader Mode и снижение расходов на SEO.</p>\n      </details>\n    </article>\n  </main>\n</div>",
+      "initialCss": ".semantic-preview { font-family: monospace; color: #e6edf3; background: #0a0e13; border-radius: 8px; overflow: hidden; }",
+      "initialJs": "console.log('Песочница семантики готова');",
+      "instructions": "Практика с семантикой:\n1. Кликните по элементу <details> — проверьте нативное раскрытие аккордеона\n2. Добавьте боковую панель <aside> с блоком похожих статей\n3. Добавьте подвал <footer> с тегом <address>"
     },
     "task": {
-      "title": "Верстка семантического макета страницы",
-      "scenario": "Соберите полноценную структуру страницы блога с использованием header, nav, main, article, aside и footer.",
+      "title": "Верстка эталонного семантического макета статьи блога с комментариями и FAQ",
+      "scenario": "Вам необходимо сверстать страницу публикации в блоге: разметка должна содержать Skip Link, header с навигацией, единственный main, статью article с заголовком h1 и временем time datetime, секции section с заголовками h2, вложенные карточки комментариев article, сайдбар aside, интерактивный FAQ на details/summary и подвал footer с address.",
       "criteria": [
-        "Использованы <header>, <nav>, <main>, <footer>",
-        "Внутри <main> расположен <article> и <aside>",
-        "Присутствует ровно один тег <main>"
+        "Присутствует Skip Link в начале документа для перехода к #main-content",
+        "Присутствует ровно один тег <main id='main-content'> и ровно один <h1>",
+        "Статья размечена в <article> с указанием даты через <time datetime='...'>",
+        "Секции комментариев и FAQ содержат заголовки <h2>",
+        "Каждый комментарий размечен как отдельный вложенный <article>",
+        "Присутствует <aside> для боковой панели и <footer> с тегом <address>"
       ],
       "starterCode": {
-        "html": "<!-- Соберите семантический скелет -->\n",
-        "css": "/* Стили задания */\n"
+        "html": "<!-- Разработайте эталонную семантическую страницу -->\n<body>\n</body>"
       },
       "hints": [
-        "Используйте <header><nav>...</nav></header><main><article>...</article><aside>...</aside></main><footer>...</footer>"
+        "В начале: <a href='#main-content' class='skip-link'>Перейти к контенту</a>",
+        "Используйте <time datetime='2026-08-19T10:00:00Z'>19 августа 2026</time>",
+        "Для контактов: <footer><address>...</address></footer>"
       ],
       "solution": {
-        "html": "<header>\n  <a href=\"/\">Портал разработчиков</a>\n  <nav>\n    <ul><li><a href=\"/articles\">Статьи</a></li></ul>\n  </nav>\n</header>\n<main>\n  <article>\n    <h1>Все о семантике HTML5</h1>\n    <p>Семантический код повышает доступность.</p>\n  </article>\n  <aside>\n    <h3>Об авторе</h3>\n    <p>Senior Frontend Engineer</p>\n  </aside>\n</main>\n<footer>\n  <p>© 2026 TechBlog</p>\n</footer>",
-        "css": "/* Решение */\n",
-        "explanation": "Безупречная семантическая структура промышленного уровня."
+        "html": "<body>\n  <a href=\"#main-content\" class=\"skip-link\">Перейти к основному контенту</a>\n\n  <header role=\"banner\">\n    <a href=\"/\" class=\"brand-logo\">DevPortal</a>\n    <nav role=\"navigation\" aria-label=\"Основное меню\">\n      <ul>\n        <li><a href=\"/\">Главная</a></li>\n        <li><a href=\"/articles\">Статьи</a></li>\n      </ul>\n    </nav>\n  </header>\n\n  <div class=\"page-layout\">\n    <main id=\"main-content\" role=\"main\">\n      <article class=\"post-entry\">\n        <header class=\"post-header\">\n          <h1>Глубокое погружение в семантическую верстку</h1>\n          <p>Опубликовано: <time datetime=\"2026-08-19T10:00:00Z\">19 августа 2026</time></p>\n        </header>\n\n        <section>\n          <h2>Зачем нужна семантика</h2>\n          <p>Семантический HTML делает сайт доступным для всех пользователей...</p>\n        </section>\n\n        <section class=\"faq-block\">\n          <h2>Частые вопросы</h2>\n          <details>\n            <summary>Что важнее: div или section?</summary>\n            <p>Section используется для смысловых блоков с заголовками, а div — для чистого CSS.</p>\n          </details>\n        </section>\n\n        <section class=\"comments-block\">\n          <h2>Комментарии</h2>\n          <article class=\"user-comment\">\n            <h3>Михаил С.</h3>\n            <p>Спасибо за отличный структурированный материал!</p>\n          </article>\n        </section>\n      </article>\n    </main>\n\n    <aside aria-label=\"Связанный контент\">\n      <section>\n        <h3>Популярное за неделю</h3>\n        <ul>\n          <li><a href=\"#\">Flexbox vs Grid</a></li>\n        </ul>\n      </section>\n    </aside>\n  </div>\n\n  <footer role=\"contentinfo\">\n    <address>\n      Контакты редакции: <a href=\"mailto:editor@devportal.ru\">editor@devportal.ru</a>\n    </address>\n    <p>&copy; 2026 DevPortal. Все права защищены.</p>\n  </footer>\n</body>",
+        "explanation": "Разметка безупречно семантична: Skip Link, единственный main и h1, article с time, секции с h2, вложенные article для комментариев, aside, details/summary и footer с address."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "h10-q1",
-          "question": "Сколько тегов <main> допускается на одной HTML-странице?",
+          "id": "html10-q1",
+          "question": "Сколько тегов <main> и <h1> должно быть на одной HTML-странице по стандартам W3C и SEO?",
           "options": [
             "Сколько угодно",
-            "Ровно один",
-            "Минимум 2",
-            "В каждой секции по одному"
+            "Строго по одному тегу <main> (уникальный контент) и строго по одному <h1> (главная тема документа)",
+            "Ровно 5",
+            "Минимум 3"
           ],
           "correctIndex": 1,
-          "explanation": "Тег <main> обозначает уникальный центральный контент документа и должен быть в единственном числе."
+          "explanation": "По спецификации HTML5 и правилам SEO страница должна иметь ровно один <main> и один <h1>, задающий тему документа."
         },
         {
-          "id": "h10-q2",
-          "question": "Какой тег создает нативный раскрывающийся аккордеон без JavaScript?",
+          "id": "html10-q2",
+          "question": "В чём принципиальное различие между тегами <article> и <section>?",
           "options": [
-            "<accordion>",
-            "<details> и <summary>",
-            "<collapse>",
+            "Они одинаковые",
+            "<article> — это самостоятельный, автономный материал (пост, карточка товара), а <section> — смысловой раздел документа с обязательным заголовком",
+            "<section> используется только для видео",
+            "<article> устарел"
+          ],
+          "correctIndex": 1,
+          "explanation": "<article> самодостаточен (его можно вырезать и опубликовать отдельно). <section> группирует связанный контент внутри документа и требует заголовка."
+        },
+        {
+          "id": "html10-q3",
+          "question": "Зачем в теге <time> указывать атрибут datetime='2026-08-19T14:00:00Z'?",
+          "options": [
+            "Для изменения цвета текста",
+            "Предоставляет дату в стандартном машиночитаемом формате ISO 8601 для поисковых систем, календарей и скринридеров",
+            "Для автоматического запуска таймера",
+            "Для перевода времени в секунды"
+          ],
+          "correctIndex": 1,
+          "explanation": "Атрибут datetime переводит дату в формат ISO 8601, понятный роботам поисковиков (для сниппетов) и программам чтения."
+        },
+        {
+          "id": "html10-q4",
+          "question": "Что такое Skip Link в веб-разработке и какую проблему доступности она решает?",
+          "options": [
+            "Ссылка для пропуска рекламы на YouTube",
+            "Скрытая ссылка в самом начале страницы, позволяющая пользователям с клавиатурой (Tab) и скринридерами пропустить повторяющуюся шапку и сразу перейти к <main>",
+            "Кнопка быстрого закрытия сайта",
+            "Скрипт для ускорения загрузки"
+          ],
+          "correctIndex": 1,
+          "explanation": "Skip Link — ключевой стандарт WCAG: позволяет человеку с клавиатурой нажать Tab и сразу перейти к основному тексту, не прокликивая 50 ссылок меню."
+        },
+        {
+          "id": "html10-q5",
+          "question": "Какой HTML5 тег позволяет создать раскрывающийся аккордеон (FAQ) нативно БЕЗ единой строчки JavaScript?",
+          "options": [
+            "<accordion> и <item>",
+            "<details> с вложенным заголовком <summary>",
+            "<toggle> и <content>",
             "<dropdown>"
           ],
           "correctIndex": 1,
-          "explanation": "Теги <details> и <summary> реализуют нативный виджет раскрытия содержимого."
+          "explanation": "Связка <details><summary>Заголовок</summary><p>Контент</p></details> поддерживается всеми браузерами нативно без JavaScript."
         }
       ]
     }

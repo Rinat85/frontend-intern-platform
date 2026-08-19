@@ -29,6 +29,11 @@ export const htmlLessons: Lesson[] = [
             "title": "Минимальный валидный HTML5-документ",
             "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Мой первый сайт</title>\n  </head>\n  <body>\n    <h1>Добро пожаловать в веб-разработку!</h1>\n    <p>Браузер прочитал этот HTML и отобразил текст.</p>\n  </body>\n</html>",
             "explanation": "DOCTYPE объявляет стандарт HTML5, html lang задает язык, head хранит метаданные для браузера, а body содержит видимый контент."
+          },
+          "image": {
+            "src": "/images/lessons/http-request-cycle.jpg",
+            "alt": "Диаграмма полного цикла HTTP Request-Response между браузером и сервером",
+            "caption": "Полный цикл сетевого взаимодействия: DNS-резолвинг → TCP + TLS Handshake → HTTP GET → 200 OK + HTML"
           }
         },
         {
@@ -39,6 +44,11 @@ export const htmlLessons: Lesson[] = [
             "title": "Иерархия элементов и построение DOM-дерева",
             "code": "<div class=\"card\">\n  <h2 class=\"card-title\">Объектная модель DOM</h2>\n  <p class=\"card-desc\">Каждый тег становится узлом (Node) в памяти браузера.</p>\n  <button class=\"card-btn\" type=\"button\">Подробнее</button>\n</div>",
             "explanation": "Элемент <div> является родителем (parent) для <h2>, <p> и <button>, которые являются дочерними узлами (children) и соседями (siblings) в DOM-дереве."
+          },
+          "image": {
+            "src": "/images/lessons/critical-rendering-path.jpg",
+            "alt": "Конвейер Critical Rendering Path: Bytes → Tokens → DOM + CSSOM → Render Tree → Layout → Paint + Composite",
+            "caption": "Critical Rendering Path: как браузер превращает HTML-байты из сети в пиксели на экране пользователя"
           }
         },
         {

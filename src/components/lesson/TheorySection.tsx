@@ -68,6 +68,22 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
               {renderParagraphs(section.content)}
             </div>
 
+            {section.image && (
+              <figure className="theory-section-figure">
+                <img
+                  src={section.image.src}
+                  alt={section.image.alt}
+                  className="theory-section-image"
+                  loading="lazy"
+                />
+                {section.image.caption && (
+                  <figcaption className="theory-section-caption">
+                    {section.image.caption}
+                  </figcaption>
+                )}
+              </figure>
+            )}
+
             {section.codeExample && (
               <div className="theory-code-example">
                 <CodeBlock

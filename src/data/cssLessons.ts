@@ -49,6 +49,11 @@ export const cssLessons: Lesson[] = [
             "title": "Демонстрация разрешения конфликтов специфичности",
             "code": "/* Вес: (0, 0, 0, 1) — проиграет */\np {\n  color: #a8c8b6;\n}\n\n/* Вес: (0, 0, 1, 0) — победит тег */\n.text-highlight {\n  color: #ffb02e;\n}\n\n/* Вес: (0, 1, 0, 0) — ID побеждает классы */\n#lead-paragraph {\n  color: #2dff8a;\n}\n\n/* Вес: (0, 1, 1, 1) — наивысший вес без !important */\n#main-content .card-body p {\n  color: #29e7ff;\n}",
             "explanation": "ID побеждает классы, а комбинация классов и тегов побеждает одиночные базовые селекторы."
+          },
+          "image": {
+            "src": "/images/lessons/css-specificity-matrix.jpg",
+            "alt": "CSS Specificity Matrix — визуализация расчёта приоритета селекторов по 4 уровням",
+            "caption": "Специфичность CSS: Inline (1-0-0-0) > ID (0-1-0-0) > Class (0-0-1-0) > Element (0-0-0-1)"
           }
         },
         {
@@ -59,6 +64,11 @@ export const cssLessons: Lesson[] = [
             "title": "Глобальный нормализатор стилей проекта",
             "code": "/* 1. Идеальный сброс боксовой модели */\n*, *::before, *::after {\n  box-sizing: border-box;\n  margin: 0;\n  padding: 0;\n}\n\n/* 2. Базовые глобальные параметры типографики */\nhtml {\n  font-size: 16px;\n  -webkit-font-smoothing: antialiased;\n}\n\nbody {\n  font-family: 'Inter', system-ui, sans-serif;\n  line-height: 1.5;\n  background-color: #06090d;\n  color: #d6f5e3;\n}\n\n/* 3. Медиа-элементы не должны вылезать за ширину контейнера */\nimg, picture, video, canvas, svg {\n  display: block;\n  max-width: 100%;\n  height: auto;\n}",
             "explanation": "border-box фиксирует внешние габариты элемента, предотвращая поломку макета при добавлении padding и border."
+          },
+          "image": {
+            "src": "/images/lessons/css-box-model.jpg",
+            "alt": "Сравнение блочных моделей content-box vs border-box",
+            "caption": "content-box vs border-box: border-box фиксирует общую ширину, предотвращая поломку верстки"
           }
         }
       ],

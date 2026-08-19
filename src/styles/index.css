@@ -1588,3 +1588,33 @@ pre code,
   color: var(--fg-0);
   margin-right: 6px;
 }
+
+
+/* ==========================================================================
+   THEORY SECTION IMAGES & FIGURES
+   ========================================================================== */
+.theory-section-figure {
+  margin: 16px 0;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--void);
+}
+
+.theory-section-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+.theory-section-caption {
+  padding: 10px 16px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  color: var(--fg-2);
+  line-height: 1.5;
+  text-align: center;
+  letter-spacing: 0.02em;
+}

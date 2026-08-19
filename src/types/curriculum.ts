@@ -13,6 +13,11 @@ export interface TheorySection {
   title: string;
   content: string;
   codeExample?: CodeExample;
+  image?: {
+    src: string;
+    alt: string;
+    caption?: string;
+  };
 }
 
 export interface CommonMistake {

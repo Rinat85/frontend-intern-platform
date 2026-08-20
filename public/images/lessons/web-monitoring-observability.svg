@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgmon18" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgmon18)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Pro: Мониторинг, Observability и Sentry</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">3 столпа Observability, Sentry Error Tracking, Source Maps, RUM, Web Vitals и Alerting</text>
+
+  <!-- Left: 3 Pillars of Observability -->
+  <rect x="20" y="65" width="370" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">3 Столпа Observability (Наблюдаемость)</text>
+
+  <rect x="35" y="100" width="340" height="60" rx="4" fill="#2dff8a22" stroke="#2dff8a"/>
+  <text x="45" y="118" fill="#2dff8a" font-size="8" font-weight="600">1. Логи (Logs) — Текстовый журнал событий:</text>
+  <text x="45" y="134" fill="#e6edf3" font-size="7">[ERROR] 2026-08-20T10:15:00Z TypeError: Cannot read 'id'</text>
+  <text x="45" y="148" fill="#8b949e" font-size="6">Структурированные JSON-логи с уровнями: info, warn, error, fatal</text>
+
+  <rect x="35" y="168" width="340" height="60" rx="4" fill="#29e7ff22" stroke="#29e7ff"/>
+  <text x="45" y="186" fill="#29e7ff" font-size="8" font-weight="600">2. Метрики (Metrics) — Числовые показатели:</text>
+  <text x="45" y="202" fill="#e6edf3" font-size="7">LCP: 1.2s | FID: 45ms | CLS: 0.03 | JS Error Rate: 0.1%</text>
+  <text x="45" y="216" fill="#8b949e" font-size="6">Web Vitals, Error Rate, Apdex Score, P95 Response Time</text>
+
+  <rect x="35" y="236" width="340" height="60" rx="4" fill="#ffb02e22" stroke="#ffb02e"/>
+  <text x="45" y="254" fill="#ffb02e" font-size="8" font-weight="600">3. Трейсы (Traces) — Путь запроса в системе:</text>
+  <text x="45" y="270" fill="#e6edf3" font-size="7">Browser → API Gateway → Auth Service → DB → Response</text>
+  <text x="45" y="284" fill="#8b949e" font-size="6">Distributed Tracing через OpenTelemetry и Sentry Performance</text>
+
+  <!-- Right: Sentry & RUM -->
+  <rect x="410" y="65" width="370" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Sentry: Error Tracking и Source Maps</text>
+
+  <rect x="425" y="98" width="340" height="55" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="114" fill="#2dff8a" font-size="8" font-weight="600">Sentry SDK — Перехват ошибок в рантайме:</text>
+  <text x="435" y="130" fill="#e6edf3" font-size="7">Sentry.init({ dsn: '...', tracesSampleRate: 0.2 })</text>
+  <text x="435" y="144" fill="#8b949e" font-size="6">Автоматический захват: window.onerror, unhandledrejection</text>
+
+  <rect x="425" y="160" width="340" height="55" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="435" y="176" fill="#29e7ff" font-size="8" font-weight="600">Source Maps (Деобфускация стеков):</text>
+  <text x="435" y="192" fill="#e6edf3" font-size="7">main.a1b2c3.js:1:4328 → src/Cart.tsx:42: addToCart()</text>
+  <text x="435" y="206" fill="#8b949e" font-size="6">Загрузка .map файлов в Sentry через CI/CD (sentry-cli upload)</text>
+
+  <rect x="425" y="222" width="340" height="50" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="435" y="238" fill="#ffb02e" font-size="8" font-weight="600">RUM (Real User Monitoring):</text>
+  <text x="435" y="254" fill="#e6edf3" font-size="7">Сбор Web Vitals (LCP, FID/INP, CLS) от реальных пользователей</text>
+  <text x="435" y="264" fill="#8b949e" font-size="6">Группировка по странам, браузерам и типам устройств</text>
+
+  <rect x="425" y="278" width="340" height="38" rx="4" fill="#f8514922" stroke="#f85149"/>
+  <text x="435" y="296" fill="#f85149" font-size="8" font-weight="600">⚠️ Alerting: PagerDuty / Slack при Error Rate &gt; 1%</text>
+
+  <!-- Bottom -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Почему Observability критически важна для продакшена</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• Без мониторинга ошибки обнаруживаются через жалобы пользователей вместо мгновенных алертов</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• Source Maps превращают нечитаемый минифицированный стектрейс в точный файл и строку</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• Правило: tracesSampleRate = 0.1–0.2 (10–20%) достаточно для аналитики без перегрузки Sentry</text>
+</svg>

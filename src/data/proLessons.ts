@@ -3291,5 +3291,200 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-18",
+    "moduleId": "pro",
+    "level": 18,
+    "title": "Мониторинг, Observability, Sentry и Web Vitals в продакшене",
+    "subtitle": "3 столпа наблюдаемости (Логи, Метрики, Трейсы), Sentry Error Tracking, Source Maps, RUM, Web Vitals и Alerting",
+    "description": "Освойте промышленный мониторинг фронтенд-приложений: 3 столпа Observability (Логи, Метрики, Трейсы), настройку Sentry SDK для автоматического перехвата ошибок и отслеживания производительности, загрузку Source Maps для деобфускации минифицированных стектрейсов, мониторинг Web Vitals (LCP, INP, CLS) от реальных пользователей (RUM) и настройку алертинга в Slack/PagerDuty.",
+    "estimatedMinutes": 70,
+    "difficulty": "advanced",
+    "tags": [
+      "monitoring",
+      "observability",
+      "sentry",
+      "error-tracking",
+      "source-maps",
+      "web-vitals",
+      "rum",
+      "logging",
+      "alerting",
+      "pagerduty",
+      "opentelemetry"
+    ],
+    "theory": {
+      "overview": "Без промышленного мониторинга баги в продакшене обнаруживаются через жалобы пользователей — через дни или недели. К этому моменту сотни клиентов уже столкнулись с белым экраном, потерянной корзиной или некликабельной кнопкой «Оплатить».\n\n**Observability (Наблюдаемость)** — это способность системы объяснить своё внутреннее состояние по внешним сигналам. В индустрии выделяют **3 столпа наблюдаемости**: Логи (что произошло), Метрики (числовые индикаторы), Трейсы (путь запроса через систему).\n\nВ этом уроке мы разберём полный цикл: от настройки Sentry SDK до алертинга в Slack при всплеске Error Rate.",
+      "sections": [
+        {
+          "title": "3 Столпа Observability: Логи, Метрики и Трейсы",
+          "content": "Три категории данных, необходимых для диагностики инцидентов:\n\n1. **Логи (Logs) — Текстовый журнал событий**:\n- Каждая запись содержит: **timestamp** (когда), **level** (info/warn/error/fatal), **message** (что случилось), **context** (userId, sessionId, URL).\n- **Структурированные JSON-логи** вместо `console.log('error!')`: `{ timestamp: '2026-08-20T10:15:00Z', level: 'error', message: 'Cannot read property id of undefined', userId: 'u_123', page: '/cart' }`.\n- Инструменты: Sentry Breadcrumbs, Datadog Logs, ELK Stack.\n\n2. **Метрики (Metrics) — Числовые агрегированные показатели**:\n- **Web Vitals**: LCP (Largest Contentful Paint), INP (Interaction to Next Paint), CLS (Cumulative Layout Shift).\n- **Error Rate** (процент сессий с ошибками): нормальный показатель < 0.5%.\n- **Apdex Score** (удовлетворённость пользователей): 0.0–1.0 (целевой > 0.85).\n- Инструменты: Sentry Performance, Grafana, Prometheus, Google Analytics.\n\n3. **Трейсы (Traces) — Распределённая трассировка запросов**:\n- Трейс показывает путь одного HTTP-запроса через цепочку микросервисов: `Browser → API Gateway → Auth Service → Database → Response`.\n- Позволяет точно определить, **какой микросервис тормозит** (например, запрос к Redis занял 4 секунды).\n- Инструменты: OpenTelemetry, Sentry Performance, Jaeger, Datadog APM.",
+          "image": {
+            "src": "/images/lessons/web-monitoring-observability.svg",
+            "alt": "3 Столпа Observability: Логи, Метрики и Трейсы; Sentry Error Tracking и Source Maps",
+            "caption": "3 столпа наблюдаемости (Logs, Metrics, Traces), Sentry SDK с Source Maps и RUM мониторинг Web Vitals"
+          },
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Структурированный логгер для фронтенд-приложения\ninterface LogEntry {\n  timestamp: string;\n  level: 'info' | 'warn' | 'error' | 'fatal';\n  message: string;\n  context?: Record<string, unknown>;\n}\n\nconst logger = {\n  _send(entry: LogEntry) {\n    // В продакшене: отправка в Sentry Breadcrumbs / Datadog\n    if (entry.level === 'error' || entry.level === 'fatal') {\n      console.error(`[${entry.level.toUpperCase()}]`, entry.message, entry.context);\n    }\n  },\n\n  info(message: string, context?: Record<string, unknown>) {\n    this._send({ timestamp: new Date().toISOString(), level: 'info', message, context });\n  },\n\n  error(message: string, context?: Record<string, unknown>) {\n    this._send({ timestamp: new Date().toISOString(), level: 'error', message, context });\n  },\n};\n\n// Использование:\nlogger.error('Ошибка загрузки каталога', {\n  userId: 'u_123',\n  page: '/catalog',\n  statusCode: 500,\n});",
+            "title": "Структурированный JSON-логгер вместо console.log",
+            "explanation": "Структурированные логи с timestamp, level и context позволяют мгновенно фильтровать события в Sentry и Datadog."
+          }
+        },
+        {
+          "title": "Sentry SDK: Автоматический перехват ошибок и Performance Monitoring",
+          "content": "Настройка промышленного Error Tracking через Sentry:\n\n1. **Инициализация Sentry SDK**:\n- `Sentry.init({ dsn: '...', environment: 'production', release: 'v2.4.0' })`.\n- **DSN (Data Source Name)** — уникальный URL проекта в Sentry для маршрутизации ошибок.\n- Автоматически перехватывает: `window.onerror`, `unhandledrejection` (непойманные промисы), ошибки рендеринга React (через `Sentry.ErrorBoundary`).\n\n2. **Performance Monitoring (Трейсинг)**:\n- `tracesSampleRate: 0.2` — сэмплирование 20% транзакций (достаточно для аналитики без перегрузки сервера).\n- Sentry автоматически записывает: время загрузки страницы, все XHR/fetch запросы с длительностью, рендеринг React компонентов.\n\n3. **Breadcrumbs (Хлебные крошки)**:\n- Sentry автоматически записывает последние 100 действий пользователя перед ошибкой: клики, навигации, HTTP-запросы, console.log.\n- Это позволяет **воспроизвести шаги** пользователя, приведшие к сбою!",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// src/main.tsx — Инициализация Sentry в React-приложении\nimport * as Sentry from '@sentry/react';\n\nSentry.init({\n  dsn: 'https://examplePublicKey@o0.ingest.sentry.io/0',\n  environment: import.meta.env.MODE, // 'production' | 'staging'\n  release: `academy@${__APP_VERSION__}`, // Привязка к версии релиза\n  \n  // Performance: сэмплируем 20% транзакций\n  tracesSampleRate: 0.2,\n  \n  // Replay: записываем сессии пользователей с ошибками\n  replaysSessionSampleRate: 0.1, // 10% всех сессий\n  replaysOnErrorSampleRate: 1.0, // 100% сессий С ОШИБКАМИ!\n  \n  integrations: [\n    Sentry.browserTracingIntegration(),\n    Sentry.replayIntegration(),\n  ],\n  \n  // Фильтрация шума (не отправлять ошибки от сторонних скриптов)\n  beforeSend(event) {\n    if (event.exception?.values?.[0]?.stacktrace?.frames?.some(\n      f => f.filename?.includes('chrome-extension')\n    )) return null; // Игнорировать баги расширений Chrome\n    return event;\n  }\n});\n\n// Обёртка React приложения в Sentry Error Boundary\nSentry.withErrorBoundary(App, {\n  fallback: <p>Произошла ошибка. Наша команда уже получила уведомление!</p>,\n});",
+            "title": "Полная настройка Sentry SDK с Performance, Replay и фильтрацией шума",
+            "explanation": "Sentry перехватывает ошибки, записывает цепочку действий (breadcrumbs), сэмплирует транзакции для анализа производительности и записывает видео-реплей при сбоях."
+          }
+        },
+        {
+          "title": "Source Maps: Деобфускация минифицированных стектрейсов",
+          "content": "Почему стектрейсы в продакшене нечитаемы и как это исправить:\n\n1. **Проблема минификации**:\n- В продакшене JavaScript код проходит через минификацию и обфускацию: переменные переименовываются в `a`, `b`, `c`, все файлы объединяются в один бандл `main.a1b2c3.js`.\n- Стектрейс ошибки выглядит так: `TypeError at main.a1b2c3.js:1:48273` — абсолютно бесполезно для отладки!\n\n2. **Source Maps — Карты соответствия**:\n- Файл `.map` содержит маппинг из минифицированного кода обратно в исходные файлы: `main.a1b2c3.js:1:48273 → src/components/Cart.tsx:42:addToCart()`.\n- Sentry автоматически применяет Source Maps и показывает **точный файл, строку и имя функции** в стектрейсе!\n\n3. **Безопасная загрузка Source Maps**:\n- Source Maps НИКОГДА не публикуются на CDN (это раскроет исходный код!).\n- Их загружают напрямую в Sentry через CI/CD: `sentry-cli sourcemaps upload --release v2.4.0 ./dist/assets/`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// .github/workflows/deploy.yml — Загрузка Source Maps в Sentry через CI/CD\n// Этот шаг выполняется ПОСЛЕ сборки, НО ПЕРЕД удалением .map файлов\n\n// Шаг 1: Сборка проекта с генерацией Source Maps\n// npm run build  (vite build --sourcemap)\n\n// Шаг 2: Загрузка Source Maps в Sentry\n// npx @sentry/cli sourcemaps upload \\\n//   --auth-token $SENTRY_AUTH_TOKEN \\\n//   --org my-org \\\n//   --project frontend-academy \\\n//   --release academy@2.4.0 \\\n//   ./dist/assets/\n\n// Шаг 3: УДАЛЕНИЕ .map файлов перед деплоем на CDN!\n// find ./dist -name '*.map' -delete\n\nconsole.log('Source Maps загружены в Sentry, .map файлы удалены из дистрибутива!');\nconsole.log('Теперь стектрейс main.a1b2c3.js:1:48273 превратится в Cart.tsx:42:addToCart()');",
+            "title": "CI/CD пайплайн загрузки Source Maps в Sentry и удаления из CDN",
+            "explanation": "Source Maps загружаются в Sentry через приватный токен, а затем удаляются из сборки — исходный код остаётся защищённым."
+          }
+        },
+        {
+          "title": "RUM, Web Vitals и Alerting: оповещения о деградации",
+          "content": "Мониторинг реальных пользователей и автоматические оповещения:\n\n1. **RUM (Real User Monitoring)**:\n- В отличие от синтетического мониторинга (Lighthouse), RUM собирает метрики от **реальных пользователей** на реальных устройствах в реальных сетях.\n- Данные группируются по: стране, браузеру, типу устройства (десктоп/мобильный), версии приложения.\n- Позволяет обнаружить, что LCP = 1.2s для пользователей в Москве, но 4.8s для Якутска.\n\n2. **Core Web Vitals (Метрики Google)**:\n- **LCP (Largest Contentful Paint)** — время рендеринга самого крупного элемента (цель: < 2.5s).\n- **INP (Interaction to Next Paint)** — задержка реакции на взаимодействие (цель: < 200ms).\n- **CLS (Cumulative Layout Shift)** — сдвиг элементов макета (цель: < 0.1).\n\n3. **Alerting (Автоматические оповещения)**:\n- Sentry Alerts: «Если Error Rate > 1% за 5 минут → Slack уведомление #frontend-alerts».\n- PagerDuty Integration: «Если Apdex Score < 0.7 → SMS и звонок дежурному инженеру».\n- Grafana Dashboard: визуализация метрик в реальном времени.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Отправка Web Vitals от реальных пользователей в Sentry\nimport { onLCP, onINP, onCLS } from 'web-vitals';\nimport * as Sentry from '@sentry/react';\n\nfunction reportWebVital(metric: { name: string; value: number; id: string }) {\n  // Отправка в Sentry как custom measurement\n  Sentry.setMeasurement(metric.name, metric.value, 'millisecond');\n  \n  // Дополнительно: отправка в Google Analytics 4\n  if (typeof gtag === 'function') {\n    gtag('event', metric.name, {\n      value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),\n      event_label: metric.id,\n      non_interaction: true,\n    });\n  }\n  \n  console.log(`[Web Vital] ${metric.name}: ${metric.value.toFixed(1)}ms`);\n}\n\n// Подписка на все Core Web Vitals\nonLCP(reportWebVital);  // Largest Contentful Paint\nonINP(reportWebVital);  // Interaction to Next Paint\nonCLS(reportWebVital);  // Cumulative Layout Shift",
+            "title": "Сбор Core Web Vitals (LCP, INP, CLS) от реальных пользователей",
+            "explanation": "Библиотека web-vitals от Google измеряет метрики в браузере пользователя, а Sentry агрегирует их для аналитики."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Устанавливайте `tracesSampleRate: 0.1–0.2` (10–20% транзакций) — этого достаточно для анализа производительности, но не перегрузит квоту Sentry.",
+        "НИКОГДА не публикуйте `.map` файлы на CDN — загружайте их только в Sentry через приватный CI/CD токен, затем удаляйте из сборки.",
+        "Используйте `beforeSend` для фильтрации шума: игнорируйте ошибки от расширений Chrome, рекламных скриптов и ботов (User-Agent содержит 'bot').",
+        "Настройте `replaysOnErrorSampleRate: 1.0` — это запишет видео-реплей КАЖДОЙ сессии с ошибкой, позволяя точно воспроизвести действия пользователя.",
+        "Фиксируйте `release` при инициализации Sentry (привязка к Git-тегу) — это позволяет отслеживать, какие ошибки появились в новой версии."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Публикация Source Maps на CDN вместе с бандлами\n// dist/assets/main.a1b2c.js.map доступен публично!",
+          "good": "// Source Maps загружаются в Sentry через CI/CD, затем удаляются из dist/",
+          "reason": "Публичные Source Maps позволяют конкурентам просмотреть весь исходный код приложения."
+        },
+        {
+          "bad": "// tracesSampleRate: 1.0 — сэмплирование 100% транзакций\nSentry.init({ tracesSampleRate: 1.0 }); // ❌ Огромный расход квоты!",
+          "good": "Sentry.init({ tracesSampleRate: 0.2 }); // ✅ 20% достаточно для аналитики",
+          "reason": "100%-ное сэмплирование генерирует тысячи событий в минуту и быстро исчерпывает квоту Sentry."
+        },
+        {
+          "bad": "// Использование console.log для логирования ошибок в продакшене\nconsole.log('что-то сломалось', err); // ❌ Никто этот лог не увидит!",
+          "good": "Sentry.captureException(err, { tags: { page: '/cart' } });",
+          "reason": "console.log виден только в DevTools конкретного пользователя. Sentry агрегирует ошибки от ВСЕХ пользователей."
+        }
+      ],
+      "keyTakeaways": [
+        "3 столпа Observability: Логи (что случилось), Метрики (числовые показатели), Трейсы (путь запроса).",
+        "Sentry автоматически перехватывает window.onerror и unhandledrejection.",
+        "Source Maps деобфусцируют стектрейсы, но их нельзя публиковать на CDN.",
+        "RUM собирает Web Vitals (LCP, INP, CLS) от реальных пользователей на реальных устройствах.",
+        "Alerting через Slack/PagerDuty уведомляет команду мгновенно при всплеске ошибок."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"monitoring-sandbox\">\n  <h3>Sentry Error Tracking Симулятор</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;\">\n    <button id=\"btn-trigger-error\" style=\"background:#f85149; color:#fff; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">1. Trigger TypeError</button>\n    <button id=\"btn-web-vitals\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">2. Измерить Web Vitals</button>\n    <button id=\"btn-sourcemap\" style=\"background:#29e7ff; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">3. Деобфускация Source Map</button>\n  </div>\n  <pre id=\"sentry-log\" style=\"color:#e6edf3; font-size:11px; line-height:1.5; background:#161b22; padding:12px; border-radius:6px; white-space:pre-wrap;\"></pre>\n</div>",
+      "initialCss": "#monitoring-sandbox { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const log = document.getElementById('sentry-log');\n\ndocument.getElementById('btn-trigger-error').onclick = () => {\n  log.textContent = '🚨 [Sentry] Новая ошибка перехвачена!\\n';\n  log.textContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';\n  log.textContent += 'TypeError: Cannot read properties of undefined (reading \"id\")\\n';\n  log.textContent += 'at addToCart (main.a1b2c3.js:1:48273)\\n\\n';\n  log.textContent += '📋 Breadcrumbs (последние действия пользователя):\\n';\n  log.textContent += '  10:15:01 [click] button.add-to-cart\\n';\n  log.textContent += '  10:15:00 [fetch] GET /api/product/42 → 200 OK\\n';\n  log.textContent += '  10:14:55 [navigation] /catalog → /product/42\\n';\n  log.textContent += '\\n🔔 Slack Alert: #frontend-alerts → \"Error Rate 1.2% (threshold: 1%)\"';\n  log.style.color = '#f85149';\n};\n\ndocument.getElementById('btn-web-vitals').onclick = () => {\n  log.textContent = '📊 [RUM] Core Web Vitals от реального пользователя:\\n';\n  log.textContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';\n  log.textContent += '  LCP: 1.2s  ✅ (порог < 2.5s)\\n';\n  log.textContent += '  INP: 45ms  ✅ (порог < 200ms)\\n';\n  log.textContent += '  CLS: 0.03  ✅ (порог < 0.1)\\n\\n';\n  log.textContent += '📱 Устройство: iPhone 14, iOS 18, Safari 20\\n';\n  log.textContent += '🌍 Регион: Москва, Россия\\n';\n  log.textContent += '📶 Соединение: 4G (RTT: 50ms)\\n';\n  log.textContent += '\\n🎉 Apdex Score: 0.94 — Отличный пользовательский опыт!';\n  log.style.color = '#2dff8a';\n};\n\ndocument.getElementById('btn-sourcemap').onclick = () => {\n  log.textContent = '🗺️ [Source Map] Деобфускация стектрейса:\\n';\n  log.textContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';\n  log.textContent += '❌ До: main.a1b2c3.js:1:48273 (нечитаемо!)\\n';\n  log.textContent += '✅ После: src/components/Cart.tsx:42 → addToCart()\\n\\n';\n  log.textContent += '📁 Точный исходный код:\\n';\n  log.textContent += '  40 |   const handleAdd = (product) => {\\n';\n  log.textContent += '  41 |     const { id, title, price } = product;\\n';\n  log.textContent += '  42 >     cart.items.push({ id: product.variant.id }); // ← ОШИБКА\\n';\n  log.textContent += '  43 |   };\\n\\n';\n  log.textContent += '💡 product.variant === undefined (API не вернул поле variant)';\n  log.style.color = '#29e7ff';\n};",
+      "instructions": "Практика с мониторингом:\n1. Нажмите 'Trigger TypeError' — Sentry перехватит ошибку с breadcrumbs\n2. Нажмите 'Измерить Web Vitals' — RUM покажет реальные метрики пользователя\n3. Нажмите 'Деобфускация Source Map' — стектрейс превратится в читаемый код"
+    },
+    "task": {
+      "title": "Настройка Sentry SDK с Performance Monitoring и сбор Web Vitals",
+      "scenario": "Настройте полную инициализацию Sentry для React-приложения: DSN, привязка к release, tracesSampleRate 20%, фильтрация ошибок от расширений Chrome через beforeSend, и подключение сбора Web Vitals (LCP, INP, CLS) через библиотеку web-vitals.",
+      "criteria": [
+        "Sentry.init содержит dsn, environment, release и tracesSampleRate: 0.2",
+        "beforeSend фильтрует ошибки с 'chrome-extension' в стектрейсе",
+        "Подключены интеграции browserTracingIntegration и replayIntegration",
+        "Web Vitals (LCP, INP, CLS) отправляются в Sentry через Sentry.setMeasurement"
+      ],
+      "starterCode": {
+        "js": "// Настройте Sentry SDK и сбор Web Vitals\nimport * as Sentry from '@sentry/react';\nimport { onLCP, onINP, onCLS } from 'web-vitals';\n\n// Ваш код"
+      },
+      "hints": [
+        "Sentry.init({ dsn: '...', tracesSampleRate: 0.2, integrations: [Sentry.browserTracingIntegration()] })",
+        "onLCP(metric => Sentry.setMeasurement(metric.name, metric.value, 'millisecond'))"
+      ],
+      "solution": {
+        "js": "import * as Sentry from '@sentry/react';\nimport { onLCP, onINP, onCLS } from 'web-vitals';\n\n// 1. Инициализация Sentry SDK\nSentry.init({\n  dsn: 'https://examplePublicKey@o0.ingest.sentry.io/0',\n  environment: 'production',\n  release: 'academy@2.4.0',\n  tracesSampleRate: 0.2,\n  replaysOnErrorSampleRate: 1.0,\n  integrations: [\n    Sentry.browserTracingIntegration(),\n    Sentry.replayIntegration(),\n  ],\n  beforeSend(event) {\n    const frames = event.exception?.values?.[0]?.stacktrace?.frames || [];\n    if (frames.some(f => f.filename?.includes('chrome-extension'))) return null;\n    return event;\n  },\n});\n\n// 2. Сбор Web Vitals от реальных пользователей\nfunction reportVital(metric) {\n  Sentry.setMeasurement(metric.name, metric.value, 'millisecond');\n  console.log('[Web Vital]', metric.name, metric.value.toFixed(1));\n}\n\nonLCP(reportVital);\nonINP(reportVital);\nonCLS(reportVital);\n\nconsole.log('Sentry SDK + Web Vitals мониторинг активирован!');",
+        "explanation": "Sentry перехватывает ошибки с фильтрацией шума от расширений, сэмплирует 20% транзакций и собирает Core Web Vitals от реальных пользователей."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro18-q1",
+          "question": "Какие 3 столпа Observability (Наблюдаемости) выделяют в индустрии?",
+          "options": [
+            "HTML, CSS, JavaScript",
+            "Логи (текстовый журнал событий), Метрики (числовые агрегированные показатели) и Трейсы (путь запроса через систему)",
+            "Тесты, Деплой, Мониторинг",
+            "Git, CI, CD"
+          ],
+          "correctIndex": 1,
+          "explanation": "Три столпа — Logs, Metrics, Traces — дают полную картину для диагностики инцидентов в распределённых системах."
+        },
+        {
+          "id": "pro18-q2",
+          "question": "Почему Source Map файлы (.map) НЕЛЬЗЯ публиковать на CDN вместе с бандлами приложения?",
+          "options": [
+            "Они слишком большие для CDN",
+            "Source Maps содержат полный маппинг к исходному коду приложения, и их публикация раскроет весь код конкурентам",
+            "CDN не поддерживает формат .map",
+            "Source Maps замедляют загрузку страницы"
+          ],
+          "correctIndex": 1,
+          "explanation": "Source Maps загружаются в Sentry через приватный CI/CD токен, а затем .map файлы удаляются из папки сборки."
+        },
+        {
+          "id": "pro18-q3",
+          "question": "Что показывают Breadcrumbs (Хлебные крошки) в Sentry при перехвате ошибки?",
+          "options": [
+            "Список всех CSS-правил страницы",
+            "Хронологическую цепочку последних действий пользователя перед ошибкой (клики, навигации, HTTP-запросы, console.log)",
+            "Список установленных npm-пакетов",
+            "IP-адрес пользователя"
+          ],
+          "correctIndex": 1,
+          "explanation": "Breadcrumbs позволяют точно воспроизвести последовательность шагов пользователя, приведших к сбою."
+        },
+        {
+          "id": "pro18-q4",
+          "question": "Какое оптимальное значение tracesSampleRate рекомендуется для продакшена?",
+          "options": [
+            "1.0 (100% всех транзакций)",
+            "0.1–0.2 (10–20% транзакций) — достаточно для аналитики производительности без перегрузки квоты Sentry",
+            "0.0 (отключить полностью)",
+            "10.0 (1000%)"
+          ],
+          "correctIndex": 1,
+          "explanation": "10–20% сэмплирование обеспечивает статистически значимую выборку для анализа без расходования всей квоты."
+        },
+        {
+          "id": "pro18-q5",
+          "question": "Какой показатель Core Web Vitals измеряет визуальную стабильность макета страницы (непредвиденные сдвиги элементов)?",
+          "options": [
+            "LCP (Largest Contentful Paint)",
+            "INP (Interaction to Next Paint)",
+            "CLS (Cumulative Layout Shift) — суммарный сдвиг элементов макета (цель: < 0.1)",
+            "TTFB (Time to First Byte)"
+          ],
+          "correctIndex": 2,
+          "explanation": "CLS измеряет все неожиданные сдвиги элементов на странице (например, когда загрузившаяся реклама сдвигает текст вниз)."
+        }
+      ]
+    }
   }
 ];

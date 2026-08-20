@@ -3298,84 +3298,191 @@ export const cssLessons: Lesson[] = [
     "id": "css-18",
     "moduleId": "css",
     "level": 18,
-    "title": "Псевдоклассы и псевдоэлементы",
-    "subtitle": ":hover, :focus-visible, :nth-child(), ::before и ::after",
-    "description": "Продвинутая селекция: состояния :hover/:active/:focus-visible, псевдоклассы :nth-child(2n), декорации ::before/::after.",
-    "estimatedMinutes": 35,
+    "title": "Псевдоклассы и псевдоэлементы: полное руководство",
+    "subtitle": ":hover, :focus-visible, :has(), :is(), :where(), :nth-child(), ::before, ::after, ::placeholder, ::backdrop",
+    "description": "Освойте всю палитру псевдоклассов (состояния, структурные, валидационные, CSS4-селекторы :has(), :is(), :where()) и псевдоэлементов (::before, ::after, ::placeholder, ::selection, ::marker, ::backdrop) для создания интерактивных и декоративных интерфейсов без лишнего JavaScript.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "PseudoClasses",
-      "PseudoElements"
+      "pseudo-classes",
+      "pseudo-elements",
+      "focus-visible",
+      "has-selector",
+      "is-where",
+      "nth-child",
+      "before-after",
+      "form-validation-css",
+      "css4-selectors"
     ],
     "theory": {
-      "overview": "Псевдоклассы выбирают по состоянию, а псевдоэлементы создают декоративные блоки без лишнего HTML.",
+      "overview": "Псевдоклассы и псевдоэлементы — одни из самых мощных и недооценённых инструментов CSS. Они позволяют стилизовать элементы **по их состоянию** (наведение, фокус, валидация), **по позиции в DOM** (первый ребёнок, чётная строка) и даже **создавать виртуальные декоративные узлы** (`::before`, `::after`) без единой строчки HTML или JavaScript.\n\nВ этом уроке мы разберём классические псевдоклассы, революционные CSS4-селекторы `:has()` (первый «родительский селектор» в истории CSS!), `:is()`, `:where()` и `:not()`, а также практики создания иконок, бейджиков и стилизации форм через псевдоэлементы.",
       "sections": [
         {
-          "title": "::before, ::after и content",
-          "content": "- Обязательно `content: \"\"`.\n- `:nth-child(even)` — четные строки зебры.\n- `:focus-visible` — рамка только для клавиатуры.",
+          "title": "Псевдоклассы состояния: :hover, :active, :focus-visible и :target",
+          "content": "Стилизация элементов в зависимости от действий пользователя:\n\n1. **Классические интерактивные псевдоклассы**:\n- `:hover` — курсор мыши над элементом.\n- `:active` — элемент зажат (кнопка мыши нажата).\n- `:focus` — элемент получил фокус (клавиатура ИЛИ клик мыши).\n- `:visited` — посещённая ссылка (ограниченный набор стилей из-за безопасности!).\n\n2. **`:focus-visible` — Современный стандарт фокуса (CSS Level 4)**:\n- Проблема `:focus`: при клике мышью на кнопку появляется некрасивое кольцо обводки, которое раздражает дизайнеров → разработчики ставят `outline: none` → клавиатурные пользователи теряют навигацию!\n- Решение: `:focus-visible` показывает кольцо обводки **ТОЛЬКО при навигации с клавиатуры (Tab)**, но не при клике мышью.\n\n3. **`:target` — Стилизация по якорному хешу URL**:\n- Если URL содержит `#section-2`, элемент с `id=\"section-2\"` можно подсветить через `:target { background: yellow; }`.",
+          "image": {
+            "src": "/images/lessons/css-pseudo-classes-elements.svg",
+            "alt": "CSS Псевдоклассы и псевдоэлементы: :has(), :is(), ::before, ::after",
+            "caption": "Классификация псевдоклассов (состояния, структурные, валидационные, CSS4) и псевдоэлементов (::before, ::after, ::backdrop)"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Подчеркивание ::after",
-            "code": ".link { position: relative; color: #4f46e5; text-decoration: none; }\n.link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: #4f46e5; transition: width 0.3s; }\n.link:hover::after { width: 100%; }",
-            "explanation": "Подчеркивание ссылки."
+            "code": "/* ✅ Правильная стратегия фокуса: :focus-visible вместо :focus */\n.nav-button {\n  background: #161b22;\n  color: #e6edf3;\n  border: 1px solid #30363d;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n  /* Убираем стандартный outline */\n  outline: none;\n}\n\n/* Кольцо фокуса показывается ТОЛЬКО при клавиатурной навигации (Tab) */\n.nav-button:focus-visible {\n  outline: 2px solid #2dff8a;\n  outline-offset: 3px;\n  box-shadow: 0 0 0 4px rgba(45, 255, 138, 0.15);\n}\n\n/* Стиль ховера — отдельно */\n.nav-button:hover {\n  background: #21262d;\n  border-color: #2dff8a;\n}\n\n/* Стиль активного нажатия */\n.nav-button:active {\n  transform: scale(0.97);\n}",
+            "title": "Профессиональная стратегия фокуса через :focus-visible",
+            "explanation": ":focus-visible показывает визуальный индикатор фокуса только при табуляции клавиатурой, исключая раздражающее кольцо от кликов мышью."
+          }
+        },
+        {
+          "title": "Структурные псевдоклассы: :nth-child(), :first-of-type и :empty",
+          "content": "Выбор элементов по их положению в DOM-дереве:\n\n1. **Семейство `:nth-child(An+B)`**:\n- `:nth-child(odd)` / `:nth-child(even)` — нечётные/чётные строки (зебра-полосы таблиц).\n- `:nth-child(3n)` — каждый третий элемент.\n- `:nth-child(-n+3)` — первые 3 элемента.\n- `:nth-last-child(1)` — последний ребёнок (аналог `:last-child`).\n\n2. **Типизированные селекторы**:\n- `:first-of-type` / `:last-of-type` — первый/последний элемент **данного типа** среди братьев.\n- `:only-child` — единственный потомок у родителя.\n\n3. **`:empty` — Стилизация пустых контейнеров**:\n- Позволяет скрывать или стилизовать контейнеры, которые не содержат ни текста, ни дочерних узлов:\n  `.message-list:empty::after { content: 'Нет сообщений'; color: #8b949e; }`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Зебра-полоски таблицы через :nth-child(even) */\n.data-table tbody tr:nth-child(even) {\n  background: rgba(45, 255, 138, 0.04);\n}\n\n/* Убираем нижний бордер у последнего элемента списка */\n.sidebar-nav li:last-child {\n  border-bottom: none;\n}\n\n/* Первые 3 позиции с акцентным маркером */\n.leaderboard li:nth-child(-n+3) {\n  font-weight: bold;\n  color: #2dff8a;\n}\n\n/* Пустой список с плейсхолдером через ::after */\n.task-list:empty {\n  min-height: 60px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\n.task-list:empty::after {\n  content: '📋 Задач пока нет';\n  color: #8b949e;\n  font-style: italic;\n}",
+            "title": "Структурные псевдоклассы для таблиц, списков и пустых контейнеров",
+            "explanation": ":nth-child(even) создаёт полосатые таблицы, :empty показывает плейсхолдер для пустого списка."
+          }
+        },
+        {
+          "title": "CSS4-селекторы: :has() — революция, :is(), :where() и :not()",
+          "content": "Современные логические селекторы уровня CSS Selectors Level 4:\n\n1. **`:has()` — Первый в истории CSS «родительский селектор»!**:\n- До `:has()` стилизовать **родительский** элемент на основе состояния **потомка** было невозможно без JavaScript.\n- `form:has(input:invalid)` — обведёт форму красной рамкой, если хотя бы одно поле невалидно!\n- `.card:has(img)` — добавляет отступы только карточкам, содержащим изображение.\n- `.sidebar:has(.active)` — подсветит сайдбар, если в нём есть активный пункт меню.\n\n2. **`:is()` — Группировка без дублирования**:\n- Объединяет несколько селекторов: `:is(h1, h2, h3) { color: #2dff8a; }` вместо трёх отдельных правил.\n- Специфичность `:is()` равна **самому специфичному** аргументу внутри.\n\n3. **`:where()` — Группировка с нулевой специфичностью**:\n- Аналогичен `:is()`, но имеет специфичность **0** — идеально для сброса стилей (CSS Reset), которые легко переопределить.\n\n4. **`:not()` — Отрицание**:\n- `.list-item:not(:last-child)` — все элементы списка кроме последнего.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* ── :has() — Родительский селектор (CSS4) ── */\n\n/* Форма подсвечивается красным, если ЛЮБОЕ поле невалидно */\n.login-form:has(input:invalid) {\n  border-color: #f85149;\n  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.15);\n}\n\n/* Карточка без изображения получает увеличенный паддинг */\n.product-card:not(:has(img)) {\n  padding: 32px;\n}\n\n/* Навигация подсвечивается при наличии активной ссылки */\nnav:has(.nav-link.active) {\n  border-left: 3px solid #2dff8a;\n}\n\n/* ── :is() и :where() — Группировка ── */\n\n/* :is() — группировка заголовков (специфичность сохраняется) */\n:is(h1, h2, h3, h4) {\n  font-family: 'Inter', sans-serif;\n  line-height: 1.3;\n}\n\n/* :where() — базовые стили ссылок с нулевой специфичностью (легко переопределить) */\n:where(a) {\n  color: #29e7ff;\n  text-decoration: none;\n}",
+            "title": "Революционный :has() — стилизация родителя по состоянию потомка",
+            "explanation": ":has() превращает CSS из однонаправленного языка в двунаправленный: теперь родитель может реагировать на состояние детей без JavaScript."
+          }
+        },
+        {
+          "title": "Псевдоэлементы: ::before, ::after, ::placeholder, ::selection и ::backdrop",
+          "content": "Генерация виртуальных узлов и стилизация нативных элементов браузера:\n\n1. **`::before` и `::after` — Декоративные вставки**:\n- Генерируют виртуальные `inline`-дочерние элементы перед и после содержимого.\n- **Обязательное свойство**: `content: ''` (без `content` псевдоэлемент не создаётся!).\n- Используются для: декоративных иконок, индикаторов «Новое!», анимированных подчёркиваний, счётчиков.\n- **Ограничение**: НЕ работают на **замещаемых элементах** (`<img>`, `<input>`, `<br>`, `<hr>`), потому что эти элементы не содержат дочерний контент.\n\n2. **`::placeholder` — Стилизация текста-подсказки в полях ввода**.\n\n3. **`::selection` — Цвет выделения текста мышкой**:\n- `::selection { background: #2dff8a; color: #0a0e13; }` — брендовое выделение.\n\n4. **`::marker` — Стилизация маркеров списков (`<li>`, `<summary>`)**.\n\n5. **`::backdrop` — Фон за нативным `<dialog>` и Fullscreen API**.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Бейджик «Новое!» через ::after без HTML-элемента */\n.feature-card.is-new::after {\n  content: 'NEW';\n  position: absolute;\n  top: 12px;\n  right: 12px;\n  background: #2dff8a;\n  color: #0a0e13;\n  font-size: 10px;\n  font-weight: 800;\n  padding: 2px 8px;\n  border-radius: 4px;\n  letter-spacing: 0.5px;\n}\n\n/* Стилизация placeholder в полях ввода */\n.search-input::placeholder {\n  color: #484f58;\n  font-style: italic;\n  font-size: 14px;\n}\n\n/* Брендовое выделение текста */\n::selection {\n  background: rgba(45, 255, 138, 0.3);\n  color: #e6edf3;\n}\n\n/* Стилизация маркеров списков */\n.feature-list li::marker {\n  content: '✅ ';\n  font-size: 14px;\n}\n\n/* Фон за нативным модальным окном <dialog> */\ndialog::backdrop {\n  background: rgba(0, 0, 0, 0.75);\n  backdrop-filter: blur(4px);\n}",
+            "title": "Практические паттерны: бейджик ::after, ::placeholder, ::selection и ::backdrop",
+            "explanation": "Псевдоэлементы генерируют декоративный контент без засорения HTML-разметки, а ::backdrop стилизует нативный фон <dialog>."
           }
         }
       ],
       "seniorTips": [
-        "Используйте :focus-visible вместо :focus."
+        "Используйте `:focus-visible` вместо `:focus` для всех интерактивных элементов — это стандарт современной доступности, который не раздражает дизайнеров при клике мышью.",
+        "`:has()` — мощнейший инструмент, но используйте его с осторожностью: сложные цепочки `:has(:has(...))` могут замедлить рендеринг на страницах с тысячами DOM-узлов.",
+        "Всегда указывайте `content: ''` для `::before`/`::after`, даже если псевдоэлемент служит чисто визуальным блоком — без этого свойства он не создастся.",
+        "Разница `:is()` и `:where()`: `:is()` сохраняет максимальную специфичность аргументов, `:where()` всегда имеет специфичность 0. Используйте `:where()` в CSS-reset и utility-классах."
       ],
       "commonMistakes": [
         {
-          "bad": ".card::before { width: 10px; } /* Забыт content */",
-          "good": ".card::before { content: ''; width: 10px; }",
-          "reason": "Без content псевдоэлемент не отрендерится."
+          "bad": "/* Использование :focus вместо :focus-visible */\n.button:focus { outline: 2px solid blue; /* ❌ Некрасивое кольцо при клике мышью */ }",
+          "good": ".button:focus-visible { outline: 2px solid #2dff8a; outline-offset: 2px; }",
+          "reason": ":focus-visible показывает обводку фокуса только при клавиатурной навигации, улучшая UX для всех пользователей."
+        },
+        {
+          "bad": "/* Забытое content: '' у ::before */\n.icon-box::before { width: 20px; height: 20px; background: red; /* ❌ Ничего не отрендерится! */ }",
+          "good": ".icon-box::before { content: ''; display: block; width: 20px; height: 20px; background: red; }",
+          "reason": "Без свойства content псевдоэлемент не генерируется в DOM."
+        },
+        {
+          "bad": "/* ::before на замещаемых элементах */\nimg::before { content: 'Loading...'; /* ❌ Не работает! */ }",
+          "good": "/* Используйте обёрточный <div> для декорации замещаемых элементов */\n.img-wrapper::before { content: ''; /* ✅ Работает на обёртке */ }",
+          "reason": "Элементы <img>, <input>, <br> не имеют дочернего содержимого, поэтому ::before/::after игнорируются."
         }
       ],
       "keyTakeaways": [
-        "::before требует content: ''.",
-        ":nth-child(even) раскрашивает зебру."
+        ":focus-visible показывает фокусное кольцо только при клавиатурной навигации (Tab).",
+        ":has() — первый в истории CSS «родительский селектор», позволяющий стилизовать родителя по состоянию потомка.",
+        ":is() группирует селекторы с сохранением специфичности, :where() — с нулевой специфичностью.",
+        "::before и ::after требуют обязательного content: '' и не работают на замещаемых элементах.",
+        "::backdrop стилизует нативный фон за <dialog> и Fullscreen без JS-оверлеев."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"p-demo\"><a class=\"c-link\" href=\"#\">Наведите мышь</a></div>",
-      "initialCss": ".p-demo { padding: 30px; background: white; border-radius: 12px; text-align: center; }\n.c-link { position: relative; text-decoration: none; color: #4f46e5; font-size: 18px; font-weight: bold; }\n.c-link::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 3px; background: #4f46e5; transition: width 0.3s; }\n.c-link:hover::after { width: 100%; }",
-      "initialJs": "console.log('Pseudo loaded');",
-      "instructions": "Наведите на ссылку."
+      "initialHtml": "<div class=\"pseudo-sandbox\">\n  <form class=\"demo-form\">\n    <label>Email:</label>\n    <input type=\"email\" class=\"demo-input\" placeholder=\"user@example.com\" required />\n    <label>Имя:</label>\n    <input type=\"text\" class=\"demo-input\" placeholder=\"Ваше имя\" required minlength=\"2\" />\n    <button type=\"submit\" class=\"demo-submit-btn\">Отправить</button>\n  </form>\n  <p style=\"color:#8b949e; font-size:11px; margin-top:12px;\">Введите невалидный email — форма подсветится красным через :has(input:invalid)</p>\n</div>",
+      "initialCss": ".pseudo-sandbox { padding: 20px; background: #0a0e13; font-family: monospace; color: #e6edf3; }\n.demo-form { display: flex; flex-direction: column; gap: 8px; padding: 16px; border: 2px solid #30363d; border-radius: 10px; transition: border-color 0.3s, box-shadow 0.3s; max-width: 300px; }\n.demo-form:has(input:invalid) { border-color: #f85149; box-shadow: 0 0 0 3px rgba(248,81,73,0.15); }\n.demo-form:has(input:valid:not(:placeholder-shown)) { border-color: #2dff8a; box-shadow: 0 0 0 3px rgba(45,255,138,0.1); }\n.demo-input { background: #161b22; border: 1px solid #30363d; color: #e6edf3; padding: 8px 12px; border-radius: 6px; outline: none; }\n.demo-input:focus-visible { border-color: #29e7ff; box-shadow: 0 0 0 2px rgba(41,231,255,0.2); }\n.demo-input:invalid { border-color: #f85149; }\n.demo-input::placeholder { color: #484f58; font-style: italic; }\n::selection { background: rgba(45,255,138,0.3); color: #e6edf3; }\n.demo-submit-btn { background: #2dff8a; color: #0a0e13; border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; }\n.demo-submit-btn:focus-visible { outline: 2px solid #29e7ff; outline-offset: 3px; }",
+      "initialJs": "document.querySelector('.demo-form').addEventListener('submit', e => { e.preventDefault(); console.log('Форма отправлена!'); });",
+      "instructions": "Практика с псевдоклассами:\n1. Введите невалидный email — :has(input:invalid) подсветит ВСЕЮ ФОРМУ красным!\n2. Заполните оба поля корректно — рамка формы станет зелёной\n3. Нажмите Tab для навигации — :focus-visible покажет голубое кольцо фокуса\n4. Выделите текст мышкой — ::selection покажет брендовый зелёный цвет"
     },
     "task": {
-      "title": "Маркер списка через ::before",
-      "scenario": "Замените маркеры списка на галочки с помощью ::before.",
+      "title": "Создание интерактивной формы с :has(), :focus-visible, :invalid и ::after бейджиками",
+      "scenario": "Создайте CSS-стилизацию формы регистрации: при наличии невалидного поля (input:invalid) вся форма подсвечивается красным через :has(), при всех валидных полях — зелёным. Каждое обязательное поле помечено звёздочкой через label::after. Кнопка отправки использует :focus-visible для клавиатурного фокуса.",
       "criteria": [
-        "Список list-style: none",
-        "Применен ::before с content: '✓ '"
+        "form:has(input:invalid) подсвечивает рамку формы красным",
+        "label::after с content: ' *' для обязательных полей",
+        "input:focus-visible показывает кольцо фокуса без вмешательства мышиного клика",
+        "::placeholder стилизует текст подсказки",
+        "::selection настроен с брендовым выделением"
       ],
       "starterCode": {
-        "html": "<ul class=\"cl\"><li>Чистый код</li></ul>",
-        "css": "/* Стили */\n"
+        "css": "/* Стилизуйте форму с псевдоклассами и псевдоэлементами */\n.register-form {\n}\n.register-form:has(input:invalid) {\n}\nlabel.required::after {\n}\ninput:focus-visible {\n}"
       },
       "hints": [
-        "Задайте .cl { list-style: none; } .cl li::before { content: '✓ '; color: #10b981; }"
+        "form:has(input:invalid) { border-color: #f85149; box-shadow: 0 0 0 3px rgba(248,81,73,0.15); }",
+        "label.required::after { content: ' *'; color: #f85149; font-weight: bold; }"
       ],
       "solution": {
-        "html": "<ul class=\"cl\"><li>Чистый код</li></ul>",
-        "css": ".cl { list-style: none; padding: 0; }\n.cl li { font-weight: bold; }\n.cl li::before { content: '✓ '; color: #10b981; margin-right: 6px; }",
-        "explanation": "Кастомный маркер."
+        "css": ".register-form {\n  display: flex;\n  flex-direction: column;\n  gap: 12px;\n  padding: 24px;\n  border: 2px solid #30363d;\n  border-radius: 12px;\n  background: #0d1117;\n  transition: border-color 0.3s, box-shadow 0.3s;\n}\n\n.register-form:has(input:invalid) {\n  border-color: #f85149;\n  box-shadow: 0 0 0 3px rgba(248, 81, 73, 0.15);\n}\n\n.register-form:has(input:valid:not(:placeholder-shown)) {\n  border-color: #2dff8a;\n}\n\nlabel.required::after {\n  content: ' *';\n  color: #f85149;\n  font-weight: bold;\n}\n\ninput {\n  background: #161b22;\n  border: 1px solid #30363d;\n  color: #e6edf3;\n  padding: 10px 14px;\n  border-radius: 8px;\n  outline: none;\n}\n\ninput:focus-visible {\n  border-color: #2dff8a;\n  box-shadow: 0 0 0 3px rgba(45, 255, 138, 0.15);\n}\n\ninput:invalid {\n  border-color: #f85149;\n}\n\ninput::placeholder {\n  color: #484f58;\n  font-style: italic;\n}\n\n::selection {\n  background: rgba(45, 255, 138, 0.3);\n  color: #e6edf3;\n}",
+        "explanation": ":has(input:invalid) стилизует родительскую форму по состоянию дочерних полей, ::after создаёт звёздочку обязательности, :focus-visible обеспечивает доступность."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c18-q1",
-          "question": "Какое свойство обязательно для ::before?",
+          "id": "css18-q1",
+          "question": "В чём главное отличие :focus-visible от :focus?",
           "options": [
-            "display",
-            "content: ''",
-            "position",
-            "width"
+            ":focus-visible работает только в Firefox",
+            ":focus-visible показывает кольцо фокуса ТОЛЬКО при клавиатурной навигации (Tab), но НЕ при клике мышью, улучшая UX",
+            ":focus-visible отключает фокус полностью",
+            ":focus-visible удаляет элемент из DOM"
           ],
           "correctIndex": 1,
-          "explanation": "Свойство content обязательно."
+          "explanation": ":focus-visible решает давнюю проблему некрасивого кольца фокуса при клике мышью, сохраняя доступность для клавиатурных пользователей."
+        },
+        {
+          "id": "css18-q2",
+          "question": "Что делает CSS-селектор form:has(input:invalid)?",
+          "options": [
+            "Удаляет форму со страницы",
+            "Стилизует РОДИТЕЛЬСКУЮ форму на основе состояния ДОЧЕРНЕГО элемента input — первый в истории CSS 'родительский селектор'",
+            "Добавляет новый input в форму",
+            "Отключает валидацию полей"
+          ],
+          "correctIndex": 1,
+          "explanation": ":has() позволяет селектору CSS проверять потомков и применять стили к элементу-предку — революционная возможность CSS Level 4."
+        },
+        {
+          "id": "css18-q3",
+          "question": "Какое CSS-свойство ОБЯЗАТЕЛЬНО должно быть указано у ::before и ::after, чтобы псевдоэлемент отрисовался?",
+          "options": [
+            "display: block",
+            "content (например, content: '' или content: 'Текст')",
+            "position: absolute",
+            "z-index: 1"
+          ],
+          "correctIndex": 1,
+          "explanation": "Без свойства content псевдоэлемент ::before/::after не генерируется браузером вообще."
+        },
+        {
+          "id": "css18-q4",
+          "question": "Почему ::before и ::after НЕ работают на элементах <img>, <input> и <br>?",
+          "options": [
+            "Это баг Chrome, который скоро исправят",
+            "Эти элементы являются замещаемыми (void/replaced) и не имеют дочернего содержимого, в которое можно вставить виртуальный узел",
+            "Нужно использовать три двоеточия :::",
+            "Они работают, просто требуют z-index: 9999"
+          ],
+          "correctIndex": 1,
+          "explanation": "Замещаемые элементы (replaced elements) рендерятся как атомарные блоки без внутренней DOM-структуры."
+        },
+        {
+          "id": "css18-q5",
+          "question": "В чём разница между :is() и :where() при группировке селекторов?",
+          "options": [
+            ":is() сохраняет специфичность самого специфичного аргумента внутри скобок, а :where() всегда имеет специфичность 0",
+            "Никакой разницы, это алиасы",
+            ":where() работает только в Safari",
+            ":is() удаляет элементы из DOM"
+          ],
+          "correctIndex": 0,
+          "explanation": ":where() с нулевой специфичностью идеально подходит для CSS Reset, который легко переопределить пользовательскими стилями."
         }
       ]
     }

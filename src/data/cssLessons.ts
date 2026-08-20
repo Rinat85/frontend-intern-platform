@@ -2722,84 +2722,191 @@ export const cssLessons: Lesson[] = [
     "id": "css-15",
     "moduleId": "css",
     "level": 15,
-    "title": "Трансформации (Transform 2D/3D)",
-    "subtitle": "Translate, rotate, scale, skew и аппаратное ускорение",
-    "description": "Анимация геометрии: смещение translate, вращение rotate, масштабирование scale, рендеринг на GPU.",
-    "estimatedMinutes": 30,
+    "title": "CSS Трансформации: 2D и 3D Transform, Матрицы и GPU-композитинг",
+    "subtitle": "translate, scale, rotate, skew, transform-origin, perspective, preserve-3d, backface-visibility и 60 FPS на GPU",
+    "description": "Освойте пространственные трансформации в CSS: 2D-преобразования (translate, rotate, scale, skew), точку трансформации transform-origin, 3D-сцены (perspective, transform-style: preserve-3d, backface-visibility: hidden), эффект переворачивающейся 3D-карточки (Card Flip) и аппаратный GPU-композитинг со скоростью 60–120 FPS.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Transform",
-      "Animation"
+      "css-transform",
+      "2d-transform",
+      "3d-transform",
+      "perspective",
+      "preserve-3d",
+      "card-flip",
+      "gpu-acceleration",
+      "matrix"
     ],
     "theory": {
-      "overview": "Свойство transform изменяет форму и положение элемента без вызова Reflow на GPU.",
+      "overview": "Свойство `transform` — самый мощный инструмент для создания плавных и высокопроизводительных визуальных эффектов в веб-дизайне.\n\nВ отличие от изменения геометрических свойств (`top`, `left`, `margin`, `width`, `height`), которые вызывают тяжелый перерасчет макета страницы (**Reflow / Layout Thrashing**) и перерисовку (**Repaint**), трансформации `transform` обрабатываются **напрямую графическим процессором (GPU) на отдельном композитном слое** со стабильной частотой 60–120 кадров в секунду.\n\nВ этом уроке мы изучим полный спектр 2D и 3D трансформаций, принципы работы с перспективой и научимся создавать сложные 3D-интерфейсы.",
       "sections": [
         {
-          "title": "Функции transform",
-          "content": "- `translate(x, y)`: смещение по осям.\n- `scale(1.1)`: увеличение.\n- `rotate(45deg)`: поворот.\n- Выполняется на GPU со 120 FPS!",
+          "title": "2D-трансформации и аппаратное ускорение на GPU",
+          "content": "Четыре базовые функции 2D-трансформаций:\n\n1. **`translate(X, Y)` (Смещение)**:\n- `transform: translate(20px, -10px);` или раздельно `translateX(50%)`, `translateY(100px)`.\n- **Ключевое отличие от `top / left`**: процентные значения `translate(-50%, -50%)` рассчитываются от **СОБСТВЕННОГО размера элемента**, а не от размера родительского контейнера! Это делает `translate` идеальным для центрирования.\n- Не сдвигает соседние элементы в потоке документа.\n\n2. **`scale(X, Y)` (Масштабирование)**:\n- `transform: scale(1.1);` — увеличение на 10%.\n- `transform: scaleX(-1);` — зеркальное отражение по горизонтали!\n\n3. **`rotate(deg | rad | turn)` (Вращение)**:\n- `transform: rotate(45deg);` или `rotate(0.5turn);` (половина оборота на 180°).\n\n4. **`skew(X, Y)` (Скос)**:\n- `transform: skewX(15deg);` — наклон граней для создания динамичных параллелограммов и скошенных неоновых бейджей.\n\n5. **Почему GPU любит transform**:\n- Изменение `transform` и `opacity` не триггерит Reflow (перерасчет геометрии DOM). Браузер выносит элемент на текстуру GPU и просто двигает/крутит эту текстуру на экране.",
+          "image": {
+            "src": "/images/lessons/css-transform-2d-3d.svg",
+            "alt": "CSS Трансформации: 2D и 3D Transform, perspective и GPU композитинг",
+            "caption": "2D/3D Transform: translate/scale/rotate, порядок функций, perspective, preserve-3d и аппаратный GPU композитинг"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Hover карточки",
-            "code": ".card { transition: transform 0.3s ease; }\n.card:hover { transform: translateY(-6px) scale(1.02); }",
-            "explanation": "Плавное всплытие на GPU."
+            "code": "/* Идеальное абсолютное центрирование через translate */\n.modal-window {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  /* -50% смещает ровно на половину собственной ширины и высоты модала! */\n  transform: translate(-50%, -50%);\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  border-radius: 12px;\n  padding: 24px;\n}\n\n/* Интерактивная карточка с микро-анимацией на GPU */\n.interactive-card {\n  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);\n  will-change: transform; /* Подсказка браузеру вынести слой на GPU */\n}\n\n.interactive-card:hover {\n  /* Комбинированная трансформация: подъем на 6px и легкое увеличение на 3% */\n  transform: translateY(-6px) scale(1.03);\n}",
+            "title": "Центрирование через translate(-50%, -50%) и hover-эффект на GPU",
+            "explanation": "translate(-50%, -50%) гарантирует безупречное центрирование модалки любого размера, а hover-анимация работает на GPU без лагов."
+          }
+        },
+        {
+          "title": "Точка трансформации (transform-origin) и порядок применения функций",
+          "content": "Управление центром и очередностью трансформаций:\n\n1. **Свойство `transform-origin`**:\n- Задает опорную точку (якорь), относительно которой происходят поворот, масштабирование и скос.\n- По умолчанию: `transform-origin: 50% 50%` (точный геометрический центр элемента).\n- Ключевые слова: `top left`, `center bottom`, `right center` или точные пиксели `transform-origin: 0 0;`.\n- Примеры: часы (стрелка вращается вокруг `transform-origin: bottom center;`), открывающаяся дверь (`transform-origin: left center;`).\n\n2. **Критическое правило: Порядок функций имеет значение!**\n- Функции в свойстве `transform` применяются **СПРАВА НАЛЕВО** (матричное умножение):\n  `transform: rotate(45deg) translateX(100px);` сначала поворачивает локальные оси координат элемента на 45 градусов, а затем сдвигает элемент на 100px вдоль **УЖЕ ПОВЕРНУТОЙ** оси X!\n  `transform: translateX(100px) rotate(45deg);` сначала сдвигает элемент вправо, а затем вращает его на месте.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Стрелка часов (вращение вокруг нижнего края) */\n.clock-hand {\n  width: 4px;\n  height: 80px;\n  background: #2dff8a;\n  position: absolute;\n  bottom: 50%;\n  left: 50%;\n  /* Точка вращения в самом низу стрелки */\n  transform-origin: bottom center;\n  transform: rotate(90deg); /* 15 минут / 3 часа */\n}\n\n/* Выпадающее меню с анимацией раскрытия от левого верхнего угла */\n.dropdown-menu {\n  transform-origin: top left;\n  transform: scale(0);\n  opacity: 0;\n  transition: transform 0.2s ease, opacity 0.2s ease;\n}\n\n.dropdown-menu.open {\n  transform: scale(1);\n  opacity: 1;\n}",
+            "title": "Использование transform-origin для анимации стрелки и выпадающего меню",
+            "explanation": "transform-origin: bottom center заставляет стрелку вращаться вокруг своей нижней оси, создавая реалистичный циферблат."
+          }
+        },
+        {
+          "title": "3D-пространство в CSS: perspective, preserve-3d и rotateX/Y/Z",
+          "content": "Переход в трехмерное пространство (3D CSS):\n\n1. **`perspective` (Глубина сцены)**:\n- Задается на **родительском контейнере**: `.scene { perspective: 1000px; }`.\n- Определяет расстояние от глаз зрителя до плоскости экрана.\n- **Чем МЕНЬШЕ значение perspective** (например, 300px), тем ближе наблюдатель и тем сильнее искажение (агрессивный 3D-эффект).\n- **Чем БОЛЬШЕ значение** (1500px), тем дальше наблюдатель и тем мягче изометрическая перспектива.\n\n2. **`transform-style: preserve-3d`**:\n- Без этого свойства все 3D-трансформации дочерних элементов сплющиваются в плоскую 2D-картинку (режим `flat`).\n- `preserve-3d` указывает браузеру честно рендерить вложенные элементы в едином трехмерном объеме!\n\n3. **3D-функции**:\n- `rotateX(60deg)` — наклон вперед/назад (эффект лежащей 3D-плитки).\n- `rotateY(45deg)` — поворот влево/вправо вокруг вертикальной оси.\n- `translateZ(50px)` — приближение к зрителю (выход из плоскости экрана!).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 3D Сцена */\n.viewport-3d {\n  perspective: 800px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  height: 300px;\n}\n\n/* Изометрическая 3D-карточка с эффектом глубины */\n.isometric-card {\n  width: 240px;\n  height: 160px;\n  background: linear-gradient(135deg, #161b22, #0d1117);\n  border: 1px solid #2dff8a;\n  border-radius: 12px;\n  /* Поворот в 3D пространстве */\n  transform: rotateX(25deg) rotateY(-20deg) rotateZ(5deg);\n  transform-style: preserve-3d;\n  box-shadow: -20px 20px 30px rgba(0, 0, 0, 0.6);\n  transition: transform 0.4s ease;\n}\n\n.isometric-card:hover {\n  /* Выравнивание при наведении */\n  transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg) translateZ(30px);\n}",
+            "title": "Создание изометрической 3D-карточки с глубиной perspective: 800px",
+            "explanation": "perspective на родителе создает перспективное сокращение, а поворот по X/Y формирует реалистичный объем."
+          }
+        },
+        {
+          "title": "Архитектура переворачивающейся 3D-карточки (3D Card Flip)",
+          "content": "Классический индустриальный паттерн интерактивной карточки товара или флеш-карточки:\n\nАнатомия 3D Card Flip:\n1. **Родитель (Сцена)**: `perspective: 1000px;`.\n2. **Вращающийся контейнер (`.card-flipper`)**: `transform-style: preserve-3d; transition: transform 0.6s;`.\n3. **Две грани (`.card-front` и `.card-back`)**:\n   - Обе грани занимают одну позицию через `position: absolute; top: 0; left: 0; width: 100%; height: 100%;`.\n   - **`backface-visibility: hidden;`** — скрывает грань, когда она повернута спиной к зрителю!\n   - Задняя грань изначально повернута на 180 градусов: `.card-back { transform: rotateY(180deg); }`.\n4. **Переворот при ховере или клике**: `.card-flipper:hover { transform: rotateY(180deg); }`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* 1. Контейнер сцены */\n.flip-scene {\n  width: 300px;\n  height: 200px;\n  perspective: 1000px;\n}\n\n/* 2. Вращающийся блок */\n.flip-card {\n  width: 100%;\n  height: 100%;\n  position: relative;\n  transform-style: preserve-3d;\n  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);\n  cursor: pointer;\n}\n\n.flip-scene:hover .flip-card {\n  transform: rotateY(180deg);\n}\n\n/* 3. Лицевая и обратная стороны */\n.card-face {\n  position: absolute;\n  inset: 0;\n  backface-visibility: hidden; /* КРИТИЧЕСКИ ВАЖНО: скрывает изнанку! */\n  border-radius: 12px;\n  padding: 24px;\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n}\n\n.card-front {\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  color: #2dff8a;\n}\n\n.card-back {\n  background: #0d1117;\n  border: 1px solid #29e7ff;\n  color: #29e7ff;\n  transform: rotateY(180deg); /* Изначально перевернута назад */\n}",
+            "title": "Полная реализация 3D Card Flip с backface-visibility: hidden",
+            "explanation": "backface-visibility: hidden скрывает изнанку при повороте, обеспечивая гладкую смену лицевой и обратной сторон без артефактов."
           }
         }
       ],
       "seniorTips": [
-        "Для анимации движения используйте translate(), а не top/left."
+        "Никогда не анимируйте свойства геометрии `top`, `left`, `margin`, `width`, `height` — анимируйте ТОЛЬКО `transform` и `opacity` для гарантированных 60–120 FPS.",
+        "Для центрирования модальных окон используйте `position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);` — это работает для элементов динамической высоты.",
+        "Помните про порядок функций: `rotate(45deg) translate(100px)` вращает координатную сетку ПЕРЕД сдвигом, меняя направление движения.",
+        "При создании 3D-переворотов карточек всегда задавайте `backface-visibility: hidden` на обеих гранях и `transform-style: preserve-3d` на вращающемся родителе."
       ],
       "commonMistakes": [
         {
-          "bad": ".card:hover { top: -10px; }",
-          "good": ".card:hover { transform: translateY(-10px); }",
-          "reason": "top/left вызывают тяжелый Reflow."
+          "bad": "/* Анимация смещения через left (тяжелый Reflow / просадки FPS) */\n.box:hover { left: 100px; }",
+          "good": "/* Анимация через transform на GPU */\n.box:hover { transform: translateX(100px); }",
+          "reason": "Изменение left вызывает пересчет макета всей страницы (Reflow). transform выполняется на видеокарте без задержек."
+        },
+        {
+          "bad": "/* Забытый preserve-3d при 3D анимации карточки */\n.card { transform: rotateY(180deg); /* ❌ Дочерние элементы сплющиваются в 2D плоскую текстуру */ }",
+          "good": ".card { transform-style: preserve-3d; }",
+          "reason": "По умолчанию transform-style имеет значение flat, что ломает трехмерную вложенность элементов."
+        },
+        {
+          "bad": "/* Забытый backface-visibility: hidden в 3D Card Flip */\n// Обратная сторона просвечивает сквозь лицевую или зеркалится с артефактами",
+          "good": ".card-front, .card-back { backface-visibility: hidden; }",
+          "reason": "Без backface-visibility: hidden браузер продолжит рендерить зеркальный текст изнанки повернутого элемента."
         }
       ],
       "keyTakeaways": [
-        "transform работает на видеокарте.",
-        "translateY(-4px) идеален для hover."
+        "CSS Transform (translate, rotate, scale, skew) обрабатывается на GPU со скоростью 60–120 FPS.",
+        "translate(-50%, -50%) вычисляет сдвиг от собственного размера элемента.",
+        "transform-origin управляет опорной точкой вращения и масштабирования.",
+        "perspective на родителе задает глубину трехмерного пространства.",
+        "3D Card Flip требует связки perspective + preserve-3d + backface-visibility: hidden."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"tr-demo\"><button class=\"tr-btn\">Взлет 🚀</button></div>",
-      "initialCss": ".tr-demo { padding: 40px; background: white; border-radius: 12px; text-align: center; }\n.tr-btn { padding: 12px 24px; background: #4f46e5; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.3s; }\n.tr-btn:hover { transform: translateY(-6px) scale(1.05); }",
-      "initialJs": "console.log('Transform loaded');",
-      "instructions": "Наведите на кнопку."
+      "initialHtml": "<div class=\"transform-sandbox\">\n  <div class=\"flip-container\" id=\"demo-flipper\">\n    <div class=\"flipper\">\n      <div class=\"face front\">\n        <h3>Лицевая грань</h3>\n        <p>Наведите или нажмите</p>\n        <span class=\"badge\">FRONT</span>\n      </div>\n      <div class=\"face back\">\n        <h3>3D Оборот</h3>\n        <p>backface-visibility: hidden</p>\n        <span class=\"badge\" style=\"background:#29e7ff22; color:#29e7ff;\">BACK</span>\n      </div>\n    </div>\n  </div>\n</div>",
+      "initialCss": ".transform-sandbox { padding: 30px; background: #0a0e13; display: flex; justify-content: center; font-family: monospace; }\n.flip-container {\n  width: 240px;\n  height: 150px;\n  perspective: 800px;\n}\n.flipper {\n  width: 100%;\n  height: 100%;\n  position: relative;\n  transform-style: preserve-3d;\n  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);\n  cursor: pointer;\n}\n.flip-container:hover .flipper, .flipper.flipped {\n  transform: rotateY(180deg);\n}\n.face {\n  position: absolute;\n  inset: 0;\n  backface-visibility: hidden;\n  border-radius: 12px;\n  padding: 16px;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  text-align: center;\n}\n.front {\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  color: #2dff8a;\n}\n.back {\n  background: #0d1117;\n  border: 1px solid #29e7ff;\n  color: #29e7ff;\n  transform: rotateY(180deg);\n}\n.badge {\n  background: #2dff8a22;\n  color: #2dff8a;\n  padding: 4px 10px;\n  border-radius: 6px;\n  font-size: 11px;\n  margin-top: 8px;\n  font-weight: bold;\n}",
+      "initialJs": "const flipper = document.getElementById('demo-flipper').querySelector('.flipper');\nflipper.onclick = () => flipper.classList.toggle('flipped');\nconsole.log('3D Transform песочница готова');",
+      "instructions": "Практика с 3D Transform:\n1. Наведите курсор на карточку — она плавно перевернется в 3D на 180°\n2. Кликните по карточке для фиксации переворота\n3. Попробуйте изменить perspective с 800px на 300px и оцените усиление 3D-искажения"
     },
     "task": {
-      "title": "Всплытие карточки",
-      "scenario": "Сделайте подъем карточки при наведении через translateY(-8px).",
+      "title": "Верстка интерактивной 3D-визитки с переворачиванием и параллакс-наклоном",
+      "scenario": "Создайте компонент 3D-карточки товара: карточка должна переворачиваться на 180 градусов при наведении с показом характеристик на обороте, использовать perspective: 1000px, preserve-3d и backface-visibility: hidden, а также иметь микро-анимацию подъема по оси Z (translateZ).",
       "criteria": [
-        "Задан transition для transform",
-        "В :hover применен translateY(-8px)"
+        "Родительский контейнер имеет perspective: 1000px",
+        "Вращающийся блок использует transform-style: preserve-3d и transition",
+        "Обе стороны (front и back) имеют backface-visibility: hidden",
+        "Обратная сторона карточки повернута на rotateY(180deg)",
+        "При наведении карточка переворачивается на 180deg с эффектом подъема"
       ],
       "starterCode": {
-        "html": "<div class=\"lift\"><h4>Карточка</h4></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили 3D Card Flip */\n.card-scene {\n}\n.card-3d {\n}\n.card-face-front {\n}\n.card-face-back {\n}"
       },
       "hints": [
-        "Задайте .lift { transition: transform 0.3s; } .lift:hover { transform: translateY(-8px); }"
+        "Сцена: perspective: 1000px; width: 280px; height: 180px;",
+        "Карточка: transform-style: preserve-3d; transition: transform 0.6s;",
+        "Грани: position: absolute; inset: 0; backface-visibility: hidden;"
       ],
       "solution": {
-        "html": "<div class=\"lift\"><h4>Карточка</h4></div>",
-        "css": ".lift { padding: 24px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; transition: transform 0.3s ease; }\n.lift:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }",
-        "explanation": "Всплытие карточки."
+        "css": ".card-scene {\n  width: 300px;\n  height: 200px;\n  perspective: 1000px;\n  margin: 0 auto;\n}\n\n.card-3d {\n  width: 100%;\n  height: 100%;\n  position: relative;\n  transform-style: preserve-3d;\n  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);\n  border-radius: 16px;\n}\n\n.card-scene:hover .card-3d {\n  transform: rotateY(180deg) translateZ(20px);\n}\n\n.card-face {\n  position: absolute;\n  inset: 0;\n  backface-visibility: hidden;\n  border-radius: 16px;\n  padding: 24px;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);\n}\n\n.card-face-front {\n  background: linear-gradient(135deg, #161b22, #0d1117);\n  border: 1px solid #2dff8a;\n  color: #e6edf3;\n}\n\n.card-face-back {\n  background: linear-gradient(135deg, #0d1117, #161b22);\n  border: 1px solid #29e7ff;\n  color: #e6edf3;\n  transform: rotateY(180deg);\n}",
+        "explanation": "3D-карточка переворачивается плавно с аппаратным ускорением GPU, исключая любые визуальные артефакты благодаря backface-visibility: hidden."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c15-q1",
-          "question": "Почему transform работает быстрее top/left?",
+          "id": "css15-q1",
+          "question": "Почему анимации на основе transform (translate, scale, rotate) работают значительно плавнее, чем анимации top/left/margin?",
           "options": [
-            "Пишется короче",
-            "Вычисляется на GPU без Reflow",
-            "Удаляет DOM",
-            "Блокирует скролл"
+            "transform написан на языке C++",
+            "transform вычисляется напрямую на графическом процессоре (GPU) на отдельном композитном слое, не вызывая тяжелого перерасчета макета страницы (Reflow) и перерисовки (Repaint)",
+            "transform работает только в браузерах на базе Chromium",
+            "Разницы в производительности нет"
           ],
           "correctIndex": 1,
-          "explanation": "transform вычисляется на GPU."
+          "explanation": "Свойства transform и opacity не влияют на геометрию соседних элементов, что позволяет браузеру анимировать их на GPU с частотой 60–120 FPS."
+        },
+        {
+          "id": "css15-q2",
+          "question": "От чего вычисляются процентные значения в свойстве transform: translate(-50%, -50%)?",
+          "options": [
+            "От ширины и высоты родительского контейнера",
+            "От СОБСТВЕННОЙ ширины и высоты самого трансформируемого элемента",
+            "От размеров окна браузера (viewport)",
+            "От размера шрифта (font-size)"
+          ],
+          "correctIndex": 1,
+          "explanation": "В отличие от top/left (где % берутся от родителя), translate(-50%, -50%) берет 50% от собственного размера элемента, что делает его идеальным для центрирования."
+        },
+        {
+          "id": "css15-q3",
+          "question": "Зачем необходимо свойство backface-visibility: hidden при создании эффекта 3D Card Flip?",
+          "options": [
+            "Для ускорения загрузки картинок",
+            "Чтобы скрыть оборотную сторону (изнанку) элемента, когда он повернут спиной к зрителю на 180 градусов",
+            "Чтобы отключить скролл страницы",
+            "Чтобы удалить тень карточки"
+          ],
+          "correctIndex": 1,
+          "explanation": "backface-visibility: hidden скрывает грань, когда нормаль ее плоскости направлена от зрителя, предотвращая наложение перевернутого текста."
+        },
+        {
+          "id": "css15-q4",
+          "question": "Что произойдет, если изменить значение perspective на родителе с 1500px до 300px?",
+          "options": [
+            "Элемент станет невидимым",
+            "3D-искажение станет намного сильнее и агрессивнее, так как виртуальная камера наблюдателя приблизится вплотную к объекту",
+            "Элемент уменьшится в 5 раз",
+            "Ничего не изменится"
+          ],
+          "correctIndex": 1,
+          "explanation": "perspective задает дистанцию от зрителя до плоскости Z=0. Чем меньше расстояние (300px), тем более выражена перспектива и глубина."
+        },
+        {
+          "id": "css15-q5",
+          "question": "Что делает свойство transform-origin: top left;?",
+          "options": [
+            "Перемещает элемент в левый верхний угол экрана",
+            "Устанавливает точку привязки (якорь), вокруг которой происходят поворот (rotate) и масштабирование (scale), в левый верхний угол элемента",
+            "Обрезает левый верхний угол",
+            "Удаляет border-radius"
+          ],
+          "correctIndex": 1,
+          "explanation": "transform-origin определяет центр трансформации. По умолчанию это центр (50% 50%), но его можно сместить в любой угол или точку."
         }
       ]
     }

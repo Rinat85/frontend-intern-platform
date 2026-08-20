@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgct15" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgct15)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">CSS: 2D и 3D Трансформации (Transform)</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">translate, rotate, scale, skew, transform-origin, perspective, preserve-3d и GPU композитинг</text>
+
+  <!-- Left: 2D Transforms & GPU Layer -->
+  <rect x="20" y="65" width="370" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">2D Трансформации и Аппаратное ускорение</text>
+
+  <!-- Transform Operations -->
+  <rect x="35" y="100" width="160" height="60" rx="4" fill="#2dff8a22" stroke="#2dff8a"/>
+  <text x="115" y="118" fill="#2dff8a" font-size="8" font-weight="600" text-anchor="middle">translate(X, Y)</text>
+  <text x="115" y="134" fill="#e6edf3" font-size="7" text-anchor="middle">Смещение без Reflow</text>
+  <text x="115" y="148" fill="#8b949e" font-size="6" text-anchor="middle">Не сдвигает соседей в DOM!</text>
+
+  <rect x="210" y="100" width="165" height="60" rx="4" fill="#29e7ff22" stroke="#29e7ff"/>
+  <text x="292" y="118" fill="#29e7ff" font-size="8" font-weight="600" text-anchor="middle">scale(X, Y) &amp; rotate()</text>
+  <text x="292" y="134" fill="#e6edf3" font-size="7" text-anchor="middle">Масштаб и Поворот</text>
+  <text x="292" y="148" fill="#8b949e" font-size="6" text-anchor="middle">rotate(45deg), scale(1.1)</text>
+
+  <rect x="35" y="170" width="340" height="65" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="45" y="188" fill="#ffb02e" font-size="8" font-weight="600">Порядок применения функций имеет значение!</text>
+  <text x="45" y="204" fill="#e6edf3" font-size="7">rotate(45deg) translate(50px) ≠ translate(50px) rotate(45deg)</text>
+  <text x="45" y="218" fill="#8b949e" font-size="6">Поворот вращает и оси координат X/Y для следующего translate!</text>
+
+  <rect x="35" y="245" width="340" height="65" rx="4" fill="#2dff8a11" stroke="#2dff8a"/>
+  <text x="45" y="263" fill="#2dff8a" font-size="8" font-weight="600">GPU Composite Layer (60–120 FPS):</text>
+  <text x="45" y="279" fill="#e6edf3" font-size="7">transform и opacity вычисляются на видеокарте</text>
+  <text x="45" y="293" fill="#8b949e" font-size="6">will-change: transform; — подсказка браузеру вынести слой на GPU</text>
+
+  <!-- Right: 3D Space & Card Flip -->
+  <rect x="410" y="65" width="370" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">3D Пространство и Переворот (Card Flip)</text>
+
+  <rect x="425" y="98" width="340" height="50" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="116" fill="#2dff8a" font-size="8" font-weight="600">perspective: 1000px;</text>
+  <text x="435" y="130" fill="#e6edf3" font-size="7">Глубина сцены на родителе (чем меньше px, тем сильнее 3D эффект)</text>
+
+  <rect x="425" y="156" width="340" height="50" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="435" y="174" fill="#29e7ff" font-size="8" font-weight="600">transform-style: preserve-3d;</text>
+  <text x="435" y="188" fill="#e6edf3" font-size="7">Сохраняет 3D-пространство для всех вложенных дочерних элементов</text>
+
+  <rect x="425" y="214" width="340" height="50" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="435" y="232" fill="#ffb02e" font-size="8" font-weight="600">backface-visibility: hidden;</text>
+  <text x="435" y="246" fill="#e6edf3" font-size="7">Скрывает оборотную сторону карточки при повороте rotateY(180deg)</text>
+
+  <rect x="425" y="272" width="340" height="42" rx="4" fill="#0d1117" stroke="#d2a8ff"/>
+  <text x="435" y="290" fill="#d2a8ff" font-size="8" font-weight="600">transform-origin: center center / top left;</text>
+  <text x="435" y="302" fill="#8b949e" font-size="6">Точка привязки, вокруг которой происходит вращение и масштабирование</text>
+
+  <!-- Bottom -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Золотое правило высокопроизводительных анимаций</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• Никогда не анимируйте top/left/width/height/margin — они вызывают тяжелый Layout/Reflow</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• Анимируйте ТОЛЬКО transform (translate, scale, rotate) и opacity — они обрабатываются на GPU за 0 мс</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• perspective + preserve-3d позволяют создавать реалистичные 3D-интерфейсы без WebGL</text>
+</svg>

@@ -2712,5 +2712,200 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-15",
+    "moduleId": "pro",
+    "level": 15,
+    "title": "Стратегии рендеринга: SSR, SSG, ISR, Гидратация, Islands и React Server Components (RSC)",
+    "subtitle": "CSR vs SSR vs SSG vs ISR, проблема стоимости гидратации, Astro Islands Architecture, React Server Components (RSC) и HTML Streaming",
+    "description": "Освойте архитектуру рендеринга современного веба: фундаментальные различия CSR, SSR, SSG и ISR, проблему накладных расходов гидратации (Hydration Cost / Double Data Fetching), революционную архитектуру островов (Astro Islands), парадигму React Server Components (RSC) с 0 КБ клиентского JS и потоковый стриминг HTML через Suspense.",
+    "estimatedMinutes": 70,
+    "difficulty": "advanced",
+    "tags": [
+      "rendering",
+      "ssr",
+      "ssg",
+      "isr",
+      "hydration",
+      "islands-architecture",
+      "rsc",
+      "react-server-components",
+      "streaming",
+      "nextjs",
+      "astro"
+    ],
+    "theory": {
+      "overview": "Как браузер получает и отображает веб-приложение — это ключевое архитектурное решение, определяющее скорость загрузки (**LCP/FCP**), стоимость инфраструктуры, индексацию поисковыми роботами (**SEO**) и отзывчивость интерфейса (**INP**).\n\nЭпоха классических «толстых» SPA (Client-Side Rendering) уступила место гибридным парадигмам: **Server-Side Rendering (SSR)**, **Static Site Generation (SSG)**, **Incremental Static Regeneration (ISR)**, архитектуре островов (**Islands Architecture в Astro**) и революции **React Server Components (RSC)**.\n\nВ этом уроке мы разберём каждую стратегию до мельчайших деталей.",
+      "sections": [
+        {
+          "title": "4 Классические стратегии: CSR, SSR, SSG и ISR",
+          "content": "Сравнение архитектурных подходов к генерации HTML:\n\n1. **CSR (Client-Side Rendering — Классический SPA на Vite/CRA)**:\n- Сервер отдает пустой `<div id=\"root\"></div>` и ссылку на тяжелый JS-бандл (1–3 МБ).\n- Браузер качает JS, выполняет его, делает запросы к API и рендерит DOM.\n- **Минусы**: долгий белый экран на мобилках (медленный FCP/LCP), поисковые роботы могут не проиндексировать контент.\n\n2. **SSR (Server-Side Rendering — Next.js / Remix / Nuxt)**:\n- Сервер генерирует готовый HTML на **КАЖДЫЙ входящий HTTP-запрос** пользователя, обращаясь к базе данных на лету.\n- **Плюсы**: мгновенный первый показ контента (быстрый FCP), идеальный SEO и динамические Open Graph превью.\n- **Минусы**: нагрузка на Node.js сервер, задержка TTFB (Time to First Byte) при медленном бэкенде.\n\n3. **SSG (Static Site Generation)**:\n- Страницы генерируются один раз во время сборки проекта (`npm run build`) и выкладываются на глобальный CDN (Cloudflare, Vercel).\n- **Плюсы**: мгновенная отдача (TTFB 10–30 мс), нулевая нагрузка на сервер, 100/100 в Lighthouse.\n- **Минусы**: при изменении одной статьи в блоге требуется полная пересборка всего сайта.\n\n4. **ISR (Incremental Static Regeneration — Next.js)**:\n- Статические страницы с **фоновой регенерацией по таймеру** (`revalidate: 60`).\n- Пользователь мгновенно получает страницу из CDN-кэша, а сервер тихо в фоне обновляет страницу при устаревании.",
+          "image": {
+            "src": "/images/lessons/web-rendering-strategies.svg",
+            "alt": "Парадигмы рендеринга: CSR, SSR, SSG, ISR, Islands Architecture и RSC",
+            "caption": "Эволюция рендеринга: CSR (SPA) → SSR/SSG/ISR → Проблема гидратации → Islands Architecture → React Server Components (RSC)"
+          },
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Пример конфигурации стратегий рендеринга в Next.js App Router:\n\n// 1. SSG (Статическая генерация по умолчанию)\nexport async function generateStaticParams() {\n  const posts = await getPosts();\n  return posts.map((post) => ({ id: post.id }));\n}\n\n// 2. ISR (Регенерация статики каждые 60 секунд)\nexport const revalidate = 60;\n\n// 3. SSR (Динамический рендеринг на каждый запрос)\nexport const dynamic = 'force-dynamic';\n\nexport default async function ProductPage({ params }: { params: { id: string } }) {\n  // Прямой запрос к базе данных прямо внутри компонента!\n  const product = await db.product.findUnique({ where: { id: params.id } });\n  return <div><h1>{product.title}</h1><span>{product.price} ₽</span></div>;\n}",
+            "title": "Декларативное переключение между SSG, ISR и SSR в Next.js",
+            "explanation": "В современных фреймворках стратегия рендеринга настраивается для каждого маршрута отдельно."
+          }
+        },
+        {
+          "title": "Проблема стоимости гидратации (Hydration Cost & Double Data Fetching)",
+          "content": "Почему классический SSR не решил проблему производительности полностью:\n\n1. **Что такое Гидратация (Hydration)**:\n- Сервер отправил пользователю готовый HTML. Пользователь видит картинку и текст.\n- Но кнопки **НЕ РАБОТАЮТ**, пока браузер не скачает весь React-бандл (весь код компонентов) и не «оживит» HTML, сопоставив виртуальный DOM с реальным и навесив слушатели `onClick`!\n- Период между показом HTML и окончанием гидратации называется «Uncanny Valley» (Зловещая долина): интерфейс выглядит готовым, но клики игнорируются.\n\n2. **Проблема двойной передачи данных (Double Data Fetching)**:\n- Чтобы клиентский React смог гидрировать страницу без ошибок, сервер вынужден отправлять данные **ДВАЖДЫ**: один раз в виде готового HTML, а второй раз — в виде огромного JSON-скрипта `<script id=\"__NEXT_DATA__\">` внизу страницы, удваивая размер ответа!",
+          "codeExample": {
+            "language": "html",
+            "code": "<!-- Как выглядит HTML страница с проблемой двойных данных в классическом SSR: -->\n<html>\n  <body>\n    <!-- 1. Первый раз: Данные отрендерены в HTML тегах (50 KB) -->\n    <div id=\"root\">\n      <h1>Курс: Advanced TypeScript</h1>\n      <p>Полное руководство по дженерикам...</p>\n    </div>\n\n    <!-- 2. Второй раз: ТЕ ЖЕ САМЫЕ данные сериализованы в JSON для гидратации (50 KB!) -->\n    <script id=\"__NEXT_DATA__\" type=\"application/json\">\n      {\"props\":{\"pageProps\":{\"course\":{\"title\":\"Advanced TypeScript\",\"desc\":\"Полное руководство...\"}}}}\n    </script>\n    <!-- 3. Клиентский бандл React для гидратации (150 KB) -->\n    <script src=\"/bundle.js\"></script>\n  </body>\n</html>",
+            "title": "Проблема Double Data Fetching: дублирование данных в HTML и JSON",
+            "explanation": "Классический SSR вынужден передавать одни и те же данные дважды, чтобы клиентский React мог пройти гидратацию."
+          }
+        },
+        {
+          "title": "Архитектура островов (Islands Architecture в Astro)",
+          "content": "Революционное решение проблемы гидратации от команды Astro:\n\n1. **Концепция Островов (Islands)**:\n- 90–95% типичной веб-страницы (шапка, футер, статьи, боковые панели, текст) — это **статический контент**, которому вообще не нужен JavaScript!\n- Вся страница отгружается браузеру как **чистый HTML (0 КБ JavaScript)**.\n\n2. **Изолированная гидратация (Partial Hydration)**:\n- Только интерактивные островки (кнопка переключения темы, корзина, поле поиска) загружают свой маленький JS-код изолированно.\n\n3. Директивы загрузки островков:\n- `client:load` — гидрировать немедленно при загрузке страницы.\n- `client:visible` — загрузить JS **только тогда, когда пользователь доскроллит** до этого блока (Lazy Hydration)!\n- `client:idle` — гидрировать в моменты простоя браузера (`requestIdleCallback`).",
+          "codeExample": {
+            "language": "html",
+            "code": "--- // Astro компонент страницы блога\nimport Header from '../components/Header.astro'; // 0 КБ JS (чистый HTML)\nimport ArticleContent from '../components/ArticleContent.astro'; // 0 КБ JS\nimport InteractiveComments from '../components/Comments.tsx'; // React компонент!\nimport ThemeToggle from '../components/ThemeToggle.tsx';\n---\n\n<html>\n  <body>\n    <!-- Статический HTML без единого байта JS -->\n    <Header>\n      <!-- Островок 1: гидрируется сразу для быстрого переключения темы -->\n      <ThemeToggle client:load />\n    </Header>\n    \n    <ArticleContent />\n    \n    <!-- Островок 2: JS для комментариев скачается ТОЛЬКО когда пользователь доскроллит до низа! -->\n    <InteractiveComments client:visible />\n  </body>\n</html>",
+            "title": "Astro Islands: чистый HTML со точечными островками client:visible",
+            "explanation": "95% страницы не содержат JavaScript, а тяжелый виджет комментариев гидрируется только при появлении в зоне видимости."
+          }
+        },
+        {
+          "title": "React Server Components (RSC) и Потоковый Стриминг HTML (Suspense)",
+          "content": "Новая фундаментальная парадигма современного React (Next.js App Router):\n\n1. **React Server Components (RSC — Серверные компоненты)**:\n- По умолчанию в App Router ВСЕ компоненты являются серверными (`Server Components`).\n- Они выполняются **ИСКЛЮЧИТЕЛЬНО на сервере Node.js**.\n- **Их код НИКОГДА не попадает в клиентский бандл (0 КБ JS!)**.\n- Могут напрямую делать SQL-запросы к базе данных, читать файлы с диска, использовать тяжелые библиотеки без раздувания клиентского бандла.\n\n2. **Клиентские компоненты (`'use client'`)**:\n- Нужны ТОЛЬКО тогда, когда требуется интерактивность браузера: хуки `useState`, `useEffect`, слушатели `onClick`, `onChange`, Web APIs (`localStorage`, `window`).\n\n3. **Потоковый стриминг HTML через `<Suspense>`**:\n- Сервер мгновенно отправляет каркас страницы (Navigation, Layout), а тяжелые медленные блоки (например, аналитику или список рекомендаций) стримит по мере готовности через HTTP Streaming chunked transfer.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// app/dashboard/page.tsx — Серверный компонент со стримингом через Suspense\nimport { Suspense } from 'react';\nimport { FastHeader } from './FastHeader'; // Server Component (0 КБ JS)\nimport { SlowAnalyticsWidget } from './SlowAnalyticsWidget';\nimport { SkeletonLoader } from '@/shared/ui/Skeleton';\nimport { InteractiveFilter } from './InteractiveFilter'; // 'use client' компонент\n\nexport default function DashboardPage() {\n  return (\n    <main className=\"dashboard-layout\">\n      {/* 1. Отправляется клиенту мгновенно за 15 мс */}\n      <FastHeader title=\"Панель управления\" />\n      \n      {/* 2. Клиентский интерактивный фильтр с хуками useState */}\n      <InteractiveFilter />\n      \n      {/* 3. Медленный блок: пользователь видит скелетон, пока сервер делает тяжелый SQL-запрос */}\n      <Suspense fallback={<SkeletonLoader />}>\n        <SlowAnalyticsWidget />\n      </Suspense>\n    </main>\n  );\n}",
+            "title": "Next.js App Router: совмещение RSC, 'use client' и Suspense Streaming",
+            "explanation": "Пользователь видит интерфейс мгновенно без блокировки медленными сетевыми запросами благодаря Suspense Streaming."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Выбирайте стратегию под задачу: для блогов и лендингов — SSG/Astro (0 КБ JS), для маркетплейсов — ISR/Next.js (кеш + ревалидация), для закрытых админок — классический CSR на Vite.",
+        "В Next.js App Router держите компоненты серверными (Server Components) по умолчанию и добавляйте директиву `'use client'` только на самых «листьях» дерева компонентов, где нужны `useState` или `onClick`.",
+        "Используйте `<Suspense>` для медленных данных — потоковый HTML-стриминг позволяет отдать пользователю готовый лейаут за 20 мс, не дожидаясь ответа медленных микросервисов.",
+        "Для минимизации стоимости гидратации выносите тяжелые неинтерактивные библиотеки (markdown парсеры, форматирование дат) в Server Components."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Проставление 'use client' в самом верху страницы app/layout.tsx\n// Превращает все приложение обратно в старый тяжелый CSR с потерей всех преимуществ RSC!",
+          "good": "// 'use client' ставится только на конкретную интерактивную кнопку или форму",
+          "reason": "'use client' создает границу, ниже которой весь код попадает в клиентский JavaScript-бандл."
+        },
+        {
+          "bad": "// Использование window или localStorage напрямую в теле Server Component\n// Ошибка: ReferenceError: window is not defined на сервере Node.js!",
+          "good": "// Вызов window только внутри useEffect или клиентских компонентов 'use client'",
+          "reason": "Серверные компоненты исполняются в среде Node.js/Edge, где нет глобальных объектов браузера window и document."
+        },
+        {
+          "bad": "// Использование чистого CSR (SPA) для интернет-магазина с 50 000 товаров (потеря 90% поискового трафика Google)",
+          "good": "// Использование ISR / SSR для каталога товаров с автоматической генерацией sitemap",
+          "reason": "Поисковые роботы индексируют статический HTML на порядок быстрее и надежнее, чем сложные JS-бандлы."
+        }
+      ],
+      "keyTakeaways": [
+        "CSR отдает пустой HTML, SSR генерирует HTML на запрос, SSG запекает статику на билде, ISR обновляет статику в фоне.",
+        "Гидратация требует скачивания JS и сопоставления виртуального DOM с реальным.",
+        "Islands Architecture (Astro) отгружает 95% чистого HTML, гидрируя только изолированные интерактивные островки.",
+        "React Server Components (RSC) имеют 0 байт в клиентском бандле и обращаются к БД напрямую.",
+        "Suspense Streaming отдает каркас страницы мгновенно, догружая тяжелые блоки потоком."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"rendering-app\">\n  <h3>Симулятор стратегий рендеринга</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"btn-csr\" style=\"background:#f85149; color:#fff; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">1. CSR (SPA)</button>\n    <button id=\"btn-ssr\" style=\"background:#ffb02e; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">2. SSR</button>\n    <button id=\"btn-ssg\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">3. SSG (CDN)</button>\n    <button id=\"btn-rsc\" style=\"background:#29e7ff; color:#0a0e13; border:none; padding:6px 12px; font-weight:bold; cursor:pointer;\">4. RSC (0 KB JS)</button>\n  </div>\n  <pre id=\"render-log\" style=\"color:#e6edf3; font-size:12px; line-height:1.5; background:#161b22; padding:12px; border-radius:6px;\"></pre>\n</div>",
+      "initialCss": "#rendering-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const log = document.getElementById('render-log');\n\ndocument.getElementById('btn-csr').onclick = () => {\n  log.style.color = '#f85149';\n  log.textContent = '⏳ CSR (Client-Side Rendering):\\n1. Сервер отдал пустой <div id=\"root\"></div> (2 KB)\\n2. Загрузка app.bundle.js (1.8 MB) — 800ms\\n3. Парсинг JS + запрос к API — 400ms\\n🔴 LCP: 1450ms | Клиентский JS: 1800 KB | SEO: Сложно';\n};\n\ndocument.getElementById('btn-ssr').onclick = () => {\n  log.style.color = '#ffb02e';\n  log.textContent = '⚡ SSR (Server-Side Rendering):\\n1. Сервер сделал SQL запрос и собрал HTML — 120ms\\n2. Браузер получил полный HTML с контентом (FCP: 150ms)\\n3. Гидратация React бандлом (TTI: 500ms)\\n🟡 LCP: 350ms | Клиентский JS: 220 KB | SEO: Идеально';\n};\n\ndocument.getElementById('btn-ssg').onclick = () => {\n  log.style.color = '#2dff8a';\n  log.textContent = '🚀 SSG (Static Site Generation):\\n1. Отдача готового HTML с ближайшего Edge CDN — 15ms!\\n2. Контент доступен мгновенно\\n🟢 LCP: 120ms | TTFB: 15ms | Нагрузка на сервер: 0% ⚡';\n};\n\ndocument.getElementById('btn-rsc').onclick = () => {\n  log.style.color = '#29e7ff';\n  log.textContent = '💎 RSC (React Server Components):\\n1. Сервер отдал готовый HTML + RSC Payload\\n2. Тяжелые библиотеки (Markdown, SQL) остались на сервере\\n3. Клиент скачал только интерактивную кнопку (3 KB!)\\n🟢 Клиентский JS: 3 KB вместо 1800 KB (Экономия 99.8%)!';\n};",
+      "instructions": "Практика со стратегиями рендеринга:\n1. Нажимайте кнопки 1–4 для сравнения таймингов LCP, веса JS-бандла и нагрузки на сервер\n2. Оцените, почему RSC и SSG обеспечивают максимальный показатель Lighthouse 100/100"
+    },
+    "task": {
+      "title": "Проектирование гибридной архитектуры рендеринга интернет-магазина (SSG + ISR + RSC)",
+      "scenario": "Спроектируйте архитектуру рендеринга для интернет-магазина на Next.js App Router: главная страница (SSG), каталог товаров (ISR с revalidate: 120), карточка товара (RSC серверный компонент с прямым запросом к БД и потоковым стримингом отзывов через Suspense) и интерактивная кнопка добавления в корзину ('use client').",
+      "criteria": [
+        "Карточка товара является Server Component без передачи лишнего JS на клиент",
+        "Кнопка AddToCart выделена в отдельный клиентский компонент с директивой 'use client'",
+        "Блок отзывов обернут в <Suspense fallback={<ReviewsSkeleton />}> для стриминга",
+        "Определены стратегии кэширования и ревалидации (revalidate)"
+      ],
+      "starterCode": {
+        "js": "// Спроектируйте структуру компонентов и стратегий рендеринга\n// Ваш код"
+      },
+      "hints": [
+        "В клиентском файле: 'use client'; export const AddToCartBtn = ...",
+        "В серверной странице: export const revalidate = 120;",
+        "<Suspense fallback={<ReviewsSkeleton />}><ReviewsSection productId={id} /></Suspense>"
+      ],
+      "solution": {
+        "js": "// 1. components/AddToCartBtn.tsx — Клиентский компонент ('use client')\n'use client';\nimport { useState } from 'react';\n\nexport function AddToCartBtn({ productId }: { productId: string }) {\n  const [isAdded, setIsAdded] = useState(false);\n  return (\n    <button onClick={() => setIsAdded(true)} className=\"btn-cart\">\n      {isAdded ? '✓ В корзине' : 'Добавить в корзину'}\n    </button>\n  );\n}\n\n// 2. app/products/[id]/page.tsx — Серверный компонент (RSC) с Suspense\nimport { Suspense } from 'react';\nimport { AddToCartBtn } from '@/components/AddToCartBtn';\n\n// ISR: обновление статики каждые 2 минуты\nexport const revalidate = 120;\n\nexport default async function ProductPage({ params }: { params: { id: string } }) {\n  // Прямой запрос к базе данных на сервере (0 КБ JS в бандле!)\n  const product = await db.product.findById(params.id);\n\n  return (\n    <div className=\"product-container\">\n      <h1>{product.title}</h1>\n      <p>{product.description}</p>\n      <AddToCartBtn productId={product.id} />\n\n      {/* Потоковый стриминг медленного блока отзывов */}\n      <Suspense fallback={<div className=\"skeleton\">Загрузка отзывов...</div>}>\n        <ReviewsWidget productId={params.id} />\n      </Suspense>\n    </div>\n  );\n}",
+        "explanation": "Идеальная гибридная архитектура: ISR кэширует страницу на 120 секунд, RSC оставляет тяжелые SQL-запросы на сервере, Suspense стримит отзывы, а 'use client' изолирован в маленькой кнопке."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro15-q1",
+          "question": "В чём фундаментальное преимущество React Server Components (RSC) перед классическими React-компонентами?",
+          "options": [
+            "RSC работают только без интернета",
+            "RSC исполняются исключительно на сервере и имеют ровно 0 КБ в клиентском JavaScript-бандле, имея прямой доступ к базам данных и файловой системе",
+            "RSC отключают CSS стили",
+            "RSC заменяют TypeScript"
+          ],
+          "correctIndex": 1,
+          "explanation": "Серверные компоненты никогда не отправляются в браузер в виде JS-кода: клиент получает только отрендеренную структуру, что кардинально снижает размер бандла."
+        },
+        {
+          "id": "pro15-q2",
+          "question": "Что происходит во время процесса гидратации (Hydration) в SSR-приложениях?",
+          "options": [
+            "Очистка кэша браузера",
+            "Браузер скачивает клиентский JS-бандл и сопоставляет виртуальный DOM с готовым серверным HTML, навешивая слушатели событий (onClick, onChange) для обеспечения интерактивности",
+            "Сжатие изображений",
+            "Компиляция TypeScript"
+          ],
+          "correctIndex": 1,
+          "explanation": "Гидратация «оживляет» статический серверный HTML, связывая его с состоянием и обработчиками событий React."
+        },
+        {
+          "id": "pro15-q3",
+          "question": "В чём суть архитектуры островов (Islands Architecture в Astro)?",
+          "options": [
+            "Размещение серверов на физических островах в океане",
+            "Страница отгружается как чистый статический HTML (0 КБ JS), а гидрируются изолированно только конкретные интерактивные виджеты-островки (например, по скроллу client:visible)",
+            "Запрет на использование HTML тегов",
+            "Разделение базы данных"
+          ],
+          "correctIndex": 1,
+          "explanation": "Astro отдает 95% страницы без JavaScript, загружая JS только для интерактивных островков по мере необходимости."
+        },
+        {
+          "id": "pro15-q4",
+          "question": "Как работает стратегия рендеринга ISR (Incremental Static Regeneration)?",
+          "options": [
+            "Пересобирает весь сайт при каждом клике",
+            "Отдает мгновенный статический HTML из CDN-кэша, а в фоне по истечении revalidate-таймера тихо регенерирует страницу на сервере без полной пересборки проекта",
+            "Работает только в режиме офлайн",
+            "Удаляет старые страницы"
+          ],
+          "correctIndex": 1,
+          "explanation": "ISR сочетает сверхбыструю скорость статического CDN с актуальностью данных благодаря фоновой ревалидации страниц."
+        },
+        {
+          "id": "pro15-q5",
+          "question": "Какую задачу решает потоковый стриминг HTML (HTML Streaming) через <Suspense> в Next.js App Router?",
+          "options": [
+            "Воспроизводит видеофайлы",
+            "Позволяет серверу мгновенно отправить каркас страницы и немедленно отобразить его пользователю, досылая тяжелые медленные блоки по мере готовности в непрерывном потоке",
+            "Шифрует пароли",
+            "Блокирует сетевые запросы"
+          ],
+          "correctIndex": 1,
+          "explanation": "HTML Streaming предотвращает блокировку всей страницы из-за одного медленного запроса к базе данных, показывая пользователю скелетон и догружая данные на лету."
+        }
+      ]
+    }
   }
 ];

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lesson, Module } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { TheorySection } from './TheorySection';
@@ -28,6 +28,25 @@ export const LessonView: React.FC<LessonViewProps> = ({
 }) => {
   const { isLessonCompleted, toggleLessonCompletion, isLessonBookmarked, toggleBookmark } = useProgress();
   const [activeTab, setActiveTab] = useState<'theory' | 'sandbox' | 'task' | 'quiz'>('theory');
+
+  // Reset tab to theory and scroll to top when changing lesson
+  useEffect(() => {
+    setActiveTab('theory');
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    const contentArea = document.querySelector('.app-content-area');
+    if (contentArea) {
+      contentArea.scrollTop = 0;
+    }
+  }, [lesson.id]);
+
+  const handleTabChange = (tab: 'theory' | 'sandbox' | 'task' | 'quiz') => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    document.documentElement.scrollTo({ top: 0, behavior: 'smooth' });
+    document.body.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const currentIndex = allLessons.findIndex(l => l.id === lesson.id);
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null;
@@ -81,28 +100,28 @@ export const LessonView: React.FC<LessonViewProps> = ({
         <div className="lesson-nav-tabs">
           <button
             className={`lesson-nav-tab ${activeTab === 'theory' ? 'active' : ''}`}
-            onClick={() => setActiveTab('theory')}
+            onClick={() => handleTabChange('theory')}
           >
             <BookOpen size={16} />
             <span>1. Теория</span>
           </button>
           <button
             className={`lesson-nav-tab ${activeTab === 'sandbox' ? 'active' : ''}`}
-            onClick={() => setActiveTab('sandbox')}
+            onClick={() => handleTabChange('sandbox')}
           >
             <Code size={16} />
             <span>2. Песочница (Live Editor)</span>
           </button>
           <button
             className={`lesson-nav-tab ${activeTab === 'task' ? 'active' : ''}`}
-            onClick={() => setActiveTab('task')}
+            onClick={() => handleTabChange('task')}
           >
             <CheckSquare size={16} />
             <span>3. Практическое задание</span>
           </button>
           <button
             className={`lesson-nav-tab ${activeTab === 'quiz' ? 'active' : ''}`}
-            onClick={() => setActiveTab('quiz')}
+            onClick={() => handleTabChange('quiz')}
           >
             <HelpCircle size={16} />
             <span>4. Тест ({lesson.quiz.questions.length})</span>

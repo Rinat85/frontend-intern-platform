@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { modulesData } from './data/modulesData';
 import { cheatSheetsData } from './data/cheatSheetsData';
 import { useAuth } from './context/AuthContext';
@@ -22,6 +22,17 @@ export const App: React.FC = () => {
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [authInitialTab, setAuthInitialTab] = useState<'login' | 'register' | 'quick'>('quick');
+
+  // Automatic scroll to top on page / lesson / admin view navigation
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    const contentArea = document.querySelector('.app-content-area');
+    if (contentArea) {
+      contentArea.scrollTop = 0;
+    }
+  }, [currentLessonId, isAdminView]);
 
   // Keyboard shortcut Ctrl+K for search
   useEffect(() => {

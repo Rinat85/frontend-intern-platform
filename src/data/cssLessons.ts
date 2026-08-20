@@ -2915,83 +2915,190 @@ export const cssLessons: Lesson[] = [
     "id": "css-16",
     "moduleId": "css",
     "level": 16,
-    "title": "Плавные переходы (Transition)",
-    "subtitle": "Duration, timing-function, cubic-bezier и задержка",
-    "description": "Микроанимации: длительность duration (150-300ms), функции плавности ease, cubic-bezier() и задержка.",
-    "estimatedMinutes": 30,
+    "title": "Плавные переходы (Transition) и функции плавности (Easing)",
+    "subtitle": "transition-property, duration, timing-function, delay, cubic-bezier, step-функции и анимации состояния",
+    "description": "Освойте плавные переходы между состояниями элементов в CSS: анатомию свойства transition, опасность transition: all, функции плавности timing-function, математику кастомных кривых cubic-bezier (эффекты пружины Spring/Bounce), пошаговые анимации steps() и технику каскадных задержек Staggered Delays.",
+    "estimatedMinutes": 65,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "Transition",
-      "Easing"
+      "css-transition",
+      "easing",
+      "cubic-bezier",
+      "timing-function",
+      "steps",
+      "staggered-delay",
+      "micro-interactions",
+      "ui-animation"
     ],
     "theory": {
-      "overview": "CSS Transitions плавно анимируют свойства при смене состояний.",
+      "overview": "Интерфейс без плавных переходов ощущается статичным и резким. Мгновенная смена цвета кнопки или резкое появление модального окна ухудшают пользовательский опыт (UX).\n\nСвойство `transition` позволяет браузеру **плавно интерполировать числовые значения CSS-свойств** во времени при смене состояния элемента (псевдоклассы `:hover`, `:focus-visible`, `:active` или добавление класса через JavaScript).\n\nВ этом уроке мы разберём анатомию переходов, математику кривых Безье (`cubic-bezier`), покадровые `steps()` и правила оптимизации для сохранения стабильных 60–120 FPS.",
       "sections": [
         {
-          "title": "Анатомия transition",
-          "content": "- `transition: transform 0.2s ease, background 0.2s ease`.\n- Оптимальная длительность UI микроанимаций: 150–300ms.",
+          "title": "Анатомия свойства transition и критическая ловушка transition: all",
+          "content": "Свойство `transition` объединяет 4 параметра:\n\n1. **Составные подсвойства**:\n- `transition-property` — анимируемое свойство (`transform`, `opacity`, `background-color`).\n- `transition-duration` — длительность перехода (`0.3s`, `250ms`).\n- `transition-timing-function` — функция ускорения (`ease`, `linear`, `cubic-bezier(...)`).\n- `transition-delay` — задержка перед стартом анимации (`0.1s`).\n- **Сокращенный синтаксис (Shorthand)**: `transition: transform 0.3s ease-out 0.05s;`.\n\n2. **Критическая ловушка: Почему `transition: all` — антипаттерн ⚠️**:\n- Значение `all` заставляет браузер отслеживать и интерполировать **ВСЕ свойства элемента**.\n- Если скрипт изменит `width`, `margin` или `border`, браузер запустит тяжелую анимацию геометрии (Reflow / Layout Thrashing) на каждый кадр, что приведет к лагам и просадке FPS на мобильных устройствах.\n- **Индустриальный стандарт ✅**: ВСЕГДА явно перечисляйте анимируемые свойства через запятую: `transition: transform 0.2s ease, opacity 0.2s ease;`.",
+          "image": {
+            "src": "/images/lessons/css-transitions-easing.svg",
+            "alt": "CSS Плавные переходы: transition, timing-function и кривые Безье",
+            "caption": "Анатомия transition, опасность transition: all, кривые cubic-bezier с эффектом пружины и Staggered Delays"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Плавная кнопка",
-            "code": ".btn { background: #4f46e5; transition: background 0.2s ease, transform 0.2s ease; }\n.btn:hover { background: #4338ca; transform: translateY(-2px); }",
-            "explanation": "Плавный hover отклик."
+            "code": "/* ❌ Плохо: transition: all вызывает неконтролируемый Reflow */\n/* .bad-button { transition: all 0.3s ease; } */\n\n/* ✅ Отлично: явное перечисление свойств с разными длительностями */\n.modern-button {\n  background: #161b22;\n  color: #e6edf3;\n  border: 1px solid #30363d;\n  padding: 10px 20px;\n  border-radius: 8px;\n  cursor: pointer;\n  \n  /* Анимируем ТОЛЬКО то, что меняется, и с нужной кривой */\n  transition:\n    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),\n    background-color 0.25s ease,\n    border-color 0.25s ease,\n    box-shadow 0.25s ease;\n}\n\n.modern-button:hover {\n  background: #2dff8a;\n  color: #0a0e13;\n  border-color: #2dff8a;\n  transform: translateY(-2px);\n  box-shadow: 0 8px 20px rgba(45, 255, 138, 0.3);\n}\n\n.modern-button:active {\n  transform: translateY(0) scale(0.98); /* Тактильный отклик на клик */\n}",
+            "title": "Профессиональная настройка transition с раздельными таймингами",
+            "explanation": "Явное перечисление свойств transform, background-color и box-shadow дает плавный и производительный отклик интерфейса."
+          }
+        },
+        {
+          "title": "Функции плавности (Timing Functions) и магия cubic-bezier",
+          "content": "Как меняется скорость анимации во времени:\n\n1. **Стандартные функции плавности**:\n- `linear` — постоянная скорость (анимация выглядит неестественно, идеально только для вращающихся спиннеров-лоадеров).\n- `ease` (по умолчанию) — медленный старт, ускорение в середине, медленный финиш.\n- `ease-in` — медленный старт с ускорением к концу (для исчезающих элементов).\n- `ease-out` — быстрый старт с мягким торможением (золотой стандарт для появления модалок, тултипов и ховеров кнопок — интерфейс ощущается отзывчивым!).\n- `ease-in-out` — симметричное замедление в начале и в конце.\n\n2. **Кастомные кривые Безье `cubic-bezier(x1, y1, x2, y2)`**:\n- Позволяют задать любую физику движения.\n- **Эффект пружины (Spring / Bounce / Overshoot)**:\n  Если значение `y2 > 1` (например, `cubic-bezier(0.34, 1.56, 0.64, 1)`), элемент в конце анимации слегка «перелетает» целевую точку и пружинит назад, создавая ультра-современный тактильный микровзаимодействующий эффект (как в iOS).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Пружинящая всплывающая подсказка (Tooltip / Notification) */\n.spring-popup {\n  position: fixed;\n  bottom: 24px;\n  right: 24px;\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  color: #e6edf3;\n  padding: 16px 24px;\n  border-radius: 12px;\n  \n  /* Исходное состояние: скрыт и уменьшен */\n  transform: translateY(100px) scale(0.8);\n  opacity: 0;\n  \n  /* Кривая с перелетом (y1 = 1.56) создает реалистичную пружину! */\n  transition:\n    transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),\n    opacity 0.25s ease-out;\n}\n\n.spring-popup.visible {\n  transform: translateY(0) scale(1);\n  opacity: 1;\n}",
+            "title": "Эффект пружины (Spring Bounce) через cubic-bezier(0.34, 1.56, 0.64, 1)",
+            "explanation": "Кривая Безье с y > 1 заставляет модалку слегка выскочить за границу и плавно встать на место, создавая эффект упругости."
+          }
+        },
+        {
+          "title": "Пошаговая дискретная анимация: steps() и step-end",
+          "content": "Не все анимации должны быть непрерывными:\n\n1. **Функция `steps(n, jump-term)`**:\n- Разбивает переход на `n` дискретных равных шагов без промежуточных сглаживаний.\n- `steps(1, end)` или ключевое слово `step-end` — меняет значение мгновенно в самом конце интервала.\n\n2. **Практические применения `steps()`**:\n- **Мигающий курсор в ретро-терминале** (`opacity` переключается шагами между 1 и 0).\n- **Покадровая спрайтовая анимация персонажей** (смещение `background-position` на фиксированное число кадров спрайта).\n- **Часы с дискретным ходом секундной стрелки** (`steps(60)` за 60 секунд делает стрелку тикающей как в настоящих механических часах!).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Мигающий курсор терминала без JavaScript */\n.terminal-cursor {\n  display: inline-block;\n  width: 10px;\n  height: 1.2em;\n  background: #2dff8a;\n  vertical-align: middle;\n  margin-left: 4px;\n  \n  /* steps(1, start) переключает opacity дискретно: 1 -> 0 -> 1 */\n  animation: blink 1s steps(1, start) infinite;\n}\n\n@keyframes blink {\n  0%, 100% { opacity: 1; }\n  50% { opacity: 0; }\n}\n\n/* Механическая тикающая стрелка часов на 60 шагов */\n.ticking-second-hand {\n  transition: transform 1s steps(60);\n}",
+            "title": "Использование steps(1, start) для мигающего терминального курсора",
+            "explanation": "Функция steps(1, start) исключает плавное затухание, обеспечивая дискретное мигание курсора."
+          }
+        },
+        {
+          "title": "Каскадные задержки (Staggered Delays) и анимация псевдоэлементов",
+          "content": "Продвинутые техники создания премиальных микровзаимодействий:\n\n1. **Каскадное появление списков (Staggered Delays)**:\n- Если анимировать появление 5 карточек одновременно — это выглядит скучно.\n- Задавая каждому следующему элементу нарастающую задержку `transition-delay: calc(var(--i) * 50ms)`, мы получаем эффект **плавной волны появления**!\n\n2. **Анимация подчеркивания ссылок через `::after`**:\n- Классический эффект: полоса подчеркивания вырастает из центра при наведении через `transform: scaleX(0)` → `scaleX(1)`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Эффектное подчеркивание ссылки из центра на GPU */\n.nav-link {\n  position: relative;\n  color: #e6edf3;\n  text-decoration: none;\n  padding-bottom: 4px;\n}\n\n.nav-link::after {\n  content: '';\n  position: absolute;\n  bottom: 0;\n  left: 0;\n  width: 100%;\n  height: 2px;\n  background: #2dff8a;\n  /* Изначально сжато до 0 в центре */\n  transform: scaleX(0);\n  transform-origin: center;\n  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n}\n\n.nav-link:hover::after {\n  transform: scaleX(1); /* Плавное расширение на 100% ширины */\n}\n\n/* Каскадное появление списка меню через задержки */\n.stagger-menu li {\n  opacity: 0;\n  transform: translateX(-20px);\n  transition: opacity 0.3s ease, transform 0.3s ease;\n}\n\n/* Задержки по очереди */\n.stagger-menu.open li:nth-child(1) { transition-delay: 50ms; opacity: 1; transform: none; }\n.stagger-menu.open li:nth-child(2) { transition-delay: 100ms; opacity: 1; transform: none; }\n.stagger-menu.open li:nth-child(3) { transition-delay: 150ms; opacity: 1; transform: none; }\n.stagger-menu.open li:nth-child(4) { transition-delay: 200ms; opacity: 1; transform: none; }",
+            "title": "Подчеркивание ссылки через scaleX(0) и каскадная задержка списка",
+            "explanation": "scaleX(0) анимируется на GPU без сдвига текста, а Staggered Delays создают динамичный эффект каскадной волны."
           }
         }
       ],
       "seniorTips": [
-        "Анимируйте только конкретные свойства (opacity, transform), а не all."
+        "Никогда не пишите `transition: all` — это приводит к скрытым просадкам производительности. Явно указывайте анимируемые свойства: `transition: transform 0.2s, opacity 0.2s`.",
+        "Для появления элементов используйте `ease-out` (быстрый отклик с мягким финишем), а для исчезновения — `ease-in`.",
+        "Используйте кастомный `cubic-bezier(0.34, 1.56, 0.64, 1)` для кнопок и модальных окон — легкий пружинящий овершут делает UI живым и премиальным.",
+        "Соблюдайте баланс длительности: идеальное время микро-анимаций кнопок и тултипов — 150–250 мс. Анимации длиннее 400 мс раздражают пользователей медлительностью."
       ],
       "commonMistakes": [
         {
-          "bad": ".card { transition: all 0.5s; }",
-          "good": ".card { transition: transform 0.2s ease; }",
-          "reason": "transition: all снижает производительность."
+          "bad": "/* Использование transition: all 0.5s на всех элементах */\n* { transition: all 0.5s ease; /* ❌ Тормозит скролл, ресайз и выпадающие списки! */ }",
+          "good": ".btn { transition: transform 0.2s ease, background-color 0.2s ease; }",
+          "reason": "transition: all заставляет браузер интерполировать даже свойства, которые не должны анимироваться, перегружая CPU."
+        },
+        {
+          "bad": "/* Слишком долгая анимация кнопок (1 секунда) */\n.btn:hover { transition: transform 1s; /* Пользователь успеет кликнуть до завершения анимации */ }",
+          "good": ".btn:hover { transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); }",
+          "reason": "UI-анимации должны быть быстрыми (150–250 мс), не задерживая взаимодействие пользователя с сайтом."
+        },
+        {
+          "bad": "/* Попытка анимировать display: none -> display: block через transition */\n.modal { display: none; transition: opacity 0.3s; }\n.modal.open { display: block; opacity: 1; /* ❌ Переход не сработает! */ }",
+          "good": "/* Использование opacity + visibility + pointer-events */\n.modal { opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.3s, visibility 0.3s; }\n.modal.open { opacity: 1; visibility: visible; pointer-events: auto; }",
+          "reason": "Свойство display не интерполируется числами. Для плавного скрытия используют связку opacity + visibility: hidden."
         }
       ],
       "keyTakeaways": [
-        "Длительность микроанимаций 150–300ms."
+        "transition интерполирует свойства при смене псевдоклассов (:hover, :focus) или классов.",
+        "Никогда не используйте transition: all — перечисляйте конкретные свойства явно.",
+        "ease-out обеспечивает быстрый отклик для появления, ease-in — для скрытия.",
+        "cubic-bezier с Y > 1 создает эффект упругой пружины (Spring).",
+        "Staggered Delays создают каскадную волну появления элементов списка."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"trans-d\"><button class=\"s-btn\">Кликни</button></div>",
-      "initialCss": ".trans-d { padding: 30px; background: white; border-radius: 12px; text-align: center; }\n.s-btn { padding: 12px 24px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s, transform 0.1s; }\n.s-btn:hover { background: #1d4ed8; }\n.s-btn:active { transform: scale(0.95); }",
-      "initialJs": "console.log('Transition loaded');",
-      "instructions": "Кликните на кнопку."
+      "initialHtml": "<div class=\"transition-sandbox\">\n  <div class=\"cards-row\">\n    <button class=\"demo-btn btn-linear\">Linear (Спид)</button>\n    <button class=\"demo-btn btn-ease-out\">Ease-Out (Мягко)</button>\n    <button class=\"demo-btn btn-spring\">Spring (Пружина ⚡)</button>\n  </div>\n  <p style=\"color:#8b949e; font-size:12px; margin-top:16px;\">Наведите курсор на кнопки для сравнения физики движения кривых Безье</p>\n</div>",
+      "initialCss": ".transition-sandbox { padding: 24px; background: #0a0e13; font-family: monospace; text-align: center; }\n.cards-row { display: flex; gap: 16px; justify-content: center; }\n.demo-btn {\n  background: #161b22;\n  color: #e6edf3;\n  border: 1px solid #30363d;\n  padding: 12px 20px;\n  border-radius: 8px;\n  font-weight: bold;\n  cursor: pointer;\n}\n.btn-linear {\n  transition: transform 0.4s linear, background 0.2s;\n}\n.btn-linear:hover {\n  background: #29e7ff;\n  color: #0a0e13;\n  transform: translateY(-12px);\n}\n.btn-ease-out {\n  transition: transform 0.4s ease-out, background 0.2s;\n}\n.btn-ease-out:hover {\n  background: #ffb02e;\n  color: #0a0e13;\n  transform: translateY(-12px);\n}\n.btn-spring {\n  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;\n}\n.btn-spring:hover {\n  background: #2dff8a;\n  color: #0a0e13;\n  transform: translateY(-12px) scale(1.08);\n}",
+      "initialJs": "console.log('Transition & Easing песочница готова');",
+      "instructions": "Практика с Easing кривыми:\n1. Наведите на кнопку 'Linear' — движение равномерное и механическое\n2. Наведите на 'Ease-Out' — мягкое торможение вверху\n3. Наведите на 'Spring' — пружинящий эффект с овершутом"
     },
     "task": {
-      "title": "Плавная ссылка",
-      "scenario": "Настройте переход цвета ссылки за 0.2s.",
+      "title": "Разработка набора интерактивных кнопок с кастомными кривыми Безье и подчеркиванием",
+      "scenario": "Создайте интерактивную карточку со ссылкой и кнопкой действия: ссылка должна плавно подчеркиваться из центра через псевдоэлемент ::after и transform: scaleX, а кнопка должна использовать кастомную кривую cubic-bezier(0.34, 1.56, 0.64, 1) для пружинящего эффекта подъема и скейла при ховере и клике.",
       "criteria": [
-        "Задан transition: color 0.2s ease",
-        "В :hover цвет меняется"
+        "Ссылка использует ::after с transform: scaleX(0) и transform-origin: center",
+        "При наведении на ссылку полоса расширяется до scaleX(1) за 0.3s",
+        "Кнопка использует transition с кастомной кривой cubic-bezier для эффекта пружины",
+        "Реализован тактильный отклик на нажатие :active (scale: 0.96)",
+        "Не используется антипаттерн transition: all"
       ],
       "starterCode": {
-        "html": "<a class=\"nl\" href=\"#\">Ссылка</a>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте стили для плавных переходов */\n.animated-link {\n}\n.animated-link::after {\n}\n.spring-button {\n}"
       },
       "hints": [
-        "Задайте .nl { color: #64748b; transition: color 0.2s ease; } .nl:hover { color: #4f46e5; }"
+        "Ссылка: position: relative; ::after: position: absolute; bottom: 0; left: 0; width: 100%; transform: scaleX(0);",
+        "Кнопка: transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.25s ease;"
       ],
       "solution": {
-        "html": "<a class=\"nl\" href=\"#\">Ссылка</a>",
-        "css": ".nl { font-size: 16px; color: #64748b; text-decoration: none; font-weight: bold; transition: color 0.2s ease; }\n.nl:hover { color: #4f46e5; }",
-        "explanation": "Плавная ссылка."
+        "css": ".animated-link {\n  position: relative;\n  color: #2dff8a;\n  text-decoration: none;\n  font-weight: bold;\n  padding-bottom: 4px;\n  display: inline-block;\n}\n\n.animated-link::after {\n  content: '';\n  position: absolute;\n  bottom: 0;\n  left: 0;\n  width: 100%;\n  height: 2px;\n  background: #2dff8a;\n  transform: scaleX(0);\n  transform-origin: center;\n  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n}\n\n.animated-link:hover::after {\n  transform: scaleX(1);\n}\n\n.spring-button {\n  background: #161b22;\n  color: #e6edf3;\n  border: 1px solid #2dff8a;\n  padding: 12px 24px;\n  border-radius: 10px;\n  font-weight: bold;\n  cursor: pointer;\n  transition:\n    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),\n    background-color 0.25s ease,\n    box-shadow 0.25s ease;\n}\n\n.spring-button:hover {\n  background-color: #2dff8a;\n  color: #0a0e13;\n  transform: translateY(-4px) scale(1.05);\n  box-shadow: 0 10px 25px rgba(45, 255, 138, 0.35);\n}\n\n.spring-button:active {\n  transform: translateY(0) scale(0.96);\n}",
+        "explanation": "Переходы оптимизированы для GPU: подчеркивание анимируется через scaleX(0) без сдвига верстки, а кнопка пружинит при наведении и прожимается при клике."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c16-q1",
-          "question": "Какая оптимальная длительность микроанимации кнопок?",
+          "id": "css16-q1",
+          "question": "Почему указание 'transition: all 0.3s;' считается антипаттерном в профессиональной разработке?",
           "options": [
-            "2-3 с",
-            "150-300 мс",
-            "5 с",
-            "50 мс"
+            "all работает только в старых браузерах",
+            "all заставляет браузер отслеживать и анимировать абсолютно все свойства элемента, вызывая тяжелый перерасчет макета (Reflow) при случайных изменениях геометрии",
+            "all отключает аппаратное ускорение",
+            "all не поддерживается в Chrome"
           ],
           "correctIndex": 1,
-          "explanation": "150-300ms воспринимается мгновенно."
+          "explanation": "Явное перечисление анимируемых свойств (transform, opacity, color) предотвращает случайный запуск тяжелых Reflow-анимаций."
+        },
+        {
+          "id": "css16-q2",
+          "question": "Какой визуальный эффект создает кривая Безье cubic-bezier(0.34, 1.56, 0.64, 1), где параметр y2 превышает 1?",
+          "options": [
+            "Мгновенное переключение без анимации",
+            "Эффект упругой пружины (Spring / Bounce): элемент слегка «перелетает» целевое значение и пружинит назад в конечную точку",
+            "Остановка анимации на середине",
+            "Замедление в 10 раз"
+          ],
+          "correctIndex": 1,
+          "explanation": "Значение координаты Y > 1 на кривой Безье выходит за пределы 100% трансформации, создавая пружинящий отскок."
+        },
+        {
+          "id": "css16-q3",
+          "question": "Какая функция плавности является золотым стандартом для ПОЯВЛЕНИЯ выпадающих меню, модалок и тултипов?",
+          "options": [
+            "linear (постоянная скорость)",
+            "ease-out (быстрый старт с мягким торможением в конце — интерфейс ощущается отзывчивым)",
+            "ease-in (медленный старт с разгоном)",
+            "steps(5)"
+          ],
+          "correctIndex": 1,
+          "explanation": "ease-out немедленно реагирует на действие пользователя и плавно останавливается, создавая ощущение мгновенного отклика."
+        },
+        {
+          "id": "css16-q4",
+          "question": "Для чего используется свойство transition-delay в технике Staggered Animation?",
+          "options": [
+            "Для удаления элементов из DOM",
+            "Для создания возрастающей задержки у каждого следующего элемента списка (50ms, 100ms, 150ms), формируя эффект плавной каскадной волны",
+            "Для ускорения анимации",
+            "Для включения 3D режима"
+          ],
+          "correctIndex": 1,
+          "explanation": "Каскадные задержки transition-delay позволяют элементам списка появляться по очереди друг за другом."
+        },
+        {
+          "id": "css16-q5",
+          "question": "Как правильно реализовать плавное появление модального окна, если display: none не поддерживает transition?",
+          "options": [
+            "Использовать связку opacity: 0; visibility: hidden; pointer-events: none; с плавным переходом к opacity: 1; visibility: visible;",
+            "Написать таймер на JavaScript через while",
+            "Изменить ширину до 0px",
+            "Это невозможно в CSS"
+          ],
+          "correctIndex": 0,
+          "explanation": "Связка opacity + visibility: hidden исключает элемент из дерева доступности и кликов, поддерживая при этом плавную интерполяцию transition."
         }
       ]
     }

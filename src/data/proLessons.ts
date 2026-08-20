@@ -2907,5 +2907,198 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-16",
+    "moduleId": "pro",
+    "level": 16,
+    "title": "Микрофронтенды: Архитектура, Module Federation, Single-SPA и iFrames",
+    "subtitle": "Монолит vs MFE, Webpack/Vite Module Federation (Host & Remote), Shared Singletons, изоляция стилей и Error Boundaries",
+    "description": "Освойте масштабирование крупных enterprise-систем через микрофронтенды (Microfrontends): сравнение монолита и MFE, 4 подхода интеграции (iFrames, Web Components, build-time, runtime Module Federation), настройку Host Shell и Remote контейнеров, разделяемые зависимости (Shared Singleton React), изолированные Error Boundaries и межмодульную коммуникацию.",
+    "estimatedMinutes": 75,
+    "difficulty": "advanced",
+    "tags": [
+      "microfrontends",
+      "module-federation",
+      "single-spa",
+      "mfe",
+      "webpack-module-federation",
+      "vite-federation",
+      "architecture",
+      "enterprise",
+      "scalability"
+    ],
+    "theory": {
+      "overview": "Когда над одним веб-приложением работают 50–200 разработчиков, классический фронтенд-монолит становится главным тормозом бизнеса: гигантский репозиторий, бесконечные конфликты мержа в `main`, 40-минутный пайплайн CI/CD и страх того, что баг в корзине уронит весь портал.\n\n**Микрофронтенды (Microfrontends — MFE)** переносят идеи микросервисной архитектуры во фронтенд: разбивают единый UI на автономные модули (Каталог, Оплата, Личный кабинет), которые разрабатываются, тестируются и **деплоятся независимыми командами по 10 раз в день** без пересборки всего сайта.\n\nВ этом уроке мы разберём революционную технологию **Module Federation**, устройство Host/Remote контейнеров и изоляцию сбоев.",
+      "sections": [
+        {
+          "title": "Проблема монолита и 4 подхода к реализации микрофронтендов",
+          "content": "Эволюция архитектуры крупномасштабных веб-приложений:\n\n1. **Проблемы фронтенд-монолита в Enterprise**:\n- **Связанность релизов**: Команда А не может задеплоить правку текста, пока Команда Б чинит упавший тест в другом разделе.\n- **Огромный бандл**: время сборки и прогона тестов растет до десятков минут.\n- **Технологическая заблокированность**: невозможно обновить React 17 до React 19 частями — только переписыванием всего проекта целиком.\n\n2. **4 Подхода к реализации микрофронтендов**:\n- **1. iFrames (Песочница)**: полная изоляция JS и CSS. Минусы: проблемы с отзывчивостью, модальными окнами за пределами фрейма, медленная загрузка нескольких экземпляров браузера, сложная синхронизация URL.\n- **2. Build-time интеграция (npm-пакеты)**: модули публикуются в npm. Минус: при обновлении пакета нужно пересобирать и передеплоить ВСЁ главное приложение (это не дает независимости релизов!).\n- **3. Web Components (Custom Elements / Shadow DOM)**: нативная браузерная изоляция через Shadow DOM. Хорошо для независимых виджетов.\n- **4. Runtime Module Federation (Современный стандарт ⚡)**: динамическая загрузка скомпилированных JS-модулей прямо в рантайме браузера с общим использованием библиотек (Shared React).",
+          "image": {
+            "src": "/images/lessons/web-microfrontends-federation.svg",
+            "alt": "Микрофронтенды: Монолит vs MFE, Host/Remote контейнеры и Module Federation",
+            "caption": "Архитектура Module Federation: Host Shell монтирует независимые Remote-модули (Каталог, Оплата) с разделяемым React Singleton"
+          },
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Архитектурная концепция Host Shell (Главного контейнера):\nimport React, { Suspense } from 'react';\nimport { ErrorBoundary } from '@/shared/ui/ErrorBoundary';\n\n// Динамический импорт удаленного микрофронтенда из другого домена/CDN!\n// @ts-ignore — модуль загружается в рантайме браузера\nconst RemoteCatalog = React.lazy(() => import('catalog_mfe/ProductCatalog'));\nconst RemoteCart = React.lazy(() => import('checkout_mfe/CartWidget'));\n\nexport function AppShell() {\n  return (\n    <div className=\"app-shell-layout\">\n      <header className=\"main-header\">\n        <h1>Супермаркет Онлайн</h1>\n        {/* Микрофронтенд корзины изолирован в ErrorBoundary */}\n        <ErrorBoundary fallback={<div>Корзина временно недоступна</div>}>\n          <Suspense fallback={<div>Загрузка корзины...</div>}>\n            <RemoteCart />\n          </Suspense>\n        </ErrorBoundary>\n      </header>\n      \n      <main>\n        {/* Микрофронтенд каталога */}\n        <ErrorBoundary fallback={<div>Ошибка загрузки каталога</div>}>\n          <Suspense fallback={<div>Загрузка витрины товаров...</div>}>\n            <RemoteCatalog />\n          </Suspense>\n        </ErrorBoundary>\n      </main>\n    </div>\n  );\n}",
+            "title": "Host Shell: динамическое монтирование Remote-микрофронтендов с изоляцией ошибок",
+            "explanation": "Host Shell загружает удаленные компоненты через React.lazy. ErrorBoundary гарантирует, что падение корзины не сломает витрину каталога."
+          }
+        },
+        {
+          "title": "Module Federation: Host vs Remote и Shared Dependencies",
+          "content": "Как устроен стандарт Module Federation (Webpack 5 / Vite Federation):\n\n1. **Remote (Удаленный модуль / Поставщик)**:\n- Автономное приложение со своим dev-сервером и CI/CD.\n- В конфиге объявляет свойство `exposes`: перечень компонентов, которые он «экспортирует» наружу (`exposes: { './ProductList': './src/ProductList.tsx' }`).\n- Генерирует маленький входной файл манифеста `remoteEntry.js`.\n\n2. **Host (Оболочка / Потребитель)**:\n- В конфиге указывает адреса удаленных модулей `remotes: { catalog: 'catalog@https://cdn.example.com/remoteEntry.js' }`.\n- Импортирует удаленный код как обычный локальный модуль: `import ProductList from 'catalog/ProductList'`.\n\n3. **Разделяемые зависимости (`shared: { react: { singleton: true } }`)**:\n- Без `shared` каждый микрофронтенд загрузил бы свою копию React (150 КБ × 5 MFE = 750 КБ лишнего веса!).\n- Флаг `singleton: true` гарантирует, что браузер загрузит React ровно **ОДИН РАЗ** и все микрофронтенды будут использовать единый контекст хуков и состояния.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// 1. remote-catalog/webpack.config.js (Конфиг микрофронтенда каталога)\nconst { ModuleFederationPlugin } = require('webpack').container;\n\nmodule.exports = {\n  plugins: [\n    new ModuleFederationPlugin({\n      name: 'catalog_mfe', // Уникальное имя микрофронтенда\n      filename: 'remoteEntry.js', // Манифест для загрузки\n      exposes: {\n        './ProductList': './src/components/ProductList.tsx', // Экспортируемый компонент\n        './useProducts': './src/hooks/useProducts.ts',       // Экспортируемый хук\n      },\n      shared: {\n        react: { singleton: true, requiredVersion: '^18.2.0', eager: false },\n        'react-dom': { singleton: true, requiredVersion: '^18.2.0' },\n      },\n    }),\n  ],\n};\n\n// 2. host-app/webpack.config.js (Конфиг главного приложения Shell)\nmodule.exports = {\n  plugins: [\n    new ModuleFederationPlugin({\n      name: 'host_shell',\n      remotes: {\n        // Подключение манифеста удаленного каталога в рантайме\n        catalog_mfe: 'catalog_mfe@https://catalog.store.dev/remoteEntry.js',\n      },\n      shared: {\n        react: { singleton: true, requiredVersion: '^18.2.0' },\n        'react-dom': { singleton: true, requiredVersion: '^18.2.0' },\n      },\n    }),\n  ],\n};",
+            "title": "Конфигурация Module Federation: Exposes, Remotes и Shared React Singleton",
+            "explanation": "Remote отдает наружу ProductList через remoteEntry.js, а Host подключает его с единым разделяемым экземпляром React Singleton."
+          }
+        },
+        {
+          "title": "Межмодульная коммуникация и изоляция стилей",
+          "content": "Как микрофронтенды общаются и не конфликтуют стилями:\n\n1. **Межмодульная коммуникация (Cross-MFE Communication)**:\n- **Слабая связка (Loose Coupling)**: микрофронтенды не должны напрямую вызывать функции друг друга.\n- **Способ 1: Custom Events / PubSub Event Bus** (`window.dispatchEvent(new CustomEvent('cart:add', { detail: product }))`).\n- **Способ 2: URL State** (параметры строки поиска `?productId=123` и hash).\n- **Способ 3: Shared Micro-Store** (легковесный стор на Zustand/EventEmitter, переданный через props или shared dependency).\n\n2. **Изоляция стилей (CSS Isolation)**:\n- Проблема: класс `.btn` из микрофронтенда каталога может случайно перекрасить кнопки в микрофронтенде оформления заказа!\n- **Решения**:\n  1. **CSS Modules** — уникальные хеши классов (`.btn_a1b2c`).\n  2. **Tailwind CSS с уникальным префиксом** (`prefix: 'mfe-catalog-'`).\n  3. **CSS-in-JS (Emotion, Styled Components)** с уникальным `nonce`/`scope`.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Безопасный типизированный Event Bus для общения между MFE\nexport interface MfeEventMap {\n  'cart:item_added': { id: string; title: string; price: number };\n  'auth:user_logout': void;\n}\n\nexport const mfeEvents = {\n  emit<K extends keyof MfeEventMap>(event: K, detail: MfeEventMap[K]) {\n    window.dispatchEvent(new CustomEvent(event, { detail }));\n  },\n  \n  listen<K extends keyof MfeEventMap>(event: K, handler: (detail: MfeEventMap[K]) => void) {\n    const listener = (e: Event) => handler((e as CustomEvent).detail);\n    window.addEventListener(event, listener);\n    return () => window.removeEventListener(event, listener); // Функция отписки\n  }\n};\n\n// Использование:\n// В MFE Каталога: mfeEvents.emit('cart:item_added', { id: 'p_1', title: 'MacBook', price: 150000 });\n// В MFE Корзины:  const unsub = mfeEvents.listen('cart:item_added', item => addProduct(item));",
+            "title": "Межмодульная коммуникация между независимыми MFE через CustomEvent",
+            "explanation": "CustomEvent в объекте window связывает микрофронтенды без жестких зависимостей в коде."
+          }
+        },
+        {
+          "title": "Изоляция ошибок (Fault Tolerance) и Canary релизы",
+          "content": "Надежность микрофронтендной системы в продакшене:\n\n1. **Изоляция сбоев (Error Boundaries)**:\n- В монолите любая необработанная ошибка `undefined is not a function` роняет всё дерево React и показывает белый экран.\n- В MFE каждый микрофронтенд оборачивается в свой **ErrorBoundary** с локальным fallback-интерфейсом.\n\n2. **Независимый деплой и Canary Releases**:\n- Команда корзины деплоит новую версию `remoteEntry.js` на CDN.\n- Host Shell подтягивает новый файл при следующей перезагрузке страницы **БЕЗ пересборки Host**!\n- Возможность A/B тестирования: отдавать 10% пользователей URL старого MFE, а 90% — нового.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Компонент безопасной обертки удаленного микрофронтенда с Fallback\nimport React from 'react';\n\ninterface MfeContainerProps {\n  title: string;\n  children: React.ReactNode;\n}\n\nexport class MfeErrorBoundary extends React.Component<MfeContainerProps, { hasError: boolean }> {\n  state = { hasError: false };\n\n  static getDerivedStateFromError() {\n    return { hasError: true };\n  }\n\n  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {\n    console.error(`[MFE Failure] Сбой в микрофронтенде ${this.props.title}:`, error, errorInfo);\n    // Отправка метрики в Sentry с тегом конкретного MFE\n  }\n\n  render() {\n    if (this.state.hasError) {\n      return (\n        <div className=\"mfe-fallback-card\">\n          <h4>⚠️ Модуль «{this.props.title}» временно недоступен</h4>\n          <button onClick={() => this.setState({ hasError: false })}>Повторить попытку</button>\n        </div>\n      );\n    }\n    return this.props.children;\n  }\n}",
+            "title": "MfeErrorBoundary: защита от каскадного падения приложения",
+            "explanation": "Сбой в одном удаленном микрофронтенде изолируется локальной плашкой с кнопкой повтора, сохраняя остальной интерфейс работоспособным."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Не внедряйте микрофронтенды в небольших проектах (до 30 разработчиков) — сложность инфраструктуры, версионирования и отладки превысит выгоду от независимых релизов.",
+        "Всегда настраивайте `react` и `react-dom` как `singleton: true` в конфиге Module Federation — дублирование экземпляров React ломает хуки и контексты.",
+        "Оборачивайте каждый удаленный микрофронтенд в отдельный `ErrorBoundary` и `Suspense` на уровне Host Shell — это гарантирует отказоустойчивость всей системы.",
+        "Для стилей используйте CSS Modules или Tailwind с уникальным префиксом классов — это на 100% исключает конфликты глобальных стилей между командами."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Забытый флаг singleton: true для React в Module Federation\nshared: ['react', 'react-dom'] // ❌ Браузер загрузит 2 копии React: ошибка 'Invalid hook call'!",
+          "good": "shared: { react: { singleton: true, requiredVersion: '^18.0.0' } }",
+          "reason": "React строго требует единого экземпляра в памяти приложения. Без singleton хуки useState и useContext падают с фатальной ошибкой."
+        },
+        {
+          "bad": "// Прямой вызов глобальных функций чужого микрофронтенда: window.catalogMfe.addToCart()",
+          "good": "// Общение через типизированные Custom Events или Event Bus",
+          "reason": "Прямые вызовы создают хрупкую связность: при изменении имени метода в удаленном модуле все зависимые микрофронтенды сломаются."
+        },
+        {
+          "bad": "// Использование iFrames для всего сайта вместо Module Federation",
+          "good": "// Module Federation для нативного бесшовного UI и единого контекста авторизации",
+          "reason": "iFrames вызывают проблемы с мобильной адаптивностью, SEO, синхронизацией истории переходов и рендерингом всплывающих модальных окон."
+        }
+      ],
+      "keyTakeaways": [
+        "Микрофронтенды разделяют крупный монолит на автономные приложения для независимого деплоя командами.",
+        "Module Federation — индустриальный стандарт рантайм-интеграции модулей с общим шарингом зависимостей.",
+        "Флаг `singleton: true` исключает дублирование React и библиотек в памяти браузера.",
+        "Изоляция стилей достигается через CSS Modules, Shadow DOM или префиксы Tailwind.",
+        "ErrorBoundary защищает Host Shell от каскадного падения при сбое в одном микрофронтенде."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"mfe-sandbox-app\">\n  <h3>Симулятор Module Federation (Host & Remote)</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"btn-load-remote\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">1. Загрузить remoteEntry.js (Каталог)</button>\n    <button id=\"btn-crash-remote\" style=\"background:#f85149; color:#fff; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">2. Симулировать сбой MFE</button>\n  </div>\n  <div id=\"mfe-container\" style=\"border:1px dashed #30363d; padding:16px; border-radius:8px; background:#161b22;\">\n    <span style=\"color:#8b949e;\">Host Shell: Ожидание подключения Remote-модуля...</span>\n  </div>\n</div>",
+      "initialCss": "#mfe-sandbox-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const container = document.getElementById('mfe-container');\n\ndocument.getElementById('btn-load-remote').onclick = () => {\n  container.innerHTML = '<span style=\"color:#ffb02e;\">⏳ Загрузка манифеста https://catalog.store.dev/remoteEntry.js (2.4 KB)...</span>';\n  setTimeout(() => {\n    container.innerHTML = `\n      <div style=\"border:1px solid #2dff8a; padding:12px; border-radius:6px;\">\n        <div style=\"display:flex; justify-content:space-between; align-items:center;\">\n          <b style=\"color:#2dff8a;\">📦 Remote MFE: ProductCatalog (v2.4.0)</b>\n          <span style=\"font-size:10px; background:#2dff8a22; color:#2dff8a; padding:2px 6px; border-radius:4px;\">Shared React: Singleton OK</span>\n        </div>\n        <p style=\"color:#8b949e; font-size:12px; margin:8px 0;\">Витрина товаров отрендерена независимо из удаленного CDN!</p>\n        <button style=\"background:#29e7ff; color:#0a0e13; border:none; padding:4px 8px; font-weight:bold; font-size:11px;\">Купить курс (15 000 ₽)</button>\n      </div>\n    `;\n  }, 400);\n};\n\ndocument.getElementById('btn-crash-remote').onclick = () => {\n  container.innerHTML = `\n    <div style=\"border:1px solid #f85149; padding:12px; border-radius:6px; background:#f8514911;\">\n      <b style=\"color:#f85149;\">🛡️ [ErrorBoundary]: Микрофронтенд временно недоступен</b>\n      <p style=\"color:#8b949e; font-size:12px; margin:6px 0;\">Сбой изолирован! Остальное приложение (шапка, навигация, профиль) продолжает работать штатно.</p>\n      <button onclick=\"document.getElementById('btn-load-remote').click()\" style=\"background:#30363d; color:#fff; border:none; padding:4px 8px; font-size:11px; cursor:pointer;\">Перезагрузить модуль</button>\n    </div>\n  `;\n};",
+      "instructions": "Практика с микрофронтендами:\n1. Нажмите '1. Загрузить remoteEntry.js' — Host Shell динамически смонтирует удаленный MFE\n2. Нажмите '2. Симулировать сбой MFE' — ErrorBoundary изолирует падение, не ломая все приложение"
+    },
+    "task": {
+      "title": "Настройка конфигурации Webpack Module Federation для Host и Remote приложений",
+      "scenario": "Настройте ModuleFederationPlugin для микрофронтенда корзины (Remote) и главного приложения (Host): Remote должен экспортировать компонент ./MiniCart и хук ./useCart, а Host должен подключать remoteEntry.js корзины. Оба приложения должны шарить react и react-dom как singleton с версией ^18.2.0.",
+      "criteria": [
+        "В Remote объявлены name, filename ('remoteEntry.js') и exposes для MiniCart и useCart",
+        "В Host настроен блок remotes с указанием адреса remoteEntry корзины",
+        "В обоих приложениях настроен блок shared с react и react-dom (singleton: true)",
+        "Конфигурация соответствует спецификации Webpack 5 Module Federation"
+      ],
+      "starterCode": {
+        "js": "// Настройте конфигурацию Module Federation для Remote и Host\nconst { ModuleFederationPlugin } = require('webpack').container;\n\n// 1. Конфиг Remote (Корзина)\nconst remoteConfig = {\n  // Ваш код\n};\n\n// 2. Конфиг Host (Shell)\nconst hostConfig = {\n  // Ваш код\n};"
+      },
+      "hints": [
+        "exposes: { './MiniCart': './src/MiniCart', './useCart': './src/useCart' }",
+        "remotes: { cart_mfe: 'cart_mfe@https://cart.domain.com/remoteEntry.js' }",
+        "shared: { react: { singleton: true, requiredVersion: '^18.2.0' }, 'react-dom': { singleton: true } }"
+      ],
+      "solution": {
+        "js": "const { ModuleFederationPlugin } = require('webpack').container;\n\n// 1. Конфигурация Remote (Микрофронтенд Корзины)\nconst remoteConfig = {\n  plugins: [\n    new ModuleFederationPlugin({\n      name: 'cart_mfe',\n      filename: 'remoteEntry.js',\n      exposes: {\n        './MiniCart': './src/components/MiniCart.tsx',\n        './useCart': './src/hooks/useCart.ts',\n      },\n      shared: {\n        react: { singleton: true, requiredVersion: '^18.2.0' },\n        'react-dom': { singleton: true, requiredVersion: '^18.2.0' },\n      },\n    }),\n  ],\n};\n\n// 2. Конфигурация Host (Главная оболочка Shell)\nconst hostConfig = {\n  plugins: [\n    new ModuleFederationPlugin({\n      name: 'host_shell',\n      remotes: {\n        cart_mfe: 'cart_mfe@https://cart.domain.com/remoteEntry.js',\n      },\n      shared: {\n        react: { singleton: true, requiredVersion: '^18.2.0' },\n        'react-dom': { singleton: true, requiredVersion: '^18.2.0' },\n      },\n    }),\n  ],\n};\n\nconsole.log('Архитектура Module Federation успешно сконфигурирована!');",
+        "explanation": "Конфигурация обеспечивает независимый деплой микрофронтенда корзины с экспортом компонентов и единым экземпляром React Singleton на уровне браузера."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro16-q1",
+          "question": "Какую главную проблему решает архитектура микрофронтендов (Microfrontends) в крупных компаниях?",
+          "options": [
+            "Удаляет CSS стили",
+            "Позволяет десяткам независимых продуктовых команд автономно разрабатывать, тестировать и деплоить свои части интерфейса без блокировки релизов и пересборки всего монолита",
+            "Запрещает использование TypeScript",
+            "Заменяет серверные базы данных"
+          ],
+          "correctIndex": 1,
+          "explanation": "Микрофронтенды дают организационную масштабируемость: каждая команда владеет своим MFE и релизится независимо."
+        },
+        {
+          "id": "pro16-q2",
+          "question": "Зачем в конфигурации Module Federation строго необходим флаг 'singleton: true' для библиотеки React?",
+          "options": [
+            "Для ускорения загрузки шрифтов",
+            "Чтобы гарантировать загрузку ровно ОДНОГО экземпляра React в память браузера, предотвращая ошибку 'Invalid Hook Call' и поломку хуков/контекстов",
+            "Для сжатия изображений",
+            "Для шифрования кода"
+          ],
+          "correctIndex": 1,
+          "explanation": "React не может работать при наличии двух разных экземпляров в одном приложении — singleton: true обеспечивает общий контекст."
+        },
+        {
+          "id": "pro16-q3",
+          "question": "Что представляет собой файл remoteEntry.js в архитектуре Module Federation?",
+          "options": [
+            "Главную страницу index.html",
+            "Манифест точки входа удаленного микрофронтенда, содержащий таблицу экспортируемых компонентов (exposes) и список требуемых shared-зависимостей",
+            "Файл базы данных SQL",
+            "Лог ошибок сервера"
+          ],
+          "correctIndex": 1,
+          "explanation": "remoteEntry.js загружается Host-приложением в рантайме и инструктирует браузер, как и откуда скачать нужные чанки компонентов."
+        },
+        {
+          "id": "pro16-q4",
+          "question": "Как правильнее всего организовать коммуникацию между микрофронтендами для сохранения слабой связности (Loose Coupling)?",
+          "options": [
+            "Прямым вызовом приватных функций через window.remoteApp.doSomething()",
+            "Через типизированные события браузера (CustomEvent / EventBus) или через параметры URL (?query=...)",
+            "Через запись в общие глобальные переменные без типизации",
+            "Микрофронтенды не могут обмениваться данными"
+          ],
+          "correctIndex": 1,
+          "explanation": "Событийная шина (Event Bus / CustomEvent) и URL параметры разрывают жесткую зависимость между кодовыми базами команд."
+        },
+        {
+          "id": "pro16-q5",
+          "question": "Какую роль играет Error Boundary вокруг удаленного микрофронтенда в Host Shell?",
+          "options": [
+            "Ускоряет анимации",
+            "Изолирует сбой: если в удаленном модуле упала ошибка, падает только данный конкретный блок, а остальное приложение продолжает полноценно работать",
+            "Удаляет cookies",
+            "Перезагружает весь компьютер"
+          ],
+          "correctIndex": 1,
+          "explanation": "ErrorBoundary гарантирует отказоустойчивость: поломка виджета корзины не приводит к белому экрану во всем сервисе."
+        }
+      ]
+    }
   }
 ];

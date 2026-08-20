@@ -3876,83 +3876,191 @@ export const cssLessons: Lesson[] = [
     "id": "css-21",
     "moduleId": "css",
     "level": 21,
-    "title": "CSS-фильтры и современные эффекты",
-    "subtitle": "Backdrop-filter, glassmorphism, blur, clip-path и mix-blend-mode",
-    "description": "Графические эффекты: матовое стекло Glassmorphism через backdrop-filter: blur(), обрезки clip-path, drop-shadow.",
-    "estimatedMinutes": 35,
+    "title": "CSS Фильтры, Режимы наложения, backdrop-filter (Glassmorphism) и маскирование (clip-path)",
+    "subtitle": "filter, backdrop-filter, drop-shadow vs box-shadow, mix-blend-mode, clip-path (polygon) и mask-image",
+    "description": "Освойте передовые визуальные эффекты в CSS: семейство функций filter (blur, brightness, contrast, drop-shadow по прозрачному контуру), эффект матового стекла Glassmorphism через backdrop-filter с надежными фолбеками @supports, режимы наложения mix-blend-mode и background-blend-mode, геометрическую обрезку clip-path и градиентное маскирование mask-image.",
+    "estimatedMinutes": 70,
     "difficulty": "advanced",
     "tags": [
-      "CSS",
-      "Filters",
-      "Glassmorphism"
+      "css-filters",
+      "backdrop-filter",
+      "glassmorphism",
+      "mix-blend-mode",
+      "clip-path",
+      "mask-image",
+      "drop-shadow",
+      "visual-effects",
+      "modern-css"
     ],
     "theory": {
-      "overview": "CSS фильтры создают эффекты уровня графических редакторов прямо в браузере.",
+      "overview": "Современный CSS позволяет создавать сложнейшие графические эффекты, которые раньше требовали экспорта тяжелых картинок из графических редакторов или написания сложных шейдеров WebGL.\n\nФункции **`filter`**, эффект матового стекла **`backdrop-filter` (Glassmorphism)**, режимы наложения пикселей **`mix-blend-mode`** и геометрическая обрезка **`clip-path`** исполняются напрямую на графическом процессоре (GPU), обеспечивая плавные 60 FPS анимации и кинематографичный дизайн интерфейсов.\n\nВ этом уроке мы разберём каждый инструмент и научимся создавать премиальные визуальные эффекты.",
       "sections": [
         {
-          "title": "Glassmorphism (Матовое стекло)",
-          "content": "- `background: rgba(255, 255, 255, 0.65)`\n- `backdrop-filter: blur(16px)`\n- `border: 1px solid rgba(255, 255, 255, 0.4)`",
+          "title": "Семейство функций filter и магия drop-shadow()",
+          "content": "Преобразование пикселей элемента на уровне GPU:\n\n1. **Базовые функции `filter`**:\n- `blur(px)` — размытие изображения или блока.\n- `brightness(%)` / `contrast(%)` — яркость и контрастность (`brightness(1.2)` = +20% яркости).\n- `grayscale(%)` / `sepia(%)` — обесцвечивание и эффект сепии.\n- `hue-rotate(deg)` — поворот цветового круга (`hue-rotate(90deg)`).\n- `invert(%)` — инвертирование цветов (быстрое создание темных иконок).\n\n2. **`drop-shadow()` против `box-shadow` (Критическая разница!) 💡**:\n- `box-shadow` отбрасывает тень от **прямоугольной рамки (Box Model)** элемента, даже если PNG-картинка или SVG-иконка имеет прозрачный фон!\n- `filter: drop-shadow(x y blur color)` анализирует альфа-канал и отбрасывает тень **ТОЧНО ПО КОНТУРУ НЕПРОЗРАЧНЫХ ПИКСЕЛЕЙ** PNG-логотипа, стрелки или SVG-иконки!",
+          "image": {
+            "src": "/images/lessons/css-filters-glassmorphism.svg",
+            "alt": "CSS Фильтры, Glassmorphism, Blend-mode и clip-path",
+            "caption": "CSS фильтры, эффект матового стекла backdrop-filter, режимы наложения и векторная обрезка clip-path"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Glassmorphism",
-            "code": ".glass {\n  background: rgba(255, 255, 255, 0.7);\n  backdrop-filter: blur(12px);\n  -webkit-backdrop-filter: blur(12px);\n  border: 1px solid rgba(255, 255, 255, 0.4);\n  border-radius: 16px;\n}",
-            "explanation": "Матовое стекло."
+            "code": "/* Сравнение теней для прозрачной SVG-иконки или PNG */\n.logo-icon {\n  width: 80px;\n  height: 80px;\n  \n  /* ❌ box-shadow создаст некрасивый серый квадрат вокруг прозрачной иконки! */\n  /* box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); */\n  \n  /* ✅ drop-shadow отбросит красивую тень точно по контурам логотипа! */\n  filter: drop-shadow(0 8px 16px rgba(45, 255, 138, 0.4));\n  \n  /* Комбинирование нескольких фильтров в одну строку: */\n  filter: brightness(1.1) contrast(105%) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));\n  transition: filter 0.3s ease;\n}\n\n.logo-icon:hover {\n  filter: brightness(1.3) drop-shadow(0 0 20px rgba(45, 255, 138, 0.8));\n}",
+            "title": "Использование filter: drop-shadow() для прозрачной графики",
+            "explanation": "drop-shadow повторяет реальный альфа-контур изображения, создавая реалистичное неоновое свечение."
+          }
+        },
+        {
+          "title": "Эффект матового стекла (Glassmorphism) через backdrop-filter",
+          "content": "Как работает размытие фона под полупрозрачным элементом:\n\n1. **Разница между `filter: blur()` и `backdrop-filter: blur()`**:\n- `filter: blur(10px)` размывает **САМ ЭЛЕМЕНТ** и весь его внутренний текст (текст становится нечитаемым!).\n- `backdrop-filter: blur(10px)` оставляет текст элемента идеально резким, но **РАЗМЫВАЕТ СЛОЙ ПОД ЭТИМ ЭЛЕМЕНТОМ**!\n\n2. **3 Правила создания идеального Glassmorphism**:\n- 1. Полупрозрачный фон: `background: rgba(22, 27, 34, 0.6)` (или с saturation).\n- 2. Размытие фона: `backdrop-filter: blur(16px) saturate(180%)`.\n- 3. Тонкая светлая граница: `border: 1px solid rgba(255, 255, 255, 0.12)`.\n\n3. **Фолбек через `@supports`**:\n- Для браузеров без поддержки `backdrop-filter` задается непрозрачный цвет фона.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Премиальная стеклянная карточка в стиле Apple Glassmorphism */\n.glass-panel {\n  /* 1. Полупрозрачный фон */\n  background: rgba(13, 17, 23, 0.65);\n  \n  /* 2. Размытие и насыщенность подложки */\n  backdrop-filter: blur(20px) saturate(190%);\n  -webkit-backdrop-filter: blur(20px) saturate(190%); /* Для Safari */\n  \n  /* 3. Тонкая стеклянная фаска */\n  border: 1px solid rgba(255, 255, 255, 0.1);\n  border-radius: 16px;\n  padding: 24px;\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);\n}\n\n/* Запасной непрозрачный фон для старых сред */\n@supports not (backdrop-filter: blur(10px)) {\n  .glass-panel {\n    background: #0d1117;\n  }\n}",
+            "title": "Стеклянная карточка Glassmorphism с поддержкой Safari и @supports",
+            "explanation": "backdrop-filter создает глубину интерфейса, размывая фоновый контент при скролле без потери резкости текста."
+          }
+        },
+        {
+          "title": "Режимы наложения: mix-blend-mode и background-blend-mode",
+          "content": "Математическое смешивание цветов слоев как в Photoshop:\n\n1. **`mix-blend-mode` (Смешивание элемента с подлежащим фоном)**:\n- **`multiply` (Умножение)**: перемножает цвета. Белый цвет становится полностью прозрачным (идеально для удаления белого фона у логотипов на темном сайте!).\n- **`screen` (Осветление)**: противоположность multiply. Черный цвет становится прозрачным (идеально для наложения световых лучей, огня и дыма).\n- **`difference` (Разница)**: вычитает цвета. Текст белого цвета поверх светлого фона станет черным, а поверх темного — белым (динамический контрастный текст!).\n- **`overlay`**: комбинирует multiply и screen, усиливая контраст.\n\n2. **`background-blend-mode`**:\n- Смешивает несколько фоновых слоев внутри одного элемента (`background-image` и `background-color`).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Динамический контрастный курсор или текст поверх любого фона */\n.invert-cursor {\n  position: fixed;\n  width: 32px;\n  height: 32px;\n  border-radius: 50%;\n  background: #ffffff;\n  \n  /* Режим difference: инвертирует цвета того, над чем находится! */\n  mix-blend-mode: difference;\n  pointer-events: none;\n  z-index: 9999;\n}\n\n/* Удаление белого фона у отсканированного логотипа */\n.scanned-logo {\n  mix-blend-mode: multiply; /* Белые пиксели фона исчезают! */\n}",
+            "title": "Использование mix-blend-mode: difference для динамического инвертирования",
+            "explanation": "Режимы наложения вычисляют цвет каждого пикселя на лету без необходимости готовить отдельные ассеты под светлую и темную темы."
+          }
+        },
+        {
+          "title": "Геометрическое маскирование: clip-path и mask-image",
+          "content": "Вырезание нестандартных форм и плавное растворение краев:\n\n1. **`clip-path` (Векторная обрезка геометрии)**:\n- Обрезает видимую область элемента по заданной фигуре. Области за пределами контура становятся прозрачными и не реагируют на клики мыши.\n- **Фигуры**:\n  - `circle(50% at center)` — круг.\n  - `polygon(x1 y1, x2 y2, ...)` — многоугольник с любым числом вершин (треугольники, скошенные углы киберпанк-кнопок, шевроны, звезды).\n- **GPU Анимация**: если количество точек в `polygon()` совпадает, `clip-path` плавно интерполируется в анимациях `@keyframes`!\n\n2. **`mask-image` (Растворение градиентом)**:\n- Использует альфа-канал маски: где маска черная — контент виден, где прозрачная — контент исчезает.\n- Идеально для плавного растворения краев длинных скроллируемых списков: `mask-image: linear-gradient(to bottom, black 80%, transparent 100%)`.",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Скошенная киберпанк-кнопка через clip-path: polygon() */\n.cyber-btn {\n  background: #2dff8a;\n  color: #0a0e13;\n  padding: 12px 28px;\n  font-weight: 800;\n  border: none;\n  \n  /* Срезаем левый верхний и правый нижний углы под 45 градусов: */\n  clip-path: polygon(\n    14px 0%,\n    100% 0%,\n    100% calc(100% - 14px),\n    calc(100% - 14px) 100%,\n    0% 100%,\n    0% 14px\n  );\n  \n  transition: clip-path 0.3s ease, transform 0.2s ease;\n}\n\n.cyber-btn:hover {\n  /* Плавная трансформация геометрии формы при наведении! */\n  clip-path: polygon(\n    0% 0%,\n    100% 0%,\n    100% 100%,\n    100% 100%,\n    0% 100%,\n    0% 0%\n  );\n  transform: scale(1.05);\n}",
+            "title": "Киберпанк-кнопка со скошенными углами и анимацией clip-path",
+            "explanation": "clip-path позволяет создавать сложные дизайнерские формы без использования громоздких SVG картинок."
           }
         }
       ],
       "seniorTips": [
-        "Добавляйте -webkit-backdrop-filter для поддержки в Safari."
+        "При создании эффекта Glassmorphism всегда добавляйте свойство `-webkit-backdrop-filter` — оно обязательно для корректной работы в браузере Safari на iOS и macOS.",
+        "Для полупрозрачного стекла используйте `backdrop-filter: blur(...) saturate(180%)` — увеличение насыщенности `saturate` делает цвета под стеклом живыми и сочными, как в дизайне Apple iOS.",
+        "При анимировании `clip-path: polygon()` убедитесь, что исходное и конечное состояния имеют **абсолютно одинаковое количество точек**, иначе браузер не сможет интерполировать вершины.",
+        "Не злоупотребляйте `backdrop-filter: blur()` на десятках элементов одновременно на слабых мобильных устройствах — это создает дополнительную нагрузку на видеопамять (GPU VRAM).",
+        "Всегда используйте `filter: drop-shadow()` вместо `box-shadow` для прозрачных PNG картинок и SVG иконок."
       ],
       "commonMistakes": [
         {
-          "bad": "backdrop-filter: blur(10px); /* Без webkit префикса */",
-          "good": "-webkit-backdrop-filter: blur(10px);\nbackdrop-filter: blur(10px);",
-          "reason": "Safari требует webkit префикс."
+          "bad": "/* Использование filter: blur() вместо backdrop-filter */\n.modal-card { filter: blur(10px); /* ❌ Размоет весь текст и кнопки внутри модалки! */ }",
+          "good": ".modal-card { backdrop-filter: blur(10px); background: rgba(0,0,0,0.5); }",
+          "reason": "filter: blur() размывает сам элемент, а backdrop-filter размывает слой позади элемента."
+        },
+        {
+          "bad": "/* backdrop-filter с полностью непрозрачным фоном */\n.glass { background: #161b22; backdrop-filter: blur(10px); /* ❌ Эффекта не видно, фон глухой! */ }",
+          "good": ".glass { background: rgba(22, 27, 34, 0.6); backdrop-filter: blur(10px); }",
+          "reason": "backdrop-filter виден только сквозь полупрозрачный фон (rgba / hsla)."
+        },
+        {
+          "bad": "/* Анимация clip-path между полигонами с разным числом вершин */\n@keyframes morph { from { clip-path: polygon(0 0, 100% 0, 100% 100%); } to { clip-path: circle(50%); } } /* ❌ Резкий скачок без плавности */",
+          "good": "/* Анимация между полигонами с одинаковым числом точек */",
+          "reason": "Браузер может плавно интерполировать вершины только при равном количестве координат в полигоне."
         }
       ],
       "keyTakeaways": [
-        "backdrop-filter: blur() размывает фон под элементом."
+        "filter: drop-shadow() отбрасывает тень по контуру альфа-канала прозрачных PNG/SVG.",
+        "backdrop-filter создает эффект матового стекла Glassmorphism под полупрозрачным слоем.",
+        "mix-blend-mode позволяет смешивать слои (multiply удаляет белый фон, screen — черный).",
+        "clip-path: polygon() вырезает векторные геометрические формы без SVG файлов.",
+        "mask-image с linear-gradient создает плавное растворение краев интерфейса."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"g-bg\"><div class=\"g-card\"><h4>Glassmorphism</h4></div></div>",
-      "initialCss": ".g-bg { padding: 30px; background: linear-gradient(135deg, #6366f1, #ec4899); border-radius: 16px; }\n.g-card { padding: 20px; background: rgba(255, 255, 255, 0.25); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 12px; color: white; text-align: center; }",
-      "initialJs": "console.log('Filters loaded');",
-      "instructions": "Оцените эффект стекла."
+      "initialHtml": "<div class=\"fx-sandbox\">\n  <div class=\"fx-bg-decor\"></div>\n  <div class=\"glass-card\">\n    <h3 class=\"glass-title\">💎 Glassmorphism Panel</h3>\n    <p class=\"glass-text\">Эффект матового стекла через backdrop-filter: blur(16px) saturate(180%). Обратите внимание на размытие светящихся кругов под карточкой!</p>\n    <button class=\"cyber-btn\">СКОШЕННАЯ КНОПКА (clip-path)</button>\n  </div>\n</div>",
+      "initialCss": ".fx-sandbox { padding: 30px; background: #0a0e13; font-family: monospace; position: relative; overflow: hidden; min-height: 240px; }\n.fx-bg-decor {\n  position: absolute;\n  top: 20px;\n  left: 30px;\n  width: 120px;\n  height: 120px;\n  background: radial-gradient(circle, #2dff8a, #29e7ff);\n  border-radius: 50%;\n  filter: blur(20px);\n  opacity: 0.8;\n}\n.glass-card {\n  position: relative;\n  z-index: 2;\n  background: rgba(22, 27, 34, 0.55);\n  backdrop-filter: blur(16px) saturate(180%);\n  -webkit-backdrop-filter: blur(16px) saturate(180%);\n  border: 1px solid rgba(255, 255, 255, 0.15);\n  border-radius: 16px;\n  padding: 24px;\n  max-width: 420px;\n  box-shadow: 0 15px 35px rgba(0,0,0,0.5);\n}\n.glass-title { color: #2dff8a; font-size: 16px; margin-bottom: 8px; }\n.glass-text { color: #e6edf3; font-size: 12px; line-height: 1.5; margin-bottom: 16px; }\n.cyber-btn {\n  background: #2dff8a;\n  color: #0a0e13;\n  font-weight: bold;\n  font-size: 11px;\n  padding: 10px 20px;\n  border: none;\n  cursor: pointer;\n  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);\n  transition: transform 0.2s;\n}\n.cyber-btn:hover { transform: scale(1.05); }",
+      "initialJs": "console.log('Filters & Glassmorphism песочница готова');",
+      "instructions": "Практика с визуальными эффектами:\n1. Оцените размытие светящегося градиентного шара сквозь панель Glassmorphism\n2. Изучите скошенные углы киберпанк-кнопки, вырезанные через clip-path: polygon()"
     },
     "task": {
-      "title": "Модалка Glassmorphism",
-      "scenario": "Оформите блок с backdrop-filter: blur(12px) и полупрозрачным фоном.",
+      "title": "Создание премиальной Glassmorphism карточки со скошенной кнопкой и drop-shadow",
+      "scenario": "Создайте стили для карточки товара: 1) Карточка .glass-product-card с полупрозрачным фоном, размытием backdrop-filter: blur(16px) saturate(180%) и тонкой стеклянной границей; 2) Логотип .product-badge с эффектом неонового свечения через filter: drop-shadow(); 3) Кнопку .cta-clip-btn со скошенными углами через clip-path: polygon().",
       "criteria": [
-        "Применен backdrop-filter: blur(12px)",
-        "Задан полупрозрачный rgba фон"
+        "Карточка использует background с rgba и backdrop-filter: blur(16px) saturate(180%)",
+        "Добавлен префикс -webkit-backdrop-filter для поддержки Safari",
+        "Логотип использует filter: drop-shadow(0 0 12px rgba(45, 255, 138, 0.6))",
+        "Кнопка использует clip-path: polygon() для срезания углов"
       ],
       "starterCode": {
-        "html": "<div class=\"gm\"><h3>Уведомление</h3></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте Glassmorphism карточку и clip-path кнопку */\n.glass-product-card {\n}\n.product-badge {\n}\n.cta-clip-btn {\n}"
       },
       "hints": [
-        "Задайте background: rgba(255,255,255,0.7); backdrop-filter: blur(12px); border-radius: 12px;"
+        ".glass-product-card { background: rgba(22, 27, 34, 0.6); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%); border: 1px solid rgba(255,255,255,0.12); }",
+        ".cta-clip-btn { clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px); }"
       ],
       "solution": {
-        "html": "<div class=\"gm\"><h3>Уведомление</h3></div>",
-        "css": ".gm { padding: 24px; background: rgba(255, 255, 255, 0.7); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }",
-        "explanation": "Стильное стекло."
+        "css": ".glass-product-card {\n  background: rgba(22, 27, 34, 0.6);\n  backdrop-filter: blur(16px) saturate(180%);\n  -webkit-backdrop-filter: blur(16px) saturate(180%);\n  border: 1px solid rgba(255, 255, 255, 0.12);\n  border-radius: 16px;\n  padding: 24px;\n  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);\n  color: #e6edf3;\n}\n\n.product-badge {\n  display: inline-block;\n  filter: drop-shadow(0 0 12px rgba(45, 255, 138, 0.6));\n}\n\n.cta-clip-btn {\n  background: #2dff8a;\n  color: #0a0e13;\n  padding: 12px 24px;\n  font-weight: 800;\n  border: none;\n  cursor: pointer;\n  clip-path: polygon(\n    12px 0,\n    100% 0,\n    100% calc(100% - 12px),\n    calc(100% - 12px) 100%,\n    0 100%,\n    0 12px\n  );\n  transition: transform 0.2s ease, filter 0.2s ease;\n}\n\n.cta-clip-btn:hover {\n  transform: translateY(-2px);\n  filter: drop-shadow(0 4px 12px rgba(45, 255, 138, 0.4));\n}",
+        "explanation": "Стили создают премиальный эффект матового стекла Apple Glassmorphism с поддержкой Safari, неоновым свечением drop-shadow и векторной геометрией clip-path."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c21-q1",
-          "question": "Какое свойство размывает фон ПОД элементом?",
+          "id": "css21-q1",
+          "question": "В чем главное отличие filter: drop-shadow() от свойства box-shadow?",
           "options": [
-            "filter: blur()",
-            "backdrop-filter: blur()",
-            "background-blur",
-            "blur()"
+            "drop-shadow работает только на смартфонах",
+            "box-shadow всегда отбрасывает тень от прямоугольного контейнера элемента, а drop-shadow отбрасывает тень точно по непрозрачному контуру альфа-канала PNG или SVG графики",
+            "drop-shadow не поддерживает цвет",
+            "drop-shadow удаляет элемент из DOM"
           ],
           "correctIndex": 1,
-          "explanation": "backdrop-filter: blur() размывает подложку под элементом."
+          "explanation": "drop-shadow анализирует прозрачные пиксели картинки, отбрасывая тень строго по форме видимого силуэта."
+        },
+        {
+          "id": "css21-q2",
+          "question": "Какое условие ОБЯЗАТЕЛЬНО для того, чтобы эффект backdrop-filter: blur(10px) был виден пользователю?",
+          "options": [
+            "Фон элемента должен быть абсолютно черным",
+            "Фон элемента должен быть полупрозрачным (rgba, hsla или #rrggbbaa), иначе через непрозрачный фон размытие подложки невозможно увидеть",
+            "Элемент должен быть анимирован",
+            "Нужно отключить GPU"
+          ],
+          "correctIndex": 1,
+          "explanation": "Если фон элемента 100% непрозрачен, он полностью перекрывает фоновый слой, и эффект backdrop-filter скрывается."
+        },
+        {
+          "id": "css21-q3",
+          "question": "Какой режим mix-blend-mode позволяет сделать абсолютно прозрачным БЕЛЫЙ фон изображения (например, отсканированного логотипа)?",
+          "options": [
+            "mix-blend-mode: screen",
+            "mix-blend-mode: multiply",
+            "mix-blend-mode: color-dodge",
+            "mix-blend-mode: normal"
+          ],
+          "correctIndex": 1,
+          "explanation": "Режим multiply перемножает цвета пикселей, в результате чего белые участки (значение 1.0) становятся невидимыми."
+        },
+        {
+          "id": "css21-q4",
+          "question": "Что делает CSS свойство clip-path: polygon(...)?",
+          "options": [
+            "Рисует 3D-графику WebGL",
+            "Обрезает видимую область элемента по координатам вершин многоугольника, делая все наружные области прозрачными и нечувствительными к кликам",
+            "Сжимает размер файла картинки",
+            "Запрещает копирование текста"
+          ],
+          "correctIndex": 1,
+          "explanation": "clip-path задает векторную маску обрезки любой геометрической формы прямо в CSS без SVG файлов."
+        },
+        {
+          "id": "css21-q5",
+          "question": "Зачем при использовании backdrop-filter обязательно дублировать свойство с префиксом -webkit-backdrop-filter?",
+          "options": [
+            "Для поддержки старых версий Internet Explorer",
+            "Для обязательной поддержки браузера Safari на мобильных устройствах iOS и macOS",
+            "Для ускорения загрузки страницы",
+            "Это требование валидатора W3C"
+          ],
+          "correctIndex": 1,
+          "explanation": "Движок WebKit в Safari требует вендорный префикс -webkit-backdrop-filter для активации размытия подложки."
         }
       ]
     }

@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgldr21" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgldr21)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Pro: Техническое лидерство, Техдолг и DORA</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">Роль Tech Lead / Staff, Управление техдолгом, Метрики DORA, Skill Matrix и Онбординг</text>
+
+  <!-- Left: Tech Leadership & Tech Debt -->
+  <rect x="20" y="65" width="370" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">Роль Tech Lead и Управление техдолгом</text>
+
+  <rect x="35" y="100" width="340" height="75" rx="4" fill="#2dff8a11" stroke="#2dff8a"/>
+  <text x="45" y="118" fill="#2dff8a" font-size="8" font-weight="600">Роль Tech Lead / Staff Engineer:</text>
+  <text x="45" y="132" fill="#e6edf3" font-size="7">• 30-40% — написание критического кода и архитектурных ядер</text>
+  <text x="45" y="146" fill="#e6edf3" font-size="7">• 30% — архитектурное планирование, RFC, оценка рисков</text>
+  <text x="45" y="158" fill="#e6edf3" font-size="7">• 30% — менторинг команды, Code Review, найм и онбординг</text>
+
+  <rect x="35" y="182" width="340" height="85" rx="4" fill="#161b22" stroke="#ffb02e"/>
+  <text x="45" y="200" fill="#ffb02e" font-size="8" font-weight="600">Квадрант техдолга Мартина Фаулера:</text>
+  <text x="45" y="216" fill="#e6edf3" font-size="7">• Оправданный (Deliberate): осознанный компромисс ради Time-to-Market</text>
+  <text x="45" y="228" fill="#8b949e" font-size="6">• Неоправданный (Reckless): некачественный код из-за некомпетентности</text>
+  <text x="45" y="242" fill="#2dff8a" font-size="6">Правило 20%: выделение 20% емкости каждого спринта на рефакторинг</text>
+  <text x="45" y="254" fill="#8b949e" font-size="6">Паттерн Strangler Fig: плавное удушение легаси новыми микросервисами</text>
+
+  <rect x="35" y="272" width="340" height="42" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="45" y="288" fill="#29e7ff" font-size="8" font-weight="600">Skill Matrix: прозрачная матрица компетенций Jun → Staff</text>
+
+  <!-- Right: DORA Metrics & Engineering Culture -->
+  <rect x="410" y="65" width="370" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Метрики DORA и Инженерная культура</text>
+
+  <rect x="425" y="98" width="340" height="110" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="116" fill="#2dff8a" font-size="8" font-weight="600">4 Метрики DORA (DevOps Research &amp; Assessment):</text>
+  <text x="435" y="132" fill="#e6edf3" font-size="7">1. Deployment Frequency: частота релизов (Elite: несколько в день)</text>
+  <text x="435" y="146" fill="#e6edf3" font-size="7">2. Lead Time for Changes: от коммита до прода (&lt; 1 часа)</text>
+  <text x="435" y="160" fill="#e6edf3" font-size="7">3. Change Failure Rate: процент сбойных релизов (&lt; 5%)</text>
+  <text x="435" y="174" fill="#e6edf3" font-size="7">4. Time to Restore (MTTR): время восстановления (&lt; 1 часа)</text>
+  <text x="435" y="190" fill="#8b949e" font-size="6">Объективные индикаторы здоровья инженерных процессов команды</text>
+
+  <rect x="425" y="215" width="340" height="98" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="435" y="232" fill="#29e7ff" font-size="8" font-weight="600">Процессы онбординга и найма:</text>
+  <text x="435" y="248" fill="#e6edf3" font-size="7">• First Day Deploy: новый разработчик катит коммит в первый день!</text>
+  <text x="435" y="260" fill="#e6edf3" font-size="7">• Buddy System: персональный наставник на первые 3 месяца</text>
+  <text x="435" y="274" fill="#8b949e" font-size="6">• Blameless Post-Mortem: разбор инцидентов без поиска виноватых</text>
+  <text x="435" y="288" fill="#8b949e" font-size="6">• Культура психологической безопасности и открытости</text>
+
+  <!-- Bottom -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Философия технического лидера</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• Успех Tech Lead измеряется не количеством написанного лично кода, а силой и автономностью команды</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• Не бойтесь осознанного техдолга для проверки продуктовых гипотез, но строго фиксируйте план его возврата</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• Культура Blameless Post-Mortem превращает производственные аварии в бесценный обучающий опыт</text>
+</svg>

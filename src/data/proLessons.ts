@@ -3874,5 +3874,199 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-21",
+    "moduleId": "pro",
+    "level": 21,
+    "title": "Техническое лидерство (Tech Lead), Управление техдолгом и Инженерные процессы (DORA)",
+    "subtitle": "Роль Tech Lead & Staff Engineer, Technical Debt Quadrant, метрики DORA (Deployment Frequency, MTTR), онбординг, Skill Matrix и Blameless Post-Mortem",
+    "description": "Освойте компетенции технического лидера (Tech Lead / Staff Frontend Engineer): переход от написания кода к архитектурному визионерству и развитию команды, управление техническим долгом по квадранту Мартина Фаулера и паттерну Strangler Fig, мониторинг инженерных метрик эффективности DORA (Lead Time, MTTR), построение процессов быстрого онбординга и культуру Blameless Post-Mortem.",
+    "estimatedMinutes": 80,
+    "difficulty": "advanced",
+    "tags": [
+      "tech-lead",
+      "staff-engineer",
+      "technical-debt",
+      "dora-metrics",
+      "engineering-culture",
+      "skill-matrix",
+      "onboarding",
+      "post-mortem",
+      "leadership",
+      "career"
+    ],
+    "theory": {
+      "overview": "Высшая ступень карьеры разработчика — позиция **Tech Lead** или **Staff / Principal Engineer**. На этом уровне ваш вклад измеряется не количеством закрытых тикетов в Jira, а **успехом всей инженерной команды**, скоростью доставки ценности в продакшен и устойчивостью технической архитектуры бизнеса.\n\nВ этом финальном уроке программы мы разберём переход от Senior к Lead-инженеру, системное управление **техническим долгом**, объективные метрики продуктивности команд **DORA** и построение культуры психологической безопасности и профессионального роста.",
+      "sections": [
+        {
+          "title": "Роль Tech Lead и Staff Engineer: баланс кода, архитектуры и людей",
+          "content": "Трансформация мышления при переходе от Senior к Lead:\n\n1. **Структура рабочего времени Tech Lead (Правило третей)**:\n- **30–40% — Код**: реализация критических архитектурных ядер, доказательств концепций (PoC), сложных интеграций и рефакторинга.\n- **30% — Архитектурное визионерство**: написание RFC, ревью архитектурных предложений, оценка технической реализуемости бизнес-фич со стейкхолдерами (Product Managers, CTO).\n- **30% — Развитие команды и процессы**: менторинг, 1-on-1 встречи, онбординг, найм, декомпозиция сложных эпиков.\n\n2. **Два трека развития Senior+ инженера**:\n- **Management Track (Engineering Manager / Team Lead)**: фокус на людях, карьерном росте сотрудников, процессах Scrum, бюджетах и найме.\n- **Individual Contributor (IC) Track (Staff / Principal Engineer)**: фокус на глубокой технической экспертизе, архитектуре платформ, масштабировании систем и технологических стандартах компании.",
+          "image": {
+            "src": "/images/lessons/web-tech-leadership-dora.svg",
+            "alt": "Техническое лидерство, Управление техдолгом и метрики DORA",
+            "caption": "Роль Tech Lead / Staff, квадрант управления техдолгом Мартина Фаулера и 4 инженерные метрики DORA"
+          },
+          "codeExample": {
+            "language": "json",
+            "code": "# Пример структуры матрицы компетенций (Engineering Skill Matrix)\n{\n  \"role\": \"Senior Frontend Engineer\",\n  \"tracks\": {\n    \"technical_excellence\": [\n      \"Проектирует архитектуру микрофронтендов и PWA\",\n      \"Оптимизирует Core Web Vitals до уровня P95 < 2.0s\",\n      \"Пишет исчерпывающие RFC перед реализацией\"\n    ],\n    \"execution_ownership\": [\n      \"Самостоятельно декомпозирует квартальные эпики на задачи\",\n      \"Управляет рисками и техническим долгом в спринтах\",\n      \"Дежурит в On-Call ротации и проводит Post-Mortem\"\n    ],\n    \"leadership_mentoring\": [\n      \"Менторит Junior и Middle инженеров\",\n      \"Проводит технические интервью на System Design\",\n      \"Внедряет новые инженерные практики в гильдию\"\n    ]\n  }\n}",
+            "title": "Матрица компетенций (Skill Matrix) для прозрачного роста инженеров",
+            "explanation": "Прозрачная матрица компетенций исключает субъективность в оценках и дает четкий roadmap профессионального роста."
+          }
+        },
+        {
+          "title": "Управление техническим долгом: Квадрант Фаулера и паттерн Strangler Fig",
+          "content": "Как грамотно бороться с устаревшим кодом без остановки бизнеса:\n\n1. **Квадрант техдолга Мартина Фаулера (Technical Debt Quadrant)**:\n- **Оправданный и осознанный (Deliberate & Prudent)**: «Мы сознательно выпускаем MVP без виртуализации, чтобы успеть к конференции, но закладываем 2 недели на оптимизацию в следующем месяце» — ✅ Нормальный инструмент бизнеса.\n- **Неосознанный и безрассудный (Reckless & Inadvertent)**: код низкого качества, написанный без тестов из-за отсутствия квалификации — ❌ Опасный яд для кодовой базы.\n\n2. **Стратегии возврата техдолга**:\n- **Правило 20% (The 20% Rule)**: 20% емкости (Story Points) каждого спринта резервируется исключительно на технический долг, рефакторинг и обновление зависимостей.\n- **Паттерн Strangler Fig (Душитель)**: монолитное легаси-приложение не переписывается с нуля годами (что почти всегда ведет к банкротству проекта), а плавно заменяется новыми модулями страница за страницей через прокси-роутер.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Реализация паттерна Strangler Fig на уровне роутинга (Next.js / Nginx)\n// Постепенный перевод страниц со старого легаси-монолита на новый стек\n\nexport const routingProxyConfig = {\n  async handleRequest(req: Request) {\n    const url = new URL(req.url);\n    \n    // 1. Новые модули, переписанные на чистый React + FSD:\n    const modernRoutes = ['/checkout', '/profile', '/catalog'];\n    if (modernRoutes.some(route => url.pathname.startsWith(route))) {\n      return forwardToModernSpa(req);\n    }\n    \n    // 2. Старые легаси-страницы монолита (будут заменены следующими):\n    console.log('[Strangler Fig]: Запрос направлен в старый монолит:', url.pathname);\n    return forwardToLegacyMonolith(req);\n  }\n};",
+            "title": "Паттерн Strangler Fig для безопасного поэтапного рефакторинга",
+            "explanation": "Strangler Fig исключает риски 'Big Bang rewrite', позволяя инкрементально модернизировать систему на живом продакшене."
+          }
+        },
+        {
+          "title": "4 Метрики DORA: Объективная оценка зрелости инженерных процессов",
+          "content": "Стандарт измерения производительности разработки от Google Cloud DORA:\n\n1. **4 Ключевые метрики DORA (DevOps Research & Assessment)**:\n- **1. Deployment Frequency (Частота деплоев)**:\n  Как часто рабочий код попадает в продакшен. *Elite команды*: несколько раз в день; *Низкий уровень*: раз в месяц.\n- **2. Lead Time for Changes (Время доставки изменений)**:\n  Время от первого коммита в ветку до появления фичи у пользователей. *Elite команды*: менее 1 часа.\n- **3. Change Failure Rate (Процент сбоев при релизах)**:\n  Доля деплоев, потребовавших хотфикса или отката (Rollback). *Elite команды*: 0–5%.\n- **4. Time to Restore Service / MTTR (Время восстановления)**:\n  Сколько времени требуется для устранения аварии в проде. *Elite команды*: менее 1 часа.\n\n2. **Культура Blameless Post-Mortem (Разбор без поиска виноватых)**:\n- Когда случается прод-инцидент, фокус смещается с «Кто виноват?» на «Какое системное улучшение в тестах/CI/CD защитит нас от повторения этой ошибки навсегда?»",
+          "codeExample": {
+            "language": "json",
+            "code": "# docs/post-mortems/2026-08-20-auth-token-outage.md\n# Blameless Post-Mortem: Инцидент INC-842 (Сбой авторизации)\n\n## Дата и длительность\n2026-08-20: 14:15 – 14:48 UTC (Простой: 33 минуты, MTTR: 33 мин)\n\n## Влияние на пользователей\nОколо 4 200 пользователей не смогли войти в личный кабинет.\n\n## Корневая причина (Root Cause)\nПри обновлении схемы cookie был пропущен атрибут SameSite, что привело к блокировке запросов в браузере Safari.\n\n## Хронология событий (Timeline)\n- 14:15 — Релиз версии v2.4.1\n- 14:20 — Сработал алерт Sentry: Error Rate > 2.5% в Slack #frontend-alerts\n- 14:25 — Инженеры подтвердили проблему и инициировали Rollback на v2.4.0\n- 14:48 — Сервис полностью восстановлен\n\n## Корректирующие действия (Action Items)\n1. Добавить Playwright E2E тест на авторизацию в Safari в CI пайплайн (Отв: Иван, до 22.08)\n2. Внедрить автоматический Canary деплой на 5% трафика (Отв: Анна, до 30.08)",
+            "title": "Пример отчета Blameless Post-Mortem по стандарту Google SRE",
+            "explanation": "Post-Mortem анализирует хронологию инцидента и формирует конкретные задачи по автоматизации защиты от повторения ошибки."
+          }
+        },
+        {
+          "title": "Онбординг, найм и построение сильной инженерной культуры",
+          "content": "Создание среды, где инженеры растут и создают лучший продукт:\n\n1. **Процесс онбординга «First Day Deploy»**:\n- Главный индикатор зрелости платформы и документации — способность нового интерна или джуниора **задеплоить свой первый маленький коммит в продакшен в первый же рабочий день**!\n- Назначение персонального наставника (**Buddy**) на первые 90 дней для ответов на любые вопросы без страха показаться некомпетентным.\n\n2. **Проведение экологичных собеседований**:\n- Отказ от решения олимпиадных задач на алгоритмы, оторванных от реальности веба.\n- Фокус на практическом Live Coding (рефакторинг реального компонента с багом), System Design интервью (проектирование ленты/мессенджера) и оценке Cultural Fit (умение слушать, давать и принимать фидбек).",
+          "codeExample": {
+            "language": "bash",
+            "code": "# Чеклист первого дня нового разработчика (Onboarding Runbook):\n# 1. Клонирование репозитория и подъем среды одной командой:\npnpm install && pnpm dev\n\n# 2. Прогон всех локальных тестов и линтеров:\npnpm test:run && pnpm lint\n\n# 3. Решение первой 'Good First Issue' задачи (например, добавление себя в contributors.json)\n# 4. Открытие первого Pull Request -> Прохождение CI -> Автоматический деплой на Preview!\n# 5. Успешный Merge в main -> Деплой на Vercel Production в первый день! 🎉",
+            "title": "Чеклист First Day Deploy для идеального онбординга инженеров",
+            "explanation": "Автоматизированный онбординг ускоряет вывод нового сотрудника на 100% продуктивность с месяцев до недель."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Фокусируйтесь на 4 метриках DORA — они объективно отражают здоровье процессов доставки кода и зрелость CI/CD пайплайна вашей команды.",
+        "Внедряйте культуру Blameless Post-Mortem: любая авария на проде — это не вина конкретного разработчика, а недоработка системы тестирования и мониторинга.",
+        "Используйте правило 20% для непрерывного возврата техдолга — это предотвращает необходимость болезненного глобального переписывания проекта.",
+        "Создайте прозрачную матрицу компетенций (Skill Matrix) с понятными критериями перехода между грейдами (Junior → Middle → Senior → Staff).",
+        "Стремитесь к метрике First Day Deploy для новых инженеров — это лучший стресс-тест вашей документации и скриптов инициализации проекта."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Поиск виноватых и наказание разработчика, допустившего баг на проде",
+          "good": "// Проведение Blameless Post-Mortem и добавление автоматического E2E теста в CI/CD",
+          "reason": "Поиск виноватых рождает страх и скрытие ошибок. Культура безопасности стимулирует открытость и улучшение процессов."
+        },
+        {
+          "bad": "// Полный 'Big Bang' перепис проекта с нуля с заморозкой разработки бизнес-фич на год",
+          "good": "// Инкрементальная замена модулей по паттерну Strangler Fig",
+          "reason": "Переписывание с нуля почти всегда срывает сроки, теряет бизнес-контекст и порождает новые неизвестные баги."
+        },
+        {
+          "bad": "// Редкие гигантские релизы раз в 2 месяца с сотнями коммитов",
+          "good": "// Непрерывный деплой маленьких изолированных фич по несколько раз в день (Trunk-based development)",
+          "reason": "Маленькие релизы снижают Change Failure Rate и позволяют мгновенно локализовать сбой при инциденте."
+        }
+      ],
+      "keyTakeaways": [
+        "Tech Lead балансирует между кодом, архитектурным планированием (RFC) и развитием людей.",
+        "Осознанный техдолг допустим для проверки гипотез, но требует регулярного возврата по правилу 20%.",
+        "4 метрики DORA (Deployment Frequency, Lead Time, Change Failure Rate, MTTR) измеряют инженерную зрелость.",
+        "Blameless Post-Mortem превращает инциденты в системные улучшения архитектуры и тестов.",
+        "First Day Deploy — эталон эффективного процесса онбординга новых инженеров."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"tech-lead-sandbox\">\n  <h3>Tech Leadership: DORA Metrics & Incident Simulator</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;\">\n    <button id=\"btn-dora-audit\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">1. DORA Metrics Audit</button>\n    <button id=\"btn-post-mortem\" style=\"background:#29e7ff; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">2. Blameless Post-Mortem</button>\n  </div>\n  <pre id=\"lead-log\" style=\"color:#e6edf3; font-size:12px; line-height:1.5; background:#161b22; padding:12px; border-radius:6px; min-height:90px;\"></pre>\n</div>",
+      "initialCss": "#tech-lead-sandbox { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const log = document.getElementById('lead-log');\n\ndocument.getElementById('btn-dora-audit').onclick = () => {\n  log.textContent = '📊 [DORA Metrics Dashboard — Q3 Performance]:\\n';\n  log.textContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';\n  log.textContent += '🚀 Deployment Frequency: 6.4 деплоя в день (ELITE РЕЙТИНГ)\\n';\n  log.textContent += '⏱️ Lead Time for Changes: 42 минуты от PR до прода (ELITE)\\n';\n  log.textContent += '🛡️ Change Failure Rate: 1.8% (Цель < 5% — В НОРМЕ)\\n';\n  log.textContent += '🔄 Time to Restore (MTTR): 18 минут (Авто-откат Canary релизов)\\n';\n  log.textContent += '\\n🏆 Команда работает по стандарту Elite High-Performing Engineering!';\n  log.style.color = '#2dff8a';\n};\n\ndocument.getElementById('btn-post-mortem').onclick = () => {\n  log.textContent = '📋 [Blameless Post-Mortem INC-492]:\\n';\n  log.textContent += '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\\n';\n  log.textContent += '🚨 Инцидент: Сбой рендеринга корзины после релиза v2.4.1 (Длительность: 18 мин)\\n';\n  log.textContent += '🔍 Root Cause: Редкий кейс при пустом промокоде в Safari\\n';\n  log.textContent += '💡 Культура: 0 обвинений разработчика! Фокус на усилении CI пайплайна.\\n';\n  log.textContent += '✅ Action Items: Добавлен E2E тест на пустой промокод в Playwright CI.';\n  log.style.color = '#29e7ff';\n};",
+      "instructions": "Практика с процессами лидерства:\n1. Нажмите '1. DORA Metrics Audit' для проверки 4 ключевых показателей эффективности команды\n2. Нажмите '2. Blameless Post-Mortem' для просмотра отчета о разборе инцидента без обвинений"
+    },
+    "task": {
+      "title": "Разработка калькулятора инженерных метрик DORA и классификатора рейтинга команды",
+      "scenario": "Создайте класс DoraMetricsAnalyzer, который принимает статистику деплоев и инцидентов команды, рассчитывает 4 метрики DORA (Deployment Frequency, Lead Time, Change Failure Rate, MTTR) и возвращает инженерный грейд команды: 'Elite', 'High', 'Medium' или 'Low' на основе официальных порогов Google Cloud DORA.",
+      "criteria": [
+        "Реализован метод calculateMetrics({ deploymentsCount, daysCount, leadTimeMinutes, failedDeployments, totalRestoreMinutes })",
+        "Корректно рассчитываются deploymentFrequencyPerDay, changeFailureRatePercentage, averageMttrMinutes",
+        "При deploymentFrequency >= 1/день, leadTime < 60мин, failureRate < 5%, MTTR < 60мин присваивается рейтинг 'Elite'",
+        "Возвращается полный структурированный отчет с рекомендациями по улучшению процессов"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте калькулятор метрик DORA\nexport class DoraMetricsAnalyzer {\n  // Ваш код\n}"
+      },
+      "hints": [
+        "changeFailureRate = (failedDeployments / deploymentsCount) * 100",
+        "const isElite = deployFreq >= 1 && leadTimeMinutes < 60 && failureRate < 5 && mttr < 60;"
+      ],
+      "solution": {
+        "js": "export class DoraMetricsAnalyzer {\n  analyze({\n    deploymentsCount,\n    daysCount,\n    leadTimeMinutes,\n    failedDeployments,\n    totalRestoreMinutes,\n  }) {\n    const deploymentFrequencyPerDay = deploymentsCount / daysCount;\n    const changeFailureRate = deploymentsCount > 0 ? (failedDeployments / deploymentsCount) * 100 : 0;\n    const averageMttrMinutes = failedDeployments > 0 ? totalRestoreMinutes / failedDeployments : 0;\n\n    let grade = 'Low';\n    if (\n      deploymentFrequencyPerDay >= 1 &&\n      leadTimeMinutes <= 60 &&\n      changeFailureRate < 5 &&\n      averageMttrMinutes <= 60\n    ) {\n      grade = 'Elite';\n    } else if (\n      deploymentFrequencyPerDay >= 0.2 &&\n      leadTimeMinutes <= 1440 &&\n      changeFailureRate < 15 &&\n      averageMttrMinutes <= 1440\n    ) {\n      grade = 'High';\n    } else if (deploymentFrequencyPerDay >= 0.05) {\n      grade = 'Medium';\n    }\n\n    return {\n      grade,\n      metrics: {\n        deploymentFrequencyPerDay: Number(deploymentFrequencyPerDay.toFixed(2)),\n        leadTimeMinutes,\n        changeFailureRatePercentage: Number(changeFailureRate.toFixed(2)),\n        averageMttrMinutes: Number(averageMttrMinutes.toFixed(1)),\n      },\n      isHighPerforming: grade === 'Elite' || grade === 'High',\n    };\n  }\n}\n\nconsole.log('DoraMetricsAnalyzer успешно протестирован и готов к использованию!');",
+        "explanation": "Анализатор объективно рассчитывает ключевые метрики зрелости процессов доставки и классифицирует команду по международным стандартам DORA."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro21-q1",
+          "question": "Какие 4 ключевые метрики входят в стандарт оценки зрелости инженерных команд DORA?",
+          "options": [
+            "Количество строк кода, число коммитов, отработанные часы и число тикетов",
+            "Deployment Frequency (частота деплоев), Lead Time for Changes (время от коммита до прода), Change Failure Rate (% сбоев при релизах) и Time to Restore Service / MTTR (время восстановления после аварии)",
+            "Зарплата, размер команды, число мониторов и кофе",
+            "Количество файлов в репозитории, число веток, размер CSS и вес HTML"
+          ],
+          "correctIndex": 1,
+          "explanation": "Четыре метрики DORA объективно отражают как скорость (скорость доставки), так и стабильность (надежность релизов) инженерной команды."
+        },
+        {
+          "id": "pro21-q2",
+          "question": "В чем суть паттерна Strangler Fig (Душитель) при модернизации крупного легаси-проекта?",
+          "options": [
+            "Полная заморозка разработки на 2 года для переписывания всего кода с нуля",
+            "Постепенная и безопасная замена отдельных страниц и модулей старого монолита на новый стек через роутер-прокси без остановки работающего бизнеса",
+            "Удаление старой базы данных",
+            "Отказ от использования тестов"
+          ],
+          "correctIndex": 1,
+          "explanation": "Strangler Fig позволяет непрерывно и безболезненно модернизировать систему инкремент за инкрементом на живом проде."
+        },
+        {
+          "id": "pro21-q3",
+          "question": "Какая главная цель преследуется при проведении Blameless Post-Mortem после производственной аварии?",
+          "options": [
+            "Найти виновного программиста и выписать штраф",
+            "Понять системную корневую причину сбоя и внедрить автоматические тесты/процессы, чтобы подобная ошибка технически не могла повториться в будущем",
+            "Удалить логи ошибок",
+            "Перезагрузить все сервера"
+          ],
+          "correctIndex": 1,
+          "explanation": "Blameless культура фокусируется на устранении уязвимостей в системе, а не на поиске виноватых людей."
+        },
+        {
+          "id": "pro21-q4",
+          "question": "Что гласит 'Правило 20%' (The 20% Rule) в управлении техническим долгом?",
+          "options": [
+            "20% разработчиков должны работать по выходным",
+            "Выделение 20% емкости (Story Points) каждого спринта исключительно на закрытие техдолга, рефакторинг и обновление зависимостей",
+            "Удаление 20% кода каждый месяц",
+            "20% тестов можно не запускать"
+          ],
+          "correctIndex": 1,
+          "explanation": "Регулярное выделение 20% времени спринта предотвращает накопление критического техдолга и деградацию кодовой базы."
+        },
+        {
+          "id": "pro21-q5",
+          "question": "Что означает показатель 'First Day Deploy' в процессах онбординга новой команды?",
+          "options": [
+            "Новый сотрудник должен работать 24 часа без сна",
+            "Новый инженер благодаря качественной документации и автоматизированному CI/CD пайплайну способен задеплоить свой первый рабочий коммит в продакшен в первый же рабочий день",
+            "Сервер деплоится только по понедельникам",
+            "Деплой разрешен только тимлиду"
+          ],
+          "correctIndex": 1,
+          "explanation": "First Day Deploy служит высшим критерием зрелости процессов, среды разработки и документации в технологической компании."
+        }
+      ]
+    }
   }
 ];

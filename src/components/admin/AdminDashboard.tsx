@@ -1,14 +1,17 @@
-﻿import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useProgress, TOTAL_PLATFORM_LESSONS } from '../../context/ProgressContext';
-import { User } from '../../types/auth';
+import React, { useState } from 'react';
 import { Module } from '../../types/curriculum';
-import {
-  Users, Award, Target, TrendingUp, Clock, Search, Filter,
-  CheckCircle2, ArrowRight, Eye, RotateCcw, Sparkles,
-  Download, ChevronRight, X, Code2, BookOpen, AlertCircle
-} from 'lucide-react';
+import { useProgress } from '../../context/ProgressContext';
+import { useAuth } from '../../context/AuthContext';
+import { useSubmissions } from '../../context/SubmissionContext';
+import { TaskSubmission } from '../../types/database';
+import { CodeReviewModal } from './CodeReviewModal';
 import { ProgressBar } from '../common/ProgressBar';
+import { TOTAL_PLATFORM_LESSONS } from '../../data/modulesData';
+import {
+  Users, Award, CheckCircle2, RotateCcw, Clock,
+  ArrowRight, Eye, ShieldCheck, ChevronRight, X,
+  Code2, Sparkles, Send, AlertTriangle, FileCode, CheckSquare
+} from 'lucide-react';
 
 interface AdminDashboardProps {
   modules: Module[];
@@ -21,349 +24,122 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigateHome,
   onSelectLesson
 }) => {
-  const { users, quickLogin, deleteUser } = useAuth();
-  const {
-    getAllProgress,
-    resetUserProgress,
-    simulateCompleteUserProgress
-  } = useProgress();
+  const { profiles, quickLogin, supabaseStatus } = useAuth();
+  const { getUserProgress, resetUserProgress, simulateCompleteUserProgress } = useProgress();
+  const { allSubmissions, pendingCount, reviewSubmission } = useSubmissions();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'certified' | 'in_progress' | 'beginner'>('all');
+  const [activeTab, setActiveTab] = useState<'interns' | 'queue'>('interns');
   const [selectedInternId, setSelectedInternId] = useState<string | null>(null);
+  const [reviewingSubmission, setReviewingSubmission] = useState<TaskSubmission | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
-  const allProgress = getAllProgress();
-  const interns = users.filter(u => u.role === 'intern');
+  const interns = profiles.filter(p => p.role !== 'admin');
+  const selectedIntern = profiles.find(p => p.id === selectedInternId);
+  const selectedProgress = selectedInternId ? getUserProgress(selectedInternId) : null;
 
-  // Compute analytics
-  const totalInterns = interns.length;
-  let totalPctSum = 0;
-  let certifiedCount = 0;
-  let totalScoresSum = 0;
-  let totalScoresCount = 0;
-  let activeLastWeekCount = 0;
-
-  const now = Date.now();
-  const sevenDaysMs = 7 * 24 * 3600 * 1000;
-
-  interns.forEach(intern => {
-    const p = allProgress[intern.id] || {
-      completedLessons: [],
-      completedTasks: [],
-      quizScores: {}
-    };
-    const completedCount = p.completedLessons?.length || 0;
-    const pct = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
-    totalPctSum += pct;
-
-    if (completedCount >= TOTAL_PLATFORM_LESSONS) {
-      certifiedCount++;
-    }
-
-    const scores = Object.values(p.quizScores || {});
-    if (scores.length > 0) {
-      const sum = scores.reduce((a, b) => a + b, 0);
-      totalScoresSum += sum;
-      totalScoresCount += scores.length;
-    }
-
-    const lastActive = new Date(intern.lastActiveAt).getTime();
-    if (now - lastActive < sevenDaysMs) {
-      activeLastWeekCount++;
-    }
+  // Filtered submissions
+  const filteredSubmissions = allSubmissions.filter(s => {
+    if (statusFilter === 'all') return true;
+    return s.status === statusFilter;
   });
-
-  const averageProgress = totalInterns > 0 ? Math.round(totalPctSum / totalInterns) : 0;
-  const averageQuizScore = totalScoresCount > 0 ? Math.round(totalScoresSum / totalScoresCount) : 0;
-
-  // Filter interns
-  const filteredInterns = interns.filter(intern => {
-    const matchesSearch =
-      intern.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      intern.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    if (!matchesSearch) return false;
-
-    const p = allProgress[intern.id] || { completedLessons: [] };
-    const completedCount = p.completedLessons?.length || 0;
-    const pct = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
-
-    if (statusFilter === 'certified') return completedCount >= TOTAL_PLATFORM_LESSONS;
-    if (statusFilter === 'in_progress') return pct > 0 && pct < 100;
-    if (statusFilter === 'beginner') return pct === 0;
-    return true;
-  });
-
-  // Selected intern for details drawer
-  const selectedIntern = selectedInternId ? users.find(u => u.id === selectedInternId) : null;
-  const selectedProgress = selectedInternId ? allProgress[selectedInternId] : null;
-
-  const handleExportSummary = () => {
-    const data = interns.map(u => {
-      const p = allProgress[u.id] || { completedLessons: [], quizScores: {} };
-      const pct = Math.round(((p.completedLessons?.length || 0) / TOTAL_PLATFORM_LESSONS) * 100);
-      return {
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        progressPercent: pct,
-        completedLessonsCount: p.completedLessons?.length || 0,
-        registeredAt: u.registeredAt,
-        lastActiveAt: u.lastActiveAt
-      };
-    });
-
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `frontend_interns_report_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="admin-dashboard-container">
-      {/* Top Banner */}
-      <div className="admin-header-banner">
-        <div className="admin-banner-left">
-          <div className="admin-badge-icon">
-            <Sparkles size={24} />
-          </div>
+      {/* Header Banner */}
+      <div className="admin-header-card">
+        <div className="admin-header-title-wrap">
+          <ShieldCheck size={28} className="text-accent" />
           <div>
-            <div className="admin-tag">Панель управления Ментора</div>
-            <h1 className="admin-title">Мониторинг успеваемости стажёров</h1>
+            <h1 className="admin-title">Панель управления стажировкой (LMS Admin)</h1>
             <p className="admin-subtitle">
-              Отслеживайте личный прогресс каждого ученика, пройденные тесты, решения задач и готовность к выдаче сертификата.
+              Управление стажерами, мониторинг успеваемости и Code Review практических заданий
             </p>
           </div>
         </div>
 
-        <div className="admin-banner-right">
-          <button className="btn btn-secondary btn-sm" onClick={handleExportSummary}>
-            <Download size={16} />
-            <span>Экспорт отчета</span>
-          </button>
-          <button className="btn btn-primary btn-sm" onClick={onNavigateHome}>
-            <BookOpen size={16} />
-            <span>К учебным материалам</span>
-          </button>
+        <div className="admin-status-pill">
+          <span className={`status-dot ${supabaseStatus.connected ? 'online' : 'offline'}`} />
+          <span>{supabaseStatus.message}</span>
         </div>
       </div>
 
-      {/* Analytics KPI Widgets */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <div className="stat-icon-wrap" style={{ background: 'rgba(99, 102, 241, 0.15)', color: '#6366f1' }}>
-            <Users size={22} />
-          </div>
-          <div className="stat-details">
-            <div className="stat-value">{totalInterns}</div>
-            <div className="stat-label">Всего стажёров</div>
-          </div>
-        </div>
+      {/* Admin Tabs */}
+      <div className="admin-tabs-bar">
+        <button
+          className={`admin-tab-btn ${activeTab === 'interns' ? 'active' : ''}`}
+          onClick={() => setActiveTab('interns')}
+        >
+          <Users size={16} />
+          <span>Стажёры платформы ({interns.length})</span>
+        </button>
 
-        <div className="admin-stat-card">
-          <div className="stat-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981' }}>
-            <TrendingUp size={22} />
-          </div>
-          <div className="stat-details">
-            <div className="stat-value">{averageProgress}%</div>
-            <div className="stat-label">Средний прогресс</div>
-          </div>
-        </div>
-
-        <div className="admin-stat-card">
-          <div className="stat-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' }}>
-            <Award size={22} />
-          </div>
-          <div className="stat-details">
-            <div className="stat-value">{certifiedCount}</div>
-            <div className="stat-label">Выдано сертификатов (100%)</div>
-          </div>
-        </div>
-
-        <div className="admin-stat-card">
-          <div className="stat-icon-wrap" style={{ background: 'rgba(236, 72, 153, 0.15)', color: '#ec4899' }}>
-            <Target size={22} />
-          </div>
-          <div className="stat-details">
-            <div className="stat-value">{averageQuizScore > 0 ? `${averageQuizScore}%` : '—'}</div>
-            <div className="stat-label">Средний балл квизов</div>
-          </div>
-        </div>
-
-        <div className="admin-stat-card">
-          <div className="stat-icon-wrap" style={{ background: 'rgba(14, 165, 233, 0.15)', color: '#0ea5e9' }}>
-            <Clock size={22} />
-          </div>
-          <div className="stat-details">
-            <div className="stat-value">{activeLastWeekCount}</div>
-            <div className="stat-label">Активны за неделю</div>
-          </div>
-        </div>
+        <button
+          className={`admin-tab-btn ${activeTab === 'queue' ? 'active' : ''}`}
+          onClick={() => setActiveTab('queue')}
+        >
+          <FileCode size={16} />
+          <span>Очередь заданий на Code Review</span>
+          {pendingCount > 0 && <span className="tab-counter-badge">{pendingCount}</span>}
+        </button>
       </div>
 
-      {/* Interns Filter & Search */}
-      <div className="admin-controls-card">
-        <div className="admin-search-wrap">
-          <Search size={18} className="search-icon" />
-          <input
-            type="text"
-            className="admin-search-input"
-            placeholder="Поиск по имени или email стажёра..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-          {searchQuery && (
-            <button className="clear-search-btn" onClick={() => setSearchQuery('')}>
-              <X size={16} />
-            </button>
-          )}
-        </div>
-
-        <div className="admin-filter-tabs">
-          <button
-            className={`filter-tab-btn ${statusFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('all')}
-          >
-            Все ({interns.length})
-          </button>
-          <button
-            className={`filter-tab-btn ${statusFilter === 'certified' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('certified')}
-          >
-            🏆 Выпускники ({certifiedCount})
-          </button>
-          <button
-            className={`filter-tab-btn ${statusFilter === 'in_progress' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('in_progress')}
-          >
-            ⚡️ В процессе ({interns.length - certifiedCount})
-          </button>
-          <button
-            className={`filter-tab-btn ${statusFilter === 'beginner' ? 'active' : ''}`}
-            onClick={() => setStatusFilter('beginner')}
-          >
-            🌱 Новички (0%)
-          </button>
-        </div>
-      </div>
-
-      {/* Interns Table / Cards */}
-      <div className="admin-interns-table-wrapper">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Стажёр</th>
-              <th>Общий прогресс</th>
-              <th>Модули (HTML / CSS / JS / PRO)</th>
-              <th>Средний квиз</th>
-              <th>Статус</th>
-              <th style={{ textAlign: 'right' }}>Действия</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredInterns.length === 0 ? (
+      {/* Tab 1: Interns List */}
+      {activeTab === 'interns' && (
+        <div className="admin-interns-table-wrapper">
+          <table className="admin-table">
+            <thead>
               <tr>
-                <td colSpan={6} className="table-empty-cell">
-                  <AlertCircle size={24} />
-                  <span>Стажёры по заданному фильтру не найдены</span>
-                </td>
+                <th>Стажёр</th>
+                <th>Роль</th>
+                <th>Прогресс</th>
+                <th>Уроков</th>
+                <th>Статус</th>
+                <th style={{ textAlign: 'right' }}>Действия</th>
               </tr>
-            ) : (
-              filteredInterns.map(intern => {
-                const p = allProgress[intern.id] || {
-                  completedLessons: [],
-                  completedTasks: [],
-                  quizScores: {}
-                };
-                const completedCount = p.completedLessons?.length || 0;
-                const pct = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
+            </thead>
+            <tbody>
+              {interns.map(intern => {
+                const prog = getUserProgress(intern.id);
+                const completedCount = prog.completedLessons?.length || 0;
+                const percentage = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
                 const isCertified = completedCount >= TOTAL_PLATFORM_LESSONS;
-
-                // Module breakdown
-                const htmlDone = p.completedLessons?.filter(id => id.startsWith('html-')).length || 0;
-                const cssDone = p.completedLessons?.filter(id => id.startsWith('css-')).length || 0;
-                const jsDone = p.completedLessons?.filter(id => id.startsWith('javascript-')).length || 0;
-                const proDone = p.completedLessons?.filter(id => id.startsWith('pro-')).length || 0;
-
-                // Average quiz
-                const scores = Object.values(p.quizScores || {});
-                const avgQuiz = scores.length > 0
-                  ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
-                  : null;
 
                 return (
                   <tr key={intern.id} className="intern-row">
                     <td>
-                      <div className="intern-user-cell">
-                        <div className="intern-avatar">{intern.avatar || '👨‍💻'}</div>
+                      <div className="intern-cell-profile">
+                        <span className="intern-avatar">{intern.avatar_url || '👨‍💻'}</span>
                         <div>
-                          <div className="intern-name">{intern.name}</div>
+                          <div className="intern-name">{intern.full_name}</div>
                           <div className="intern-email">{intern.email}</div>
-                          <div className="intern-date text-xs text-muted">
-                            Регистрация: {new Date(intern.registeredAt).toLocaleDateString('ru-RU')}
-                          </div>
                         </div>
                       </div>
                     </td>
-
                     <td>
-                      <div className="table-progress-cell">
-                        <div className="progress-top-info">
-                          <span className="font-bold">{pct}%</span>
-                          <span className="text-muted text-xs">{completedCount} / {TOTAL_PLATFORM_LESSONS}</span>
-                        </div>
-                        <ProgressBar value={pct} height={6} />
+                      <span className="role-chip intern">Стажёр</span>
+                    </td>
+                    <td style={{ minWidth: '160px' }}>
+                      <div className="progress-cell-wrap">
+                        <ProgressBar value={percentage} height={6} />
+                        <span className="progress-cell-pct">{percentage}%</span>
                       </div>
                     </td>
-
                     <td>
-                      <div className="module-badges-list">
-                        <span className={`mod-pill ${htmlDone === 11 ? 'done' : ''}`} title={`HTML: ${htmlDone}/11`}>
-                          HTML {htmlDone}/11
-                        </span>
-                        <span className={`mod-pill ${cssDone === 21 ? 'done' : ''}`} title={`CSS: ${cssDone}/21`}>
-                          CSS {cssDone}/21
-                        </span>
-                        <span className={`mod-pill ${jsDone === 14 ? 'done' : ''}`} title={`JS: ${jsDone}/14`}>
-                          JS {jsDone}/14
-                        </span>
-                        <span className={`mod-pill ${proDone === 2 ? 'done' : ''}`} title={`PRO: ${proDone}/2`}>
-                          PRO {proDone}/2
-                        </span>
-                      </div>
+                      <span className="lessons-count-chip">
+                        {completedCount} / {TOTAL_PLATFORM_LESSONS}
+                      </span>
                     </td>
-
-                    <td>
-                      <div className="quiz-score-cell">
-                        {avgQuiz !== null ? (
-                          <span className="score-badge font-bold">
-                            {avgQuiz}% <span className="text-xs text-muted">({scores.length} тестов)</span>
-                          </span>
-                        ) : (
-                          <span className="text-muted text-xs">Не сдавал</span>
-                        )}
-                      </div>
-                    </td>
-
                     <td>
                       {isCertified ? (
                         <span className="status-badge status-certified">
-                          🏆 Выпускник
+                          <Award size={12} /> Сертифицирован
                         </span>
-                      ) : pct > 0 ? (
-                        <span className="status-badge status-progress">
-                          ⚡️ Обучается
-                        </span>
+                      ) : percentage > 20 ? (
+                        <span className="status-badge status-active">⚡️ Обучается</span>
                       ) : (
-                        <span className="status-badge status-new">
-                          🌱 Новичок
-                        </span>
+                        <span className="status-badge status-new">🌱 Новичок</span>
                       )}
                     </td>
-
                     <td style={{ textAlign: 'right' }}>
                       <div className="row-actions-group">
                         <button
@@ -374,37 +150,145 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <Eye size={14} />
                           <span>Детали</span>
                         </button>
-
                         <button
                           className="btn btn-secondary btn-sm"
                           onClick={() => {
                             quickLogin(intern.id);
                             onNavigateHome();
                           }}
-                          title="Войти в интерфейс от имени этого стажёра"
+                          title="Войти в систему от имени этого стажёра"
                         >
-                          <span>Войти как ученик</span>
+                          <span>Войти как стажёр</span>
                           <ArrowRight size={14} />
                         </button>
                       </div>
                     </td>
                   </tr>
                 );
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
-      {/* Detailed Intern Drawer / Modal */}
+      {/* Tab 2: Code Review Queue */}
+      {activeTab === 'queue' && (
+        <div className="admin-queue-view">
+          <div className="queue-filter-bar">
+            <span className="filter-label">Фильтр по статусу:</span>
+            <div className="filter-buttons-group">
+              <button
+                className={`filter-btn ${statusFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('all')}
+              >
+                Все ({allSubmissions.length})
+              </button>
+              <button
+                className={`filter-btn ${statusFilter === 'pending' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('pending')}
+              >
+                Ожидают проверки ({allSubmissions.filter(s => s.status === 'pending').length})
+              </button>
+              <button
+                className={`filter-btn ${statusFilter === 'approved' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('approved')}
+              >
+                Одобренные ({allSubmissions.filter(s => s.status === 'approved').length})
+              </button>
+              <button
+                className={`filter-btn ${statusFilter === 'rejected' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('rejected')}
+              >
+                На доработке ({allSubmissions.filter(s => s.status === 'rejected').length})
+              </button>
+            </div>
+          </div>
+
+          <div className="admin-interns-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Стажёр</th>
+                  <th>Урок / Задание</th>
+                  <th>Статус</th>
+                  <th>Дата отправки</th>
+                  <th style={{ textAlign: 'right' }}>Code Review</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSubmissions.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '36px' }}>
+                      <CheckCircle2 size={32} className="text-success" style={{ margin: '0 auto 8px' }} />
+                      <p className="text-muted">Нет заданий в данной категории</p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredSubmissions.map(sub => {
+                    const allL = modules.flatMap(m => m.lessons);
+                    const curLesson = allL.find(l => l.id === sub.lesson_id);
+
+                    return (
+                      <tr key={sub.id} className="submission-row">
+                        <td>
+                          <div className="intern-cell-profile">
+                            <span className="intern-avatar">{sub.profiles?.avatar_url || '👨‍💻'}</span>
+                            <div>
+                              <div className="intern-name">{sub.profiles?.full_name || 'Стажёр'}</div>
+                              <div className="intern-email">{sub.profiles?.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="queue-lesson-info">
+                            <span className="queue-lesson-title">{curLesson?.title || sub.lesson_id}</span>
+                            <span className="queue-lesson-id font-mono text-xs">{sub.lesson_id}</span>
+                          </div>
+                        </td>
+                        <td>
+                          {sub.status === 'pending' && (
+                            <span className="status-badge status-new">⏳ Ожидает проверки</span>
+                          )}
+                          {sub.status === 'approved' && (
+                            <span className="status-badge status-certified">✅ Одобрено</span>
+                          )}
+                          {sub.status === 'rejected' && (
+                            <span className="status-badge status-warning">⚠️ На доработке</span>
+                          )}
+                        </td>
+                        <td>
+                          <span className="text-muted text-xs">
+                            {sub.submitted_at ? new Date(sub.submitted_at).toLocaleString() : 'Недавно'}
+                          </span>
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => setReviewingSubmission(sub)}
+                          >
+                            <FileCode size={14} />
+                            <span>Провести Code Review</span>
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Intern Details Drawer */}
       {selectedIntern && selectedProgress && (
         <div className="modal-backdrop" onClick={() => setSelectedInternId(null)}>
           <div className="modal-container intern-details-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-header-user">
-                <div className="intern-avatar-lg">{selectedIntern.avatar || '👨‍💻'}</div>
+                <div className="intern-avatar-lg">{selectedIntern.avatar_url || '👨‍💻'}</div>
                 <div>
-                  <h3 style={{ margin: 0 }}>Успеваемость: {selectedIntern.name}</h3>
+                  <h3 style={{ margin: 0 }}>Успеваемость: {selectedIntern.full_name}</h3>
                   <p className="text-muted text-xs">{selectedIntern.email} • ID: {selectedIntern.id}</p>
                 </div>
               </div>
@@ -414,7 +298,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
 
             <div className="modal-body intern-details-body">
-              {/* Progress Bar Summary */}
               <div className="intern-detail-kpi-card">
                 <div className="kpi-row">
                   <div>
@@ -436,19 +319,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
               </div>
 
-              {/* Fast-track Admin Actions */}
               <div className="admin-actions-bar">
                 <button
                   className="btn btn-secondary btn-sm"
                   onClick={() => simulateCompleteUserProgress(selectedIntern.id)}
                 >
                   <Award size={16} />
-                  <span>Симулировать 100% завершение (Выдать сертификат)</span>
+                  <span>Симулировать 100% завершение (Сертификат)</span>
                 </button>
                 <button
                   className="btn btn-secondary btn-sm text-danger"
                   onClick={() => {
-                    if (window.confirm(`Сбросить весь прогресс стажёра ${selectedIntern.name}?`)) {
+                    if (window.confirm(`Сбросить весь прогресс стажёра ${selectedIntern.full_name}?`)) {
                       resetUserProgress(selectedIntern.id);
                     }
                   }}
@@ -458,7 +340,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </button>
               </div>
 
-              {/* Module-by-Module Breakdown */}
               <h4 style={{ marginTop: '20px', marginBottom: '12px' }}>Прогресс по модулям:</h4>
               <div className="detail-modules-list">
                 {modules.map(mod => {
@@ -501,31 +382,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   );
                 })}
               </div>
-
-              {/* Saved Sandbox Code Viewer if any */}
-              {selectedProgress.sandboxSavedCode && Object.keys(selectedProgress.sandboxSavedCode).length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                  <h4 style={{ marginBottom: '12px' }}>Сохраненный код в песочницах:</h4>
-                  <div className="sandbox-saved-list">
-                    {Object.entries(selectedProgress.sandboxSavedCode).map(([lessonId, code]) => (
-                      <div key={lessonId} className="sandbox-code-preview">
-                        <div className="sandbox-preview-head">
-                          <Code2 size={16} />
-                          <span>Урок: {lessonId}</span>
-                        </div>
-                        <pre className="code-pre">
-                          {code.html ? `<!-- HTML -->\n${code.html}\n\n` : ''}
-                          {code.css ? `/* CSS */\n${code.css}\n\n` : ''}
-                          {code.js ? `// JS\n${code.js}` : ''}
-                        </pre>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Code Review Modal */}
+      {reviewingSubmission && (
+        <CodeReviewModal
+          submission={reviewingSubmission}
+          modules={modules}
+          onClose={() => setReviewingSubmission(null)}
+          onReviewSubmit={reviewSubmission}
+        />
       )}
     </div>
   );

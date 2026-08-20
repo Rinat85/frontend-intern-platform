@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../types/auth';
 import { X, Mail, Lock, User as UserIcon, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
@@ -24,42 +24,57 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [role, setRole] = useState<UserRole>('intern');
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const res = login(email, password);
-    if (res.success) {
-      setSuccessMsg('Вход успешно выполнен!');
-      setTimeout(() => {
-        setSuccessMsg(null);
-        onClose();
-      }, 500);
-    } else {
-      setError(res.error || 'Ошибка входа');
+    setIsSubmitting(true);
+    try {
+      const res = await login(email, role);
+      if (res.success) {
+        setSuccessMsg('Вход успешно выполнен!');
+        setTimeout(() => {
+          setSuccessMsg(null);
+          onClose();
+        }, 500);
+      } else {
+        setError(res.error || 'Ошибка входа');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Ошибка входа');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const res = register(email, name, password, role);
-    if (res.success) {
-      setSuccessMsg('Регистрация завершена! Добро пожаловать.');
-      setTimeout(() => {
-        setSuccessMsg(null);
-        onClose();
-      }, 500);
-    } else {
-      setError(res.error || 'Ошибка регистрации');
+    setIsSubmitting(true);
+    try {
+      const res = await register(name, email, role);
+      if (res.success) {
+        setSuccessMsg('Регистрация завершена! Добро пожаловать.');
+        setTimeout(() => {
+          setSuccessMsg(null);
+          onClose();
+        }, 500);
+      } else {
+        setError(res.error || 'Ошибка регистрации');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Ошибка регистрации');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleQuickSelect = (userId: string) => {
     quickLogin(userId);
-    setSuccessMsg('Переключение выполнено!');
+    setSuccessMsg('Вход выполнен!');
     setTimeout(() => {
       setSuccessMsg(null);
       onClose();
@@ -69,17 +84,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="modal-container auth-modal" onClick={e => e.stopPropagation()}>
+        {/* Header */}
         <div className="modal-header">
-          <div className="auth-header-title">
-            <div className="auth-icon-badge">
-              <Sparkles size={20} />
-            </div>
+          <div className="modal-header-title">
+            <Sparkles size={20} className="text-accent" />
             <div>
-              <h3>Авторизация в Академии</h3>
-              <p className="text-muted text-xs">Личный кабинет стажёра и панель ментора</p>
+              <h3 style={{ margin: 0 }}>Вход и регистрация</h3>
+              <p className="text-muted text-xs">RocketGate Frontend Intern Platform</p>
             </div>
           </div>
-          <button className="btn-icon" onClick={onClose} aria-label="Закрыть">
+          <button className="btn-icon" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
@@ -172,8 +186,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary btn-block auth-submit-btn">
-                Войти в аккаунт
+              <button type="submit" className="btn btn-primary btn-block auth-submit-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Вход...' : 'Войти в аккаунт'}
               </button>
 
               <div className="auth-footer-note">
@@ -245,7 +259,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   >
                     <div className="role-option-icon">👨‍💻</div>
                     <div className="role-option-title">Стажёр</div>
-                    <div className="role-option-desc">Изучение 48 уровней, решение задач, личный прогресс и сертификат</div>
+                    <div className="role-option-desc">Изучение 67 уровней, решение задач, личный прогресс и сертификат</div>
                   </div>
 
                   <div
@@ -254,13 +268,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   >
                     <div className="role-option-icon">👑</div>
                     <div className="role-option-title">Ментор / Админ</div>
-                    <div className="role-option-desc">Доступ к панели управления, просмотр прогресса и решений всех стажеров</div>
+                    <div className="role-option-desc">Доступ к панели управления, Code Review и проверка решений стажеров</div>
                   </div>
                 </div>
               </div>
 
-              <button type="submit" className="btn btn-primary btn-block auth-submit-btn">
-                Создать аккаунт
+              <button type="submit" className="btn btn-primary btn-block auth-submit-btn" disabled={isSubmitting}>
+                {isSubmitting ? 'Регистрация...' : 'Создать аккаунт'}
               </button>
 
               <div className="auth-footer-note">

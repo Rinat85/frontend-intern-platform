@@ -1,6 +1,17 @@
-﻿import React, { createContext, useContext, useEffect, useState } from 'react';
-import { InternProgress } from '../types/curriculum';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
+import { progressService, UserProgressSummary } from '../services/progressService';
+import { ALL_LESSON_IDS, TOTAL_PLATFORM_LESSONS } from '../data/modulesData';
+
+interface InternProgress {
+  completedLessons: string[];
+  bookmarkedLessons: string[];
+  completedTasks: string[];
+  quizScores: Record<string, number>;
+  sandboxSavedCode: Record<string, { html: string; css: string; js: string }>;
+  internName: string;
+  startDate: string;
+}
 
 interface ProgressContextType {
   progress: InternProgress;
@@ -27,26 +38,14 @@ interface ProgressContextType {
   getSavedSandboxCode: (lessonId: string) => { html: string; css: string; js: string } | null;
   getSandboxSavedCode: (lessonId: string) => { html: string; css: string; js: string } | null;
   resetProgress: () => void;
-  
-  // Admin & Multi-user helpers
   getUserProgress: (userId: string) => InternProgress;
   getAllProgress: () => Record<string, InternProgress>;
   resetUserProgress: (userId: string) => void;
   simulateCompleteUserProgress: (userId: string) => void;
+  reloadProgress: () => Promise<void>;
 }
 
-const MULTI_PROGRESS_STORAGE_KEY = 'frontend_intern_user_progress_map_v3';
-export const TOTAL_PLATFORM_LESSONS = 48;
-
-// All 48 lesson IDs across the platform for seed computations
-const ALL_LESSON_IDS = [
-  ...Array.from({ length: 11 }, (_, i) => `html-${i + 1}`),
-  ...Array.from({ length: 21 }, (_, i) => `css-${i + 1}`),
-  ...Array.from({ length: 14 }, (_, i) => `javascript-${i + 1}`),
-  ...Array.from({ length: 2 }, (_, i) => `pro-${i + 1}`)
-];
-
-const makeEmptyProgress = (name: string): InternProgress => ({
+const emptyProgress = (name: string): InternProgress => ({
   completedLessons: [],
   bookmarkedLessons: [],
   completedTasks: [],
@@ -56,200 +55,139 @@ const makeEmptyProgress = (name: string): InternProgress => ({
   startDate: new Date().toISOString()
 });
 
-// Seed data for demo users
-const INITIAL_PROGRESS_MAP: Record<string, InternProgress> = {
-  // Maria Ivanova: 100% Certified Graduate
-  usr_maria: {
-    completedLessons: [...ALL_LESSON_IDS],
-    bookmarkedLessons: ['html-6', 'css-12', 'javascript-9'],
-    completedTasks: [...ALL_LESSON_IDS],
-    quizScores: ALL_LESSON_IDS.reduce((acc, id) => {
-      acc[id] = 100;
-      return acc;
-    }, {} as Record<string, number>),
-    sandboxSavedCode: {
-      'html-1': {
-        html: '<div class="profile-card"><h3>Мария Иванова</h3><p>Frontend Graduate</p></div>',
-        css: '.profile-card { padding: 20px; background: #ecfdf5; border-radius: 12px; }',
-        js: 'console.log("Maria graduated with 100% score!");'
-      }
-    },
-    internName: 'Мария Иванова',
-    startDate: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
-  },
-
-  // Alex Smirnov: Active Intern (~60% Progress)
-  usr_alex: {
-    completedLessons: [
-      ...Array.from({ length: 11 }, (_, i) => `html-${i + 1}`),
-      ...Array.from({ length: 17 }, (_, i) => `css-${i + 1}`)
-    ],
-    bookmarkedLessons: ['html-3', 'css-6', 'css-14'],
-    completedTasks: [
-      ...Array.from({ length: 11 }, (_, i) => `html-${i + 1}`),
-      ...Array.from({ length: 15 }, (_, i) => `css-${i + 1}`)
-    ],
-    quizScores: {
-      'html-1': 100, 'html-2': 100, 'html-3': 100, 'html-4': 100, 'html-5': 100,
-      'html-6': 100, 'html-7': 100, 'html-8': 100, 'html-9': 100, 'html-10': 100, 'html-11': 100,
-      'css-1': 100, 'css-2': 100, 'css-3': 100, 'css-4': 100, 'css-5': 100,
-      'css-6': 100, 'css-7': 100, 'css-8': 100, 'css-9': 100, 'css-10': 100
-    },
-    sandboxSavedCode: {
-      'css-1': {
-        html: '<div class="alex-box">Мой первый CSS стиль</div>',
-        css: '.alex-box { color: #6366f1; font-weight: bold; }',
-        js: '// Alex test script'
-      }
-    },
-    internName: 'Алексей Смирнов',
-    startDate: new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString()
-  },
-
-  // Dmitry Kovalev: Beginner Intern (12% Progress)
-  usr_dmitry: {
-    completedLessons: ['html-1', 'html-2', 'html-3', 'html-4', 'html-5', 'html-6'],
-    bookmarkedLessons: ['html-2'],
-    completedTasks: ['html-1', 'html-2', 'html-3'],
-    quizScores: {
-      'html-1': 100,
-      'html-2': 100,
-      'html-3': 100
-    },
-    sandboxSavedCode: {},
-    internName: 'Дмитрий Ковалев',
-    startDate: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString()
-  },
-
-  // Admin Progress (Default clean / observer)
-  usr_admin: {
-    completedLessons: [],
-    bookmarkedLessons: [],
-    completedTasks: [],
-    quizScores: {},
-    sandboxSavedCode: {},
-    internName: 'Главный Ментор',
-    startDate: new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString()
-  }
-};
-
 const ProgressContext = createContext<ProgressContextType | undefined>(undefined);
 
 export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const currentUserId = user?.id || 'anonymous';
-  const currentUserName = user?.name || 'Гость';
+  const currentUserName = user?.name || 'Студент';
 
-  const [progressMap, setProgressMap] = useState<Record<string, InternProgress>>(() => {
+  const [currentProgress, setCurrentProgress] = useState<InternProgress>(emptyProgress(currentUserName));
+  const [allProgressCache, setAllProgressCache] = useState<Record<string, InternProgress>>({});
+
+  const reloadProgress = useCallback(async () => {
+    if (!user?.id) return;
     try {
-      const saved = localStorage.getItem(MULTI_PROGRESS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return { ...INITIAL_PROGRESS_MAP, ...parsed };
-      }
+      const summary = await progressService.fetchUserProgress(user.id);
+      const prog: InternProgress = {
+        ...summary,
+        internName: user.name || summary.internName
+      };
+      setCurrentProgress(prog);
+      setAllProgressCache(prev => ({ ...prev, [user.id]: prog }));
     } catch (e) {
-      console.error('Failed to load progress map', e);
+      console.warn('reloadProgress error:', e);
     }
-    return INITIAL_PROGRESS_MAP;
-  });
+  }, [user?.id, user?.name]);
 
-  // Save progressMap to localStorage
   useEffect(() => {
-    try {
-      localStorage.setItem(MULTI_PROGRESS_STORAGE_KEY, JSON.stringify(progressMap));
-    } catch (e) {
-      console.error('Failed to persist progress map', e);
-    }
-  }, [progressMap]);
+    reloadProgress();
+  }, [reloadProgress]);
 
-  // Ensure current user has a progress entry
-  const progress: InternProgress =
-    progressMap[currentUserId] || makeEmptyProgress(currentUserName);
-
-  const updateCurrentProgress = (updater: (prev: InternProgress) => InternProgress) => {
-    setProgressMap(prevMap => {
-      const current = prevMap[currentUserId] || makeEmptyProgress(currentUserName);
-      const updated = updater(current);
-      return { ...prevMap, [currentUserId]: updated };
-    });
-  };
-
-  const isLessonCompleted = (lessonId: string) => progress.completedLessons.includes(lessonId);
+  const isLessonCompleted = (lessonId: string) => currentProgress.completedLessons.includes(lessonId);
 
   const toggleLessonCompletion = (lessonId: string) => {
-    updateCurrentProgress(prev => {
-      const exists = prev.completedLessons.includes(lessonId);
+    const exists = currentProgress.completedLessons.includes(lessonId);
+    const nextCompleted = !exists;
+    
+    setCurrentProgress(prev => {
       const updated = exists
         ? prev.completedLessons.filter(id => id !== lessonId)
         : [...prev.completedLessons, lessonId];
       return { ...prev, completedLessons: updated };
     });
+
+    if (user?.id) {
+      progressService.toggleLessonCompletion(user.id, lessonId, nextCompleted);
+    }
   };
 
-  const isLessonBookmarked = (lessonId: string) => progress.bookmarkedLessons.includes(lessonId);
+  const isLessonBookmarked = (lessonId: string) => currentProgress.bookmarkedLessons.includes(lessonId);
 
   const toggleBookmark = (lessonId: string) => {
-    updateCurrentProgress(prev => {
-      const exists = prev.bookmarkedLessons.includes(lessonId);
+    const exists = currentProgress.bookmarkedLessons.includes(lessonId);
+    const nextBookmark = !exists;
+
+    setCurrentProgress(prev => {
       const updated = exists
         ? prev.bookmarkedLessons.filter(id => id !== lessonId)
         : [...prev.bookmarkedLessons, lessonId];
       return { ...prev, bookmarkedLessons: updated };
     });
+
+    if (user?.id) {
+      progressService.toggleBookmark(user.id, lessonId, nextBookmark);
+    }
   };
 
-  const isTaskCompleted = (lessonId: string) => progress.completedTasks.includes(lessonId);
+  const isTaskCompleted = (lessonId: string) => currentProgress.completedTasks.includes(lessonId);
 
   const toggleTaskCompletion = (lessonId: string) => {
-    updateCurrentProgress(prev => {
-      const exists = prev.completedTasks.includes(lessonId);
+    const exists = currentProgress.completedTasks.includes(lessonId);
+    setCurrentProgress(prev => {
       const updated = exists
         ? prev.completedTasks.filter(id => id !== lessonId)
         : [...prev.completedTasks, lessonId];
       return { ...prev, completedTasks: updated };
     });
+
+    if (user?.id) {
+      progressService.toggleLessonCompletion(user.id, lessonId, !exists);
+    }
   };
 
   const setQuizScore = (lessonId: string, scorePercent: number) => {
-    updateCurrentProgress(prev => ({
+    setCurrentProgress(prev => ({
       ...prev,
+      completedLessons: prev.completedLessons.includes(lessonId) ? prev.completedLessons : [...prev.completedLessons, lessonId],
       quizScores: { ...prev.quizScores, [lessonId]: scorePercent }
     }));
+
+    if (user?.id) {
+      progressService.saveQuizScore(user.id, lessonId, scorePercent);
+    }
   };
 
   const saveSandboxCode = (lessonId: string, code: { html: string; css: string; js: string }) => {
-    updateCurrentProgress(prev => ({
+    setCurrentProgress(prev => ({
       ...prev,
       sandboxSavedCode: { ...prev.sandboxSavedCode, [lessonId]: code }
     }));
+
+    if (user?.id) {
+      progressService.saveSandboxCode(user.id, lessonId, code);
+    }
   };
 
   const getSavedSandboxCode = (lessonId: string) => {
-    return progress.sandboxSavedCode[lessonId] || null;
+    return currentProgress.sandboxSavedCode[lessonId] || null;
   };
 
   const setInternName = (name: string) => {
-    updateCurrentProgress(prev => ({ ...prev, internName: name }));
+    setCurrentProgress(prev => ({ ...prev, internName: name }));
   };
 
   const resetProgress = () => {
     if (window.confirm('Вы уверены, что хотите сбросить свой прогресс обучения?')) {
-      updateCurrentProgress(() => makeEmptyProgress(currentUserName));
+      setCurrentProgress(emptyProgress(currentUserName));
+      if (user?.id) {
+        progressService.resetUserProgress(user.id);
+      }
     }
   };
 
-  // Multi-user & Admin methods
   const getUserProgress = (userId: string): InternProgress => {
-    return progressMap[userId] || makeEmptyProgress('Пользователь');
+    return allProgressCache[userId] || emptyProgress('Студент');
   };
 
-  const getAllProgress = () => progressMap;
+  const getAllProgress = () => allProgressCache;
 
   const resetUserProgress = (userId: string) => {
-    setProgressMap(prev => ({
+    setAllProgressCache(prev => ({
       ...prev,
-      [userId]: makeEmptyProgress(prev[userId]?.internName || 'Студент')
+      [userId]: emptyProgress('Студент')
     }));
+    progressService.resetUserProgress(userId);
   };
 
   const simulateCompleteUserProgress = (userId: string) => {
@@ -258,21 +196,28 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return acc;
     }, {} as Record<string, number>);
 
-    setProgressMap(prev => ({
-      ...prev,
-      [userId]: {
-        completedLessons: [...ALL_LESSON_IDS],
-        bookmarkedLessons: [],
-        completedTasks: [...ALL_LESSON_IDS],
-        quizScores: fullQuizScores,
-        sandboxSavedCode: prev[userId]?.sandboxSavedCode || {},
-        internName: prev[userId]?.internName || 'Студент',
-        startDate: prev[userId]?.startDate || new Date().toISOString()
-      }
-    }));
+    const completedProg: InternProgress = {
+      completedLessons: [...ALL_LESSON_IDS],
+      bookmarkedLessons: [],
+      completedTasks: [...ALL_LESSON_IDS],
+      quizScores: fullQuizScores,
+      sandboxSavedCode: currentProgress.sandboxSavedCode || {},
+      internName: user?.name || 'Студент',
+      startDate: new Date().toISOString()
+    };
+
+    setCurrentProgress(completedProg);
+    setAllProgressCache(prev => ({ ...prev, [userId]: completedProg }));
+
+    // Sync all to Supabase
+    if (userId) {
+      ALL_LESSON_IDS.forEach(id => {
+        progressService.saveQuizScore(userId, id, 100);
+      });
+    }
   };
 
-  const completedLessonsCount = progress.completedLessons.length;
+  const completedLessonsCount = currentProgress.completedLessons.length;
   const totalLessonsCount = TOTAL_PLATFORM_LESSONS;
   const isFullyCompleted = completedLessonsCount >= totalLessonsCount;
   const getOverallPercentage = () => Math.round((completedLessonsCount / totalLessonsCount) * 100);
@@ -280,12 +225,12 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   return (
     <ProgressContext.Provider
       value={{
-        progress,
-        internName: progress.internName || currentUserName,
+        progress: currentProgress,
+        internName: currentProgress.internName || currentUserName,
         setInternName,
-        bookmarkedLessons: progress.bookmarkedLessons,
-        completedTasks: progress.completedTasks,
-        quizScores: progress.quizScores,
+        bookmarkedLessons: currentProgress.bookmarkedLessons,
+        completedTasks: currentProgress.completedTasks,
+        quizScores: currentProgress.quizScores,
         completedLessonsCount,
         totalLessonsCount,
         isFullyCompleted,
@@ -304,11 +249,11 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         getSavedSandboxCode,
         getSandboxSavedCode: getSavedSandboxCode,
         resetProgress,
-
         getUserProgress,
         getAllProgress,
         resetUserProgress,
-        simulateCompleteUserProgress
+        simulateCompleteUserProgress,
+        reloadProgress
       }}
     >
       {children}
@@ -316,10 +261,10 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
-export const useProgress = (): ProgressContextType => {
+export const useProgress = () => {
   const context = useContext(ProgressContext);
   if (!context) {
-    throw new Error('useProgress must be used within a ProgressProvider');
+    throw new Error('useProgress must be used within ProgressProvider');
   }
   return context;
 };

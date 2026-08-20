@@ -50,3 +50,6 @@ export const modulesData: Module[] = [
     lessons: proLessons
   }
 ];
+
+export const ALL_LESSON_IDS: string[] = modulesData.flatMap(m => m.lessons.map(l => l.id));
+export const TOTAL_PLATFORM_LESSONS: number = ALL_LESSON_IDS.length;

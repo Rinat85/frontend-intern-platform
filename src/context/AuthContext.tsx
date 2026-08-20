@@ -1,190 +1,158 @@
-﻿import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types/auth';
+import { Profile } from '../types/database';
+import { profileService, DEFAULT_DEMO_PROFILES } from '../services/profileService';
+import { checkSupabaseConnection } from '../services/supabaseClient';
 
 interface AuthContextType {
   user: User | null;
   users: User[];
+  profiles: Profile[];
   isAuthenticated: boolean;
   isAdmin: boolean;
-  login: (email: string, password?: string) => { success: boolean; error?: string };
-  register: (email: string, name: string, password?: string, role?: UserRole) => { success: boolean; error?: string };
+  supabaseStatus: { connected: boolean; message: string };
+  login: (email: string, role?: UserRole) => Promise<{ success: boolean; error?: string }>;
+  register: (name: string, email: string, role?: UserRole, avatar?: string) => Promise<{ success: boolean; error?: string }>;
+  quickLogin: (profileId: string) => Promise<void>;
   logout: () => void;
-  quickLogin: (userId: string) => void;
-  updateUser: (userId: string, updates: Partial<User>) => void;
-  deleteUser: (userId: string) => void;
+  updateUser: (updates: Partial<User>) => void;
+  refreshProfiles: () => Promise<void>;
 }
 
-const USERS_STORAGE_KEY = 'frontend_intern_users_v3';
-const CURRENT_USER_KEY = 'frontend_intern_current_user_v3';
-
-export const INITIAL_DEMO_USERS: User[] = [
-  {
-    id: 'usr_admin',
-    email: 'admin@academy.io',
-    name: 'Главный Ментор',
-    role: 'admin',
-    registeredAt: new Date(Date.now() - 60 * 24 * 3600 * 1000).toISOString(),
-    lastActiveAt: new Date().toISOString(),
-    avatar: '👑'
-  },
-  {
-    id: 'usr_alex',
-    email: 'alex@intern.io',
-    name: 'Алексей Смирнов',
-    role: 'intern',
-    registeredAt: new Date(Date.now() - 14 * 24 * 3600 * 1000).toISOString(),
-    lastActiveAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
-    avatar: '👨‍💻'
-  },
-  {
-    id: 'usr_maria',
-    email: 'maria@intern.io',
-    name: 'Мария Иванова',
-    role: 'intern',
-    registeredAt: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
-    lastActiveAt: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
-    avatar: '👩‍💻'
-  },
-  {
-    id: 'usr_dmitry',
-    email: 'dmitry@intern.io',
-    name: 'Дмитрий Ковалев',
-    role: 'intern',
-    registeredAt: new Date(Date.now() - 3 * 24 * 3600 * 1000).toISOString(),
-    lastActiveAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
-    avatar: '🧑‍💻'
-  }
-];
+const CURRENT_USER_ID_KEY = 'frontend_intern_active_user_id';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [users, setUsers] = useState<User[]>(() => {
-    try {
-      const saved = localStorage.getItem(USERS_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load users from localStorage', e);
-    }
-    return INITIAL_DEMO_USERS;
+  const [profiles, setProfiles] = useState<Profile[]>(DEFAULT_DEMO_PROFILES);
+  const [user, setUser] = useState<User | null>(null);
+  const [supabaseStatus, setSupabaseStatus] = useState<{ connected: boolean; message: string }>({
+    connected: false,
+    message: 'Проверка подключения к Supabase...'
   });
 
-  const [currentUserId, setCurrentUserId] = useState<string | null>(() => {
-    try {
-      const saved = localStorage.getItem(CURRENT_USER_KEY);
-      if (saved) return saved;
-    } catch (e) {
-      console.error('Failed to load current user ID', e);
-    }
-    return 'usr_alex'; // Default to Alex Smirnov (Intern)
-  });
-
-  // Save users list
   useEffect(() => {
-    try {
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-    } catch (e) {
-      console.error('Failed to persist users', e);
-    }
-  }, [users]);
+    checkSupabaseConnection().then(status => {
+      setSupabaseStatus(status);
+    });
+  }, []);
 
-  // Save current user ID and update lastActiveAt
+  const refreshProfiles = async () => {
+    const list = await profileService.getProfiles();
+    setProfiles(list);
+  };
+
   useEffect(() => {
-    try {
-      if (currentUserId) {
-        localStorage.setItem(CURRENT_USER_KEY, currentUserId);
-        setUsers(prev =>
-          prev.map(u => (u.id === currentUserId ? { ...u, lastActiveAt: new Date().toISOString() } : u))
-        );
-      } else {
-        localStorage.removeItem(CURRENT_USER_KEY);
-      }
-    } catch (e) {
-      console.error('Failed to persist current user ID', e);
-    }
-  }, [currentUserId]);
+    refreshProfiles();
+  }, []);
 
-  const user = users.find(u => u.id === currentUserId) || null;
-  const isAuthenticated = !!user;
-  const isAdmin = user?.role === 'admin';
+  const users: User[] = profiles.map(p => ({
+    id: p.id,
+    email: p.email,
+    name: p.full_name,
+    role: p.role === 'admin' ? 'admin' : 'intern',
+    registeredAt: p.created_at,
+    lastActiveAt: p.updated_at || p.created_at,
+    avatar: p.avatar_url || (p.role === 'admin' ? '👑' : '👨‍💻')
+  }));
 
-  const login = (email: string, _password?: string) => {
-    const cleanEmail = email.trim().toLowerCase();
-    const found = users.find(u => u.email.toLowerCase() === cleanEmail);
-    if (!found) {
-      return { success: false, error: 'Пользователь с таким email не найден. Проверьте адрес или зарегистрируйтесь.' };
+  useEffect(() => {
+    const savedUserId = localStorage.getItem(CURRENT_USER_ID_KEY);
+    const activeProfile = profiles.find(p => p.id === savedUserId) || profiles[2] || DEFAULT_DEMO_PROFILES[2];
+    
+    if (activeProfile) {
+      setUser({
+        id: activeProfile.id,
+        email: activeProfile.email,
+        name: activeProfile.full_name,
+        role: activeProfile.role === 'admin' ? 'admin' : 'intern',
+        registeredAt: activeProfile.created_at,
+        lastActiveAt: new Date().toISOString(),
+        avatar: activeProfile.avatar_url || '🚀'
+      });
     }
-    setCurrentUserId(found.id);
+  }, [profiles]);
+
+  const quickLogin = async (profileId: string) => {
+    const target = profiles.find(p => p.id === profileId) || DEFAULT_DEMO_PROFILES.find(p => p.id === profileId);
+    if (target) {
+      localStorage.setItem(CURRENT_USER_ID_KEY, target.id);
+      setUser({
+        id: target.id,
+        email: target.email,
+        name: target.full_name,
+        role: target.role === 'admin' ? 'admin' : 'intern',
+        registeredAt: target.created_at,
+        lastActiveAt: new Date().toISOString(),
+        avatar: target.avatar_url || (target.role === 'admin' ? '👑' : '👨‍💻')
+      });
+    }
+  };
+
+  const login = async (email: string, role: UserRole = 'intern'): Promise<{ success: boolean; error?: string }> => {
+    const existing = profiles.find(p => p.email.toLowerCase() === email.toLowerCase());
+    if (existing) {
+      await quickLogin(existing.id);
+      return { success: true };
+    }
+
+    const namePart = email.split('@')[0];
+    const created = await profileService.createProfile({
+      email,
+      full_name: namePart.charAt(0).toUpperCase() + namePart.slice(1),
+      role
+    });
+    await refreshProfiles();
+    await quickLogin(created.id);
     return { success: true };
   };
 
-  const register = (email: string, name: string, _password?: string, role: UserRole = 'intern') => {
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanName = name.trim();
-
-    if (!cleanEmail || !cleanName) {
-      return { success: false, error: 'Пожалуйста, заполните имя и email.' };
-    }
-
-    if (users.some(u => u.email.toLowerCase() === cleanEmail)) {
-      return { success: false, error: 'Пользователь с таким email уже зарегистрирован. Пожалуйста, выполните вход.' };
-    }
-
-    const newUser: User = {
-      id: `usr_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      email: cleanEmail,
-      name: cleanName,
-      role: role,
-      registeredAt: new Date().toISOString(),
-      lastActiveAt: new Date().toISOString(),
-      avatar: role === 'admin' ? '👑' : '🎓'
-    };
-
-    setUsers(prev => [newUser, ...prev]);
-    setCurrentUserId(newUser.id);
+  const register = async (name: string, email: string, role: UserRole = 'intern', avatar?: string): Promise<{ success: boolean; error?: string }> => {
+    const created = await profileService.createProfile({
+      email,
+      full_name: name,
+      role,
+      avatar_url: avatar || (role === 'admin' ? '👑' : '👨‍💻')
+    });
+    await refreshProfiles();
+    await quickLogin(created.id);
     return { success: true };
   };
 
   const logout = () => {
-    setCurrentUserId(null);
+    quickLogin(DEFAULT_DEMO_PROFILES[2].id);
   };
 
-  const quickLogin = (userId: string) => {
-    const found = users.find(u => u.id === userId);
-    if (found) {
-      setCurrentUserId(found.id);
+  const updateUser = (updates: Partial<User>) => {
+    if (!user) return;
+    const updated = { ...user, ...updates };
+    setUser(updated);
+    if (updates.name || updates.avatar) {
+      profileService.updateProfile(user.id, {
+        full_name: updates.name,
+        avatar_url: updates.avatar
+      });
     }
   };
 
-  const updateUser = (userId: string, updates: Partial<User>) => {
-    setUsers(prev => prev.map(u => (u.id === userId ? { ...u, ...updates } : u)));
-  };
-
-  const deleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
-    if (currentUserId === userId) {
-      setCurrentUserId(null);
-    }
-  };
+  const isAuthenticated = !!user;
+  const isAdmin = user?.role === 'admin';
 
   return (
     <AuthContext.Provider
       value={{
         user,
         users,
+        profiles,
         isAuthenticated,
         isAdmin,
+        supabaseStatus,
         login,
         register,
-        logout,
         quickLogin,
+        logout,
         updateUser,
-        deleteUser
+        refreshProfiles
       }}
     >
       {children}
@@ -192,10 +160,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useAuth must be used within AuthProvider');
   }
   return context;
 };

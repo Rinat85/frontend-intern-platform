@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { modulesData } from './data/modulesData';
 import { cheatSheetsData } from './data/cheatSheetsData';
-import { useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ProgressProvider } from './context/ProgressContext';
+import { SubmissionProvider } from './context/SubmissionContext';
+import { NotificationProvider } from './context/NotificationContext';
 import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
 import { DashboardHome } from './components/dashboard/DashboardHome';
@@ -12,7 +15,7 @@ import { CheatSheetsModal } from './components/cheat-sheet/CheatSheetsModal';
 import { CertificateModal } from './components/certificate/CertificateModal';
 import { AuthModal } from './components/auth/AuthModal';
 
-export const App: React.FC = () => {
+const AppInner: React.FC = () => {
   const { isAdmin } = useAuth();
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null);
   const [isAdminView, setIsAdminView] = useState(false);
@@ -81,6 +84,7 @@ export const App: React.FC = () => {
         onOpenAuth={handleOpenAuth}
         onOpenAdmin={handleOpenAdmin}
         isAdminView={isAdminView}
+        onSelectLesson={handleSelectLesson}
       />
 
       <div className="app-main-wrapper">
@@ -143,6 +147,20 @@ export const App: React.FC = () => {
         initialTab={authInitialTab}
       />
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <NotificationProvider>
+        <ProgressProvider>
+          <SubmissionProvider>
+            <AppInner />
+          </SubmissionProvider>
+        </ProgressProvider>
+      </NotificationProvider>
+    </AuthProvider>
   );
 };
 

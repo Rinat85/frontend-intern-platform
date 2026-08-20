@@ -1,10 +1,12 @@
-﻿import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { useProgress } from '../../context/ProgressContext';
+import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Sun, Moon, Search, BookOpen, Award, Menu, Sparkles, Shield } from 'lucide-react';
-import { ProgressBar } from './ProgressBar';
+import { useNotifications } from '../../context/NotificationContext';
 import { UserMenu } from './UserMenu';
+import { NotificationDropdown } from './NotificationDropdown';
+import {
+  Menu, Search, BookOpen, Award, Shield,
+  Terminal, Sparkles, Bell
+} from 'lucide-react';
 
 interface HeaderProps {
   onOpenSearch: () => void;
@@ -15,6 +17,7 @@ interface HeaderProps {
   onOpenAuth: (tab?: 'login' | 'register' | 'quick') => void;
   onOpenAdmin: () => void;
   isAdminView: boolean;
+  onSelectLesson?: (lessonId: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,12 +28,12 @@ export const Header: React.FC<HeaderProps> = ({
   onNavigateHome,
   onOpenAuth,
   onOpenAdmin,
-  isAdminView
+  isAdminView,
+  onSelectLesson = () => {}
 }) => {
-  const { theme, toggleTheme } = useTheme();
-  const { isAdmin } = useAuth();
-  const { getOverallPercentage, completedLessonsCount, totalLessonsCount, isFullyCompleted } = useProgress();
-  const progressPercent = getOverallPercentage();
+  const { user, isAdmin, supabaseStatus } = useAuth();
+  const { unreadCount } = useNotifications();
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   return (
     <header className="header">
@@ -38,86 +41,92 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           className="btn-icon mobile-menu-btn"
           onClick={onToggleSidebar}
-          aria-label="Навигация"
+          title="Открыть боковое меню"
         >
           <Menu size={20} />
         </button>
-        <div className="header-logo" onClick={onNavigateHome} style={{ cursor: 'pointer' }}>
-          <div className="logo-icon">
-            <Sparkles size={20} color="#ffffff" />
+
+        <div className="header-logo" onClick={onNavigateHome} title="На главную страницу">
+          <div className="logo-icon-wrap">
+            <Terminal size={20} className="text-accent" />
+            <span className="logo-sparkle"><Sparkles size={10} /></span>
           </div>
-          <div className="logo-text">
-            <span className="logo-title">Frontend Intern</span>
-            <span className="logo-badge">ACADEMY</span>
+          <div className="logo-text-wrap">
+            <span className="logo-title">OCTO INTERN</span>
+            <span className="logo-subtitle">Frontend LMS Platform</span>
           </div>
         </div>
       </div>
 
       <div className="header-center">
-        {isAdmin ? (
-          <div className="admin-status-pill" onClick={onOpenAdmin}>
-            <Shield size={14} />
-            <span>Режим Администратора / Ментора</span>
-          </div>
-        ) : (
-          <div className="header-progress-compact" title={`Пройдено ${completedLessonsCount} из ${totalLessonsCount} уроков`}>
-            <div className="header-progress-info">
-              <span className="text-muted text-xs">Личный прогресс</span>
-              <span className="text-xs font-bold text-accent">{progressPercent}%</span>
-            </div>
-            <ProgressBar value={progressPercent} height={6} className="header-progress-bar" />
-          </div>
-        )}
+        <button className="header-search-btn" onClick={onOpenSearch}>
+          <Search size={16} />
+          <span className="search-placeholder">Поиск по 67 урокам, темам и коду...</span>
+          <span className="kbd-shortcut">Ctrl+K</span>
+        </button>
       </div>
 
       <div className="header-right">
-        {isAdmin && (
-          <button
-            className={`btn btn-sm ${isAdminView ? 'btn-primary' : 'btn-secondary'} admin-toggle-nav-btn`}
-            onClick={onOpenAdmin}
-            title="Панель аналитики Ментора"
-          >
-            <Shield size={15} />
-            <span className="desktop-only">Панель Ментора</span>
-          </button>
-        )}
-
-        <button
-          className="header-search-btn"
-          onClick={onOpenSearch}
-          title="Поиск по урокам (Ctrl + K)"
+        {/* Supabase Status Indicator */}
+        <div
+          className={`supabase-header-pill ${supabaseStatus.connected ? 'connected' : 'offline'}`}
+          title={supabaseStatus.message}
         >
-          <Search size={16} />
-          <span className="search-placeholder">Поиск...</span>
-          <kbd className="kbd-shortcut">Ctrl K</kbd>
-        </button>
+          <span className="db-dot" />
+          <span className="db-text">{supabaseStatus.connected ? 'Supabase DB' : 'Offline Mode'}</span>
+        </div>
 
+        {/* Notifications Bell */}
+        <div style={{ position: 'relative' }}>
+          <button
+            className={`btn-icon notif-bell-btn ${unreadCount > 0 ? 'has-unread' : ''}`}
+            onClick={() => setIsNotifOpen(!isNotifOpen)}
+            title="Уведомления"
+          >
+            <Bell size={18} />
+            {unreadCount > 0 && (
+              <span className="bell-badge-count">{unreadCount > 9 ? '9+' : unreadCount}</span>
+            )}
+          </button>
+
+          <NotificationDropdown
+            isOpen={isNotifOpen}
+            onClose={() => setIsNotifOpen(false)}
+            onSelectLesson={onSelectLesson}
+          />
+        </div>
+
+        {/* Cheatsheets button */}
         <button
-          className="btn btn-secondary btn-sm"
+          className="btn btn-secondary header-action-btn"
           onClick={onOpenCheatSheets}
-          title="Шпаргалки"
+          title="Шпаргалки и справочники"
         >
           <BookOpen size={16} />
-          <span className="desktop-only">Шпаргалки</span>
+          <span className="btn-text">Шпаргалки</span>
         </button>
 
+        {/* Certificate button */}
         <button
-          className={`btn btn-sm ${isFullyCompleted ? 'btn-primary pulse' : 'btn-secondary'}`}
+          className="btn btn-secondary header-action-btn"
           onClick={onOpenCertificate}
-          title="Сертификат окончания"
+          title="Сертификат об окончании"
         >
           <Award size={16} />
-          <span className="desktop-only">Сертификат</span>
+          <span className="btn-text">Сертификат</span>
         </button>
 
-        <button
-          className="btn-icon theme-toggle-btn"
-          onClick={toggleTheme}
-          title={theme === 'dark' ? 'Включить светлую тему' : 'Включить темную тему'}
-          aria-label="Смена темы"
-        >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-        </button>
+        {/* Admin Dashboard toggle */}
+        {isAdmin && (
+          <button
+            className={`btn ${isAdminView ? 'btn-primary' : 'btn-secondary'} header-action-btn`}
+            onClick={isAdminView ? onNavigateHome : onOpenAdmin}
+            title="Панель администратора / Ментора"
+          >
+            <Shield size={16} />
+            <span className="btn-text">{isAdminView ? 'Обучение' : 'Панель Ментора'}</span>
+          </button>
+        )}
 
         {/* User Account Menu */}
         <UserMenu

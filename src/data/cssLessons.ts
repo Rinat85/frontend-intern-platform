@@ -3107,84 +3107,189 @@ export const cssLessons: Lesson[] = [
     "id": "css-17",
     "moduleId": "css",
     "level": 17,
-    "title": "CSS Анимации (@keyframes)",
-    "subtitle": "Директива @keyframes, animation-name, infinite и forwards",
-    "description": "Покадровые анимации: спиннеры загрузки, пульсация бейджей, зацикливание infinite и fill-mode forwards.",
-    "estimatedMinutes": 35,
+    "title": "CSS Анимации: Директива @keyframes, сложные сценарии и оптимизация",
+    "subtitle": "@keyframes, animation-fill-mode, iteration-count, direction, play-state, FLIP и prefers-reduced-motion",
+    "description": "Освойте покадровые анимации в CSS: директиву @keyframes, полное семейство свойств animation, фиксацию стилей через animation-fill-mode (forwards, both), паузу по ховеру через animation-play-state, события жизненного цикла в JS, паттерн FLIP и обязательную адаптацию под prefers-reduced-motion (WCAG доступность).",
+    "estimatedMinutes": 65,
     "difficulty": "advanced",
     "tags": [
-      "CSS",
-      "Keyframes",
-      "Animation"
+      "css-animations",
+      "keyframes",
+      "animation-fill-mode",
+      "animation-play-state",
+      "flip-animation",
+      "prefers-reduced-motion",
+      "gpu-compositing"
     ],
     "theory": {
-      "overview": "Директива @keyframes создает сложные покадровые анимации без JS.",
+      "overview": "В то время как `transition` умеет лишь плавно переходить из состояния А в состояние Б при воздействии пользователя, **CSS Анимации (`@keyframes`)** позволяют создавать полноценные многошаговые сценарии, циклические эффекты (пульсация, вращение, бегущие строки) и управлять сложными цепочками кадров вообще без JavaScript.\n\nВ этом уроке мы разберём синтаксис `@keyframes`, тонкости `animation-fill-mode` (почему элементы сбрасываются после завершения), управление паузой в рантайме и стандарты доступности.",
       "sections": [
         {
-          "title": "@keyframes и спиннеры",
-          "content": "- `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`.\n- `animation: spin 0.8s linear infinite`.",
+          "title": "Директива @keyframes и шортхенд свойства animation",
+          "content": "Как устроена покадровая анимация в CSS:\n\n1. **Директива `@keyframes <имя>`**:\n- Задает ключевые точки во времени от `0%` (или `from`) до `100%` (или `to`).\n- Можно указывать любые промежуточные точки: `0%, 50%, 75%, 100%`.\n\n2. **Семейство свойств `animation`**:\n- `animation-name` — имя сценария из `@keyframes`.\n- `animation-duration` — время одного полного цикла (например, `2s`).\n- `animation-timing-function` — физика ускорения (`ease-in-out`, `cubic-bezier(...)`).\n- `animation-delay` — задержка перед первым запуском.\n- `animation-iteration-count` — количество повторов (`1`, `3`, `infinite` для бесконечной анимации).\n- `animation-direction` — направление движения: `normal`, `reverse`, `alternate` (движение вперед-назад без рывка!), `alternate-reverse`.\n- **Сокращенный синтаксис**: `animation: pulse 1.5s ease-in-out 0.2s infinite alternate both;`.",
+          "image": {
+            "src": "/images/lessons/css-keyframes-animations.svg",
+            "alt": "CSS Анимации @keyframes, fill-mode, play-state и prefers-reduced-motion",
+            "caption": "Анатомия @keyframes, фиксация стилей через animation-fill-mode: forwards, пауза play-state и адаптация под prefers-reduced-motion"
+          },
           "codeExample": {
             "language": "css",
-            "title": "Спиннер",
-            "code": "@keyframes spin {\n  to { transform: rotate(360deg); }\n}\n.loader {\n  width: 36px; height: 36px;\n  border: 4px solid #e2e8f0; border-top-color: #4f46e5;\n  border-radius: 50%;\n  animation: spin 0.8s linear infinite;\n}",
-            "explanation": "Плавный лоадер."
+            "code": "/* Бесконечная неоновая пульсация на GPU */\n@keyframes neonGlow {\n  0% {\n    transform: scale(1);\n    box-shadow: 0 0 10px rgba(45, 255, 138, 0.2);\n  }\n  50% {\n    transform: scale(1.05);\n    box-shadow: 0 0 30px rgba(45, 255, 138, 0.6);\n  }\n  100% {\n    transform: scale(1);\n    box-shadow: 0 0 10px rgba(45, 255, 138, 0.2);\n  }\n}\n\n.status-badge {\n  background: #161b22;\n  color: #2dff8a;\n  border: 1px solid #2dff8a;\n  padding: 6px 14px;\n  border-radius: 20px;\n  display: inline-block;\n  \n  /* Запуск анимации: 2 секунды, бесконечно, мягкий переход */\n  animation: neonGlow 2s ease-in-out infinite;\n}",
+            "title": "Сценарий @keyframes neonGlow с бесконечным циклом infinite",
+            "explanation": "Ключевые кадры 0% и 100% согласованы по значениям, гарантируя бесшовный бесконечный цикл пульсации без резких скачков."
+          }
+        },
+        {
+          "title": "Магия animation-fill-mode: forwards, backwards и both",
+          "content": "Управление стилями элемента ДО и ПОСЛЕ анимации:\n\n1. **Проблема по умолчанию (`animation-fill-mode: none`)**:\n- Когда однократная анимация завершается (100%), браузер **мгновенно сбрасывает все свойства к исходным стилям в CSS**, и элемент некрасиво «отпрыгивает» назад!\n- Во время `animation-delay` элемент отображается со своими дефолтными стилями, а не со стилями кадра `0%`.\n\n2. **Значения `animation-fill-mode`**:\n- **`forwards` (Самое популярное)**: элемент **НАВСЕГДА сохраняет стили последнего кадра (100%)** после завершения анимации (модальное окно остается открытым, плашка остается на месте).\n- **`backwards`**: применяет стили первого кадра (`0%`) **НЕМЕДЛЕННО**, в том числе во время ожидания задержки `animation-delay`!\n- **`both`**: объединяет `backwards` (применяет 0% в период delay) и `forwards` (сохраняет 100% после финиша).",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Плавное выплывание плашки уведомления с фиксацией в конце */\n@keyframes slideInNotification {\n  0% {\n    opacity: 0;\n    transform: translateY(-40px);\n  }\n  100% {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n\n.notification-toast {\n  position: fixed;\n  top: 20px;\n  right: 20px;\n  background: #161b22;\n  border: 1px solid #29e7ff;\n  padding: 16px 20px;\n  border-radius: 8px;\n  \n  /* both: во время задержки 0.3s плашка невидима (0%), а после финиша остается на экране (100%)! */\n  animation: slideInNotification 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.3s both;\n}",
+            "title": "Использование animation-fill-mode: both для точного контроля задержки и финала",
+            "explanation": "both предотвращает мигание элемента до старта задержки и фиксирует его на экране после завершения анимации."
+          }
+        },
+        {
+          "title": "Пауза (animation-play-state) и JS-события жизненного цикла",
+          "content": "Интерактивное управление анимацией:\n\n1. **Свойство `animation-play-state`**:\n- Принимает значения `running` (воспроизводится) или `paused` (на паузе).\n- **Идеальный UX для бегущих строк (Marquee) и каруселей**:\n  `.marquee-track:hover { animation-play-state: paused; }` — анимация плавно замирает ровно в том месте, где находилась, позволяя пользователю прочитать текст или кликнуть на карточку!\n\n2. **События жизненного цикла в JavaScript**:\n- `animationstart` — анимация началась (после окончания delay).\n- `animationiteration` — завершился очередной цикл в многократной анимации.\n- `animationend` — анимация полностью завершилась (идеально для удаления уведомления из DOM: `el.remove()`).\n- `animationcancel` — анимация была прервана.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Удаление уведомления из DOM сразу после окончания анимации исчезновения\nconst toast = document.querySelector('.fade-out-toast');\n\n// Запускаем CSS анимацию исчезновения\ntoast.classList.add('animate-leave');\n\n// Ловим событие окончания CSS-анимации в JS:\ntoast.addEventListener('animationend', (event) => {\n  if (event.animationName === 'fadeOut') {\n    console.log('CSS Анимация завершилась, безопасно удаляем DOM-узел');\n    toast.remove(); // Полное освобождение памяти\n  }\n});",
+            "title": "Связка JS и CSS: удаление элемента по событию animationend",
+            "explanation": "Событие animationend позволяет JavaScript точно узнать момент завершения визуального эффекта без хрупких таймеров setTimeout."
+          }
+        },
+        {
+          "title": "Доступность (prefers-reduced-motion) и FLIP-анимации",
+          "content": "Стандарты доступности WCAG и высокая производительность:\n\n1. **Медиа-запрос `prefers-reduced-motion`**:\n- У многих пользователей анимация движения (зум, вращение, параллакс) вызывает головокружение, тошноту и приступы вестибулярных расстройств.\n- В настройках Windows/macOS/iOS пользователи могут включить «Уменьшение движения».\n- **Требование доступности (WCAG 2.1 AA)**: отключать резкие перемещения и заменять их на плавное затухание `opacity`.\n\n2. **Паттерн FLIP (First, Last, Invert, Play)**:\n- Техника для плавной анимации элементов при пересортировке списка в React/Vue:\n  - **First**: запоминаем начальную позицию (`getBoundingClientRect()`).\n  - **Last**: перерисовываем DOM и запоминаем новую позицию.\n  - **Invert**: мгновенно сдвигаем элемент назад через `transform: translate(ΔX, ΔY)`.\n  - **Play**: анимируем `transform` в 0 на GPU!",
+          "codeExample": {
+            "language": "css",
+            "code": "/* Обязательная адаптация для людей с вестибулярными расстройствами */\n@media (prefers-reduced-motion: reduce) {\n  *,\n  *::before,\n  *::after {\n    /* Отключаем непрерывные перемещения, заменяя на минимальную длительность */\n    animation-duration: 0.01ms !important;\n    animation-iteration-count: 1 !important;\n    transition-duration: 0.01ms !important;\n    scroll-behavior: auto !important;\n  }\n  \n  /* Для критических элементов оставляем только мягкое затухание прозрачности */\n  .important-alert {\n    animation: simpleFade 0.2s ease !important;\n  }\n}\n\n@keyframes simpleFade {\n  from { opacity: 0; }\n  to { opacity: 1; }\n}",
+            "title": "Поддержка prefers-reduced-motion для доступности WCAG",
+            "explanation": "prefers-reduced-motion отключает тяжелые вращения и сдвиги, сохраняя доступность интерфейса для всех категорий пользователей."
           }
         }
       ],
       "seniorTips": [
-        "Используйте forwards, чтобы сохранить финальное состояние анимации."
+        "Внутри `@keyframes` анимируйте исключительно свойства композитинга GPU: `transform` (translate, scale, rotate) и `opacity` — это сохранит стабильные 60–120 FPS.",
+        "Всегда используйте `animation-fill-mode: forwards` (или `both`), если элемент должен остаться в конечном состоянии после завершения анимации.",
+        "Для бегущих строк и бесконечных каруселей добавляйте `:hover { animation-play-state: paused; }` — это признак заботы о пользователе.",
+        "Всегда внедряйте `@media (prefers-reduced-motion: reduce)` — это обязательное требование для соответствия стандартам доступности WCAG 2.1 AA.",
+        "Слушайте событие `animationend` в JavaScript для удаления отработавших модалок и уведомлений из DOM без использования ненадежных `setTimeout`."
       ],
       "commonMistakes": [
         {
-          "bad": "@keyframes bad { to { left: 50px; } }",
-          "good": "@keyframes good { to { transform: translateX(50px); } }",
-          "reason": "transform работает на GPU."
+          "bad": "/* Анимация тяжелых свойств геометрии в @keyframes */\n@keyframes pulse { 0% { width: 100px; } 50% { width: 120px; } } /* ❌ Reflow на каждый кадр! */",
+          "good": "@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } }",
+          "reason": "Изменение width/height/top/left в анимации пересчитывает макет всей страницы 60 раз в секунду, вызывая жуткие тормоза."
+        },
+        {
+          "bad": "/* Забытый animation-fill-mode: forwards */\n.toast { animation: slideIn 0.5s ease; /* ❌ После завершения плашка мгновенно исчезает/отпрыгивает */ }",
+          "good": ".toast { animation: slideIn 0.5s ease forwards; }",
+          "reason": "По умолчанию (fill-mode: none) после завершения анимации элемент возвращается к исходным CSS стилям."
+        },
+        {
+          "bad": "/* Использование setTimeout для удаления элемента вместо события animationend */\nsetTimeout(() => el.remove(), 500); // Если в CSS поменяют duration на 0.7s, элемент удалится недоиграв!",
+          "good": "el.addEventListener('animationend', () => el.remove());",
+          "reason": "Событие animationend синхронизировано с реальным временем завершения CSS-анимации в браузере."
         }
       ],
       "keyTakeaways": [
-        "@keyframes задает кадры.",
-        "infinite зацикливает анимацию."
+        "@keyframes описывает многошаговый сценарий анимации от 0% до 100%.",
+        "animation-fill-mode: forwards фиксирует стили последнего кадра после завершения.",
+        "animation-play-state: paused позволяет ставить анимацию на паузу при наведении курсора.",
+        "prefers-reduced-motion защищает пользователей от вестибулярного дискомфорта.",
+        "События animationstart и animationend связывают CSS-анимации с логикой JavaScript."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"spin-d\"><div class=\"sp\"></div></div>",
-      "initialCss": "@keyframes sp-rot { to { transform: rotate(360deg); } }\n.spin-d { padding: 30px; background: white; border-radius: 12px; text-align: center; }\n.sp { width: 32px; height: 32px; border: 4px solid #e0e7ff; border-top-color: #4f46e5; border-radius: 50%; animation: sp-rot 0.8s linear infinite; margin: 0 auto; }",
-      "initialJs": "console.log('Keyframes loaded');",
-      "instructions": "Посмотрите вращение спиннера."
+      "initialHtml": "<div class=\"keyframes-sandbox\">\n  <div class=\"marquee-container\">\n    <div class=\"marquee-track\">\n      <span class=\"marquee-item\">🚀 FRONTEND INTERN ACADEMY</span>\n      <span class=\"marquee-item\">⚡ 60 FPS GPU ANIMATIONS</span>\n      <span class=\"marquee-item\">💎 SENIOR CURRICULUM</span>\n      <span class=\"marquee-item\">🚀 FRONTEND INTERN ACADEMY</span>\n      <span class=\"marquee-item\">⚡ 60 FPS GPU ANIMATIONS</span>\n    </div>\n  </div>\n  <p style=\"color:#8b949e; font-size:12px; margin-top:16px;\">Наведите курсор на бегущую строку: свойство animation-play-state: paused остановит ленту без рывка!</p>\n</div>",
+      "initialCss": ".keyframes-sandbox { padding: 24px; background: #0a0e13; font-family: monospace; overflow: hidden; }\n.marquee-container {\n  width: 100%;\n  overflow: hidden;\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  border-radius: 8px;\n  padding: 12px 0;\n}\n.marquee-track {\n  display: flex;\n  gap: 32px;\n  white-space: nowrap;\n  width: max-content;\n  animation: marqueeScroll 10s linear infinite;\n}\n.marquee-track:hover {\n  animation-play-state: paused; /* Пауза при наведении! */\n  cursor: pointer;\n}\n.marquee-item {\n  color: #2dff8a;\n  font-weight: bold;\n  font-size: 14px;\n}\n@keyframes marqueeScroll {\n  0% { transform: translateX(0); }\n  100% { transform: translateX(-50%); }\n}",
+      "initialJs": "console.log('Keyframes & Marquee песочница готова');",
+      "instructions": "Практика с @keyframes:\n1. Наблюдайте за плавной бесконечной бегущей строкой на GPU\n2. Наведите курсор на строку — animation-play-state: paused плавно остановит ленту на месте\n3. Уберите курсор — анимация продолжится с той же миллисекунды"
     },
     "task": {
-      "title": "Пульсирующая точка",
-      "scenario": "Создайте точку со статусом онлайн и анимацией pulse.",
+      "title": "Создание бесконечного пульсирующего индикатора статуса и модалки с animation-fill-mode",
+      "scenario": "Создайте два компонента: 1) Бесконечный пульсирующий индикатор активного сервера (.pulse-indicator) с анимацией scale и box-shadow; 2) Всплывающее модальное окно (.modal-entry), которое плавно выезжает сверху за 0.4s и сохраняет свое конечное положение на экране с помощью animation-fill-mode: forwards, а также поддерживает prefers-reduced-motion.",
       "criteria": [
-        "Описан @keyframes pulse",
-        "Применено animation: pulse 1.2s infinite alternate"
+        "Объявлены сценарии @keyframes pulse и @keyframes modalSlideDown",
+        "Индикатор использует animation с infinite и alternate для бесшовной пульсации на GPU",
+        "Модальное окно использует animation-fill-mode: forwards для фиксации в конечной точке",
+        "Добавлена адаптация @media (prefers-reduced-motion: reduce)"
       ],
       "starterCode": {
-        "html": "<div class=\"st\"><span class=\"dot\"></span> Live</div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте CSS-анимации */\n@keyframes pulse {\n}\n@keyframes modalSlideDown {\n}\n.pulse-indicator {\n}\n.modal-entry {\n}"
       },
       "hints": [
-        "Задайте @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.3); } } .dot { animation: pulse 1.2s infinite alternate; }"
+        "@keyframes pulse: 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.15); opacity: 1; }",
+        ".modal-entry { animation: modalSlideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }"
       ],
       "solution": {
-        "html": "<div class=\"st\"><span class=\"dot\"></span> Live</div>",
-        "css": "@keyframes pulse { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.3); opacity: 1; } }\n.st { display: flex; align-items: center; gap: 8px; padding: 16px; background: white; border-radius: 8px; font-weight: bold; }\n.dot { width: 10px; height: 10px; background: #10b981; border-radius: 50%; animation: pulse 1.2s infinite alternate; }",
-        "explanation": "Пульсирующий бейдж."
+        "css": "@keyframes pulse {\n  0% {\n    transform: scale(1);\n    box-shadow: 0 0 0 0 rgba(45, 255, 138, 0.5);\n  }\n  70% {\n    transform: scale(1.1);\n    box-shadow: 0 0 0 12px rgba(45, 255, 138, 0);\n  }\n  100% {\n    transform: scale(1);\n    box-shadow: 0 0 0 0 rgba(45, 255, 138, 0);\n  }\n}\n\n@keyframes modalSlideDown {\n  0% {\n    opacity: 0;\n    transform: translateY(-50px) scale(0.95);\n  }\n  100% {\n    opacity: 1;\n    transform: translateY(0) scale(1);\n  }\n}\n\n.pulse-indicator {\n  width: 14px;\n  height: 14px;\n  background: #2dff8a;\n  border-radius: 50%;\n  display: inline-block;\n  animation: pulse 2s ease-in-out infinite;\n}\n\n.modal-entry {\n  background: #161b22;\n  border: 1px solid #2dff8a;\n  color: #e6edf3;\n  padding: 24px;\n  border-radius: 12px;\n  animation: modalSlideDown 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;\n}\n\n@media (prefers-reduced-motion: reduce) {\n  .pulse-indicator,\n  .modal-entry {\n    animation-duration: 0.01ms !important;\n    animation-iteration-count: 1 !important;\n  }\n}",
+        "explanation": "Анимации выполняются на GPU: индикатор пульсирует плавно без джанка, модалка фиксируется через forwards, а prefers-reduced-motion гарантирует доступность."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c17-q1",
-          "question": "Какое свойство зацикливает анимацию?",
+          "id": "css17-q1",
+          "question": "Что произойдет после завершения однократной анимации, если для элемента НЕ указано свойство animation-fill-mode (значение по умолчанию 'none')?",
           "options": [
-            "animation-loop",
-            "animation-iteration-count: infinite",
-            "repeat: true",
-            "forever"
+            "Элемент навсегда останется в состоянии последнего кадра (100%)",
+            "Элемент мгновенно вернется в исходное состояние, описанное в CSS-стилях до начала анимации (эффект отпрыгивания)",
+            "Элемент удалится из DOM дерева",
+            "Страница перезагрузится"
           ],
           "correctIndex": 1,
-          "explanation": "animation-iteration-count: infinite."
+          "explanation": "По умолчанию (fill-mode: none) анимация влияет на элемент только во время своего воспроизведения. Для фиксации 100% кадра требуется animation-fill-mode: forwards."
+        },
+        {
+          "id": "css17-q2",
+          "question": "Какое значение свойства animation-play-state позволяет поставить бесконечную CSS-анимацию на паузу в текущей точке?",
+          "options": [
+            "stop",
+            "paused",
+            "freeze",
+            "disabled"
+          ],
+          "correctIndex": 1,
+          "explanation": "animation-play-state: paused останавливает анимацию в текущем промежуточном кадре без сброса."
+        },
+        {
+          "id": "css17-q3",
+          "question": "Какое событие JavaScript срабатывает при полном завершении CSS-анимации, позволяя безопасно удалить элемент из DOM?",
+          "options": [
+            "onfinish",
+            "animationend",
+            "csscomplete",
+            "transitionclose"
+          ],
+          "correctIndex": 1,
+          "explanation": "Событие animationend стреляет в DOM-элементе в момент окончания анимации, что позволяет выполнять очистку ресурсов."
+        },
+        {
+          "id": "css17-q4",
+          "question": "Что делает значение animation-direction: alternate?",
+          "options": [
+            "Воспроизводит анимацию случайным образом",
+            "Воспроизводит четные циклы анимации вперед (0% -> 100%), а нечетные — назад (100% -> 0%), создавая бесшовное маятниковое движение",
+            "Ускоряет анимацию в 2 раза",
+            "Инвертирует цвета"
+          ],
+          "correctIndex": 1,
+          "explanation": "alternate разворачивает направление движения на каждом втором цикле, исключая резкий скачок между 100% и 0%."
+        },
+        {
+          "id": "css17-q5",
+          "question": "Зачем в CSS обязателен медиа-запрос @media (prefers-reduced-motion: reduce)?",
+          "options": [
+            "Для экономии мобильного интернет-трафика",
+            "Для защиты людей с вестибулярными расстройствами, у которых движение и зум на экране вызывают тошноту и головокружение (стандарт доступности WCAG)",
+            "Для поддержки старых версий Internet Explorer",
+            "Для отключения JavaScript"
+          ],
+          "correctIndex": 1,
+          "explanation": "prefers-reduced-motion сообщает сайту, что пользователь попросил в системе отключить анимации движения ради комфорта и здоровья."
         }
       ]
     }

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgcka17" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgcka17)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">CSS: Анимации (@keyframes) и Жизненный цикл</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">@keyframes, animation shorthand, fill-mode, play-state, FLIP и prefers-reduced-motion</text>
+
+  <!-- Left: Keyframes Anatomy & Fill-mode -->
+  <rect x="20" y="65" width="370" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">Анатомия @keyframes и fill-mode</text>
+
+  <rect x="35" y="100" width="340" height="60" rx="4" fill="#161b22" stroke="#2dff8a"/>
+  <text x="45" y="118" fill="#2dff8a" font-size="8" font-weight="600">Шортхенд свойства animation:</text>
+  <text x="45" y="132" fill="#e6edf3" font-size="7">animation: name duration timing-fn delay count dir fill-mode;</text>
+  <text x="45" y="146" fill="#8b949e" font-size="6">animation: pulse 2s ease-in-out infinite alternate forwards;</text>
+
+  <!-- Fill-mode comparison -->
+  <rect x="35" y="168" width="340" height="70" rx="4" fill="#0d1117" stroke="#30363d"/>
+  <text x="45" y="186" fill="#ffb02e" font-size="8" font-weight="600">animation-fill-mode (Фиксация стилей):</text>
+  <text x="45" y="200" fill="#e6edf3" font-size="7">• none: сбрасывает стили в исходные до и после анимации</text>
+  <text x="45" y="214" fill="#2dff8a" font-size="7">• forwards: сохраняет состояние ПОСЛЕДНЕГО кадра (100%)</text>
+  <text x="45" y="226" fill="#29e7ff" font-size="6">• both: применяет 0% во время delay и 100% после завершения</text>
+
+  <rect x="35" y="246" width="340" height="65" rx="4" fill="#2dff8a11" stroke="#2dff8a"/>
+  <text x="45" y="264" fill="#2dff8a" font-size="8" font-weight="600">animation-play-state (Пауза):</text>
+  <text x="45" y="278" fill="#e6edf3" font-size="7">.marquee:hover { animation-play-state: paused; }</text>
+  <text x="45" y="292" fill="#8b949e" font-size="6">Останавливает анимацию в текущей точке без рывка!</text>
+
+  <!-- Right: Performance & Accessibility -->
+  <rect x="410" y="65" width="370" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Доступность и 60 FPS Оптимизация</text>
+
+  <rect x="425" y="98" width="340" height="65" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="116" fill="#2dff8a" font-size="8" font-weight="600">prefers-reduced-motion (A11y Стандарт):</text>
+  <text x="435" y="132" fill="#e6edf3" font-size="7">@media (prefers-reduced-motion: reduce) {</text>
+  <text x="435" y="144" fill="#e6edf3" font-size="7">  * { animation-duration: 0.01ms !important; }</text>
+  <text x="435" y="156" fill="#8b949e" font-size="6">} — Защита людей с вестибулярными расстройствами</text>
+
+  <rect x="425" y="172" width="340" height="65" rx="4" fill="#0d1117" stroke="#29e7ff"/>
+  <text x="435" y="190" fill="#29e7ff" font-size="8" font-weight="600">JS Animation Events (События в рантайме):</text>
+  <text x="435" y="206" fill="#e6edf3" font-size="7">el.addEventListener('animationend', () =&gt; el.remove());</text>
+  <text x="435" y="220" fill="#8b949e" font-size="6">animationstart, animationiteration, animationend, animationcancel</text>
+
+  <rect x="425" y="246" width="340" height="65" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="435" y="264" fill="#ffb02e" font-size="8" font-weight="600">FLIP Паттерн (First, Last, Invert, Play):</text>
+  <text x="435" y="280" fill="#e6edf3" font-size="7">Плавное перемещение элементов списка при сортировке</text>
+  <text x="435" y="294" fill="#8b949e" font-size="6">Вычисляет разницу координат и анимирует через transform на GPU</text>
+
+  <!-- Bottom -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Инженерные правила создания долговечных CSS-анимаций</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• В кадрах @keyframes изменяйте ТОЛЬКО transform и opacity — они гарантируют 60–120 FPS без просадок</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• Всегда добавляйте forwards, если элемент должен остаться в конечном состоянии после завершения анимации</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• Поддержка prefers-reduced-motion обязательна для прохождения аудитов доступности (WCAG 2.1 AA)</text>
+</svg>

@@ -3100,5 +3100,196 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-17",
+    "moduleId": "pro",
+    "level": 17,
+    "title": "Прогрессивные веб-приложения (PWA), Service Workers и Offline-First архитектура",
+    "subtitle": "Web App Manifest, жизненный цикл Service Worker, 5 стратегий кэширования (Workbox), Background Sync и Push API",
+    "description": "Освойте разработку прогрессивных веб-приложений (PWA): создание Web App Manifest для установки приложения на рабочий стол, архитектуру программируемого сетевого прокси Service Worker, 5 стратегий кэширования (Cache-First, Network-First, Stale-While-Revalidate), синхронизацию данных в оффлайне через Background Sync API и доставку Web Push уведомлений.",
+    "estimatedMinutes": 75,
+    "difficulty": "advanced",
+    "tags": [
+      "pwa",
+      "service-worker",
+      "offline-first",
+      "cache-api",
+      "manifest",
+      "workbox",
+      "background-sync",
+      "push-notifications",
+      "web-apis"
+    ],
+    "theory": {
+      "overview": "Пользователи ожидают, что веб-приложение будет работать так же надежно, быстро и плавно, как нативное мобильное приложение — даже при нестабильной связи в метро или полном отсутствии интернета (**Offline-First**).\n\n**Прогрессивные веб-приложения (PWA)** стирают грань между сайтами и нативными приложениями: они устанавливаются на главный экран смартфона/десктопа в один клик без App Store, мгновенно открываются из локального кэша за 50 мс и могут отправлять фоновые данные через **Service Workers**.\n\nВ этом уроке мы разберём жизненный цикл Service Worker, 5 стратегий кэширования и построение отказоустойчивых PWA.",
+      "sections": [
+        {
+          "title": "Что такое PWA и анатомия Web App Manifest (manifest.json)",
+          "content": "Превращение веб-сайта в устанавливаемое приложение:\n\n1. **Три столпа PWA**:\n- **Capable (Функциональное)**: доступ к современным Web APIs (камера, геолокация, Push-уведомления, файловая система).\n- **Reliable (Надежное)**: мгновенная загрузка и работа без интернета благодаря Service Worker.\n- **Installable (Устанавливаемое)**: запуск в отдельном окне без адресной строки браузера как нативное приложение.\n\n2. **Структура `manifest.json`**:\n- `name` и `short_name` — название под иконкой на рабочем столе.\n- `icons` — массив иконок (192x192, 512x512, с маской `purpose: \"maskable\"`).\n- `start_url` — стартовый URL при открытии.\n- `display: \"standalone\"` — скрывает адресную строку и кнопки браузера!\n- `theme_color` и `background_color` — цвет статус-бара и сплеш-скрина.\n\n3. **Событие `beforeinstallprompt`**:\n- Позволяет перехватить стандартный системный баннер и показать красивую кастомную кнопку «Установить на телефон».",
+          "image": {
+            "src": "/images/lessons/web-pwa-service-workers.svg",
+            "alt": "PWA, Service Workers и 5 стратегий кэширования",
+            "caption": "PWA архитектура: Web App Manifest, жизненный цикл Service Worker (install, activate, fetch) и 5 стратегий кэширования"
+          },
+          "codeExample": {
+            "language": "json",
+            "code": "{\n  \"name\": \"Frontend Intern Academy PWA\",\n  \"short_name\": \"Academy\",\n  \"description\": \"Интерактивная платформа обучения фронтенд-разработке\",\n  \"start_url\": \"/\",\n  \"display\": \"standalone\",\n  \"background_color\": \"#0a0e13\",\n  \"theme_color\": \"#2dff8a\",\n  \"icons\": [\n    {\n      \"src\": \"/icons/icon-192.png\",\n      \"sizes\": \"192x192\",\n      \"type\": \"image/png\",\n      \"purpose\": \"any maskable\"\n    },\n    {\n      \"src\": \"/icons/icon-512.png\",\n      \"sizes\": \"512x512\",\n      \"type\": \"image/png\"\n    }\n  ]\n}",
+            "title": "Манифест веб-приложения public/manifest.json",
+            "explanation": "Манифест сообщает операционной системе (Android, iOS, Windows), как отображать приложение при установке на рабочий стол."
+          }
+        },
+        {
+          "title": "Архитектура и жизненный цикл Service Worker",
+          "content": "Service Worker — это программируемый сетевой прокси, работающий в фоновом потоке:\n\n1. **Особенности Service Worker**:\n- Работает **ТОЛЬКО по HTTPS** (для безопасности, на localhost работает по HTTP).\n- Не имеет прямого доступа к DOM-дереву (общается с UI через `postMessage`).\n- Живет отдельно от страницы: продолжает работать даже когда вкладка закрыта.\n\n2. **Жизненный цикл (Lifecycle)**:\n- **1. Регистрация (`navigator.serviceWorker.register('/sw.js')`)**.\n- **2. Событие `install`**:\n  Срабатывает один раз при установке новой версии скрипта. Здесь кэшируется базовый каркас приложения (App Shell: `index.html`, стили, логотипы) через `caches.open('app-shell-v1').addAll([...])`.\n  Вызов `self.skipWaiting()` заставляет воркер активироваться немедленно.\n- **3. Событие `activate`**:\n  Срабатывает после установки. Здесь **удаляются старые версии кэша** (`caches.delete(oldCacheKey)`).\n  Вызов `self.clients.claim()` берет под контроль все открытые вкладки.\n- **4. Событие `fetch`**:\n  Перехватывает **КАЖДЫЙ сетевой HTTP-запрос** от страницы к серверу!",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// public/sw.js — базовый Service Worker с кэшированием App Shell\nconst CACHE_NAME = 'intern-academy-v1.0.0';\nconst STATIC_ASSETS = ['/', '/index.html', '/src/index.css', '/icons/icon-192.png'];\n\n// 1. Фаза установки: предзагрузка статики в Cache Storage\nself.addEventListener('install', (event) => {\n  console.log('[SW] Установка новой версии...');\n  event.waitUntil(\n    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))\n  );\n  self.skipWaiting(); // Активироваться немедленно\n});\n\n// 2. Фаза активации: удаление устаревших версий кэша\nself.addEventListener('activate', (event) => {\n  console.log('[SW] Активация...');\n  event.waitUntil(\n    caches.keys().then((keys) =>\n      Promise.all(\n        keys.map((key) => {\n          if (key !== CACHE_NAME) {\n            console.log('[SW] Удаление старого кэша:', key);\n            return caches.delete(key);\n          }\n        })\n      )\n    )\n  );\n  return self.clients.claim();\n});",
+            "title": "Жизненный цикл Service Worker: install и activate с очисткой старого кэша",
+            "explanation": "При выкатке новой версии старый кэш удаляется в фазе activate, предотвращая засорение памяти устройства."
+          }
+        },
+        {
+          "title": "5 Промышленных стратегий кэширования (Workbox / Cache API)",
+          "content": "Как отвечать на сетевые запросы в событии `fetch`:\n\n1. **Cache-First (Сначала кэш, затем сеть)**:\n- Сначала ищет ответ в кэше. Если нашел — отдает за 0 мс. Если нет — идет в сеть и сохраняет в кэш.\n- **Для чего**: шрифты, иконки, статичные картинки, хешированные JS/CSS бандлы.\n\n2. **Network-First (Сначала сеть, при сбое — кэш)**:\n- Идет в сеть. Если интернет есть — отдает свежие данные и обновляет кэш. Если оффлайн (сбой сети) — отдает закешированный запасной ответ.\n- **Для чего**: баланс счета, профиль пользователя, список заказов.\n\n3. **Stale-While-Revalidate (Старый кэш + фоновое обновление)**:\n- Мгновенно отдает пользователю имеющийся кэш, а в фоне тихо делает запрос в сеть и обновляет кэш для следующего раза.\n- **Для чего**: ленты новостей, статьи блога, список курсов.\n\n4. **Network-Only**: только сеть (платежи, отправка паролей).\n5. **Cache-Only**: только локальный оффлайн-кэш.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// Реализация стратегии Stale-While-Revalidate в перехватчике fetch\nself.addEventListener('fetch', (event) => {\n  // Перехватываем только GET-запросы\n  if (event.request.method !== 'GET') return;\n\n  event.respondWith(\n    caches.open(CACHE_NAME).then(async (cache) => {\n      // 1. Ищем ответ в локальном кэше\n      const cachedResponse = await cache.match(event.request);\n\n      // 2. Фоновый запрос к реальной сети для обновления кэша\n      const networkFetch = fetch(event.request).then((networkResponse) => {\n        if (networkResponse && networkResponse.status === 200) {\n          // Клонируем ответ (stream можно прочитать только 1 раз!)\n          cache.put(event.request, networkResponse.clone());\n        }\n        return networkResponse;\n      }).catch(() => {\n        // Оффлайн: сеть недоступна, ничего страшного\n        console.log('[SW] Оффлайн режим для:', event.request.url);\n      });\n\n      // 3. Возвращаем кэш мгновенно (если есть), иначе ждем сеть\n      return cachedResponse || networkFetch;\n    })\n  );\n});",
+            "title": "Стратегия Stale-While-Revalidate на чистом Cache API",
+            "explanation": "Пользователь получает контент мгновенно за 0 мс из кэша, пока Service Worker в фоне обновляет копию из сети."
+          }
+        },
+        {
+          "title": "Background Sync, Push API и Оффлайн-очереди",
+          "content": "Продвинутые возможности Offline-First архитектуры:\n\n1. **Background Sync API**:\n- Пользователь пишет сообщение или ставит лайк в метро без интернета.\n- Приложение сохраняет действие в локальную базу данных **IndexedDB** и регистрирует фоновую задачу: `registration.sync.register('sync-likes')`.\n- Как только смартфон поймает связь (даже если браузер уже закрыт!), Service Worker проснется и отправит накопленные запросы на сервер!\n\n2. **Push Notifications API**:\n- Сервер отправляет зашифрованное веб-пуш сообщение через VAPID-ключи.\n- Service Worker перехватывает событие `self.addEventListener('push', ...)` и вызывает нативный диалог `self.registration.showNotification('Новый урок!', { icon, body })`.",
+          "codeExample": {
+            "language": "javascript",
+            "code": "// sw.js — Обработка фоновой синхронизации (Background Sync)\nself.addEventListener('sync', (event) => {\n  if (event.tag === 'sync-offline-forms') {\n    console.log('[SW] Сеть восстановилась! Отправка накопленных оффлайн-заявок...');\n    event.waitUntil(sendPendingFormsFromIndexedDB());\n  }\n});\n\n// sw.js — Перехват Web Push уведомлений\nself.addEventListener('push', (event) => {\n  const data = event.data ? event.data.json() : { title: 'Уведомление', body: 'Новое событие' };\n  \n  event.waitUntil(\n    self.registration.showNotification(data.title, {\n      body: data.body,\n      icon: '/icons/icon-192.png',\n      badge: '/icons/badge.png',\n    })\n  );\n});",
+            "title": "События sync и push в Service Worker",
+            "explanation": "Background Sync отправляет оффлайн-очередь при восстановлении сети, а Push API показывает нативные уведомления."
+          }
+        }
+      ],
+      "seniorTips": [
+        "При разработке всегда используйте правильные стратегии: Cache-First для статических ассетов с хешами, Network-First для персональных данных, Stale-While-Revalidate для публичного контента.",
+        "Не кэшируйте ответы с ошибками (HTTP 4xx/5xx) или запросы с методом POST/PUT — кэшируйте только успешные GET-запросы со статусом 200.",
+        "Всегда вызывайте `networkResponse.clone()` перед сохранением в `cache.put()` — тело HTTP-ответа является ReadableStream и может быть прочитано только один раз.",
+        "Для удобной работы с PWA в продакшене используйте библиотеку **Workbox** (от команды Google) или плагин `vite-plugin-pwa` — они автоматизируют генерацию Service Worker и стратегии кэширования."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Забытый clone() ответа перед записью в кэш\ncache.put(event.request, networkResponse); // ❌ Ошибка: response body is already used!",
+          "good": "cache.put(event.request, networkResponse.clone());",
+          "reason": "Поток ответа (Stream) может быть прочитан только единожды. Метод .clone() создает дубликат для записи в Cache Storage."
+        },
+        {
+          "bad": "// Кэширование файла sw.js браузерным HTTP-кэшем на 1 год\nCache-Control: max-age=31536000 для /sw.js",
+          "good": "// Для sw.js ВСЕГДА устанавливается Cache-Control: no-cache, max-age=0",
+          "reason": "Если закешировать сам файл sw.js, браузер никогда не узнает о выходе новой версии воркера и сайт застрянет на старом коде."
+        },
+        {
+          "bad": "// Хранение паролей и конфиденциальных токенов в Cache API без шифрования",
+          "good": "// Использование HttpOnly cookies и исключение закрытых эндпоинтов из Service Worker кэша",
+          "reason": "Cache API доступен из любого скрипта на клиенте и не предназначен для хранения секретных данных."
+        }
+      ],
+      "keyTakeaways": [
+        "PWA превращает веб-сайт в устанавливаемое приложение с поддержкой оффлайн-режима.",
+        "manifest.json настраивает иконки, цвета темы и standalone-режим отображения.",
+        "Service Worker — программируемый сетевой прокси, работающий в фоновом потоке.",
+        "5 стратегий кэширования (Cache-First, Network-First, Stale-While-Revalidate) оптимизируют работу с сетью.",
+        "Background Sync отправляет данные из оффлайн-очереди при появлении интернета."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"pwa-sandbox-app\">\n  <h3>PWA & Service Worker Симулятор</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"btn-sw-register\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">1. Зарегистрировать SW</button>\n    <button id=\"btn-sw-offline\" style=\"background:#ffb02e; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">2. Режим «В самолете (Offline)»</button>\n  </div>\n  <pre id=\"sw-log\" style=\"color:#e6edf3; font-size:12px; line-height:1.5; background:#161b22; padding:12px; border-radius:6px;\"></pre>\n</div>",
+      "initialCss": "#pwa-sandbox-app { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const log = document.getElementById('sw-log');\nlet isOffline = false;\n\ndocument.getElementById('btn-sw-register').onclick = () => {\n  log.textContent = '⚙️ [SW Lifecycle]:\\n';\n  log.textContent += '1. navigator.serviceWorker.register(\"/sw.js\") — OK\\n';\n  log.textContent += '2. [install] Кэширование App Shell: index.html, main.css, icon-192.png (12 ассетов)\\n';\n  log.textContent += '3. [activate] Очистка старых кэшей + clients.claim()\\n';\n  log.textContent += '✅ Service Worker активен и готов перехватывать fetch-запросы 🚀';\n  log.style.color = '#2dff8a';\n};\n\ndocument.getElementById('btn-sw-offline').onclick = () => {\n  isOffline = !isOffline;\n  log.textContent = isOffline \n    ? '✈️ [Режим Offline включен]:\\n> GET /api/lessons\\n⚡ [Cache-First]: Запрос перехвачен Service Worker!\\n📦 Отдан закешированный ответ из Cache Storage (0 мс, 0 байт трафика)\\n🎉 Сайт 100% функционален без интернета!'\n    : '🌐 [Режим Online]: Подключение к интернету восстановлено.';\n  log.style.color = isOffline ? '#ffb02e' : '#2dff8a';\n};",
+      "instructions": "Практика с PWA и Service Worker:\n1. Нажмите '1. Зарегистрировать SW' для симуляции фаз install и activate\n2. Нажмите '2. Режим Offline' — Service Worker перехватит запрос и мгновенно отдаст данные из Cache Storage"
+    },
+    "task": {
+      "title": "Разработка Service Worker со стратегией Network-First и запасным оффлайн-кэшем",
+      "scenario": "Создайте скрипт sw.js для новостного портала: воркер должен кэшировать базовые ассеты в фазе install, очищать старые кэши в activate, и реализовывать стратегию Network-First для запросов статей (пытается загрузить свежие данные из сети, а при сбое или отсутствии интернета отдает сохраненную копию из кэша).",
+      "criteria": [
+        "Реализованы обработчики событий install (addAll статики) и activate (очистка устаревших кэшей)",
+        "В событии fetch реализована стратегия Network-First",
+        "При успешном сетевом ответе кэш обновляется через cache.put(event.request, res.clone())",
+        "При оффлайн-сбое возвращается сохраненный кэш из caches.match(event.request)"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте sw.js со стратегией Network-First\nconst CACHE_NAME = 'news-v1';\n// Ваш код"
+      },
+      "hints": [
+        "event.respondWith(fetch(event.request).then(res => { cache.put(...); return res; }).catch(() => caches.match(event.request)))"
+      ],
+      "solution": {
+        "js": "const CACHE_NAME = 'news-cache-v1';\nconst STATIC_ASSETS = ['/', '/index.html', '/styles.css', '/app.js'];\n\n// 1. Установка и кэширование статики\nself.addEventListener('install', (event) => {\n  event.waitUntil(\n    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))\n  );\n  self.skipWaiting();\n});\n\n// 2. Активация и удаление старых версий кэша\nself.addEventListener('activate', (event) => {\n  event.waitUntil(\n    caches.keys().then((keys) =>\n      Promise.all(\n        keys.map((key) => {\n          if (key !== CACHE_NAME) return caches.delete(key);\n        })\n      )\n    )\n  );\n  self.clients.claim();\n});\n\n// 3. Стратегия Network-First для свежих новостей с оффлайн-фолбеком\nself.addEventListener('fetch', (event) => {\n  if (event.request.method !== 'GET') return;\n\n  event.respondWith(\n    fetch(event.request)\n      .then(async (networkResponse) => {\n        if (networkResponse && networkResponse.status === 200) {\n          const cache = await caches.open(CACHE_NAME);\n          cache.put(event.request, networkResponse.clone());\n        }\n        return networkResponse;\n      })\n      .catch(async () => {\n        // Оффлайн сбой: отдаем закешированную копию\n        const cached = await caches.match(event.request);\n        if (cached) return cached;\n        throw new Error('Ресурс недоступен в оффлайне');\n      })\n  );\n});\n\nconsole.log('Network-First Service Worker успешно зарегистрирован!');",
+        "explanation": "Скрипт обеспечивает максимальную актуальность новостей при наличии сети и бесшовный показ закешированных статей при потере связи."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro17-q1",
+          "question": "В каком потоке браузера исполняется код Service Worker?",
+          "options": [
+            "В главном UI-потоке рендеринга (Main Thread)",
+            "В отдельном изолированном фоновом потоке ОС без прямого доступа к объектам DOM и window",
+            "На удаленном сервере Node.js",
+            "В потоке базы данных SQL"
+          ],
+          "correctIndex": 1,
+          "explanation": "Service Worker работает в фоновом потоке, перехватывая сетевые запросы без блокировки пользовательского интерфейса."
+        },
+        {
+          "id": "pro17-q2",
+          "question": "Для каких типов ресурсов оптимальна стратегия кэширования Cache-First (Сначала кэш, затем сеть)?",
+          "options": [
+            "Для баланса банковской карты",
+            "Для неизменяемых статических ассетов (шрифты, логотипы, хешированные JS/CSS файлы)",
+            "Для отправки POST-запросов",
+            "Для динамического чата"
+          ],
+          "correctIndex": 1,
+          "explanation": "Неизменяемые ассеты эффективнее всего отдавать мгновенно из локального кэша за 0 мс без сетевых задержек."
+        },
+        {
+          "id": "pro17-q3",
+          "question": "Зачем перед сохранением сетевого ответа в cache.put(request, response) обязательно вызывать response.clone()?",
+          "options": [
+            "Для шифрования паролей",
+            "Тело HTTP-ответа представляет собой ReadableStream, который может быть прочитан только один раз; clone() создает копию для записи в кэш",
+            "Для сжатия картинок",
+            "Это требование TypeScript"
+          ],
+          "correctIndex": 1,
+          "explanation": "Поток ответа закрывается после первого чтения браузером, поэтому для Cache Storage требуется отдельный клон."
+        },
+        {
+          "id": "pro17-q4",
+          "question": "Какую проблему решает Background Sync API в PWA?",
+          "options": [
+            "Синхронизирует время часов",
+            "Позволяет отложить отправку сетевых запросов (например, отправку формы) при отсутствии интернета и автоматически выполнить их в фоне при появлении сети",
+            "Удаляет старые файлы",
+            "Увеличивает скорость процессора"
+          ],
+          "correctIndex": 1,
+          "explanation": "Background Sync гарантирует надежную доставку действий пользователя даже при разрывах соединения."
+        },
+        {
+          "id": "pro17-q5",
+          "question": "Какое значение display в файле manifest.json скрывает адресную строку и элементы управления браузера для нативного опыта?",
+          "options": [
+            "display: \"browser\"",
+            "display: \"standalone\"",
+            "display: \"fullscreen_only\"",
+            "display: \"none\""
+          ],
+          "correctIndex": 1,
+          "explanation": "standalone запускает PWA как отдельное приложение без интерфейса браузера."
+        }
+      ]
+    }
   }
 ];

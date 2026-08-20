@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgfsd20" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgfsd20)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Web Pro: Frontend System Design, RFC и Архитектура</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">RADIO Framework, RFC &amp; ADR, Масштабирование, Client Cache Modeling, NFR, SLI/SLO/SLA</text>
+
+  <!-- Left: RADIO Framework & RFC/ADR -->
+  <rect x="20" y="65" width="370" height="260" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="205" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">RADIO Framework и Документирование (RFC/ADR)</text>
+
+  <rect x="35" y="100" width="340" height="95" rx="4" fill="#2dff8a11" stroke="#2dff8a"/>
+  <text x="45" y="118" fill="#2dff8a" font-size="8" font-weight="600">RADIO Framework для System Design:</text>
+  <text x="45" y="134" fill="#e6edf3" font-size="7">1. R (Requirements): функциональные и нефункциональные (NFR)</text>
+  <text x="45" y="148" fill="#e6edf3" font-size="7">2. A (Architecture): высокоуровневая диаграмма (Client, CDN, API)</text>
+  <text x="45" y="162" fill="#e6edf3" font-size="7">3. D (Data Model): сущности, нормализация, стейт-машина</text>
+  <text x="45" y="176" fill="#e6edf3" font-size="7">4. I (Interface): API контракты (REST, GraphQL, WebSocket payload)</text>
+  <text x="45" y="188" fill="#8b949e" font-size="6">5. O (Optimizations): виртуализация, кэш, оффлайн, degraded state</text>
+
+  <rect x="35" y="202" width="340" height="85" rx="4" fill="#161b22" stroke="#30363d"/>
+  <text x="45" y="220" fill="#29e7ff" font-size="8" font-weight="600">RFC (Request for Comments) и ADR:</text>
+  <text x="45" y="236" fill="#e6edf3" font-size="7">• RFC: проектное предложение до написания кода (ревью команды)</text>
+  <text x="45" y="250" fill="#e6edf3" font-size="7">• ADR: журнал архитектурных решений (Контекст, Решение, Последствия)</text>
+  <text x="45" y="264" fill="#8b949e" font-size="6">Исключает споры 'почему так сделано' и фиксирует технический контекст</text>
+
+  <!-- Right: Real-world System Design Cases -->
+  <rect x="410" y="65" width="370" height="260" rx="8" fill="none" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="595" y="85" fill="#2dff8a" font-size="12" font-weight="600" text-anchor="middle">Архитектурные кейсы и Отказоустойчивость</text>
+
+  <rect x="425" y="98" width="340" height="92" rx="4" fill="#0d1117" stroke="#2dff8a"/>
+  <text x="435" y="116" fill="#2dff8a" font-size="8" font-weight="600">Кейс: Infinite Scroll Feed (Лента новостей 100K+ постов):</text>
+  <text x="435" y="132" fill="#e6edf3" font-size="7">• Virtualized Windowing: рендеринг только 10 видимых DOM-узлов</text>
+  <text x="435" y="146" fill="#e6edf3" font-size="7">• Cursor Pagination: page_token вместо offset (защита от дублей)</text>
+  <text x="435" y="160" fill="#8b949e" font-size="6">• Prefetching: подгрузка следующей пачки за 300px до конца скролла</text>
+  <text x="435" y="174" fill="#29e7ff" font-size="6">• IndexedDB Cache: мгновенный показ ленты при перезагрузке</text>
+
+  <rect x="425" y="198" width="340" height="90" rx="4" fill="#0d1117" stroke="#ffb02e"/>
+  <text x="435" y="216" fill="#ffb02e" font-size="8" font-weight="600">Надежность: Graceful Degradation и SLI/SLO:</text>
+  <text x="435" y="232" fill="#e6edf3" font-size="7">• Graceful Degradation: при падении рекомендаций показываем топ</text>
+  <text x="435" y="246" fill="#e6edf3" font-size="7">• Circuit Breaker: отключение падающего API для сохранения UI</text>
+  <text x="435" y="260" fill="#8b949e" font-size="6">• SLO: 99.9% успешных загрузок страниц с LCP &lt; 2.0s</text>
+  <text x="435" y="272" fill="#8b949e" font-size="6">• Disaster Recovery: статический fallback на CDN при сбое бекенда</text>
+
+  <!-- Bottom -->
+  <rect x="20" y="335" width="760" height="90" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="355" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">💡 Инженерное мышление уровня Senior / Staff Frontend</text>
+  <text x="400" y="375" fill="#e6edf3" font-size="8" text-anchor="middle">• На System Design интервью всегда начинайте с уточнения требований (Scope &amp; Scale) и структуры данных</text>
+  <text x="400" y="390" fill="#e6edf3" font-size="8" text-anchor="middle">• Любое архитектурное решение — это компромисс (Trade-off): простота разработки vs производительность</text>
+  <text x="400" y="405" fill="#8b949e" font-size="8" text-anchor="middle">• Пишите RFC перед внедрением крупных библиотек или изменением архитектуры — это сбережет недели работы</text>
+</svg>

@@ -3683,82 +3683,191 @@ export const cssLessons: Lesson[] = [
     "id": "css-20",
     "moduleId": "css",
     "level": 20,
-    "title": "Методологии CSS (BEM) и организация кода",
-    "subtitle": "Блок-Элемент-Модификатор, модульность и архитектура стилей",
-    "description": "Архитектура стилей: БЭМ (Block, Element, Modifier), правила именования, плоская специфичность 10.",
-    "estimatedMinutes": 35,
+    "title": "Методологии CSS: БЭМ (BEM), CSS Modules, CSS-in-JS, Tailwind и Архитектура стилей",
+    "subtitle": "Изоляция глобального скоупа: Блок-Элемент-Модификатор, Scoped CSS Modules, Runtime vs Zero-Runtime CSS-in-JS и Utility-First подход",
+    "description": "Освойте эволюцию и архитектуру стилизации в веб-разработке: методологию БЭМ для устранения каскадных конфликтов, локальный скоупинг через CSS Modules с хешированием классов, возможности и ограничения CSS-in-JS (Emotion, Styled Components, Zero-Runtime Vanilla Extract), и философию Utility-First (Tailwind CSS, UnoCSS) для создания масштабируемых дизайн-систем.",
+    "estimatedMinutes": 70,
     "difficulty": "intermediate",
     "tags": [
-      "CSS",
-      "BEM",
-      "Architecture"
+      "css-methodologies",
+      "bem",
+      "css-modules",
+      "css-in-js",
+      "tailwind",
+      "styled-components",
+      "vanilla-extract",
+      "design-tokens",
+      "architecture"
     ],
     "theory": {
-      "overview": "БЭМ решает проблему конфликтов имен классов в больших командах.",
+      "overview": "Главная историческая проблема CSS — **глобальная область видимости (Global Scope)**. Правило `.btn { color: red; }`, написанное для всплывающего окна, случайно перекрашивает все кнопки оформления заказа на сайте. В крупных проектах это приводило к «войнам специфичности» с десятками `!important` и страху трогать старый CSS-код.\n\nИндустрия прошла путь эволюции от методологий соглашений об именах (**БЭМ**) до автоматической изоляции сборщиками (**CSS Modules**), стилей внутри компонентов (**CSS-in-JS**) и атомарного подхода (**Tailwind CSS**).\n\nВ этом уроке мы разберём каждую парадигму, их плюсы, минусы и критерии выбора под конкретный проект.",
       "sections": [
         {
-          "title": "Блок, Элемент, Модификатор",
-          "content": "- Блок: `.card`\n- Элемент: `.card__title` (через `__`)\n- Модификатор: `.card--featured` (через `--`)\n- Плоская специфичность: всегда вес 10!",
+          "title": "Методология БЭМ: Блок, Элемент, Модификатор и плоская специфичность",
+          "content": "Как соглашение об именах решило проблему каскада:\n\n1. **3 Сущности БЭМ**:\n- **Блок (`block`)**: функционально независимый компонент страницы (кнопка, форма, карточка товара). Может вкладываться в другие блоки: `.product-card`, `.nav-menu`.\n- **Элемент (`block__elem`)**: составная часть блока, которая не может существовать отдельно от него. Обозначается двойным подчеркиванием: `.product-card__title`, `.product-card__price`.\n- **Модификатор (`block_mod` или `block__elem_mod`)**: флаг состояния, темы или размера. Обозначается подчеркиванием (или двойным дефисом): `.product-card_featured`, `.product-card__btn_disabled`.\n\n2. **Главное преимущество БЭМ — Плоская специфичность (0-1-0)**:\n- Селекторы никогда не вкладываются друг в друга (`.header .nav .item .link` ❌).\n- Каждый селектор состоит из **ОДНОГО класса**: `.header__link` ✅. Это исключает каскадные конфликты и делает переопределение стилей предсказуемым без `!important`.",
+          "image": {
+            "src": "/images/lessons/css-methodologies-bem-tailwind.svg",
+            "alt": "Методологии CSS: БЭМ, CSS Modules, CSS-in-JS и Tailwind",
+            "caption": "Эволюция изоляции стилей: БЭМ соглашения, автоматический скоуп CSS Modules, CSS-in-JS и Utility-First Tailwind"
+          },
+          "codeExample": {
+            "language": "css",
+            "code": "/* Блок: Карточка пользователя */\n.user-card {\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 12px;\n  padding: 20px;\n}\n\n/* Элементы блока */\n.user-card__avatar {\n  width: 64px;\n  height: 64px;\n  border-radius: 50%;\n}\n\n.user-card__title {\n  font-size: 18px;\n  color: #e6edf3;\n  margin-top: 12px;\n}\n\n.user-card__bio {\n  color: #8b949e;\n  font-size: 14px;\n}\n\n/* Модификаторы темы и состояния */\n.user-card_premium {\n  border-color: #2dff8a;\n  box-shadow: 0 0 20px rgba(45, 255, 138, 0.15);\n}\n\n.user-card__btn_disabled {\n  opacity: 0.5;\n  pointer-events: none;\n}",
+            "title": "Чистая архитектура БЭМ с плоской специфичностью селекторов",
+            "explanation": "Все селекторы односложные (специфичность 0-1-0), что исключает случайные каскадные перекрытия."
+          }
+        },
+        {
+          "title": "CSS Modules: локальный скоуп на уровне файлов сборщика",
+          "content": "Автоматическая изоляция стилей без ручного следования соглашениям:\n\n1. **Принцип работы CSS Modules (`.module.css`)**:\n- Вы пишете обычный короткий CSS в файле `Button.module.css` (например, `.btn { ... }`, `.primary { ... }`).\n- При сборке (Vite, Webpack) инструмент компилирует эти классы в **уникальные глобальные хеши**: `.Button_btn__a1b2c`, `.Button_primary__f9e8d`.\n- JavaScript импортирует объект маппинга: `import styles from './Button.module.css'` → `styles.btn` вернет сгенерированное уникальное имя!\n\n2. **Преимущества CSS Modules**:\n- **100% изоляция**: два разных компонента могут иметь класс `.title`, и они гарантированно не пересекутся.\n- **Мертвый код**: сборщик предупреждает о неиспользуемых классах.\n- **Композиция стилей (`composes`)**: возможность наследовать стили из других файлов без дублирования кода.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// 1. Button.module.css\n/*\n.button {\n  padding: 10px 20px;\n  border-radius: 8px;\n  border: none;\n  cursor: pointer;\n}\n.primary {\n  composes: button; // Композиция базового класса!\n  background: #2dff8a;\n  color: #0a0e13;\n}\n*/\n\n// 2. Button.tsx (React компонент)\nimport React from 'react';\nimport styles from './Button.module.css';\n\ninterface ButtonProps {\n  variant?: 'primary' | 'secondary';\n  children: React.ReactNode;\n}\n\nexport function Button({ variant = 'primary', children }: ButtonProps) {\n  // styles.primary компилируется в 'Button_primary__a1b2c Button_button__x8y9z'\n  return (\n    <button className={styles[variant]}>\n      {children}\n    </button>\n  );\n}",
+            "title": "Использование CSS Modules с автоматическим хешированием классов",
+            "explanation": "CSS Modules изолирует стили на уровне сборщика, исключая конфликты имен между независимыми компонентами."
+          }
+        },
+        {
+          "title": "CSS-in-JS: Styled Components против Zero-Runtime (Vanilla Extract)",
+          "content": "Объединение логики компонентов и стилей в едином JavaScript файле:\n\n1. **Runtime CSS-in-JS (Styled Components, Emotion)**:\n- Стили объявляются прямо в JS через шаблонные строки: `styled.button`.\n- **Плюс**: прямая привязка к React-пропсам (`color: ${props => props.theme.primary}`) и динамическая смена тем.\n- **Минус ⚠️**: накладные расходы на парсинг CSS и инъекцию тегов `<style>` в браузере в рантайме (Runtime Cost); несовместимость с React Server Components (RSC) в Next.js App Router!\n\n2. **Zero-Runtime CSS-in-JS (Vanilla Extract, StyleX, Panda CSS) ⚡**:\n- Вы пишете стили на TypeScript с автокомплитом и строгой типизацией дизайн-токенов.\n- На этапе сборки компилятор превращает TS-стили в **обычный статический `.css` файл** с нулевым рантайм-оверхедом (Zero-Runtime) и 100% поддержкой SSR/RSC!",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// 1. Zero-Runtime стилизация через Vanilla Extract (button.css.ts)\nimport { style } from '@vanilla-extract/css';\n\nexport const baseButton = style({\n  padding: '10px 20px',\n  borderRadius: '8px',\n  fontWeight: 'bold',\n  cursor: 'pointer',\n  transition: 'transform 0.2s ease',\n  ':hover': {\n    transform: 'translateY(-2px)',\n  },\n});\n\nexport const primaryVariant = style([\n  baseButton,\n  {\n    backgroundColor: '#2dff8a',\n    color: '#0a0e13',\n  }\n]);\n\n// На этапе сборки этот код превратится в чистый статический CSS без JS-библиотеки в бандле!",
+            "title": "Zero-Runtime CSS-in-JS на Vanilla Extract: типизация без оверхеда",
+            "explanation": "Vanilla Extract объединяет строгую типизацию TypeScript и производительность чистого статического CSS."
+          }
+        },
+        {
+          "title": "Utility-First парадигма: Tailwind CSS и UnoCSS",
+          "content": "Почему атомарные классы стали стандартом современной разработки:\n\n1. **Философия Utility-First**:\n- Вместо написания уникального CSS-класса для каждой карточки (`.user-profile-header-card`), верстка собирается из готовых атомарных утилит: `flex items-center gap-4 p-6 bg-slate-900 rounded-xl`.\n- **JIT (Just-In-Time) компилятор**: сканирует исходный код и генерирует CSS **ТОЛЬКО для реально используемых классов**. Результирующий CSS-бандл всего огромного сайта весит **менее 15–20 КБ в gzip**!\n\n2. **Преимущества Tailwind CSS**:\n- **Скорость**: не нужно тратить время на придумывание имен классов (`.wrapper-inner-container-box`).\n- **Строгая дизайн-система**: отступы (`p-4`, `p-6`), цвета и шрифты берутся из единого конфига `tailwind.config.js`.\n- **Отсутствие мертвого CSS**: при удалении компонента лишний CSS не остается в бандле.",
           "codeExample": {
             "language": "html",
-            "title": "БЭМ разметка",
-            "code": "<div class=\"card card--featured\">\n  <h3 class=\"card__title\">Заголовок</h3>\n  <button class=\"btn btn--primary\">Купить</button>\n</div>",
-            "explanation": "Понятная структура компонентов."
+            "code": "<!-- Компонент профиля на чистом Tailwind CSS -->\n<div class=\"flex items-center gap-4 p-5 bg-slate-900 border border-slate-800 rounded-2xl shadow-xl hover:border-emerald-500 transition-colors duration-200\">\n  <!-- Аватар со статусом -->\n  <div class=\"relative\">\n    <img class=\"w-14 h-14 rounded-full object-cover border-2 border-emerald-400\" src=\"/avatar.jpg\" alt=\"Аватар\" />\n    <span class=\"absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-slate-900 rounded-full\"></span>\n  </div>\n  \n  <!-- Текстовый блок -->\n  <div class=\"flex flex-col\">\n    <h3 class=\"text-lg font-bold text-slate-100\">Алексей Иванов</h3>\n    <p class=\"text-sm text-slate-400\">Senior Frontend Engineer</p>\n  </div>\n</div>",
+            "title": "Компонент на Tailwind CSS: компактность, адаптивность и темы",
+            "explanation": "Tailwind генерирует строго ограниченный атомарный CSS прямо на лету без необходимости писать кастомные файлы стилей."
           }
         }
       ],
       "seniorTips": [
-        "Не делайте вложенных элементов вроде .card__header__title."
+        "Для современных проектов на Next.js / Astro выбирайте **Tailwind CSS** или **CSS Modules** — они идеально поддерживают React Server Components (RSC) и потоковый стриминг HTML.",
+        "Избегайте Runtime CSS-in-JS (Styled Components / Emotion) в новых проектах — они увеличивают вес JS-бандла и вызывают задержки рендеринга при частой смене пропсов.",
+        "В БЭМ никогда не используйте каскадные селекторы вида `.block .elem` — всегда пишите плоский селектор `.block__elem` для сохранения минимальной специфичности (0-1-0).",
+        "При использовании Tailwind не злоупотребляйте директивой `@apply` в CSS-файлах — это возвращает вас к проблемам именования классов и лишает преимуществ атомарной верстки."
       ],
       "commonMistakes": [
         {
-          "bad": ".header .nav ul li a { ... }",
-          "good": ".nav__link { ... }",
-          "reason": "БЭМ сохраняет плоский вес 10."
+          "bad": "/* Нарушение БЭМ: элемент элемента в имени класса */\n.header__nav__item__link { ... } /* ❌ Глубокая вложенность имен ломает модульность */",
+          "good": ".header__link { ... } /* ✅ Элемент принадлежит напрямую блоку */",
+          "reason": "В БЭМ элементы всегда привязаны к блоку (block__elem), независимо от реальной вложенности DOM-дерева."
+        },
+        {
+          "bad": "/* Смешивание селекторов тегов с БЭМ классами */\n.card h2 { font-size: 20px; } /* ❌ Создает каскадную зависимость */",
+          "good": ".card__title { font-size: 20px; }",
+          "reason": "Селектор по тегу увеличивает специфичность и ломает верстку, если заголовок h2 заменят на h3 ради семантики."
+        },
+        {
+          "bad": "/* Использование Runtime Styled Components в серверных компонентах Next.js (RSC) */",
+          "good": "/* Использование CSS Modules, Tailwind или Zero-Runtime Vanilla Extract */",
+          "reason": "Runtime CSS-in-JS требует React Context, который не поддерживается в чистых Server Components."
         }
       ],
       "keyTakeaways": [
-        "Блок (.card), Элемент (.card__title), Модификатор (.card--dark)."
+        "БЭМ устраняет войны каскада за счет соглашений об именах и плоской специфичности (0-1-0).",
+        "CSS Modules автоматически генерирует уникальные хеши классов на уровне сборщика.",
+        "Zero-Runtime CSS-in-JS компилирует стили в статический CSS без нагрузки на браузер.",
+        "Tailwind CSS генерирует атомарный CSS на лету, сокращая итоговый бандл до 15 КБ.",
+        "Выбор методологии зависит от архитектуры: Tailwind/CSS Modules для SSR/RSC, BEM для дизайн-систем."
       ]
     },
     "sandbox": {
-      "initialHtml": "<div class=\"c-card c-card--feat\"><h3 class=\"c-card__title\">Премиум</h3></div>",
-      "initialCss": ".c-card { padding: 20px; background: white; border-radius: 12px; border: 2px solid #e2e8f0; }\n.c-card--feat { border-color: #4f46e5; }\n.c-card__title { color: #1e293b; margin: 0; }",
-      "initialJs": "console.log('BEM loaded');",
-      "instructions": "Изучите БЭМ классы."
+      "initialHtml": "<div class=\"methodology-sandbox\">\n  <h3>Сравнение подходов стилизации</h3>\n  <div class=\"cards-comparison\">\n    <!-- БЭМ Card -->\n    <div class=\"bem-card bem-card_active\">\n      <div class=\"bem-card__title\">📦 БЭМ Компонент</div>\n      <div class=\"bem-card__text\">Плоская специфичность .bem-card__text</div>\n    </div>\n    \n    <!-- Utility-First Card -->\n    <div class=\"p-4 bg-slate-900 border border-emerald-500 rounded-xl shadow-lg\">\n      <div class=\"text-emerald-400 font-bold\">⚡ Tailwind Style</div>\n      <div class=\"text-xs text-slate-400 mt-1\">Атомарные классы в HTML</div>\n    </div>\n  </div>\n</div>",
+      "initialCss": ".methodology-sandbox { padding: 20px; background: #0a0e13; font-family: monospace; color: #e6edf3; }\n.cards-comparison { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }\n/* BEM стили */\n.bem-card { background: #161b22; border: 1px solid #30363d; padding: 16px; border-radius: 12px; min-width: 220px; }\n.bem-card_active { border-color: #29e7ff; box-shadow: 0 0 15px rgba(41,231,255,0.15); }\n.bem-card__title { color: #29e7ff; font-weight: bold; }\n.bem-card__text { color: #8b949e; font-size: 12px; margin-top: 4px; }\n/* Имитация Utility классов */\n.p-4 { padding: 16px; }\n.bg-slate-900 { background: #0f172a; }\n.border { border-width: 1px; border-style: solid; }\n.border-emerald-500 { border-color: #10b981; }\n.rounded-xl { border-radius: 12px; }\n.shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); }\n.text-emerald-400 { color: #34d399; }\n.font-bold { font-weight: bold; }\n.text-xs { font-size: 12px; }\n.text-slate-400 { color: #94a3b8; }\n.mt-1 { margin-top: 4px; }",
+      "initialJs": "console.log('Methodologies песочница готова');",
+      "instructions": "Практика с методологиями:\n1. Изучите структуру БЭМ карточки (.bem-card, .bem-card__title, .bem-card_active)\n2. Изучите Utility-First карточку — все стили собраны из атомарных классов"
     },
     "task": {
-      "title": "Карточка по БЭМ",
-      "scenario": "Назовите классы карточки по БЭМ: блок .card, __title, __date, --urgent.",
+      "title": "Проектирование компонента баннера оповещения по методологии БЭМ",
+      "scenario": "Создайте стили для компонента уведомления (.alert-banner) строго по правилам БЭМ: блок .alert-banner, элементы .alert-banner__icon, .alert-banner__content, .alert-banner__title, .alert-banner__close, и модификаторы темы .alert-banner_success и .alert-banner_warning с плоской специфичностью 0-1-0.",
       "criteria": [
-        "Использованы классы по БЭМ"
+        "Объявлены базовые стили блока .alert-banner",
+        "Элементы используют синтаксис block__elem (.alert-banner__icon, .alert-banner__title)",
+        "Модификаторы используют синтаксис block_mod (.alert-banner_success, .alert-banner_warning)",
+        "Все селекторы плоские (специфичность 0-1-0), нет вложенных селекторов по тегам",
+        "Модификатор success задает зеленую тему (#2dff8a), warning — янтарную (#ffb02e)"
       ],
       "starterCode": {
-        "html": "<div class=\"news news--urgent\"><h3 class=\"news__title\">Новость</h3></div>",
-        "css": "/* Стили */\n"
+        "css": "/* Разработайте компонент alert-banner по БЭМ */\n.alert-banner {\n}\n.alert-banner__icon {\n}\n.alert-banner__title {\n}\n.alert-banner_success {\n}\n.alert-banner_warning {\n}"
       },
       "hints": [
-        "Примените стили к .news, .news--urgent, .news__title."
+        ".alert-banner { display: flex; align-items: center; padding: 16px; border-radius: 8px; }",
+        ".alert-banner_success { border: 1px solid #2dff8a; background: rgba(45, 255, 138, 0.08); }"
       ],
       "solution": {
-        "html": "<div class=\"news news--urgent\"><h3 class=\"news__title\">Новость</h3></div>",
-        "css": ".news { padding: 16px; background: white; border-radius: 8px; border-left: 4px solid #94a3b8; }\n.news--urgent { border-left-color: #ef4444; background: #fef2f2; }\n.news__title { margin: 0; color: #1e293b; }",
-        "explanation": "БЭМ структура."
+        "css": ".alert-banner {\n  display: flex;\n  align-items: center;\n  gap: 12px;\n  padding: 16px;\n  border-radius: 10px;\n  background: #161b22;\n  border: 1px solid #30363d;\n  color: #e6edf3;\n}\n\n.alert-banner__icon {\n  font-size: 20px;\n  flex-shrink: 0;\n}\n\n.alert-banner__content {\n  flex-grow: 1;\n}\n\n.alert-banner__title {\n  font-weight: bold;\n  font-size: 14px;\n  margin-bottom: 2px;\n}\n\n.alert-banner__description {\n  font-size: 12px;\n  color: #8b949e;\n}\n\n.alert-banner__close-btn {\n  background: transparent;\n  border: none;\n  color: #8b949e;\n  cursor: pointer;\n  padding: 4px;\n}\n\n/* Модификаторы тем */\n.alert-banner_success {\n  border-color: #2dff8a;\n  background: rgba(45, 255, 138, 0.06);\n}\n\n.alert-banner_warning {\n  border-color: #ffb02e;\n  background: rgba(255, 176, 46, 0.06);\n}",
+        "explanation": "Специфичность всех селекторов строго равна 0-1-0. Модификаторы темы легко комбинируются с базовым блоком."
       }
     },
     "quiz": {
       "questions": [
         {
-          "id": "c20-q1",
-          "question": "Чем отделяется элемент от блока в БЭМ?",
+          "id": "css20-q1",
+          "question": "Какое ключевое преимущество дает плоская специфичность селекторов (0-1-0) в методологии БЭМ?",
           "options": [
-            ".",
-            "__ (двойным подчеркиванием)",
-            "--",
-            "/"
+            "Удаляет необходимость в JavaScript",
+            "Полностью исключает войны каскада и необходимость использовать !important, делая поведение стилей абсолютно предсказуемым",
+            "Ускоряет парсинг HTML",
+            "Шифрует имена классов"
           ],
           "correctIndex": 1,
-          "explanation": "Двойным подчеркиванием (__)."
+          "explanation": "Когда каждый селектор состоит из одного класса (0-1-0), порядок и предсказуемость переопределения свойств становятся тривиальными."
+        },
+        {
+          "id": "css20-q2",
+          "question": "Как CSS Modules решают проблему глобальной области видимости стилей?",
+          "options": [
+            "Запрещают создание более 5 классов",
+            "Сборщик на этапе компиляции преобразует локальные имена классов в уникальные глобальные хеши (например, .Button_btn__a1b2c)",
+            "Переносят CSS в атрибут style каждого тега",
+            "Удаляют все дублирующиеся свойства"
+          ],
+          "correctIndex": 1,
+          "explanation": "Генерация уникальных хешей гарантирует, что одинаковые имена классов из разных файлов никогда не пересекутся."
+        },
+        {
+          "id": "css20-q3",
+          "question": "В чем главное отличие Zero-Runtime CSS-in-JS (Vanilla Extract, StyleX) от традиционного Runtime CSS-in-JS (Emotion, Styled Components)?",
+          "options": [
+            "Zero-Runtime работает только в Safari",
+            "Zero-Runtime компилирует TypeScript-стили в статический чистый CSS на этапе сборки без runtime-оверхеда и отлично работает с React Server Components (RSC)",
+            "Zero-Runtime не поддерживает переменные",
+            "Zero-Runtime увеличивает JS-бандл в 3 раза"
+          ],
+          "correctIndex": 1,
+          "explanation": "Zero-Runtime исключает исполнение стилей в браузере пользователя, превращая их в статический CSS во время билда."
+        },
+        {
+          "id": "css20-q4",
+          "question": "Каким образом JIT-компилятор в Tailwind CSS решает проблему размера итогового CSS-файла?",
+          "options": [
+            "Удаляет шрифты",
+            "Сканирует исходные файлы проекта и генерирует CSS исключительно для тех атомарных классов, которые реально используются в HTML/JSX (бандл < 15-20 КБ)",
+            "Уменьшает разрешение картинок",
+            "Шифрует файл стилей"
+          ],
+          "correctIndex": 1,
+          "explanation": "JIT компилятор генерирует CSS на лету, создавая микроскопический итоговый бандл независимо от размера проекта."
+        },
+        {
+          "id": "css20-q5",
+          "question": "Какая запись селектора является грубым нарушением методологии БЭМ?",
+          "options": [
+            ".card__title",
+            ".card_featured",
+            ".card__nav__item__link (вложенность элементов друг в друга)",
+            ".card"
+          ],
+          "correctIndex": 2,
+          "explanation": "В БЭМ элементы всегда привязаны напрямую к блоку (block__elem). Вложенность вида block__elem1__elem2 строго запрещена."
         }
       ]
     }

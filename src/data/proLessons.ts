@@ -3680,5 +3680,199 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "pro-20",
+    "moduleId": "pro",
+    "level": 20,
+    "title": "Frontend System Design: Архитектурное проектирование крупных веб-систем, RFC и ADR",
+    "subtitle": "RADIO Framework, RFC & ADR документация, Virtualized Infinite Feed, Collaborative Real-time, NFR, SLI/SLO/SLA и Graceful Degradation",
+    "description": "Освойте методологию системного проектирования фронтенда (Frontend System Design) уровня Senior / Staff Engineer: прохождение System Design интервью по фреймворку RADIO, составление проектных документов RFC и архитектурных журналов ADR, проектирование реальных кейсов (бесконечная лента с виртуализацией и совместный оффлайн-редактор), оценку NFR и стратегии обеспечения отказоустойчивости (Graceful Degradation, Circuit Breaker).",
+    "estimatedMinutes": 80,
+    "difficulty": "advanced",
+    "tags": [
+      "system-design",
+      "frontend-system-design",
+      "rfc",
+      "adr",
+      "architecture",
+      "virtualization",
+      "scalability",
+      "slo-sla",
+      "graceful-degradation",
+      "enterprise"
+    ],
+    "theory": {
+      "overview": "На уровне Senior и Lead инженера ключевым навыком становится не написание отдельных компонентов, а **системное проектирование архитектуры веб-приложений (Frontend System Design)**, способных выдерживать миллионы пользователей, терабайты данных и сбои сетевых сервисов.\n\nВ этом уроке мы изучим проверенный фреймворк **RADIO** для решения архитектурных задач, стандарты составления проектных предложений (**RFC**) и архитектурных записей решений (**ADR**), разберём проектирование высоконагруженной бесконечной ленты новостей и правила обеспечения непрерывной доступности (**Graceful Degradation**).",
+      "sections": [
+        {
+          "title": "Методология Frontend System Design: Фреймворк RADIO",
+          "content": "Пошаговый алгоритм проектирования любой масштабной фронтенд-системы:\n\n1. **R — Requirements Exploration (Уточнение требований)**:\n- **Функциональные требования**: что конкретно делает система (например, поиск товаров, добавление в корзину, оформление заказа).\n- **Нефункциональные требования (NFR)**: масштаб (10 млн активных пользователей в сутки), задержки (LCP < 1.5s, INP < 100ms), поддержка оффлайн-режима, мобильные клиенты, доступность WCAG.\n\n2. **A — Architecture & High-Level Design (Высокоуровневая архитектура)**:\n- Диаграмма компонентов: Client App Shell, CDN Edge, API Gateway, WebSocket Server, Microfrontends.\n\n3. **D — Data Model & Client State (Модель данных и состояние)**:\n- Форма нормализованных сущностей в клиентском кэше (IndexedDB, TanStack Query, Redux).\n\n4. **I — Interface Definition (Контракты API)**:\n- Эндпоинты REST / GraphQL Queries / WebSocket события с пагинацией.\n\n5. **O — Optimizations & Deep Dive (Оптимизации и отказоустойчивость)**:\n- Виртуализация списков, кэширование, degraded fallback-режимы, аналитика.",
+          "image": {
+            "src": "/images/lessons/web-frontend-system-design.svg",
+            "alt": "Frontend System Design: RADIO Framework, RFC/ADR и Infinite Scroll",
+            "caption": "Архитектурное проектирование: RADIO Framework, составление RFC/ADR документов и кейс виртуализированной ленты"
+          },
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Архитектурная модель нормализованного хранилища сущностей (Data Modeling)\ninterface FeedState {\n  // Нормализованные сущности по ID (O(1) доступ и обновление)\n  entities: {\n    posts: Record<string, PostEntity>;\n    authors: Record<string, AuthorEntity>;\n  };\n  // Список упорядоченных ID для виртуализированного списка\n  feed: {\n    ids: string[];\n    nextCursor: string | null;\n    hasMore: boolean;\n    isLoading: boolean;\n    error: string | null;\n  };\n}\n\ninterface PostEntity {\n  id: string;\n  authorId: string;\n  text: string;\n  mediaUrls: string[];\n  likesCount: number;\n  commentsCount: number;\n  createdAt: number;\n}",
+            "title": "Проектирование нормализованной модели данных для масштабируемого клиента",
+            "explanation": "Нормализация сущностей (entities + feed.ids) исключает дублирование данных и гарантирует O(1) скорость точечных обновлений."
+          }
+        },
+        {
+          "title": "Документирование архитектуры: составление RFC и ADR",
+          "content": "Как согласовывать масштабные технические изменения в инженерной команде:\n\n1. **RFC (Request for Comments — Запрос на комментарии)**:\n- Документ, описывающий масштабную фичу или рефакторинг **ДО написания первой строчки кода**.\n- **Структура RFC**:\n  1. *Summary*: краткая суть предложения.\n  2. *Motivation*: почему текущее решение не устраивает (просадки метрик, лимиты масштабирования).\n  3. *Detailed Design*: архитектурные диаграммы, схемы данных, API контракты.\n  4. *Drawbacks & Trade-offs*: недостатки и компромиссы.\n  5. *Alternatives*: какие другие библиотеки/подходы рассматривались и почему были отвергнуты.\n  6. *Migration Plan*: план бесшовной миграции без остановки прод-сервиса.\n\n2. **ADR (Architecture Decision Records — Журнал архитектурных решений)**:\n- Неизменяемый короткий markdown-файл в репозитории (`docs/adr/001-use-zustand-for-state.md`).\n- Фиксирует: Контекст (Context), Принятое решение (Decision) и Последствия (Consequences).",
+          "codeExample": {
+            "language": "json",
+            "code": "# docs/adr/004-migrate-to-tanstack-query.md\n# ADR 004: Переход на TanStack Query для серверного стейта\n\n## Статус\nПринято (Accepted) — 2026-08-20\n\n## Контекст\nВ проекте накопилось более 40 Redux Thunk экшенов для работы с API. \nЭто привело к 1500+ строк бойлерплейта, ручному отслеживанию isLoading/error \nи отсутствию фоновой инвалидации кэша.\n\n## Решение\nЗаменить самописный API-слой на TanStack Query v5:\n1. Все GET-запросы перевести на useQuery с staleTime: 5 минут.\n2. Мутации реализовать через useMutation с автоматической инвалидацией queryClient.invalidateQueries().\n\n## Последствия\n- Положительные: сокращение кодовой базы на 1200 строк, автоматический дедупликатор запросов.\n- Отрицательные: необходимость обучить команду концепции Server vs Client State.",
+            "title": "Пример реального Architecture Decision Record (ADR)",
+            "explanation": "ADR навсегда сохраняет технический контекст для новых разработчиков и предотвращает повторные споры об архитектуре."
+          }
+        },
+        {
+          "title": "Кейс: Проектирование высоконагруженной бесконечной ленты (Infinite Feed)",
+          "content": "Глубокий разбор реального кейса System Design:\n\n1. **Проблема 100 000 постов в DOM (Memory Leak & Layout Thrashing)**:\n- Если отрендерить 10 000 постов обычным списком, браузер упадет от переполнения памяти.\n- **Решение: Виртуализация списка (Windowing / Virtualized List)**: в DOM-дереве существуют **только 8–10 видимых карточек** плюс 2 буферных элемента сверху и снизу. При скролле контент карточек переиспользуется на лету!\n\n2. **Курсорная пагинация (Cursor-based Pagination)**:\n- Почему `offset / limit` ломается в реалтайм ленте: если во время чтения пользователь добавил 2 новых поста, сдвиг `offset=20` вернет дубликаты!\n- **Решение**: использование непрозрачного токена `cursor` (хеш timestamp + id последнего элемента).\n\n3. **Упреждающая загрузка (Prefetching & Predictive Loading)**:\n- Запрос следующей порции данных инициируется за 300–500px до достижения пользователем конца видимого экрана.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Архитектурный хук виртуализированной бесконечной ленты с упреждающей подгрузкой\nimport { useEffect, useRef } from 'react';\n\nexport function useInfiniteScroll({\n  hasMore,\n  isLoading,\n  onLoadMore,\n  thresholdPx = 400,\n}: {\n  hasMore: boolean;\n  isLoading: boolean;\n  onLoadMore: () => void;\n  thresholdPx?: number;\n}) {\n  const sentinelRef = useRef<HTMLDivElement | null>(null);\n\n  useEffect(() => {\n    if (!hasMore || isLoading) return;\n\n    // IntersectionObserver отслеживает приближение к концу за thresholdPx\n    const observer = new IntersectionObserver(\n      (entries) => {\n        if (entries[0].isIntersecting) {\n          onLoadMore(); // Упреждающая подгрузка следующего курсора!\n        }\n      },\n      { rootMargin: `0px 0px ${thresholdPx}px 0px` }\n    );\n\n    if (sentinelRef.current) observer.observe(sentinelRef.current);\n    return () => observer.disconnect();\n  }, [hasMore, isLoading, onLoadMore, thresholdPx]);\n\n  return { sentinelRef };\n}",
+            "title": "Реализация упреждающей подгрузки ленты через IntersectionObserver",
+            "explanation": "rootMargin 400px запускает загрузку следующей пачки заранее, гарантируя бесшовный бесконечный скролл без спиннеров ожидания."
+          }
+        },
+        {
+          "title": "Отказоустойчивость, Graceful Degradation и метрики SLI / SLO",
+          "content": "Как проектировать системы, которые никогда не показывают белый экран:\n\n1. **Graceful Degradation (Плавная деградация интерфейса)**:\n- Если упал тяжелый рекомендательный ML-бэкенд, сервис не должен падать с ошибкой 500 — вместо персонализированных рекомендаций клиент показывает закешированный статический топ-10 популярных статей!\n- Если пропал интернет — приложение переключается в режим чтения из IndexedDB кэша с ненавязчивым бейджем «Оффлайн».\n\n2. **Паттерн Circuit Breaker на клиенте**:\n- Если внешний сервис аналитики или виджет отзывов ответил ошибкой 5 раз подряд, клиент временно **отключает запросы к нему на 60 секунд**, чтобы не перегружать сеть и не тратить батарею пользователя.\n\n3. **SLI, SLO и SLA**:\n- **SLI (Indicator)**: измеряемый показатель (например, % успешных сессий с LCP < 2.0s).\n- **SLO (Objective)**: внутренняя цель команды (например, 99.9% сессий соответствуют SLI).\n- **SLA (Agreement)**: юридическое соглашение с клиентами бизнеса с финансовыми штрафами за простой.",
+          "codeExample": {
+            "language": "typescript",
+            "code": "// Реализация клиентского Fallback сервиса (Graceful Degradation)\nexport async function getPersonalizedFeed(userId: string) {\n  try {\n    // 1. Попытка запроса к основному ML-сервису рекомендаций\n    const response = await fetchWithTimeout(`/api/feed/personalized?user=${userId}`, 2000);\n    return await response.json();\n  } catch (error) {\n    console.warn('[System Design Fallback]: Сервис рекомендаций недоступен. Переход на статический кэш:', error);\n    \n    // 2. Graceful Degradation: отдача популярного контента из локального кэша / CDN\n    const fallbackCache = await caches.match('/api/feed/trending.json');\n    if (fallbackCache) return await fallbackCache.json();\n    \n    // 3. Крайний fallback: базовый статический набор карточек\n    return { posts: STATIC_DISASTER_RECOVERY_POSTS, isDegraded: true };\n  }\n}",
+            "title": "Многоуровневый Fallback для обеспечения 99.99% доступности интерфейса",
+            "explanation": "Многоуровневая деградация исключает белые экраны и фатальные сбои при авариях на серверной инфраструктуре."
+          }
+        }
+      ],
+      "seniorTips": [
+        "Начинайте любое System Design интервью с уточнения масштаба (Scale) и ограничений: сколько DAU/MAU, каков размер полезной нагрузки, критична ли задержка и нужен ли оффлайн.",
+        "Всегда формулируйте Trade-offs: например, 'Использование IndexedDB ускорит повторную загрузку до 0 мс, но потребует сложной логики миграции схемы базы данных при релизах'.",
+        "Пишите RFC для любых архитектурных изменений, затрагивающих более одного разработчика — это защищает проект от дорогостоящих архитектурных ошибок.",
+        "Внедряйте Circuit Breaker для всех сторонних SDK (карты, платежные шлюзы, аналитика) — сторонний сервис не должен ломать основной бизнес-процесс клиента.",
+        "Всегда проектируйте модели данных в нормализованном виде (Normalized State) — это исключает рассинхронизацию данных между экранами."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "// Использование offset-пагинации для высоконагруженных динамических лент\n// GET /api/posts?offset=100&limit=20 — ❌ Дублирование постов при вставке новых записей в начало!",
+          "good": "// Использование курсорной пагинации: GET /api/posts?cursor=eyJpZCI6MTAxfQ==&limit=20",
+          "reason": "Cursor-based pagination гарантирует стабильную выборку данных при непрерывном добавлении нового контента."
+        },
+        {
+          "bad": "// Написание кода без предварительного согласования архитектуры (RFC)",
+          "good": "// Написание краткого RFC с описанием альтернатив и ревью команды до реализации",
+          "reason": "Переписывание несогласованного кода после pull request обходится в разы дороже написания RFC документа."
+        },
+        {
+          "bad": "// Показ белого экрана или алерта 'Ошибка сервера' при сбое второстепенного виджета",
+          "good": "// Изоляция сбоя в Error Boundary и показ запасного контента (Graceful Degradation)",
+          "reason": "Сбой в блоке 'Вам может понравиться' не должен блокировать просмотр товара и кнопку 'Оплатить'."
+        }
+      ],
+      "keyTakeaways": [
+        "RADIO фреймворк структурирует проектирование: Requirements, Architecture, Data Model, Interface, Optimizations.",
+        "RFC согласует архитектурные предложения до написания кода, а ADR фиксирует историю решений.",
+        "Виртуализация (Windowing) удерживает в DOM только видимые элементы, спасая от утечек памяти.",
+        "Cursor-based пагинация исключает дублирование записей в динамических лентах.",
+        "Graceful Degradation сохраняет работоспособность UI даже при отказе части микросервисов."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div id=\"system-design-sandbox\">\n  <h3>Frontend System Design: Виртуализация и Graceful Degradation</h3>\n  <div style=\"display:flex; gap:8px; margin-bottom:12px;\">\n    <button id=\"btn-simulate-normal\" style=\"background:#2dff8a; color:#0a0e13; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">1. Запрос к ML-рекомендациям</button>\n    <button id=\"btn-simulate-failure\" style=\"background:#f85149; color:#fff; border:none; padding:8px 14px; font-weight:bold; cursor:pointer;\">2. Авария бэкенда (Graceful Fallback)</button>\n  </div>\n  <pre id=\"sys-log\" style=\"color:#e6edf3; font-size:12px; line-height:1.5; background:#161b22; padding:12px; border-radius:6px; min-height:90px;\"></pre>\n</div>",
+      "initialCss": "#system-design-sandbox { font-family: monospace; color: #e6edf3; padding: 16px; background: #0d1117; border-radius: 8px; }",
+      "initialJs": "const log = document.getElementById('sys-log');\n\ndocument.getElementById('btn-simulate-normal').onclick = () => {\n  log.textContent = '🚀 [API] GET /api/feed/personalized (HTTP 200 OK — 120ms)\\n';\n  log.textContent += '📦 Получено 20 постов. Виртуализатор отрендерил 6 видимых карточек в DOM.\\n';\n  log.textContent += '📊 Память DOM: 14 КБ (вместо 45 МБ для 10 000 постов)\\n';\n  log.textContent += '⚡ Cursor token: \"eyJjcmVhdGVkQXQiOjE3MDAsImlkIjoyMH0=\"';\n  log.style.color = '#2dff8a';\n};\n\ndocument.getElementById('btn-simulate-failure').onclick = () => {\n  log.textContent = '🚨 [API Failure] GET /api/feed/personalized → 503 Service Unavailable\\n';\n  log.textContent += '🛡️ [Graceful Degradation]: Circuit Breaker активирован! Белый экран ПРЕДОТВРАЩЕН.\\n';\n  log.textContent += '📦 Отдан Fallback кэш: \"Топ-10 популярных статей недели\" из IndexedDB.\\n';\n  log.textContent += '🎉 Пользовательский опыт сохранен на 100%!';\n  log.style.color = '#ffb02e';\n};",
+      "instructions": "Практика с системным дизайном:\n1. Нажмите '1. Запрос к ML-рекомендациям' — виртуализатор отрендерит только видимые узлы\n2. Нажмите '2. Авария бэкенда' — сработает Graceful Degradation с показом оффлайн-кэша вместо ошибки"
+    },
+    "task": {
+      "title": "Разработка отказоустойчивого клиента с многоуровневым Graceful Degradation",
+      "scenario": "Создайте функцию fetchProductCatalogWithFallback(category), которая: 1) Пытается загрузить актуальный каталог с сервера с таймаутом 2000 мс; 2) При сбое сети или таймауте ищет данные в локальном кэше Cache API; 3) Если кэш пуст — возвращает статический аварийный набор данных (Disaster Recovery Fallback) с флагом isDegraded: true.",
+      "criteria": [
+        "Реализован таймаут сетевого запроса через AbortController (2000 мс)",
+        "При успешном ответе кэш обновляется",
+        "При сетевой ошибке/таймауте происходит бесшовный переход к кэшу",
+        "При отсутствии кэша возвращается статический аварийный массив с isDegraded: true"
+      ],
+      "starterCode": {
+        "js": "// Реализуйте отказоустойчивый клиент с Fallback\nconst STATIC_FALLBACK_DATA = [{ id: 'fallback-1', title: 'Популярный товар', price: 999 }];\n\nexport async function fetchProductCatalogWithFallback(category) {\n  // Ваш код\n}"
+      },
+      "hints": [
+        "const controller = new AbortController(); setTimeout(() => controller.abort(), 2000);",
+        "const res = await fetch(url, { signal: controller.signal });"
+      ],
+      "solution": {
+        "js": "const STATIC_FALLBACK_DATA = [\n  { id: 'fallback-1', title: 'Базовый товар (Оффлайн-режим)', price: 999 },\n  { id: 'fallback-2', title: 'Популярный товар каталога', price: 1499 },\n];\n\nexport async function fetchProductCatalogWithFallback(category) {\n  const controller = new AbortController();\n  const timeoutId = setTimeout(() => controller.abort(), 2000);\n  const cacheKey = `/api/catalog/${category}`;\n\n  try {\n    // 1. Попытка запроса к основному API с таймаутом 2с\n    const response = await fetch(cacheKey, { signal: controller.signal });\n    clearTimeout(timeoutId);\n\n    if (response.ok) {\n      const data = await response.json();\n      // Сохраняем свежую копию в Cache Storage\n      if ('caches' in window) {\n        const cache = await caches.open('catalog-v1');\n        cache.put(cacheKey, new Response(JSON.stringify(data)));\n      }\n      return { products: data, isDegraded: false };\n    }\n    throw new Error(`HTTP Error: ${response.status}`);\n  } catch (error) {\n    clearTimeout(timeoutId);\n    console.warn('[System Design Fallback]: Основной API недоступен, переход на Graceful Fallback:', error.message);\n\n    // 2. Попытка извлечь закешированную копию\n    if ('caches' in window) {\n      const cachedResponse = await caches.match(cacheKey);\n      if (cachedResponse) {\n        const cachedData = await cachedResponse.json();\n        return { products: cachedData, isDegraded: true, source: 'cache' };\n      }\n    }\n\n    // 3. Аварийный откат на статический набор (Disaster Recovery)\n    return { products: STATIC_FALLBACK_DATA, isDegraded: true, source: 'disaster-recovery' };\n  }\n}\n\nconsole.log('Отказоустойчивый сервис каталога успешно инициализирован!');",
+        "explanation": "Функция реализует трехуровневую защиту от сбоев: основной сетевой запрос с таймаутом, локальный кэш и статический Disaster Recovery массив."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "pro20-q1",
+          "question": "Что означает буква 'D' в архитектурном фреймворке Frontend System Design RADIO?",
+          "options": [
+            "Deployment (Автоматизация деплоя)",
+            "Data Model & Client State (Проектирование нормализованных сущностей, стейт-машины и клиентского кэша)",
+            "Debugging (Поиск ошибок в консоли)",
+            "Design Tokens (Цветовая палитра)"
+          ],
+          "correctIndex": 1,
+          "explanation": "В блоке Data Model инженеры проектируют форму данных, связи между сущностями и стратегию клиентского кэширования."
+        },
+        {
+          "id": "pro20-q2",
+          "question": "Для чего составляется документ RFC (Request for Comments) перед началом масштабных инженерных работ?",
+          "options": [
+            "Для оплаты счетов хостинга",
+            "Для описания архитектурного решения, анализа компромиссов (Trade-offs), альтернатив и сбора обратной связи от команды ДО написания кода",
+            "Для генерации документации Swagger",
+            "Для увольнения сотрудников"
+          ],
+          "correctIndex": 1,
+          "explanation": "RFC позволяет команде обсудить архитектуру и выявить критические уязвимости до инвестирования времени в разработку."
+        },
+        {
+          "id": "pro20-q3",
+          "question": "Какую проблему решает виртуализация списков (Windowing / Virtualized List) в бесконечных лентах новостей?",
+          "options": [
+            "Ускоряет загрузку картинок с CDN",
+            "Предотвращает переполнение оперативной памяти и зависание браузера, удерживая в DOM-дереве только несколько реально видимых пользователю карточек",
+            "Шифрует заголовки HTTP",
+            "Автоматически переводит текст на другие языки"
+          ],
+          "correctIndex": 1,
+          "explanation": "Виртуализатор рендерит только 8-10 элементов, находящихся в viewport, исключая создание десятков тысяч узлов в DOM."
+        },
+        {
+          "id": "pro20-q4",
+          "question": "Почему курсорная пагинация (Cursor-based) предпочтительнее смещения (Offset-based) в высоконагруженных лентах контента?",
+          "options": [
+            "Курсорная пагинация работает без базы данных",
+            "Она исключает дублирование или пропуск постов при непрерывном добавлении нового контента пользователями во время скролла ленты",
+            "Она занимает меньше места на сервере",
+            "Она поддерживается только в Google Chrome"
+          ],
+          "correctIndex": 1,
+          "explanation": "Курсор опирается на уникальный идентификатор последней прочитанной записи, оставаясь стабильным при вставке новых постов."
+        },
+        {
+          "id": "pro20-q5",
+          "question": "Что представляет собой концепция Graceful Degradation (Плавная деградация) во фронтенде?",
+          "options": [
+            "Удаление старых версий CSS",
+            "Способность приложения сохранять базовую работоспособность интерфейса (показ кэша, отключение второстепенных фич) при сбое бэкенда вместо падения в белый экран",
+            "Замедление скорости анимаций",
+            "Отключение JavaScript для всех клиентов"
+          ],
+          "correctIndex": 1,
+          "explanation": "Graceful Degradation гарантирует, что пользователь сможет завершить целевое действие даже при аварии вспомогательных микросервисов."
+        }
+      ]
+    }
   }
 ];

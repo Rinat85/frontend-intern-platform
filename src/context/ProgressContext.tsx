@@ -66,7 +66,10 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [allProgressCache, setAllProgressCache] = useState<Record<string, InternProgress>>({});
 
   const reloadProgress = useCallback(async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setCurrentProgress(emptyProgress('Гость'));
+      return;
+    }
     try {
       const summary = await progressService.fetchUserProgress(user.id);
       const prog: InternProgress = {

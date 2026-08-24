@@ -164,6 +164,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               className="dropdown-item item-logout"
               onClick={() => {
                 logout();
+                onNavigateHome();
                 setIsOpen(false);
               }}
             >

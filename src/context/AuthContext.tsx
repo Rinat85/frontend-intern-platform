@@ -69,20 +69,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     const savedUserId = localStorage.getItem(CURRENT_USER_ID_KEY);
-    const activeProfile = profiles.find(p => p.id === savedUserId) || profiles[0] || DEFAULT_DEMO_PROFILES[0];
     
-    if (activeProfile) {
-      const mentorProfile = activeProfile.mentor_id ? profiles.find(m => m.id === activeProfile.mentor_id) : null;
+    // Explicitly logged out
+    if (savedUserId === 'guest') {
+      setUser(null);
+      return;
+    }
+
+    // Explicitly saved user
+    if (savedUserId) {
+      const activeProfile = profiles.find(p => p.id === savedUserId);
+      if (activeProfile) {
+        const mentorProfile = activeProfile.mentor_id ? profiles.find(m => m.id === activeProfile.mentor_id) : null;
+        setUser({
+          id: activeProfile.id,
+          email: activeProfile.email,
+          name: activeProfile.full_name,
+          role: activeProfile.role,
+          mentorId: activeProfile.mentor_id || null,
+          mentorName: mentorProfile?.full_name || null,
+          registeredAt: activeProfile.created_at,
+          lastActiveAt: new Date().toISOString(),
+          avatar: activeProfile.avatar_url || (activeProfile.role === 'admin' ? '👑' : activeProfile.role === 'mentor' ? '👨‍🏫' : '👨‍💻')
+        });
+        return;
+      }
+    }
+
+    // Default to first profile if not explicitly logged out
+    if (profiles.length > 0) {
+      const activeProfile = profiles[0] || DEFAULT_DEMO_PROFILES[0];
       setUser({
         id: activeProfile.id,
         email: activeProfile.email,
         name: activeProfile.full_name,
         role: activeProfile.role,
         mentorId: activeProfile.mentor_id || null,
-        mentorName: mentorProfile?.full_name || null,
+        mentorName: null,
         registeredAt: activeProfile.created_at,
         lastActiveAt: new Date().toISOString(),
-        avatar: activeProfile.avatar_url || (activeProfile.role === 'admin' ? '👑' : activeProfile.role === 'mentor' ? '👨‍🏫' : '👨‍💻')
+        avatar: activeProfile.avatar_url || (activeProfile.role === 'admin' ? '👑' : '👨‍💻')
       });
     }
   }, [profiles]);
@@ -126,7 +152,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const created = await profileService.createProfile({
       email: cleanEmail,
       full_name: name.trim(),
-      role: 'intern', // Self-registered accounts are always Interns!
+      role: 'intern',
       avatar_url: '👨‍💻'
     });
 
@@ -183,8 +209,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (ok) {
       await refreshProfiles();
       if (user?.id === userId) {
-        // Logout if deleted self
-        quickLogin(DEFAULT_DEMO_PROFILES[0].id);
+        logout();
       }
       return true;
     }
@@ -192,7 +217,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    quickLogin(DEFAULT_DEMO_PROFILES[0].id);
+    localStorage.setItem(CURRENT_USER_ID_KEY, 'guest');
+    setUser(null);
   };
 
   const updateUser = (updates: Partial<User>) => {

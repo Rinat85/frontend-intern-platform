@@ -3,6 +3,7 @@ import { PracticalTask } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { useSubmissions } from '../../context/SubmissionContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { CodeBlock } from './CodeBlock';
 import {
   CheckCircle2, HelpCircle, Eye, EyeOff, Target, Sparkles,
@@ -18,7 +19,8 @@ interface TaskSectionProps {
 }
 
 export const TaskSection: React.FC<TaskSectionProps> = ({ lessonId, task, onCompletedChange }) => {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
   const { isTaskCompleted, toggleTaskCompletion, getSavedSandboxCode } = useProgress();
   const { currentLessonSubmission, loadLessonSubmission, submitTask } = useSubmissions();
 
@@ -68,13 +70,13 @@ export const TaskSection: React.FC<TaskSectionProps> = ({ lessonId, task, onComp
       setCssCode(saved.css || '');
       setJsCode(saved.js || '');
     } else {
-      alert('В песочнице этого урока пока нет сохраненного кода.');
+      toast.info('В песочнице этого урока пока нет сохранённого кода.', 'Песочница');
     }
   };
 
   const handleSubmitForReview = async () => {
     if (!htmlCode.trim() && !cssCode.trim() && !jsCode.trim() && !githubPrUrl.trim()) {
-      alert('Пожалуйста, введите код вашего решения или вставьте ссылку на GitHub PR.');
+      toast.warning('Пожалуйста, введите код решения или укажите ссылку на GitHub PR.', 'Пустое решение');
       return;
     }
 
@@ -94,7 +96,7 @@ export const TaskSection: React.FC<TaskSectionProps> = ({ lessonId, task, onComp
       setTimeout(() => setSubmitSuccessMsg(false), 4000);
       if (onCompletedChange) onCompletedChange();
     } else {
-      alert(res.error || 'Ошибка отправки решения');
+      toast.error(res.error === 'User not authenticated' ? 'Для отправки задания на проверку необходимо войти в аккаунт стажёра.' : (res.error || 'Ошибка отправки решения'), 'Ошибка отправки');
     }
   };
 

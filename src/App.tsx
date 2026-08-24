@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProgressProvider } from './context/ProgressContext';
 import { SubmissionProvider } from './context/SubmissionContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { ToastProvider } from './context/ToastContext';
 import { Header } from './components/common/Header';
 import { Sidebar } from './components/common/Sidebar';
 import { DashboardHome } from './components/dashboard/DashboardHome';
@@ -152,6 +153,7 @@ const AppInner: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
+    <ToastProvider>
     <AuthProvider>
       <NotificationProvider>
         <ProgressProvider>
@@ -161,6 +163,7 @@ export const App: React.FC = () => {
         </ProgressProvider>
       </NotificationProvider>
     </AuthProvider>
+    </ToastProvider>
   );
 };
 

@@ -3,6 +3,7 @@ import { Module } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { useAuth } from '../../context/AuthContext';
 import { useSubmissions } from '../../context/SubmissionContext';
+import { useToast } from '../../context/ToastContext';
 import { TaskSubmission, UserRole, Profile } from '../../types/database';
 import { CodeReviewModal } from './CodeReviewModal';
 import { ProgressBar } from '../common/ProgressBar';
@@ -42,6 +43,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const { getUserProgress, resetUserProgress, simulateCompleteUserProgress } = useProgress();
   const { allSubmissions, pendingCount, reviewSubmission } = useSubmissions();
+  const { toast, confirm } = useToast();
 
   const [activeTab, setActiveTab] = useState<'users' | 'queue'>('users');
   const [roleFilter, setRoleFilter] = useState<'all' | 'intern' | 'mentor' | 'admin'>('all');
@@ -161,13 +163,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }
   };
 
-  const handleDeleteUserClick = async (userId: string, userName: string) => {
-    if (window.confirm(`Вы действительно хотите удалить пользователя "${userName}" и все связанные данные?`)) {
-      await deleteUser(userId);
-      if (editingProfile?.id === userId) {
-        setEditingProfile(null);
+  const handleDeleteUserClick = (userId: string, userName: string) => {
+    confirm({
+      title: 'Удаление пользователя',
+      message: `Вы действительно хотите удалить пользователя "${userName}" и все связанные с ним данные и прогресс?`,
+      confirmText: 'Да, удалить',
+      cancelText: 'Отмена',
+      isDestructive: true,
+      onConfirm: async () => {
+        const ok = await deleteUser(userId);
+        if (ok) {
+          toast.success(`Пользователь "${userName}" успешно удален`, 'Удаление');
+          if (editingProfile?.id === userId) {
+            setEditingProfile(null);
+          }
+        } else {
+          toast.error('Не удалось удалить пользователя', 'Ошибка');
+        }
       }
-    }
+    });
   };
 
   return (
@@ -762,9 +776,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <button
                     className="btn btn-secondary btn-sm text-danger"
                     onClick={() => {
-                      if (window.confirm(`Сбросить весь прогресс стажёра ${selectedIntern.full_name}?`)) {
-                        resetUserProgress(selectedIntern.id);
-                      }
+                      confirm({
+                        title: 'Сброс прогресса стажёра',
+                        message: `Сбросить весь прогресс стажёра ${selectedIntern.full_name}? Все пройденные уроки и квизы будут обнулены.`,
+                        confirmText: 'Сбросить прогресс',
+                        cancelText: 'Отмена',
+                        isDestructive: true,
+                        onConfirm: () => {
+                          resetUserProgress(selectedIntern.id);
+                          toast.info(`Прогресс стажёра ${selectedIntern.full_name} сброшен`, 'Сброс прогресса');
+                        }
+                      })
                     }}
                   >
                     <RotateCcw size={16} />

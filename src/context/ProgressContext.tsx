@@ -171,11 +171,9 @@ export const ProgressProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const resetProgress = () => {
-    if (window.confirm('Вы уверены, что хотите сбросить свой прогресс обучения?')) {
-      setCurrentProgress(emptyProgress(currentUserName));
-      if (user?.id) {
-        progressService.resetUserProgress(user.id);
-      }
+    setCurrentProgress(emptyProgress(currentUserName));
+    if (user?.id) {
+      progressService.resetUserProgress(user.id);
     }
   };
 

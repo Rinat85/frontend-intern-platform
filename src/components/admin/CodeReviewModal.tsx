@@ -1,3 +1,4 @@
+import { useToast } from '../../context/ToastContext';
 import React, { useState, useEffect } from 'react';
 import { TaskSubmission } from '../../types/database';
 import { Module } from '../../types/curriculum';
@@ -27,6 +28,7 @@ export const CodeReviewModal: React.FC<CodeReviewModalProps> = ({
   onClose,
   onReviewSubmit
 }) => {
+  const { toast } = useToast();
   const [feedback, setFeedback] = useState('');
   const [grade, setGrade] = useState(100);
   const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'solution'>('code');
@@ -53,7 +55,7 @@ export const CodeReviewModal: React.FC<CodeReviewModalProps> = ({
 
   const handleAction = async (statusResult: 'approved' | 'rejected') => {
     if (!feedback.trim()) {
-      alert('Пожалуйста, напишите комментарий / фидбек к выполненному заданию.');
+      toast.warning('Пожалуйста, напишите комментарий или рекомендации стажёру.', 'Требуется комментарий');
       return;
     }
 

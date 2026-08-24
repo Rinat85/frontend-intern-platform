@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { X, Mail, Lock, User as UserIcon, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { X, Mail, Lock, User as UserIcon, Sparkles, CheckCircle2, ArrowRight, ShieldAlert, KeyRound } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     setIsSubmitting(true);
     try {
-      const res = await login(email);
+      const res = await login(email, password);
       if (res.success) {
         setSuccessMsg('Вход успешно выполнен!');
         setTimeout(() => {
@@ -53,7 +53,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     setIsSubmitting(true);
     try {
-      const res = await register(name, email);
+      const res = await register(name, email, password);
       if (res.success) {
         setSuccessMsg('Регистрация завершена! Добро пожаловать на стажировку.');
         setTimeout(() => {
@@ -70,13 +70,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleQuickSelect = (userId: string) => {
-    quickLogin(userId);
-    setSuccessMsg('Вход выполнен!');
-    setTimeout(() => {
-      setSuccessMsg(null);
-      onClose();
-    }, 300);
+  const handleQuickSelect = async (userItem: typeof users[0]) => {
+    if (userItem.role === 'admin' || userItem.role === 'mentor') {
+      // Pre-fill email and switch to login tab requiring password
+      setEmail(userItem.email);
+      setActiveTab('login');
+      setError('Для входа под учетной записью администратора / ментора введите пароль:');
+      return;
+    }
+
+    const res = await quickLogin(userItem.id);
+    if (res.success) {
+      setSuccessMsg('Вход выполнен!');
+      setTimeout(() => {
+        setSuccessMsg(null);
+        onClose();
+      }, 300);
+    } else {
+      setEmail(userItem.email);
+      setActiveTab('login');
+      setError(res.error || 'Ошибка входа');
+    }
   };
 
   return (
@@ -87,7 +101,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="modal-header-title">
             <Sparkles size={20} className="text-accent" />
             <div>
-              <h3 style={{ margin: 0 }}>Вход и регистрация стажёров</h3>
+              <h3 style={{ margin: 0 }}>Авторизация и регистрация</h3>
               <p className="text-muted text-xs">RocketGate Frontend Intern Platform</p>
             </div>
           </div>
@@ -119,20 +133,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         <div className="modal-body auth-modal-body">
-          {error && <div className="auth-alert auth-alert-error">{error}</div>}
-          {successMsg && <div className="auth-alert auth-alert-success"><CheckCircle2 size={16} /> {successMsg}</div>}
+          {error && (
+            <div className="auth-alert auth-alert-error">
+              <ShieldAlert size={16} />
+              <span>{error}</span>
+            </div>
+          )}
+          {successMsg && (
+            <div className="auth-alert auth-alert-success">
+              <CheckCircle2 size={16} />
+              <span>{successMsg}</span>
+            </div>
+          )}
 
           {/* Login Form */}
           {activeTab === 'login' && (
             <form onSubmit={handleLoginSubmit} className="auth-form">
               <div className="form-group">
-                <label className="form-label">Email адрес</label>
+                <label className="form-label">Email или логин (например, admin@rocketgate.com):</label>
                 <div className="input-with-icon">
                   <Mail size={16} className="field-icon" />
                   <input
-                    type="email"
+                    type="text"
                     required
-                    placeholder="student@intern.io или admin@rocketgate.com"
+                    placeholder="admin@rocketgate.com или student@intern.io"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="form-input"
@@ -141,21 +165,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Пароль</label>
+                <label className="form-label">Пароль:</label>
                 <div className="input-with-icon">
                   <Lock size={16} className="field-icon" />
                   <input
                     type="password"
-                    placeholder="••••••••"
+                    required
+                    placeholder="Введите ваш пароль"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     className="form-input"
                   />
                 </div>
+                {email.toLowerCase().includes('admin') && (
+                  <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
+                    💡 Пароль администратора по умолчанию: <code className="font-mono text-accent">admin123</code>
+                  </span>
+                )}
               </div>
 
               <button type="submit" className="btn btn-primary btn-block auth-submit-btn" disabled={isSubmitting}>
-                {isSubmitting ? 'Вход...' : 'Войти в аккаунт'}
+                <KeyRound size={16} />
+                <span>{isSubmitting ? 'Проверка...' : 'Войти в аккаунт'}</span>
               </button>
 
               <div className="auth-footer-note">
@@ -205,11 +236,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Пароль</label>
+                <label className="form-label">Пароль для входа</label>
                 <div className="input-with-icon">
                   <Lock size={16} className="field-icon" />
                   <input
                     type="password"
+                    required
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
@@ -246,29 +278,42 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {activeTab === 'quick' && (
             <div className="quick-accounts-list">
               <p className="text-sm text-muted" style={{ marginBottom: '14px' }}>
-                Быстрое переключение между зарегистрированными аккаунтами в базе данных:
+                Выберите аккаунт для входа (для аккаунтов администратора/ментора потребуется ввод пароля):
               </p>
-              {users.map(u => (
-                <div
-                  key={u.id}
-                  className="quick-user-card"
-                  onClick={() => handleQuickSelect(u.id)}
-                >
-                  <div className="quick-user-avatar">{u.avatar || '👤'}</div>
-                  <div className="quick-user-info">
-                    <div className="quick-user-name">
-                      {u.name}
-                      <span className={`role-badge role-${u.role}`}>
-                        {u.role === 'admin' ? 'Администратор' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'}
-                      </span>
+              {users.map(u => {
+                const isPrivileged = u.role === 'admin' || u.role === 'mentor';
+                return (
+                  <div
+                    key={u.id}
+                    className="quick-user-card"
+                    onClick={() => handleQuickSelect(u)}
+                  >
+                    <div className="quick-user-avatar">{u.avatar || '👤'}</div>
+                    <div className="quick-user-info">
+                      <div className="quick-user-name">
+                        {u.name}
+                        <span className={`role-badge role-${u.role}`}>
+                          {u.role === 'admin' ? '👑 Администратор' : u.role === 'mentor' ? '👨‍🏫 Ментор' : '👨‍💻 Стажёр'}
+                        </span>
+                      </div>
+                      <div className="quick-user-email">{u.email}</div>
                     </div>
-                    <div className="quick-user-email">{u.email}</div>
+                    <button className="btn btn-secondary btn-sm quick-select-btn">
+                      {isPrivileged ? (
+                        <>
+                          <Lock size={13} />
+                          <span>Пароль</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Войти</span>
+                          <ArrowRight size={14} />
+                        </>
+                      )}
+                    </button>
                   </div>
-                  <button className="btn btn-secondary btn-sm quick-select-btn">
-                    Войти <ArrowRight size={14} />
-                  </button>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

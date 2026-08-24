@@ -126,24 +126,32 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           <div className="user-dropdown-divider" />
 
           {/* Quick Switch Section */}
-          <div className="dropdown-section-title">Быстрое переключение аккаунтов:</div>
-          <div className="quick-switch-list">
-            {users.map(u => (
-              <button
-                key={u.id}
-                className={`quick-switch-item ${u.id === user.id ? 'active' : ''}`}
-                onClick={() => {
-                  quickLogin(u.id);
-                  setIsOpen(false);
-                }}
-              >
-                <span className="quick-switch-avatar">{u.avatar || '👤'}</span>
-                <span className="quick-switch-name">{u.name}</span>
-                <span className="quick-switch-role">({u.role === 'admin' ? 'Админ' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'})</span>
-                {u.id === user.id && <Check size={14} className="active-check" />}
-              </button>
-            ))}
-          </div>
+          {users.length > 1 && (
+            <>
+              <div className="dropdown-section-title">Переключение аккаунтов:</div>
+              <div className="quick-switch-list">
+                {users.map(u => (
+                  <button
+                    key={u.id}
+                    className={`quick-switch-item ${u.id === user.id ? 'active' : ''}`}
+                    onClick={() => {
+                      if (u.role === 'admin' || u.role === 'mentor') {
+                        onOpenAuth('login');
+                      } else {
+                        quickLogin(u.id);
+                      }
+                      setIsOpen(false);
+                    }}
+                  >
+                    <span className="quick-switch-avatar">{u.avatar || '👤'}</span>
+                    <span className="quick-switch-name">{u.name}</span>
+                    <span className="quick-switch-role">({u.role === 'admin' ? 'Админ' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'})</span>
+                    {u.id === user.id && <Check size={14} className="active-check" />}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
           <div className="user-dropdown-divider" />
 

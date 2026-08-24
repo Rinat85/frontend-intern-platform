@@ -11,7 +11,8 @@ import {
   Users, Award, CheckCircle2, RotateCcw, Clock,
   ArrowRight, Eye, ShieldCheck, ChevronRight, X,
   Code2, Sparkles, Send, AlertTriangle, FileCode, CheckSquare,
-  UserPlus, UserCog, UserCheck, Shield, Trash2, Edit3, Mail, Lock
+  UserPlus, UserCog, UserCheck, Shield, Trash2, Edit3, Mail, Lock,
+  Check, Filter
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -25,7 +26,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigateHome,
   onSelectLesson
 }) => {
-  const { profiles, user: currentUser, isAdmin, quickLogin, createUser, updateUserRole, assignMentor, deleteUser, supabaseStatus } = useAuth();
+  const {
+    profiles,
+    user: currentUser,
+    isAdmin,
+    isMentor,
+    assignedInterns,
+    quickLogin,
+    createUser,
+    updateUserRole,
+    assignMentors,
+    deleteUser,
+    supabaseStatus
+  } = useAuth();
+
   const { getUserProgress, resetUserProgress, simulateCompleteUserProgress } = useProgress();
   const { allSubmissions, pendingCount, reviewSubmission } = useSubmissions();
 
@@ -43,27 +57,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserRole, setNewUserRole] = useState<UserRole>('intern');
-  const [newUserMentorId, setNewUserMentorId] = useState<string>('');
+  const [selectedMentorIds, setSelectedMentorIds] = useState<string[]>([]);
   const [addUserError, setAddUserError] = useState<string | null>(null);
   const [isAddingUser, setIsAddingUser] = useState(false);
 
   // Edit User Form state
   const [editRole, setEditRole] = useState<UserRole>('intern');
-  const [editMentorId, setEditMentorId] = useState<string>('');
+  const [editMentorIds, setEditMentorIds] = useState<string[]>([]);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
+  // List of all available mentors & admins
   const mentorsList = profiles.filter(p => p.role === 'mentor' || p.role === 'admin');
 
-  // Filtered users
-  const filteredUsers = profiles.filter(p => {
-    if (roleFilter === 'all') return true;
-    return p.role === roleFilter;
-  });
+  // Visible users based on role:
+  // Admin: can see all users (or filtered by role)
+  // Mentor: can ONLY see their assigned interns
+  const visibleUsers = isAdmin
+    ? profiles.filter(p => (roleFilter === 'all' ? true : p.role === roleFilter))
+    : assignedInterns;
 
-  // Filtered submissions
-  const filteredSubmissions = allSubmissions.filter(s => {
-    if (statusFilter === 'all') return true;
-    return s.status === statusFilter;
+  // Visible submissions based on role:
+  // Admin: can see all submissions
+  // Mentor: can ONLY see submissions of their assigned interns
+  const visibleSubmissions = allSubmissions.filter(s => {
+    if (statusFilter !== 'all' && s.status !== statusFilter) return false;
+    if (isAdmin) return true;
+    if (isMentor && currentUser?.id) {
+      const studentProfile = profiles.find(p => p.id === s.user_id);
+      return studentProfile?.mentor_ids?.includes(currentUser.id);
+    }
+    return false;
   });
 
   const selectedIntern = profiles.find(p => p.id === selectedInternId);
@@ -73,9 +96,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setNewUserName('');
     setNewUserEmail('');
     setNewUserRole('intern');
-    setNewUserMentorId(mentorsList[0]?.id || '');
+    setSelectedMentorIds([]);
     setAddUserError(null);
     setIsAddUserOpen(true);
+  };
+
+  const toggleAddMentorSelection = (mentorId: string) => {
+    setSelectedMentorIds(prev =>
+      prev.includes(mentorId) ? prev.filter(id => id !== mentorId) : [...prev, mentorId]
+    );
   };
 
   const handleAddUserSubmit = async (e: React.FormEvent) => {
@@ -87,7 +116,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         name: newUserName,
         email: newUserEmail,
         role: newUserRole,
-        mentorId: newUserRole === 'intern' ? (newUserMentorId || null) : null
+        mentorIds: newUserRole === 'intern' ? selectedMentorIds : []
       });
 
       if (res.success) {
@@ -105,7 +134,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleOpenEditUser = (p: Profile) => {
     setEditingProfile(p);
     setEditRole(p.role);
-    setEditMentorId(p.mentor_id || '');
+    setEditMentorIds(p.mentor_ids || []);
+  };
+
+  const toggleEditMentorSelection = (mentorId: string) => {
+    setEditMentorIds(prev =>
+      prev.includes(mentorId) ? prev.filter(id => id !== mentorId) : [...prev, mentorId]
+    );
   };
 
   const handleSaveEditUser = async () => {
@@ -116,7 +151,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         await updateUserRole(editingProfile.id, editRole);
       }
       if (editRole === 'intern') {
-        await assignMentor(editingProfile.id, editMentorId || null);
+        await assignMentors(editingProfile.id, editMentorIds);
       }
       setEditingProfile(null);
     } catch (e) {
@@ -127,7 +162,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   const handleDeleteUserClick = async (userId: string, userName: string) => {
-    if (window.confirm(`Вы действительно хотите удалить пользователя "${userName}" и все его данные?`)) {
+    if (window.confirm(`Вы действительно хотите удалить пользователя "${userName}" и все связанные данные?`)) {
       await deleteUser(userId);
       if (editingProfile?.id === userId) {
         setEditingProfile(null);
@@ -142,9 +177,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="admin-header-title-wrap">
           <ShieldCheck size={28} className="text-accent" />
           <div>
-            <h1 className="admin-title">Панель управления стажировкой (LMS)</h1>
+            <h1 className="admin-title">
+              {isAdmin ? 'Панель Администратора (LMS Management)' : 'Панель Ментора (LMS Workspace)'}
+            </h1>
             <p className="admin-subtitle">
-              Управление пользователями, назначение менторов, мониторинг успеваемости и Code Review
+              {isAdmin
+                ? 'Полный контроль пользователей, назначение менторов, мониторинг успеваемости и проверка заданий'
+                : `Просмотр успеваемости ваших подопечных стажёров (${assignedInterns.length}) и Code Review заданий`}
             </p>
           </div>
         </div>
@@ -164,14 +203,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       </div>
 
-      {/* Admin Tabs */}
+      {/* Admin / Mentor Tabs */}
       <div className="admin-tabs-bar">
         <button
           className={`admin-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
           onClick={() => setActiveTab('users')}
         >
           <Users size={16} />
-          <span>Пользователи и роли ({profiles.length})</span>
+          <span>
+            {isAdmin ? `Пользователи и роли (${profiles.length})` : `Мои стажёры (${assignedInterns.length})`}
+          </span>
         </button>
 
         <button
@@ -180,43 +221,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         >
           <FileCode size={16} />
           <span>Очередь заданий на Code Review</span>
-          {pendingCount > 0 && <span className="tab-counter-badge">{pendingCount}</span>}
+          {visibleSubmissions.filter(s => s.status === 'pending').length > 0 && (
+            <span className="tab-counter-badge">
+              {visibleSubmissions.filter(s => s.status === 'pending').length}
+            </span>
+          )}
         </button>
       </div>
 
-      {/* Tab 1: Users Management */}
+      {/* Tab 1: Users / Interns Management */}
       {activeTab === 'users' && (
         <div className="admin-queue-view">
-          {/* Filter Bar */}
-          <div className="queue-filter-bar">
-            <span className="filter-label">Роль:</span>
-            <div className="filter-buttons-group">
-              <button
-                className={`filter-btn ${roleFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setRoleFilter('all')}
-              >
-                Все ({profiles.length})
-              </button>
-              <button
-                className={`filter-btn ${roleFilter === 'intern' ? 'active' : ''}`}
-                onClick={() => setRoleFilter('intern')}
-              >
-                Стажёры ({profiles.filter(p => p.role === 'intern').length})
-              </button>
-              <button
-                className={`filter-btn ${roleFilter === 'mentor' ? 'active' : ''}`}
-                onClick={() => setRoleFilter('mentor')}
-              >
-                Менторы ({profiles.filter(p => p.role === 'mentor').length})
-              </button>
-              <button
-                className={`filter-btn ${roleFilter === 'admin' ? 'active' : ''}`}
-                onClick={() => setRoleFilter('admin')}
-              >
-                Администраторы ({profiles.filter(p => p.role === 'admin').length})
-              </button>
+          {/* Admin Role Filters */}
+          {isAdmin && (
+            <div className="queue-filter-bar">
+              <span className="filter-label">Фильтр ролей:</span>
+              <div className="filter-buttons-group">
+                <button
+                  className={`filter-btn ${roleFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setRoleFilter('all')}
+                >
+                  Все ({profiles.length})
+                </button>
+                <button
+                  className={`filter-btn ${roleFilter === 'intern' ? 'active' : ''}`}
+                  onClick={() => setRoleFilter('intern')}
+                >
+                  Стажёры ({profiles.filter(p => p.role === 'intern').length})
+                </button>
+                <button
+                  className={`filter-btn ${roleFilter === 'mentor' ? 'active' : ''}`}
+                  onClick={() => setRoleFilter('mentor')}
+                >
+                  Менторы ({profiles.filter(p => p.role === 'mentor').length})
+                </button>
+                <button
+                  className={`filter-btn ${roleFilter === 'admin' ? 'active' : ''}`}
+                  onClick={() => setRoleFilter('admin')}
+                >
+                  Администраторы ({profiles.filter(p => p.role === 'admin').length})
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Users Table */}
           <div className="admin-interns-table-wrapper">
@@ -225,103 +272,126 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <tr>
                   <th>Пользователь</th>
                   <th>Роль</th>
-                  <th>Назначенный ментор</th>
+                  <th>Назначенные менторы</th>
                   <th>Прогресс обучения</th>
                   <th style={{ textAlign: 'right' }}>Управление</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map(profile => {
-                  const isIntern = profile.role === 'intern';
-                  const prog = isIntern ? getUserProgress(profile.id) : null;
-                  const completedCount = prog?.completedLessons?.length || 0;
-                  const percentage = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
-                  const isCertified = completedCount >= TOTAL_PLATFORM_LESSONS;
-                  const mentor = profile.mentor_id ? profiles.find(m => m.id === profile.mentor_id) : null;
+                {visibleUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '36px' }}>
+                      <Users size={32} className="text-muted" style={{ margin: '0 auto 8px' }} />
+                      <p className="text-muted">
+                        {isMentor
+                          ? 'У вас пока нет прикреплённых стажёров. Администратор может назначить вам подопечных.'
+                          : 'Нет пользователей в выбранной категории.'}
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  visibleUsers.map(profile => {
+                    const isIntern = profile.role === 'intern';
+                    const prog = isIntern ? getUserProgress(profile.id) : null;
+                    const completedCount = prog?.completedLessons?.length || 0;
+                    const percentage = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
+                    const mentorIds = profile.mentor_ids || [];
+                    const assignedMentorsList = profiles.filter(m => mentorIds.includes(m.id));
 
-                  return (
-                    <tr key={profile.id} className="intern-row">
-                      <td>
-                        <div className="intern-cell-profile">
-                          <span className="intern-avatar">{profile.avatar_url || (profile.role === 'admin' ? '👑' : profile.role === 'mentor' ? '👨‍🏫' : '👨‍💻')}</span>
-                          <div>
-                            <div className="intern-name">{profile.full_name}</div>
-                            <div className="intern-email">{profile.email}</div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td>
-                        <span className={`role-chip ${profile.role}`}>
-                          {profile.role === 'admin' ? '👑 Администратор' : profile.role === 'mentor' ? '👨‍🏫 Ментор' : '👨‍💻 Стажёр'}
-                        </span>
-                      </td>
-
-                      <td>
-                        {isIntern ? (
-                          mentor ? (
-                            <span className="mentor-assigned-badge" title={`Ментор: ${mentor.full_name}`}>
-                              👨‍🏫 {mentor.full_name}
+                    return (
+                      <tr key={profile.id} className="intern-row">
+                        <td>
+                          <div className="intern-cell-profile">
+                            <span className="intern-avatar">
+                              {profile.avatar_url || (profile.role === 'admin' ? '👑' : profile.role === 'mentor' ? '👨‍🏫' : '👨‍💻')}
                             </span>
-                          ) : (
-                            <span className="text-muted text-xs">Не назначен</span>
-                          )
-                        ) : (
-                          <span className="text-muted text-xs">—</span>
-                        )}
-                      </td>
-
-                      <td style={{ minWidth: '160px' }}>
-                        {isIntern ? (
-                          <div className="progress-cell-wrap">
-                            <ProgressBar value={percentage} height={6} />
-                            <span className="progress-cell-pct">{percentage}% ({completedCount}/{TOTAL_PLATFORM_LESSONS})</span>
+                            <div>
+                              <div className="intern-name">{profile.full_name}</div>
+                              <div className="intern-email">{profile.email}</div>
+                            </div>
                           </div>
-                        ) : (
-                          <span className="text-muted text-xs">Преподавательский состав</span>
-                        )}
-                      </td>
+                        </td>
 
-                      <td style={{ textAlign: 'right' }}>
-                        <div className="row-actions-group">
-                          {isIntern && (
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => setSelectedInternId(profile.id)}
-                              title="Успеваемость стажёра"
-                            >
-                              <Eye size={14} />
-                              <span>Успеваемость</span>
-                            </button>
+                        <td>
+                          <span className={`role-chip ${profile.role}`}>
+                            {profile.role === 'admin' ? '👑 Администратор' : profile.role === 'mentor' ? '👨‍🏫 Ментор' : '👨‍💻 Стажёр'}
+                          </span>
+                        </td>
+
+                        <td>
+                          {isIntern ? (
+                            assignedMentorsList.length > 0 ? (
+                              <div className="mentors-chips-wrap">
+                                {assignedMentorsList.map(m => (
+                                  <span key={m.id} className="mentor-assigned-badge" title={m.email}>
+                                    👨‍🏫 {m.full_name}
+                                  </span>
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-muted text-xs">Не назначены</span>
+                            )
+                          ) : (
+                            <span className="text-muted text-xs">—</span>
                           )}
+                        </td>
 
-                          {isAdmin && (
-                            <button
-                              className="btn btn-secondary btn-sm"
-                              onClick={() => handleOpenEditUser(profile)}
-                              title="Редактировать роль и ментора"
-                            >
-                              <UserCog size={14} />
-                              <span>Роль/Ментор</span>
-                            </button>
+                        <td style={{ minWidth: '160px' }}>
+                          {isIntern ? (
+                            <div className="progress-cell-wrap">
+                              <ProgressBar value={percentage} height={6} />
+                              <span className="progress-cell-pct">
+                                {percentage}% ({completedCount}/{TOTAL_PLATFORM_LESSONS})
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-muted text-xs">Преподавательский состав</span>
                           )}
+                        </td>
 
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={() => {
-                              quickLogin(profile.id);
-                              onNavigateHome();
-                            }}
-                            title="Войти в интерфейс под этим пользователем"
-                          >
-                            <span>Войти</span>
-                            <ArrowRight size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="row-actions-group">
+                            {isIntern && (
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => setSelectedInternId(profile.id)}
+                                title="Успеваемость стажёра"
+                              >
+                                <Eye size={14} />
+                                <span>Успеваемость</span>
+                              </button>
+                            )}
+
+                            {isAdmin && (
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => handleOpenEditUser(profile)}
+                                title="Редактировать роль и менторов"
+                              >
+                                <UserCog size={14} />
+                                <span>Роль/Менторы</span>
+                              </button>
+                            )}
+
+                            {isAdmin && (
+                              <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={() => {
+                                  quickLogin(profile.id);
+                                  onNavigateHome();
+                                }}
+                                title="Войти в интерфейс под этим пользователем"
+                              >
+                                <span>Войти</span>
+                                <ArrowRight size={14} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -332,31 +402,31 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {activeTab === 'queue' && (
         <div className="admin-queue-view">
           <div className="queue-filter-bar">
-            <span className="filter-label">Фильтр по статусу:</span>
+            <span className="filter-label">Фильтр статуса:</span>
             <div className="filter-buttons-group">
               <button
                 className={`filter-btn ${statusFilter === 'all' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('all')}
               >
-                Все ({allSubmissions.length})
+                Все ({visibleSubmissions.length})
               </button>
               <button
                 className={`filter-btn ${statusFilter === 'pending' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('pending')}
               >
-                Ожидают проверки ({allSubmissions.filter(s => s.status === 'pending').length})
+                Ожидают проверки ({visibleSubmissions.filter(s => s.status === 'pending').length})
               </button>
               <button
                 className={`filter-btn ${statusFilter === 'approved' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('approved')}
               >
-                Одобренные ({allSubmissions.filter(s => s.status === 'approved').length})
+                Одобренные ({visibleSubmissions.filter(s => s.status === 'approved').length})
               </button>
               <button
                 className={`filter-btn ${statusFilter === 'rejected' ? 'active' : ''}`}
                 onClick={() => setStatusFilter('rejected')}
               >
-                На доработке ({allSubmissions.filter(s => s.status === 'rejected').length})
+                На доработке ({visibleSubmissions.filter(s => s.status === 'rejected').length})
               </button>
             </div>
           </div>
@@ -373,15 +443,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {filteredSubmissions.length === 0 ? (
+                {visibleSubmissions.length === 0 ? (
                   <tr>
                     <td colSpan={5} style={{ textAlign: 'center', padding: '36px' }}>
                       <CheckCircle2 size={32} className="text-success" style={{ margin: '0 auto 8px' }} />
-                      <p className="text-muted">Нет заданий в данной категории</p>
+                      <p className="text-muted">Нет заданий на проверку в данной категории</p>
                     </td>
                   </tr>
                 ) : (
-                  filteredSubmissions.map(sub => {
+                  visibleSubmissions.map(sub => {
                     const allL = modules.flatMap(m => m.lessons);
                     const curLesson = allL.find(l => l.id === sub.lesson_id);
 
@@ -437,8 +507,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       )}
 
-      {/* Modal: Add User */}
-      {isAddUserOpen && (
+      {/* Modal: Add User (Admin Only) */}
+      {isAddUserOpen && isAdmin && (
         <div className="modal-backdrop" onClick={() => setIsAddUserOpen(false)}>
           <div className="modal-container user-manage-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
@@ -507,19 +577,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               {newUserRole === 'intern' && mentorsList.length > 0 && (
                 <div className="form-group">
-                  <label className="form-label">Назначить ментора:</label>
-                  <select
-                    className="form-input"
-                    value={newUserMentorId}
-                    onChange={e => setNewUserMentorId(e.target.value)}
-                  >
-                    <option value="">Без ментора (назначить позже)</option>
-                    {mentorsList.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.full_name} ({m.role === 'admin' ? 'Администратор' : 'Ментор'})
-                      </option>
-                    ))}
-                  </select>
+                  <label className="form-label">Прикрепить менторов (выберите одного или нескольких):</label>
+                  <div className="mentors-checkbox-list">
+                    {mentorsList.map(m => {
+                      const isSelected = selectedMentorIds.includes(m.id);
+                      return (
+                        <div
+                          key={m.id}
+                          className={`mentor-checkbox-item ${isSelected ? 'checked' : ''}`}
+                          onClick={() => toggleAddMentorSelection(m.id)}
+                        >
+                          <div className="checkbox-box">{isSelected && <Check size={14} />}</div>
+                          <div className="mentor-check-info">
+                            <span className="mentor-check-name">{m.full_name}</span>
+                            <span className="text-xs text-muted">({m.role === 'admin' ? 'Админ' : 'Ментор'})</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
@@ -536,15 +612,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
       )}
 
-      {/* Modal: Edit User Role & Mentor */}
-      {editingProfile && (
+      {/* Modal: Edit User Role & Mentors (Admin Only) */}
+      {editingProfile && isAdmin && (
         <div className="modal-backdrop" onClick={() => setEditingProfile(null)}>
           <div className="modal-container user-manage-modal" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-header-title">
                 <UserCog size={20} className="text-accent" />
                 <div>
-                  <h3 style={{ margin: 0 }}>Настройки пользователя: {editingProfile.full_name}</h3>
+                  <h3 style={{ margin: 0 }}>Настройки: {editingProfile.full_name}</h3>
                   <p className="text-muted text-xs">{editingProfile.email}</p>
                 </div>
               </div>
@@ -583,21 +659,27 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               {editRole === 'intern' && (
                 <div className="form-group">
-                  <label className="form-label">Назначенный ментор:</label>
-                  <select
-                    className="form-input"
-                    value={editMentorId}
-                    onChange={e => setEditMentorId(e.target.value)}
-                  >
-                    <option value="">Не назначен</option>
+                  <label className="form-label">Прикреплённые менторы (множественный выбор):</label>
+                  <div className="mentors-checkbox-list">
                     {mentorsList
                       .filter(m => m.id !== editingProfile.id)
-                      .map(m => (
-                        <option key={m.id} value={m.id}>
-                          {m.full_name} ({m.role === 'admin' ? 'Администратор' : 'Ментор'})
-                        </option>
-                      ))}
-                  </select>
+                      .map(m => {
+                        const isSelected = editMentorIds.includes(m.id);
+                        return (
+                          <div
+                            key={m.id}
+                            className={`mentor-checkbox-item ${isSelected ? 'checked' : ''}`}
+                            onClick={() => toggleEditMentorSelection(m.id)}
+                          >
+                            <div className="checkbox-box">{isSelected && <Check size={14} />}</div>
+                            <div className="mentor-check-info">
+                              <span className="mentor-check-name">{m.full_name}</span>
+                              <span className="text-xs text-muted">({m.role === 'admin' ? 'Админ' : 'Ментор'})</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
                 </div>
               )}
 
@@ -668,26 +750,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 />
               </div>
 
-              <div className="admin-actions-bar">
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={() => simulateCompleteUserProgress(selectedIntern.id)}
-                >
-                  <Award size={16} />
-                  <span>Симулировать 100% завершение (Сертификат)</span>
-                </button>
-                <button
-                  className="btn btn-secondary btn-sm text-danger"
-                  onClick={() => {
-                    if (window.confirm(`Сбросить весь прогресс стажёра ${selectedIntern.full_name}?`)) {
-                      resetUserProgress(selectedIntern.id);
-                    }
-                  }}
-                >
-                  <RotateCcw size={16} />
-                  <span>Сбросить прогресс</span>
-                </button>
-              </div>
+              {isAdmin && (
+                <div className="admin-actions-bar">
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => simulateCompleteUserProgress(selectedIntern.id)}
+                  >
+                    <Award size={16} />
+                    <span>Симулировать 100% завершение (Сертификат)</span>
+                  </button>
+                  <button
+                    className="btn btn-secondary btn-sm text-danger"
+                    onClick={() => {
+                      if (window.confirm(`Сбросить весь прогресс стажёра ${selectedIntern.full_name}?`)) {
+                        resetUserProgress(selectedIntern.id);
+                      }
+                    }}
+                  >
+                    <RotateCcw size={16} />
+                    <span>Сбросить прогресс</span>
+                  </button>
+                </div>
+              )}
 
               <h4 style={{ marginTop: '20px', marginBottom: '12px' }}>Прогресс по модулям:</h4>
               <div className="detail-modules-list">

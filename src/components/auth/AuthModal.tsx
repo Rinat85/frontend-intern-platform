@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { X, Mail, Lock, User as UserIcon, Sparkles, CheckCircle2, ArrowRight, ShieldAlert, KeyRound } from 'lucide-react';
+import {
+  X, Mail, Lock, User as UserIcon, Sparkles, CheckCircle2,
+  ArrowRight, ShieldAlert, KeyRound, CheckCheck, Send, Eye, EyeOff
+} from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -20,8 +23,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [emailConfirmationSent, setEmailConfirmationSent] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
@@ -29,7 +35,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setEmailConfirmationSent(null);
     setIsSubmitting(true);
+
     try {
       const res = await login(email, password);
       if (res.success) {
@@ -51,15 +59,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setEmailConfirmationSent(null);
+
+    // Password validation
+    if (password.length < 6) {
+      setError('Пароль должен содержать не менее 6 символов.');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Введённые пароли не совпадают. Пожалуйста, проверьте правильность.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await register(name, email, password);
       if (res.success) {
-        setSuccessMsg('Регистрация завершена! Добро пожаловать на стажировку.');
-        setTimeout(() => {
-          setSuccessMsg(null);
-          onClose();
-        }, 500);
+        if (res.requiresEmailConfirmation) {
+          setEmailConfirmationSent(email);
+        } else {
+          setSuccessMsg('Регистрация завершена! Добро пожаловать на стажировку.');
+          setTimeout(() => {
+            setSuccessMsg(null);
+            onClose();
+          }, 500);
+        }
       } else {
         setError(res.error || 'Ошибка регистрации');
       }
@@ -71,14 +96,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   const handleQuickSelect = async (userItem: typeof users[0]) => {
-    if (userItem.role === 'admin' || userItem.role === 'mentor') {
-      // Pre-fill email and switch to login tab requiring password
-      setEmail(userItem.email);
-      setActiveTab('login');
-      setError('Для входа под учетной записью администратора / ментора введите пароль:');
-      return;
-    }
-
     const res = await quickLogin(userItem.id);
     if (res.success) {
       setSuccessMsg('Вход выполнен!');
@@ -101,7 +118,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="modal-header-title">
             <Sparkles size={20} className="text-accent" />
             <div>
-              <h3 style={{ margin: 0 }}>Авторизация и регистрация</h3>
+              <h3 style={{ margin: 0 }}>Вход и регистрация</h3>
               <p className="text-muted text-xs">RocketGate Frontend Intern Platform</p>
             </div>
           </div>
@@ -114,21 +131,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="auth-tabs">
           <button
             className={`auth-tab-btn ${activeTab === 'login' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('login'); setError(null); }}
+            onClick={() => { setActiveTab('login'); setError(null); setEmailConfirmationSent(null); }}
           >
             Вход в аккаунт
           </button>
           <button
             className={`auth-tab-btn ${activeTab === 'register' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('register'); setError(null); }}
+            onClick={() => { setActiveTab('register'); setError(null); setEmailConfirmationSent(null); }}
           >
             Регистрация стажёра
           </button>
           <button
             className={`auth-tab-btn ${activeTab === 'quick' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('quick'); setError(null); }}
+            onClick={() => { setActiveTab('quick'); setError(null); setEmailConfirmationSent(null); }}
           >
-            ⚡️ Пользователи ({users.length})
+            ⚡️ Аккаунты ({users.length})
           </button>
         </div>
 
@@ -146,17 +163,41 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
+          {/* Email confirmation required card */}
+          {emailConfirmationSent && (
+            <div className="email-confirmation-card">
+              <div className="email-conf-icon">
+                <Send size={28} className="text-accent" />
+              </div>
+              <h4 style={{ margin: '8px 0' }}>Подтвердите ваш адрес электронной почты</h4>
+              <p className="text-sm text-muted" style={{ margin: '8px 0 16px' }}>
+                Мы отправили письмо со ссылкой для активации на <strong>{emailConfirmationSent}</strong>.
+                Пожалуйста, проверьте ваш почтовый ящик (включая папку «Спам») и перейдите по ссылке в письме.
+              </p>
+              <button
+                type="button"
+                className="btn btn-primary btn-block"
+                onClick={() => {
+                  setEmailConfirmationSent(null);
+                  setActiveTab('login');
+                }}
+              >
+                Я подтвердил почту — Перейти ко входу
+              </button>
+            </div>
+          )}
+
           {/* Login Form */}
-          {activeTab === 'login' && (
+          {activeTab === 'login' && !emailConfirmationSent && (
             <form onSubmit={handleLoginSubmit} className="auth-form">
               <div className="form-group">
-                <label className="form-label">Email или логин (например, admin@rocketgate.com):</label>
+                <label className="form-label">Email адрес или логин:</label>
                 <div className="input-with-icon">
                   <Mail size={16} className="field-icon" />
                   <input
                     type="text"
                     required
-                    placeholder="admin@rocketgate.com или student@intern.io"
+                    placeholder="student@intern.io или admin@rocketgate.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="form-input"
@@ -169,19 +210,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <div className="input-with-icon">
                   <Lock size={16} className="field-icon" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
                     placeholder="Введите ваш пароль"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     className="form-input"
                   />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
                 </div>
-                {email.toLowerCase().includes('admin') && (
-                  <span className="text-xs text-muted" style={{ display: 'block', marginTop: '4px' }}>
-                    💡 Пароль администратора по умолчанию: <code className="font-mono text-accent">admin123</code>
-                  </span>
-                )}
               </div>
 
               <button type="submit" className="btn btn-primary btn-block auth-submit-btn" disabled={isSubmitting}>
@@ -202,11 +246,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {/* Register Form */}
-          {activeTab === 'register' && (
+          {/* Register Form with Password Confirmation */}
+          {activeTab === 'register' && !emailConfirmationSent && (
             <form onSubmit={handleRegisterSubmit} className="auth-form">
               <div className="form-group">
-                <label className="form-label">ФИО стажёра (для выдачи сертификата)</label>
+                <label className="form-label">ФИО стажёра (для выдачи сертификата):</label>
                 <div className="input-with-icon">
                   <UserIcon size={16} className="field-icon" />
                   <input
@@ -221,7 +265,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Email адрес</label>
+                <label className="form-label">Email адрес для подтверждения:</label>
                 <div className="input-with-icon">
                   <Mail size={16} className="field-icon" />
                   <input
@@ -236,29 +280,63 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <div className="form-group">
-                <label className="form-label">Пароль для входа</label>
+                <label className="form-label">Придумайте пароль (минимум 6 символов):</label>
                 <div className="input-with-icon">
                   <Lock size={16} className="field-icon" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     required
+                    minLength={6}
                     placeholder="••••••••"
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     className="form-input"
                   />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Подтвердите пароль:</label>
+                <div className="input-with-icon">
+                  <CheckCheck size={16} className="field-icon" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    minLength={6}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={e => setConfirmPassword(e.target.value)}
+                    className={`form-input ${confirmPassword && confirmPassword !== password ? 'input-error' : ''}`}
+                  />
+                </div>
+                {confirmPassword && confirmPassword !== password && (
+                  <span className="text-xs text-danger" style={{ display: 'block', marginTop: '4px' }}>
+                    ⚠️ Пароли не совпадают
+                  </span>
+                )}
               </div>
 
               <div className="auth-role-notice-card">
                 <div className="role-badge role-intern">Роль: Стажёр</div>
                 <p className="text-xs text-muted" style={{ margin: '4px 0 0 0' }}>
-                  Вы получите доступ ко всем 67 уровням, практическим задачам и проверке ментором.
+                  После отправки формы вам придёт ссылка на подтверждение почты. Вы получите доступ ко всем 67 уровням, проверке ментором и получению сертификата.
                 </p>
               </div>
 
-              <button type="submit" className="btn btn-primary btn-block auth-submit-btn" disabled={isSubmitting}>
-                {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться на стажировку 🚀'}
+              <button
+                type="submit"
+                className="btn btn-primary btn-block auth-submit-btn"
+                disabled={isSubmitting || (confirmPassword !== '' && password !== confirmPassword)}
+              >
+                {isSubmitting ? 'Создание аккаунта...' : 'Зарегистрироваться на стажировку 🚀'}
               </button>
 
               <div className="auth-footer-note">
@@ -274,46 +352,34 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {/* Quick Demo Accounts Tab */}
+          {/* Quick Accounts Tab */}
           {activeTab === 'quick' && (
             <div className="quick-accounts-list">
               <p className="text-sm text-muted" style={{ marginBottom: '14px' }}>
-                Выберите аккаунт для входа (для аккаунтов администратора/ментора потребуется ввод пароля):
+                Быстрый вход для тестирования и переключения между ролями:
               </p>
-              {users.map(u => {
-                const isPrivileged = u.role === 'admin' || u.role === 'mentor';
-                return (
-                  <div
-                    key={u.id}
-                    className="quick-user-card"
-                    onClick={() => handleQuickSelect(u)}
-                  >
-                    <div className="quick-user-avatar">{u.avatar || '👤'}</div>
-                    <div className="quick-user-info">
-                      <div className="quick-user-name">
-                        {u.name}
-                        <span className={`role-badge role-${u.role}`}>
-                          {u.role === 'admin' ? '👑 Администратор' : u.role === 'mentor' ? '👨‍🏫 Ментор' : '👨‍💻 Стажёр'}
-                        </span>
-                      </div>
-                      <div className="quick-user-email">{u.email}</div>
+              {users.map(u => (
+                <div
+                  key={u.id}
+                  className="quick-user-card"
+                  onClick={() => handleQuickSelect(u)}
+                >
+                  <div className="quick-user-avatar">{u.avatar || '👤'}</div>
+                  <div className="quick-user-info">
+                    <div className="quick-user-name">
+                      {u.name}
+                      <span className={`role-badge role-${u.role}`}>
+                        {u.role === 'admin' ? '👑 Администратор' : u.role === 'mentor' ? '👨‍🏫 Ментор' : '👨‍💻 Стажёр'}
+                      </span>
                     </div>
-                    <button className="btn btn-secondary btn-sm quick-select-btn">
-                      {isPrivileged ? (
-                        <>
-                          <Lock size={13} />
-                          <span>Пароль</span>
-                        </>
-                      ) : (
-                        <>
-                          <span>Войти</span>
-                          <ArrowRight size={14} />
-                        </>
-                      )}
-                    </button>
+                    <div className="quick-user-email">{u.email}</div>
                   </div>
-                );
-              })}
+                  <button className="btn btn-secondary btn-sm quick-select-btn">
+                    <span>Войти</span>
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
+              ))}
             </div>
           )}
         </div>

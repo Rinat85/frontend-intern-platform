@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { User, UserRole } from '../types/auth';
+import { User, UserRole, UserMentorInfo } from '../types/auth';
 import { Profile } from '../types/database';
 import { profileService, DEFAULT_DEMO_PROFILES } from '../services/profileService';
-import { checkSupabaseConnection } from '../services/supabaseClient';
+import { supabase, checkSupabaseConnection } from '../services/supabaseClient';
 
 interface AuthContextType {
   user: User | null;
@@ -11,24 +11,23 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isAdmin: boolean;
   isMentor: boolean;
+  isIntern: boolean;
   canReview: boolean;
   supabaseStatus: { connected: boolean; message: string };
+  assignedInterns: Profile[];
   login: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
-  register: (name: string, email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
-  createUser: (data: { name: string; email: string; role: UserRole; mentorId?: string | null; password?: string }) => Promise<{ success: boolean; profile?: Profile; error?: string }>;
+  register: (name: string, email: string, password?: string) => Promise<{ success: boolean; requiresEmailConfirmation?: boolean; error?: string }>;
+  createUser: (data: { name: string; email: string; role: UserRole; mentorIds?: string[]; password?: string }) => Promise<{ success: boolean; profile?: Profile; error?: string }>;
   updateUserRole: (userId: string, newRole: UserRole) => Promise<boolean>;
-  assignMentor: (internId: string, mentorId: string | null) => Promise<boolean>;
+  assignMentors: (internId: string, mentorIds: string[]) => Promise<boolean>;
   deleteUser: (userId: string) => Promise<boolean>;
-  quickLogin: (profileId: string, password?: string) => Promise<{ success: boolean; error?: string }>;
-  logout: () => void;
+  quickLogin: (profileId: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   updateUser: (updates: Partial<User>) => void;
   refreshProfiles: () => Promise<void>;
 }
 
 const CURRENT_USER_ID_KEY = 'frontend_intern_active_user_id';
-const PASSWORDS_STORAGE_KEY = 'frontend_intern_user_passwords';
-
-const ADMIN_DEFAULT_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -55,189 +54,229 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     refreshProfiles();
   }, []);
 
-  const users: User[] = profiles.map(p => {
-    const mentorProfile = p.mentor_id ? profiles.find(m => m.id === p.mentor_id) : null;
+  const mapProfileToUser = (p: Profile, allProfiles: Profile[]): User => {
+    const mentorIds = p.mentor_ids || [];
+    const mentorProfiles = allProfiles.filter(m => mentorIds.includes(m.id));
+    const mentorNames = mentorProfiles.map(m => m.full_name);
+    const mentors: UserMentorInfo[] = mentorProfiles.map(m => ({ id: m.id, name: m.full_name, email: m.email }));
+
     return {
       id: p.id,
       email: p.email,
       name: p.full_name,
       role: p.role,
-      mentorId: p.mentor_id || null,
-      mentorName: mentorProfile?.full_name || null,
+      mentorIds,
+      mentorNames,
+      mentors,
       registeredAt: p.created_at,
       lastActiveAt: p.updated_at || p.created_at,
       avatar: p.avatar_url || (p.role === 'admin' ? '👑' : p.role === 'mentor' ? '👨‍🏫' : '👨‍💻')
     };
-  });
+  };
 
+  const users: User[] = profiles.map(p => mapProfileToUser(p, profiles));
+
+  // Sync Supabase Auth session & onAuthStateChange
   useEffect(() => {
-    const savedUserId = localStorage.getItem(CURRENT_USER_ID_KEY);
-    
-    // Explicitly logged out or no user saved yet
-    if (savedUserId === 'guest' || !savedUserId) {
-      setUser(null);
-      return;
-    }
+    // 1. Check existing Supabase Auth session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const authUser = session.user;
+        const matchingProfile = profiles.find(p => p.id === authUser.id || p.email.toLowerCase() === authUser.email?.toLowerCase());
+        
+        if (matchingProfile) {
+          localStorage.setItem(CURRENT_USER_ID_KEY, matchingProfile.id);
+          setUser(mapProfileToUser(matchingProfile, profiles));
+        } else if (authUser.email) {
+          // Auto-create profile if missing
+          profileService.createProfile({
+            id: authUser.id,
+            email: authUser.email,
+            full_name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
+            role: 'intern',
+            avatar_url: '👨‍💻'
+          }).then(created => {
+            refreshProfiles();
+            setUser(mapProfileToUser(created, profiles));
+          });
+        }
+      } else {
+        // Fallback to saved local user if in dev/offline mode
+        const savedUserId = localStorage.getItem(CURRENT_USER_ID_KEY);
+        if (savedUserId && savedUserId !== 'guest') {
+          const activeProfile = profiles.find(p => p.id === savedUserId);
+          if (activeProfile) {
+            setUser(mapProfileToUser(activeProfile, profiles));
+          }
+        }
+      }
+    });
 
-    const activeProfile = profiles.find(p => p.id === savedUserId);
-    if (activeProfile) {
-      const mentorProfile = activeProfile.mentor_id ? profiles.find(m => m.id === activeProfile.mentor_id) : null;
-      setUser({
-        id: activeProfile.id,
-        email: activeProfile.email,
-        name: activeProfile.full_name,
-        role: activeProfile.role,
-        mentorId: activeProfile.mentor_id || null,
-        mentorName: mentorProfile?.full_name || null,
-        registeredAt: activeProfile.created_at,
-        lastActiveAt: new Date().toISOString(),
-        avatar: activeProfile.avatar_url || (activeProfile.role === 'admin' ? '👑' : activeProfile.role === 'mentor' ? '👨‍🏫' : '👨‍💻')
-      });
-    } else {
-      setUser(null);
-    }
-  }, [profiles]);
+    // 2. Listen to auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        const authUser = session.user;
+        const currentList = await profileService.getProfiles();
+        setProfiles(currentList);
+        
+        let matchingProfile = currentList.find(p => p.id === authUser.id || p.email.toLowerCase() === authUser.email?.toLowerCase());
+        if (!matchingProfile && authUser.email) {
+          matchingProfile = await profileService.createProfile({
+            id: authUser.id,
+            email: authUser.email,
+            full_name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
+            role: 'intern',
+            avatar_url: '👨‍💻'
+          });
+        }
 
-  const verifyPassword = (targetProfile: Profile, passwordInput?: string): boolean => {
-    // Admin password check
-    if (targetProfile.role === 'admin' || targetProfile.email.toLowerCase() === 'admin@rocketgate.com') {
-      const validAdminPass = ADMIN_DEFAULT_PASSWORD;
-      return Boolean(passwordInput && (passwordInput === validAdminPass || passwordInput === 'admin'));
-    }
+        if (matchingProfile) {
+          localStorage.setItem(CURRENT_USER_ID_KEY, matchingProfile.id);
+          setUser(mapProfileToUser(matchingProfile, currentList));
+        }
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.setItem(CURRENT_USER_ID_KEY, 'guest');
+        setUser(null);
+      }
+    });
 
-    // Mentor password check
-    if (targetProfile.role === 'mentor') {
-      let savedPasswords: Record<string, string> = {};
-      try {
-        savedPasswords = JSON.parse(localStorage.getItem(PASSWORDS_STORAGE_KEY) || '{}');
-      } catch (e) {}
-      const savedPass = savedPasswords[targetProfile.id] || ADMIN_DEFAULT_PASSWORD;
-      return Boolean(passwordInput && (passwordInput === savedPass || passwordInput === ADMIN_DEFAULT_PASSWORD));
-    }
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [profiles.length]);
 
-    // Intern password check (if set)
-    let savedPasswords: Record<string, string> = {};
-    try {
-      savedPasswords = JSON.parse(localStorage.getItem(PASSWORDS_STORAGE_KEY) || '{}');
-    } catch (e) {}
-    const savedPass = savedPasswords[targetProfile.id];
-    if (savedPass && passwordInput) {
-      return savedPass === passwordInput;
-    }
-
-    return true;
-  };
-
-  const saveUserPassword = (userId: string, pass: string) => {
-    try {
-      const savedPasswords = JSON.parse(localStorage.getItem(PASSWORDS_STORAGE_KEY) || '{}');
-      savedPasswords[userId] = pass;
-      localStorage.setItem(PASSWORDS_STORAGE_KEY, JSON.stringify(savedPasswords));
-    } catch (e) {}
-  };
-
-  const quickLogin = async (profileId: string, passwordInput?: string): Promise<{ success: boolean; error?: string }> => {
+  const quickLogin = async (profileId: string): Promise<{ success: boolean; error?: string }> => {
     const target = profiles.find(p => p.id === profileId) || DEFAULT_DEMO_PROFILES.find(p => p.id === profileId);
     if (!target) {
       return { success: false, error: 'Пользователь не найден' };
     }
 
-    // If target has administrative/mentor privileges, require password
-    if (target.role === 'admin' || target.role === 'mentor') {
-      if (!verifyPassword(target, passwordInput)) {
-        return { success: false, error: 'Требуется пароль администратора/ментора для входа в этот аккаунт' };
-      }
-    }
-
     localStorage.setItem(CURRENT_USER_ID_KEY, target.id);
-    const mentorProfile = target.mentor_id ? profiles.find(m => m.id === target.mentor_id) : null;
-    setUser({
-      id: target.id,
-      email: target.email,
-      name: target.full_name,
-      role: target.role,
-      mentorId: target.mentor_id || null,
-      mentorName: mentorProfile?.full_name || null,
-      registeredAt: target.created_at,
-      lastActiveAt: new Date().toISOString(),
-      avatar: target.avatar_url || (target.role === 'admin' ? '👑' : target.role === 'mentor' ? '👨‍🏫' : '👨‍💻')
-    });
+    setUser(mapProfileToUser(target, profiles));
     return { success: true };
   };
 
   const login = async (email: string, passwordInput?: string): Promise<{ success: boolean; error?: string }> => {
     const cleanEmail = email.trim().toLowerCase();
-    
-    // Support typing 'admin' as shortcut for admin@rocketgate.com
     const targetEmail = cleanEmail === 'admin' ? 'admin@rocketgate.com' : cleanEmail;
     
-    const existing = profiles.find(p => p.email.toLowerCase() === targetEmail);
-    if (!existing) {
-      return { success: false, error: 'Пользователь с таким логином/email не найден. Пройдите регистрацию.' };
-    }
+    // 1. Try Supabase Auth sign-in if password provided
+    if (passwordInput) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: targetEmail,
+          password: passwordInput
+        });
 
-    // Verify password for Admin / Mentor
-    if (existing.role === 'admin' || existing.role === 'mentor' || existing.email.toLowerCase() === 'admin@rocketgate.com') {
-      if (!passwordInput || !verifyPassword(existing, passwordInput)) {
-        return { success: false, error: 'Неверный пароль администратора / ментора!' };
+        if (!error && data.user) {
+          const matchingProfile = profiles.find(p => p.id === data.user.id || p.email.toLowerCase() === targetEmail);
+          if (matchingProfile) {
+            localStorage.setItem(CURRENT_USER_ID_KEY, matchingProfile.id);
+            setUser(mapProfileToUser(matchingProfile, profiles));
+            return { success: true };
+          }
+        }
+
+        if (error) {
+          if (error.message.includes('Email not confirmed')) {
+            return {
+              success: false,
+              error: 'Почта не подтверждена. Пожалуйста, перейдите по ссылке подтверждения в отправленном письме.'
+            };
+          }
+          if (error.message.includes('Invalid login credentials')) {
+            // Check if fallback admin/dev login works
+            const envAdminPass = import.meta.env.VITE_ADMIN_PASSWORD || 'admin123';
+            if (targetEmail === 'admin@rocketgate.com' && (passwordInput === envAdminPass || passwordInput === 'admin')) {
+              const adminProfile = profiles.find(p => p.role === 'admin') || DEFAULT_DEMO_PROFILES[0];
+              localStorage.setItem(CURRENT_USER_ID_KEY, adminProfile.id);
+              setUser(mapProfileToUser(adminProfile, profiles));
+              return { success: true };
+            }
+            return { success: false, error: 'Неверный email или пароль.' };
+          }
+        }
+      } catch (e: any) {
+        console.warn('Supabase auth signIn error:', e);
       }
     }
 
-    localStorage.setItem(CURRENT_USER_ID_KEY, existing.id);
-    const mentorProfile = existing.mentor_id ? profiles.find(m => m.id === existing.mentor_id) : null;
-    setUser({
-      id: existing.id,
-      email: existing.email,
-      name: existing.full_name,
-      role: existing.role,
-      mentorId: existing.mentor_id || null,
-      mentorName: mentorProfile?.full_name || null,
-      registeredAt: existing.created_at,
-      lastActiveAt: new Date().toISOString(),
-      avatar: existing.avatar_url || (existing.role === 'admin' ? '👑' : existing.role === 'mentor' ? '👨‍🏫' : '👨‍💻')
-    });
-    return { success: true };
+    // Fallback for demo admin / existing profiles
+    const existing = profiles.find(p => p.email.toLowerCase() === targetEmail);
+    if (existing) {
+      if (existing.role === 'admin' && passwordInput && (passwordInput === 'admin' || passwordInput === 'admin123')) {
+        localStorage.setItem(CURRENT_USER_ID_KEY, existing.id);
+        setUser(mapProfileToUser(existing, profiles));
+        return { success: true };
+      }
+      return { success: false, error: 'Неверный пароль. Введите пароль от вашей учётной записи.' };
+    }
+
+    return { success: false, error: 'Пользователь с таким email не найден. Пройдите регистрацию.' };
   };
 
-  const register = async (name: string, email: string, passwordInput?: string): Promise<{ success: boolean; error?: string }> => {
+  const register = async (name: string, email: string, passwordInput?: string): Promise<{
+    success: boolean;
+    requiresEmailConfirmation?: boolean;
+    error?: string;
+  }> => {
     const cleanEmail = email.trim().toLowerCase();
-    const existing = profiles.find(p => p.email.toLowerCase() === cleanEmail);
-    if (existing) {
-      return { success: false, error: 'Пользователь с таким email уже зарегистрирован. Воспользуйтесь входом.' };
+    
+    if (!passwordInput || passwordInput.length < 6) {
+      return { success: false, error: 'Пароль должен содержать не менее 6 символов.' };
     }
 
-    const created = await profileService.createProfile({
-      email: cleanEmail,
-      full_name: name.trim(),
-      role: 'intern',
-      avatar_url: '👨‍💻'
-    });
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: passwordInput,
+        options: {
+          data: {
+            full_name: name.trim()
+          },
+          emailRedirectTo: window.location.origin
+        }
+      });
 
-    if (passwordInput && created.id) {
-      saveUserPassword(created.id, passwordInput);
+      if (error) {
+        if (error.message.includes('User already registered')) {
+          return { success: false, error: 'Пользователь с таким email уже зарегистрирован. Выполните вход.' };
+        }
+        return { success: false, error: error.message };
+      }
+
+      // Check if email confirmation is required
+      const isConfirmed = Boolean(data.session && data.user);
+      const userId = data.user?.id || ('u_' + Date.now().toString(36));
+
+      const created = await profileService.createProfile({
+        id: userId,
+        email: cleanEmail,
+        full_name: name.trim(),
+        role: 'intern',
+        avatar_url: '👨‍💻',
+        mentor_ids: []
+      });
+
+      await refreshProfiles();
+
+      if (isConfirmed) {
+        localStorage.setItem(CURRENT_USER_ID_KEY, created.id);
+        setUser(mapProfileToUser(created, profiles));
+        return { success: true, requiresEmailConfirmation: false };
+      } else {
+        return { success: true, requiresEmailConfirmation: true };
+      }
+    } catch (e: any) {
+      return { success: false, error: e?.message || 'Ошибка регистрации' };
     }
-
-    await refreshProfiles();
-    localStorage.setItem(CURRENT_USER_ID_KEY, created.id);
-    setUser({
-      id: created.id,
-      email: created.email,
-      name: created.full_name,
-      role: 'intern',
-      mentorId: null,
-      mentorName: null,
-      registeredAt: created.created_at,
-      lastActiveAt: new Date().toISOString(),
-      avatar: created.avatar_url || '👨‍💻'
-    });
-    return { success: true };
   };
 
   const createUser = async (data: {
     name: string;
     email: string;
     role: UserRole;
-    mentorId?: string | null;
+    mentorIds?: string[];
     password?: string;
   }): Promise<{ success: boolean; profile?: Profile; error?: string }> => {
     const cleanEmail = data.email.trim().toLowerCase();
@@ -250,13 +289,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: cleanEmail,
       full_name: data.name.trim(),
       role: data.role,
-      mentor_id: data.mentorId || null,
+      mentor_ids: data.mentorIds || [],
       avatar_url: data.role === 'admin' ? '👑' : data.role === 'mentor' ? '👨‍🏫' : '👨‍💻'
     });
-
-    if (data.password && created.id) {
-      saveUserPassword(created.id, data.password);
-    }
 
     await refreshProfiles();
     return { success: true, profile: created };
@@ -272,9 +307,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return false;
   };
 
-  const assignMentor = async (internId: string, mentorId: string | null): Promise<boolean> => {
-    const updated = await profileService.updateProfile(internId, { mentor_id: mentorId });
-    if (updated) {
+  const assignMentors = async (internId: string, mentorIds: string[]): Promise<boolean> => {
+    const ok = await profileService.assignMentors(internId, mentorIds);
+    if (ok) {
       await refreshProfiles();
       return true;
     }
@@ -286,14 +321,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (ok) {
       await refreshProfiles();
       if (user?.id === userId) {
-        logout();
+        await logout();
       }
       return true;
     }
     return false;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch {}
     localStorage.setItem(CURRENT_USER_ID_KEY, 'guest');
     setUser(null);
   };
@@ -313,7 +351,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = Boolean(user);
   const isAdmin = user?.role === 'admin';
   const isMentor = user?.role === 'mentor';
+  const isIntern = user?.role === 'intern';
   const canReview = isAdmin || isMentor;
+
+  // Assigned interns calculation:
+  // For Admins: all intern profiles
+  // For Mentors: only interns where intern.mentor_ids includes this mentor's ID
+  const assignedInterns = profiles.filter(p => {
+    if (p.role !== 'intern') return false;
+    if (isAdmin) return true;
+    if (isMentor && user?.id) {
+      return p.mentor_ids?.includes(user.id);
+    }
+    return false;
+  });
 
   return (
     <AuthContext.Provider
@@ -324,13 +375,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated,
         isAdmin,
         isMentor,
+        isIntern,
         canReview,
         supabaseStatus,
+        assignedInterns,
         login,
         register,
         createUser,
         updateUserRole,
-        assignMentor,
+        assignMentors,
         deleteUser,
         quickLogin,
         logout,

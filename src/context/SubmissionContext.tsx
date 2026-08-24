@@ -32,7 +32,7 @@ interface SubmissionContextType {
 const SubmissionContext = createContext<SubmissionContextType | undefined>(undefined);
 
 export const SubmissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isMentor, canReview } = useAuth();
   const [userSubmissions, setUserSubmissions] = useState<TaskSubmission[]>([]);
   const [allSubmissions, setAllSubmissions] = useState<TaskSubmission[]>([]);
   const [currentLessonSubmission, setCurrentLessonSubmission] = useState<TaskSubmission | null>(null);
@@ -69,10 +69,10 @@ export const SubmissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   useEffect(() => {
     fetchUserSubmissions();
-    if (isAdmin) {
+    if (canReview) {
       fetchAllSubmissions();
     }
-  }, [fetchUserSubmissions, fetchAllSubmissions, isAdmin]);
+  }, [fetchUserSubmissions, fetchAllSubmissions, canReview]);
 
   const submitTask = async (payload: {
     lessonId: string;

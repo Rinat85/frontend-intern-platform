@@ -16,7 +16,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   onNavigateHome,
   isAdminView
 }) => {
-  const { user, users, isAuthenticated, isAdmin, isMentor, canReview, logout, quickLogin } = useAuth();
+  const { user, users, isAuthenticated, isAdmin, isMentor, isIntern, canReview, logout, quickLogin } = useAuth();
   const { getOverallPercentage, completedLessonsCount, totalLessonsCount } = useProgress();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -45,6 +45,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
   const progressPercent = getOverallPercentage();
   const roleLabel = user.role === 'admin' ? 'Администратор' : user.role === 'mentor' ? 'Ментор' : 'Стажёр';
+  const mentorNames = user.mentorNames || [];
 
   return (
     <div className="user-menu-wrapper" ref={menuRef}>
@@ -74,9 +75,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               <span className={`role-badge role-${user.role}`}>
                 {roleLabel}
               </span>
-              {user.role === 'intern' && user.mentorName && (
+              {user.role === 'intern' && mentorNames.length > 0 && (
                 <div className="intern-mentor-sublabel">
-                  Ментор: <strong>{user.mentorName}</strong>
+                  {mentorNames.length === 1 ? 'Ментор: ' : 'Менторы: '}
+                  <strong>{mentorNames.join(', ')}</strong>
                 </div>
               )}
             </div>
@@ -123,11 +125,10 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             </button>
           </div>
 
-          <div className="user-dropdown-divider" />
-
-          {/* Quick Switch Section */}
+          {/* Quick Switch for Dev / Testing */}
           {users.length > 1 && (
             <>
+              <div className="user-dropdown-divider" />
               <div className="dropdown-section-title">Переключение аккаунтов:</div>
               <div className="quick-switch-list">
                 {users.map(u => (
@@ -135,17 +136,15 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                     key={u.id}
                     className={`quick-switch-item ${u.id === user.id ? 'active' : ''}`}
                     onClick={() => {
-                      if (u.role === 'admin' || u.role === 'mentor') {
-                        onOpenAuth('login');
-                      } else {
-                        quickLogin(u.id);
-                      }
+                      quickLogin(u.id);
                       setIsOpen(false);
                     }}
                   >
                     <span className="quick-switch-avatar">{u.avatar || '👤'}</span>
                     <span className="quick-switch-name">{u.name}</span>
-                    <span className="quick-switch-role">({u.role === 'admin' ? 'Админ' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'})</span>
+                    <span className="quick-switch-role">
+                      ({u.role === 'admin' ? 'Админ' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'})
+                    </span>
                     {u.id === user.id && <Check size={14} className="active-check" />}
                   </button>
                 ))}
@@ -170,8 +169,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
             <button
               className="dropdown-item item-logout"
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 onNavigateHome();
                 setIsOpen(false);
               }}

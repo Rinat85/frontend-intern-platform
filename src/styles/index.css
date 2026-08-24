@@ -2416,3 +2416,111 @@ pre code,
   padding: 9px;
   font-size: 11px;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   USER MANAGEMENT, MENTOR ASSIGNMENT & ROLE STYLES
+   ═══════════════════════════════════════════════════════════════ */
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+  padding: 3px 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.role-chip.admin {
+  background: rgba(255, 179, 0, 0.12);
+  color: var(--neon-amber);
+  border: 1px solid rgba(255, 179, 0, 0.4);
+}
+.role-chip.mentor {
+  background: rgba(0, 229, 255, 0.12);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+}
+.role-chip.intern {
+  background: rgba(45, 255, 138, 0.08);
+  color: var(--neon);
+  border: 1px solid rgba(45, 255, 138, 0.3);
+}
+
+.role-badge.role-mentor {
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--neon-cyan);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+}
+
+.mentor-assigned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--neon-cyan);
+  background: rgba(0, 229, 255, 0.05);
+  padding: 2px 8px;
+  border: 1px dashed rgba(0, 229, 255, 0.3);
+}
+
+.intern-mentor-sublabel {
+  font-size: 11px;
+  color: var(--fg-2);
+  margin-top: 4px;
+}
+.intern-mentor-sublabel strong {
+  color: var(--neon-cyan);
+}
+
+.user-manage-modal {
+  max-width: 540px;
+  width: 95vw;
+}
+
+.modal-actions-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-2);
+}
+
+.danger-zone-box {
+  margin-top: 20px;
+  padding: 14px;
+  background: rgba(255, 43, 214, 0.04);
+  border: 1px dashed rgba(255, 43, 214, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.danger-zone-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--neon-pink);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.auth-role-notice-card {
+  padding: 10px 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  margin-bottom: 16px;
+}
+
+.admin-header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}

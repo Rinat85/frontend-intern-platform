@@ -16,7 +16,7 @@ import { CertificateModal } from './components/certificate/CertificateModal';
 import { AuthModal } from './components/auth/AuthModal';
 
 const AppInner: React.FC = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, canReview } = useAuth();
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(null);
   const [isAdminView, setIsAdminView] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -98,7 +98,7 @@ const AppInner: React.FC = () => {
         />
 
         <main className="app-content-area">
-          {isAdminView && isAdmin ? (
+          {isAdminView && canReview ? (
             <AdminDashboard
               modules={modulesData}
               onNavigateHome={handleNavigateHome}

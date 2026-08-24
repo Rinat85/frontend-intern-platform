@@ -11,8 +11,11 @@ export interface Profile {
   role: UserRole;
   avatar_url?: string | null;
   github_username?: string | null;
+  mentor_id?: string | null;
+  mentor_name?: string | null;
   created_at: string;
   updated_at: string;
+  mentor?: Profile | null;
 }
 
 export interface UserProgressItem {

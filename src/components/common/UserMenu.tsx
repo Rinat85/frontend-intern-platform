@@ -1,7 +1,7 @@
-﻿import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useProgress } from '../../context/ProgressContext';
-import { LogIn, LogOut, Shield, LayoutDashboard, Users, ChevronDown, Check } from 'lucide-react';
+import { LogIn, LogOut, Shield, LayoutDashboard, Users, ChevronDown, Check, UserPlus, GraduationCap } from 'lucide-react';
 
 interface UserMenuProps {
   onOpenAuth: (tab?: 'login' | 'register' | 'quick') => void;
@@ -16,12 +16,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   onNavigateHome,
   isAdminView
 }) => {
-  const { user, users, isAuthenticated, isAdmin, logout, quickLogin } = useAuth();
+  const { user, users, isAuthenticated, isAdmin, isMentor, canReview, logout, quickLogin } = useAuth();
   const { getOverallPercentage, completedLessonsCount, totalLessonsCount } = useProgress();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -36,7 +35,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
     return (
       <button
         className="btn btn-primary btn-sm user-auth-btn"
-        onClick={() => onOpenAuth('quick')}
+        onClick={() => onOpenAuth('login')}
       >
         <LogIn size={16} />
         <span>Войти</span>
@@ -45,19 +44,20 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   }
 
   const progressPercent = getOverallPercentage();
+  const roleLabel = user.role === 'admin' ? 'Администратор' : user.role === 'mentor' ? 'Ментор' : 'Стажёр';
 
   return (
     <div className="user-menu-wrapper" ref={menuRef}>
       <button
-        className={`user-menu-trigger ${isAdmin ? 'trigger-admin' : ''}`}
+        className={`user-menu-trigger ${isAdmin ? 'trigger-admin' : user.role === 'mentor' ? 'trigger-mentor' : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         title={user.name}
       >
-        <span className="user-avatar-badge">{user.avatar || (isAdmin ? '👑' : '👨‍💻')}</span>
+        <span className="user-avatar-badge">{user.avatar || (isAdmin ? '👑' : user.role === 'mentor' ? '👨‍🏫' : '👨‍💻')}</span>
         <div className="user-trigger-info desktop-only">
           <span className="user-trigger-name">{user.name}</span>
-          <span className={`user-role-tag ${isAdmin ? 'tag-admin' : 'tag-intern'}`}>
-            {isAdmin ? 'Ментор' : `${progressPercent}%`}
+          <span className={`user-role-tag ${isAdmin ? 'tag-admin' : user.role === 'mentor' ? 'tag-mentor' : 'tag-intern'}`}>
+            {user.role === 'intern' ? `${progressPercent}%` : roleLabel}
           </span>
         </div>
         <ChevronDown size={14} className="user-chevron" />
@@ -67,17 +67,22 @@ export const UserMenu: React.FC<UserMenuProps> = ({
         <div className="user-dropdown-menu">
           {/* Header */}
           <div className="user-dropdown-header">
-            <div className="user-dropdown-avatar">{user.avatar || (isAdmin ? '👑' : '👨‍💻')}</div>
+            <div className="user-dropdown-avatar">{user.avatar || (isAdmin ? '👑' : user.role === 'mentor' ? '👨‍🏫' : '👨‍💻')}</div>
             <div className="user-dropdown-meta">
               <div className="user-dropdown-name">{user.name}</div>
               <div className="user-dropdown-email">{user.email}</div>
-              <span className={`role-badge ${isAdmin ? 'role-admin' : 'role-intern'}`}>
-                {isAdmin ? 'Администратор / Ментор' : 'Стажёр Академии'}
+              <span className={`role-badge role-${user.role}`}>
+                {roleLabel}
               </span>
+              {user.role === 'intern' && user.mentorName && (
+                <div className="intern-mentor-sublabel">
+                  Ментор: <strong>{user.mentorName}</strong>
+                </div>
+              )}
             </div>
           </div>
 
-          {!isAdmin && (
+          {user.role === 'intern' && (
             <div className="user-dropdown-progress">
               <div className="dropdown-progress-label">
                 <span>Прогресс обучения:</span>
@@ -93,7 +98,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
           {/* Navigation Links */}
           <div className="user-dropdown-actions">
-            {isAdmin ? (
+            {canReview && (
               <button
                 className={`dropdown-item ${isAdminView ? 'active' : ''}`}
                 onClick={() => {
@@ -102,9 +107,9 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 }}
               >
                 <Shield size={16} />
-                <span>Панель Ментора (Админка)</span>
+                <span>{isAdmin ? 'Панель Администратора' : 'Панель Ментора (Code Review)'}</span>
               </button>
-            ) : null}
+            )}
 
             <button
               className={`dropdown-item ${!isAdminView ? 'active' : ''}`}
@@ -121,7 +126,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
           <div className="user-dropdown-divider" />
 
           {/* Quick Switch Section */}
-          <div className="dropdown-section-title">Быстрое переключение:</div>
+          <div className="dropdown-section-title">Быстрое переключение аккаунтов:</div>
           <div className="quick-switch-list">
             {users.map(u => (
               <button
@@ -134,7 +139,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
               >
                 <span className="quick-switch-avatar">{u.avatar || '👤'}</span>
                 <span className="quick-switch-name">{u.name}</span>
-                <span className="quick-switch-role">({u.role === 'admin' ? 'Админ' : 'Стажёр'})</span>
+                <span className="quick-switch-role">({u.role === 'admin' ? 'Админ' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'})</span>
                 {u.id === user.id && <Check size={14} className="active-check" />}
               </button>
             ))}
@@ -142,7 +147,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
 
           <div className="user-dropdown-divider" />
 
-          {/* Switch / Add account & Logout */}
+          {/* Register new intern & Logout */}
           <div className="user-dropdown-footer">
             <button
               className="dropdown-item"
@@ -151,8 +156,8 @@ export const UserMenu: React.FC<UserMenuProps> = ({
                 setIsOpen(false);
               }}
             >
-              <Users size={16} />
-              <span>Создать новый аккаунт</span>
+              <UserPlus size={16} />
+              <span>Регистрация нового стажёра</span>
             </button>
 
             <button

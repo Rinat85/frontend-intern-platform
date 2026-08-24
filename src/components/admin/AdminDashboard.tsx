@@ -3,14 +3,15 @@ import { Module } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { useAuth } from '../../context/AuthContext';
 import { useSubmissions } from '../../context/SubmissionContext';
-import { TaskSubmission } from '../../types/database';
+import { TaskSubmission, UserRole, Profile } from '../../types/database';
 import { CodeReviewModal } from './CodeReviewModal';
 import { ProgressBar } from '../common/ProgressBar';
 import { TOTAL_PLATFORM_LESSONS } from '../../data/modulesData';
 import {
   Users, Award, CheckCircle2, RotateCcw, Clock,
   ArrowRight, Eye, ShieldCheck, ChevronRight, X,
-  Code2, Sparkles, Send, AlertTriangle, FileCode, CheckSquare
+  Code2, Sparkles, Send, AlertTriangle, FileCode, CheckSquare,
+  UserPlus, UserCog, UserCheck, Shield, Trash2, Edit3, Mail, Lock
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -24,24 +25,115 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onNavigateHome,
   onSelectLesson
 }) => {
-  const { profiles, quickLogin, supabaseStatus } = useAuth();
+  const { profiles, user: currentUser, isAdmin, quickLogin, createUser, updateUserRole, assignMentor, deleteUser, supabaseStatus } = useAuth();
   const { getUserProgress, resetUserProgress, simulateCompleteUserProgress } = useProgress();
   const { allSubmissions, pendingCount, reviewSubmission } = useSubmissions();
 
-  const [activeTab, setActiveTab] = useState<'interns' | 'queue'>('interns');
-  const [selectedInternId, setSelectedInternId] = useState<string | null>(null);
-  const [reviewingSubmission, setReviewingSubmission] = useState<TaskSubmission | null>(null);
+  const [activeTab, setActiveTab] = useState<'users' | 'queue'>('users');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'intern' | 'mentor' | 'admin'>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
 
-  const interns = profiles.filter(p => p.role !== 'admin');
-  const selectedIntern = profiles.find(p => p.id === selectedInternId);
-  const selectedProgress = selectedInternId ? getUserProgress(selectedInternId) : null;
+  // Modals state
+  const [selectedInternId, setSelectedInternId] = useState<string | null>(null);
+  const [reviewingSubmission, setReviewingSubmission] = useState<TaskSubmission | null>(null);
+  const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+
+  // Add User Form state
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserRole, setNewUserRole] = useState<UserRole>('intern');
+  const [newUserMentorId, setNewUserMentorId] = useState<string>('');
+  const [addUserError, setAddUserError] = useState<string | null>(null);
+  const [isAddingUser, setIsAddingUser] = useState(false);
+
+  // Edit User Form state
+  const [editRole, setEditRole] = useState<UserRole>('intern');
+  const [editMentorId, setEditMentorId] = useState<string>('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  const mentorsList = profiles.filter(p => p.role === 'mentor' || p.role === 'admin');
+
+  // Filtered users
+  const filteredUsers = profiles.filter(p => {
+    if (roleFilter === 'all') return true;
+    return p.role === roleFilter;
+  });
 
   // Filtered submissions
   const filteredSubmissions = allSubmissions.filter(s => {
     if (statusFilter === 'all') return true;
     return s.status === statusFilter;
   });
+
+  const selectedIntern = profiles.find(p => p.id === selectedInternId);
+  const selectedProgress = selectedInternId ? getUserProgress(selectedInternId) : null;
+
+  const handleOpenAddUser = () => {
+    setNewUserName('');
+    setNewUserEmail('');
+    setNewUserRole('intern');
+    setNewUserMentorId(mentorsList[0]?.id || '');
+    setAddUserError(null);
+    setIsAddUserOpen(true);
+  };
+
+  const handleAddUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddUserError(null);
+    setIsAddingUser(true);
+    try {
+      const res = await createUser({
+        name: newUserName,
+        email: newUserEmail,
+        role: newUserRole,
+        mentorId: newUserRole === 'intern' ? (newUserMentorId || null) : null
+      });
+
+      if (res.success) {
+        setIsAddUserOpen(false);
+      } else {
+        setAddUserError(res.error || 'Ошибка при создании пользователя');
+      }
+    } catch (err: any) {
+      setAddUserError(err?.message || 'Ошибка создания');
+    } finally {
+      setIsAddingUser(false);
+    }
+  };
+
+  const handleOpenEditUser = (p: Profile) => {
+    setEditingProfile(p);
+    setEditRole(p.role);
+    setEditMentorId(p.mentor_id || '');
+  };
+
+  const handleSaveEditUser = async () => {
+    if (!editingProfile) return;
+    setIsSavingEdit(true);
+    try {
+      if (editRole !== editingProfile.role) {
+        await updateUserRole(editingProfile.id, editRole);
+      }
+      if (editRole === 'intern') {
+        await assignMentor(editingProfile.id, editMentorId || null);
+      }
+      setEditingProfile(null);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleDeleteUserClick = async (userId: string, userName: string) => {
+    if (window.confirm(`Вы действительно хотите удалить пользователя "${userName}" и все его данные?`)) {
+      await deleteUser(userId);
+      if (editingProfile?.id === userId) {
+        setEditingProfile(null);
+      }
+    }
+  };
 
   return (
     <div className="admin-dashboard-container">
@@ -50,27 +142,36 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="admin-header-title-wrap">
           <ShieldCheck size={28} className="text-accent" />
           <div>
-            <h1 className="admin-title">Панель управления стажировкой (LMS Admin)</h1>
+            <h1 className="admin-title">Панель управления стажировкой (LMS)</h1>
             <p className="admin-subtitle">
-              Управление стажерами, мониторинг успеваемости и Code Review практических заданий
+              Управление пользователями, назначение менторов, мониторинг успеваемости и Code Review
             </p>
           </div>
         </div>
 
-        <div className="admin-status-pill">
-          <span className={`status-dot ${supabaseStatus.connected ? 'online' : 'offline'}`} />
-          <span>{supabaseStatus.message}</span>
+        <div className="admin-header-actions-group">
+          {isAdmin && (
+            <button className="btn btn-primary btn-sm" onClick={handleOpenAddUser}>
+              <UserPlus size={16} />
+              <span>Добавить пользователя</span>
+            </button>
+          )}
+
+          <div className="admin-status-pill">
+            <span className={`status-dot ${supabaseStatus.connected ? 'online' : 'offline'}`} />
+            <span>{supabaseStatus.message}</span>
+          </div>
         </div>
       </div>
 
       {/* Admin Tabs */}
       <div className="admin-tabs-bar">
         <button
-          className={`admin-tab-btn ${activeTab === 'interns' ? 'active' : ''}`}
-          onClick={() => setActiveTab('interns')}
+          className={`admin-tab-btn ${activeTab === 'users' ? 'active' : ''}`}
+          onClick={() => setActiveTab('users')}
         >
           <Users size={16} />
-          <span>Стажёры платформы ({interns.length})</span>
+          <span>Пользователи и роли ({profiles.length})</span>
         </button>
 
         <button
@@ -83,91 +184,147 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </button>
       </div>
 
-      {/* Tab 1: Interns List */}
-      {activeTab === 'interns' && (
-        <div className="admin-interns-table-wrapper">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Стажёр</th>
-                <th>Роль</th>
-                <th>Прогресс</th>
-                <th>Уроков</th>
-                <th>Статус</th>
-                <th style={{ textAlign: 'right' }}>Действия</th>
-              </tr>
-            </thead>
-            <tbody>
-              {interns.map(intern => {
-                const prog = getUserProgress(intern.id);
-                const completedCount = prog.completedLessons?.length || 0;
-                const percentage = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
-                const isCertified = completedCount >= TOTAL_PLATFORM_LESSONS;
+      {/* Tab 1: Users Management */}
+      {activeTab === 'users' && (
+        <div className="admin-queue-view">
+          {/* Filter Bar */}
+          <div className="queue-filter-bar">
+            <span className="filter-label">Роль:</span>
+            <div className="filter-buttons-group">
+              <button
+                className={`filter-btn ${roleFilter === 'all' ? 'active' : ''}`}
+                onClick={() => setRoleFilter('all')}
+              >
+                Все ({profiles.length})
+              </button>
+              <button
+                className={`filter-btn ${roleFilter === 'intern' ? 'active' : ''}`}
+                onClick={() => setRoleFilter('intern')}
+              >
+                Стажёры ({profiles.filter(p => p.role === 'intern').length})
+              </button>
+              <button
+                className={`filter-btn ${roleFilter === 'mentor' ? 'active' : ''}`}
+                onClick={() => setRoleFilter('mentor')}
+              >
+                Менторы ({profiles.filter(p => p.role === 'mentor').length})
+              </button>
+              <button
+                className={`filter-btn ${roleFilter === 'admin' ? 'active' : ''}`}
+                onClick={() => setRoleFilter('admin')}
+              >
+                Администраторы ({profiles.filter(p => p.role === 'admin').length})
+              </button>
+            </div>
+          </div>
 
-                return (
-                  <tr key={intern.id} className="intern-row">
-                    <td>
-                      <div className="intern-cell-profile">
-                        <span className="intern-avatar">{intern.avatar_url || '👨‍💻'}</span>
-                        <div>
-                          <div className="intern-name">{intern.full_name}</div>
-                          <div className="intern-email">{intern.email}</div>
+          {/* Users Table */}
+          <div className="admin-interns-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Пользователь</th>
+                  <th>Роль</th>
+                  <th>Назначенный ментор</th>
+                  <th>Прогресс обучения</th>
+                  <th style={{ textAlign: 'right' }}>Управление</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map(profile => {
+                  const isIntern = profile.role === 'intern';
+                  const prog = isIntern ? getUserProgress(profile.id) : null;
+                  const completedCount = prog?.completedLessons?.length || 0;
+                  const percentage = Math.round((completedCount / TOTAL_PLATFORM_LESSONS) * 100);
+                  const isCertified = completedCount >= TOTAL_PLATFORM_LESSONS;
+                  const mentor = profile.mentor_id ? profiles.find(m => m.id === profile.mentor_id) : null;
+
+                  return (
+                    <tr key={profile.id} className="intern-row">
+                      <td>
+                        <div className="intern-cell-profile">
+                          <span className="intern-avatar">{profile.avatar_url || (profile.role === 'admin' ? '👑' : profile.role === 'mentor' ? '👨‍🏫' : '👨‍💻')}</span>
+                          <div>
+                            <div className="intern-name">{profile.full_name}</div>
+                            <div className="intern-email">{profile.email}</div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="role-chip intern">Стажёр</span>
-                    </td>
-                    <td style={{ minWidth: '160px' }}>
-                      <div className="progress-cell-wrap">
-                        <ProgressBar value={percentage} height={6} />
-                        <span className="progress-cell-pct">{percentage}%</span>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="lessons-count-chip">
-                        {completedCount} / {TOTAL_PLATFORM_LESSONS}
-                      </span>
-                    </td>
-                    <td>
-                      {isCertified ? (
-                        <span className="status-badge status-certified">
-                          <Award size={12} /> Сертифицирован
+                      </td>
+
+                      <td>
+                        <span className={`role-chip ${profile.role}`}>
+                          {profile.role === 'admin' ? '👑 Администратор' : profile.role === 'mentor' ? '👨‍🏫 Ментор' : '👨‍💻 Стажёр'}
                         </span>
-                      ) : percentage > 20 ? (
-                        <span className="status-badge status-active">⚡️ Обучается</span>
-                      ) : (
-                        <span className="status-badge status-new">🌱 Новичок</span>
-                      )}
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div className="row-actions-group">
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => setSelectedInternId(intern.id)}
-                          title="Подробная успеваемость"
-                        >
-                          <Eye size={14} />
-                          <span>Детали</span>
-                        </button>
-                        <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => {
-                            quickLogin(intern.id);
-                            onNavigateHome();
-                          }}
-                          title="Войти в систему от имени этого стажёра"
-                        >
-                          <span>Войти как стажёр</span>
-                          <ArrowRight size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+
+                      <td>
+                        {isIntern ? (
+                          mentor ? (
+                            <span className="mentor-assigned-badge" title={`Ментор: ${mentor.full_name}`}>
+                              👨‍🏫 {mentor.full_name}
+                            </span>
+                          ) : (
+                            <span className="text-muted text-xs">Не назначен</span>
+                          )
+                        ) : (
+                          <span className="text-muted text-xs">—</span>
+                        )}
+                      </td>
+
+                      <td style={{ minWidth: '160px' }}>
+                        {isIntern ? (
+                          <div className="progress-cell-wrap">
+                            <ProgressBar value={percentage} height={6} />
+                            <span className="progress-cell-pct">{percentage}% ({completedCount}/{TOTAL_PLATFORM_LESSONS})</span>
+                          </div>
+                        ) : (
+                          <span className="text-muted text-xs">Преподавательский состав</span>
+                        )}
+                      </td>
+
+                      <td style={{ textAlign: 'right' }}>
+                        <div className="row-actions-group">
+                          {isIntern && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => setSelectedInternId(profile.id)}
+                              title="Успеваемость стажёра"
+                            >
+                              <Eye size={14} />
+                              <span>Успеваемость</span>
+                            </button>
+                          )}
+
+                          {isAdmin && (
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={() => handleOpenEditUser(profile)}
+                              title="Редактировать роль и ментора"
+                            >
+                              <UserCog size={14} />
+                              <span>Роль/Ментор</span>
+                            </button>
+                          )}
+
+                          <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              quickLogin(profile.id);
+                              onNavigateHome();
+                            }}
+                            title="Войти в интерфейс под этим пользователем"
+                          >
+                            <span>Войти</span>
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
@@ -276,6 +433,198 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Add User */}
+      {isAddUserOpen && (
+        <div className="modal-backdrop" onClick={() => setIsAddUserOpen(false)}>
+          <div className="modal-container user-manage-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-header-title">
+                <UserPlus size={20} className="text-accent" />
+                <h3 style={{ margin: 0 }}>Добавить нового пользователя</h3>
+              </div>
+              <button className="btn-icon" onClick={() => setIsAddUserOpen(false)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddUserSubmit} className="modal-body">
+              {addUserError && <div className="auth-alert auth-alert-error">{addUserError}</div>}
+
+              <div className="form-group">
+                <label className="form-label">ФИО пользователя:</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Алексей Смирнов"
+                  value={newUserName}
+                  onChange={e => setNewUserName(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Email адрес:</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="alex@company.com"
+                  value={newUserEmail}
+                  onChange={e => setNewUserEmail(e.target.value)}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Роль в системе:</label>
+                <div className="role-selector-grid">
+                  <div
+                    className={`role-option-card ${newUserRole === 'intern' ? 'selected' : ''}`}
+                    onClick={() => setNewUserRole('intern')}
+                  >
+                    <div className="role-option-icon">👨‍💻</div>
+                    <div className="role-option-title">Стажёр</div>
+                  </div>
+                  <div
+                    className={`role-option-card ${newUserRole === 'mentor' ? 'selected' : ''}`}
+                    onClick={() => setNewUserRole('mentor')}
+                  >
+                    <div className="role-option-icon">👨‍🏫</div>
+                    <div className="role-option-title">Ментор</div>
+                  </div>
+                  <div
+                    className={`role-option-card ${newUserRole === 'admin' ? 'selected' : ''}`}
+                    onClick={() => setNewUserRole('admin')}
+                  >
+                    <div className="role-option-icon">👑</div>
+                    <div className="role-option-title">Администратор</div>
+                  </div>
+                </div>
+              </div>
+
+              {newUserRole === 'intern' && mentorsList.length > 0 && (
+                <div className="form-group">
+                  <label className="form-label">Назначить ментора:</label>
+                  <select
+                    className="form-input"
+                    value={newUserMentorId}
+                    onChange={e => setNewUserMentorId(e.target.value)}
+                  >
+                    <option value="">Без ментора (назначить позже)</option>
+                    {mentorsList.map(m => (
+                      <option key={m.id} value={m.id}>
+                        {m.full_name} ({m.role === 'admin' ? 'Администратор' : 'Ментор'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="modal-actions-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setIsAddUserOpen(false)}>
+                  Отмена
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={isAddingUser}>
+                  {isAddingUser ? 'Создание...' : 'Создать пользователя'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Edit User Role & Mentor */}
+      {editingProfile && (
+        <div className="modal-backdrop" onClick={() => setEditingProfile(null)}>
+          <div className="modal-container user-manage-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-header-title">
+                <UserCog size={20} className="text-accent" />
+                <div>
+                  <h3 style={{ margin: 0 }}>Настройки пользователя: {editingProfile.full_name}</h3>
+                  <p className="text-muted text-xs">{editingProfile.email}</p>
+                </div>
+              </div>
+              <button className="btn-icon" onClick={() => setEditingProfile(null)}>
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Роль пользователя:</label>
+                <div className="role-selector-grid">
+                  <div
+                    className={`role-option-card ${editRole === 'intern' ? 'selected' : ''}`}
+                    onClick={() => setEditRole('intern')}
+                  >
+                    <div className="role-option-icon">👨‍💻</div>
+                    <div className="role-option-title">Стажёр</div>
+                  </div>
+                  <div
+                    className={`role-option-card ${editRole === 'mentor' ? 'selected' : ''}`}
+                    onClick={() => setEditRole('mentor')}
+                  >
+                    <div className="role-option-icon">👨‍🏫</div>
+                    <div className="role-option-title">Ментор</div>
+                  </div>
+                  <div
+                    className={`role-option-card ${editRole === 'admin' ? 'selected' : ''}`}
+                    onClick={() => setEditRole('admin')}
+                  >
+                    <div className="role-option-icon">👑</div>
+                    <div className="role-option-title">Администратор</div>
+                  </div>
+                </div>
+              </div>
+
+              {editRole === 'intern' && (
+                <div className="form-group">
+                  <label className="form-label">Назначенный ментор:</label>
+                  <select
+                    className="form-input"
+                    value={editMentorId}
+                    onChange={e => setEditMentorId(e.target.value)}
+                  >
+                    <option value="">Не назначен</option>
+                    {mentorsList
+                      .filter(m => m.id !== editingProfile.id)
+                      .map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.full_name} ({m.role === 'admin' ? 'Администратор' : 'Ментор'})
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="danger-zone-box">
+                <div className="danger-zone-title">
+                  <AlertTriangle size={16} className="text-danger" />
+                  <span>Опасные действия</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm text-danger"
+                  onClick={() => handleDeleteUserClick(editingProfile.id, editingProfile.full_name)}
+                >
+                  <Trash2 size={14} />
+                  <span>Удалить пользователя из системы</span>
+                </button>
+              </div>
+
+              <div className="modal-actions-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setEditingProfile(null)}>
+                  Отмена
+                </button>
+                <button type="button" className="btn btn-primary" onClick={handleSaveEditUser} disabled={isSavingEdit}>
+                  {isSavingEdit ? 'Сохранение...' : 'Сохранить изменения'}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

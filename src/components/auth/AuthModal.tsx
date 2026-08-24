@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { UserRole } from '../../types/auth';
 import { X, Mail, Lock, User as UserIcon, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 
 interface AuthModalProps {
@@ -12,7 +11,7 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
-  initialTab = 'quick'
+  initialTab = 'login'
 }) => {
   const { users, login, register, quickLogin } = useAuth();
   const [activeTab, setActiveTab] = useState<'login' | 'register' | 'quick'>(initialTab);
@@ -21,7 +20,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [email, setEmail] = useState('');
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('intern');
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,13 +31,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     setIsSubmitting(true);
     try {
-      const res = await login(email, role);
+      const res = await login(email);
       if (res.success) {
         setSuccessMsg('Вход успешно выполнен!');
         setTimeout(() => {
           setSuccessMsg(null);
           onClose();
-        }, 500);
+        }, 400);
       } else {
         setError(res.error || 'Ошибка входа');
       }
@@ -55,9 +53,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setError(null);
     setIsSubmitting(true);
     try {
-      const res = await register(name, email, role);
+      const res = await register(name, email);
       if (res.success) {
-        setSuccessMsg('Регистрация завершена! Добро пожаловать.');
+        setSuccessMsg('Регистрация завершена! Добро пожаловать на стажировку.');
         setTimeout(() => {
           setSuccessMsg(null);
           onClose();
@@ -78,7 +76,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setTimeout(() => {
       setSuccessMsg(null);
       onClose();
-    }, 400);
+    }, 300);
   };
 
   return (
@@ -89,7 +87,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="modal-header-title">
             <Sparkles size={20} className="text-accent" />
             <div>
-              <h3 style={{ margin: 0 }}>Вход и регистрация</h3>
+              <h3 style={{ margin: 0 }}>Вход и регистрация стажёров</h3>
               <p className="text-muted text-xs">RocketGate Frontend Intern Platform</p>
             </div>
           </div>
@@ -101,58 +99,28 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Tabs */}
         <div className="auth-tabs">
           <button
-            className={`auth-tab-btn ${activeTab === 'quick' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('quick'); setError(null); }}
-          >
-            ⚡️ Быстрый демо-вход
-          </button>
-          <button
             className={`auth-tab-btn ${activeTab === 'login' ? 'active' : ''}`}
             onClick={() => { setActiveTab('login'); setError(null); }}
           >
-            Вход
+            Вход в аккаунт
           </button>
           <button
             className={`auth-tab-btn ${activeTab === 'register' ? 'active' : ''}`}
             onClick={() => { setActiveTab('register'); setError(null); }}
           >
-            Регистрация
+            Регистрация стажёра
+          </button>
+          <button
+            className={`auth-tab-btn ${activeTab === 'quick' ? 'active' : ''}`}
+            onClick={() => { setActiveTab('quick'); setError(null); }}
+          >
+            ⚡️ Пользователи ({users.length})
           </button>
         </div>
 
         <div className="modal-body auth-modal-body">
           {error && <div className="auth-alert auth-alert-error">{error}</div>}
           {successMsg && <div className="auth-alert auth-alert-success"><CheckCircle2 size={16} /> {successMsg}</div>}
-
-          {/* Quick Demo Accounts Tab */}
-          {activeTab === 'quick' && (
-            <div className="quick-accounts-list">
-              <p className="text-sm text-muted" style={{ marginBottom: '14px' }}>
-                Выберите готовый аккаунт для моментального входа и тестирования платформы:
-              </p>
-              {users.map(u => (
-                <div
-                  key={u.id}
-                  className="quick-user-card"
-                  onClick={() => handleQuickSelect(u.id)}
-                >
-                  <div className="quick-user-avatar">{u.avatar || '👤'}</div>
-                  <div className="quick-user-info">
-                    <div className="quick-user-name">
-                      {u.name}
-                      <span className={`role-badge ${u.role === 'admin' ? 'role-admin' : 'role-intern'}`}>
-                        {u.role === 'admin' ? 'Администратор' : 'Стажёр'}
-                      </span>
-                    </div>
-                    <div className="quick-user-email">{u.email}</div>
-                  </div>
-                  <button className="btn btn-secondary btn-sm quick-select-btn">
-                    Войти <ArrowRight size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
 
           {/* Login Form */}
           {activeTab === 'login' && (
@@ -164,7 +132,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="email"
                     required
-                    placeholder="alex@intern.io"
+                    placeholder="student@intern.io или admin@rocketgate.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="form-input"
@@ -191,13 +159,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </button>
 
               <div className="auth-footer-note">
-                Нет аккаунта?{' '}
+                Впервые на платформе?{' '}
                 <button
                   type="button"
                   className="link-btn"
                   onClick={() => { setActiveTab('register'); setError(null); }}
                 >
-                  Зарегистрироваться
+                  Зарегистрироваться как стажёр
                 </button>
               </div>
             </form>
@@ -207,13 +175,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           {activeTab === 'register' && (
             <form onSubmit={handleRegisterSubmit} className="auth-form">
               <div className="form-group">
-                <label className="form-label">Ваше имя (ФИО для сертификата)</label>
+                <label className="form-label">ФИО стажёра (для выдачи сертификата)</label>
                 <div className="input-with-icon">
                   <UserIcon size={16} className="field-icon" />
                   <input
                     type="text"
                     required
-                    placeholder="Алексей Смирнов"
+                    placeholder="Иван Петров"
                     value={name}
                     onChange={e => setName(e.target.value)}
                     className="form-input"
@@ -228,7 +196,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   <input
                     type="email"
                     required
-                    placeholder="intern@academy.io"
+                    placeholder="ivan@intern.io"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     className="form-input"
@@ -250,31 +218,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Тип аккаунта / Роль</label>
-                <div className="role-selector-grid">
-                  <div
-                    className={`role-option-card ${role === 'intern' ? 'selected' : ''}`}
-                    onClick={() => setRole('intern')}
-                  >
-                    <div className="role-option-icon">👨‍💻</div>
-                    <div className="role-option-title">Стажёр</div>
-                    <div className="role-option-desc">Изучение 67 уровней, решение задач, личный прогресс и сертификат</div>
-                  </div>
-
-                  <div
-                    className={`role-option-card ${role === 'admin' ? 'selected' : ''}`}
-                    onClick={() => setRole('admin')}
-                  >
-                    <div className="role-option-icon">👑</div>
-                    <div className="role-option-title">Ментор / Админ</div>
-                    <div className="role-option-desc">Доступ к панели управления, Code Review и проверка решений стажеров</div>
-                  </div>
-                </div>
+              <div className="auth-role-notice-card">
+                <div className="role-badge role-intern">Роль: Стажёр</div>
+                <p className="text-xs text-muted" style={{ margin: '4px 0 0 0' }}>
+                  Вы получите доступ ко всем 67 уровням, практическим задачам и проверке ментором.
+                </p>
               </div>
 
               <button type="submit" className="btn btn-primary btn-block auth-submit-btn" disabled={isSubmitting}>
-                {isSubmitting ? 'Регистрация...' : 'Создать аккаунт'}
+                {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться на стажировку 🚀'}
               </button>
 
               <div className="auth-footer-note">
@@ -288,6 +240,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 </button>
               </div>
             </form>
+          )}
+
+          {/* Quick Demo Accounts Tab */}
+          {activeTab === 'quick' && (
+            <div className="quick-accounts-list">
+              <p className="text-sm text-muted" style={{ marginBottom: '14px' }}>
+                Быстрое переключение между зарегистрированными аккаунтами в базе данных:
+              </p>
+              {users.map(u => (
+                <div
+                  key={u.id}
+                  className="quick-user-card"
+                  onClick={() => handleQuickSelect(u.id)}
+                >
+                  <div className="quick-user-avatar">{u.avatar || '👤'}</div>
+                  <div className="quick-user-info">
+                    <div className="quick-user-name">
+                      {u.name}
+                      <span className={`role-badge role-${u.role}`}>
+                        {u.role === 'admin' ? 'Администратор' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'}
+                      </span>
+                    </div>
+                    <div className="quick-user-email">{u.email}</div>
+                  </div>
+                  <button className="btn btn-secondary btn-sm quick-select-btn">
+                    Войти <ArrowRight size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

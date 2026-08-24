@@ -31,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   isAdminView,
   onSelectLesson = () => {}
 }) => {
-  const { user, isAdmin, supabaseStatus } = useAuth();
+  const { user, isAdmin, isMentor, canReview, supabaseStatus } = useAuth();
   const { unreadCount } = useNotifications();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
@@ -116,15 +116,15 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="btn-text">Сертификат</span>
         </button>
 
-        {/* Admin Dashboard toggle */}
-        {isAdmin && (
+        {/* Admin / Mentor Dashboard toggle */}
+        {canReview && (
           <button
             className={`btn ${isAdminView ? 'btn-primary' : 'btn-secondary'} header-action-btn`}
             onClick={isAdminView ? onNavigateHome : onOpenAdmin}
-            title="Панель администратора / Ментора"
+            title={isAdmin ? 'Панель администратора' : 'Панель ментора'}
           >
             <Shield size={16} />
-            <span className="btn-text">{isAdminView ? 'Обучение' : 'Панель Ментора'}</span>
+            <span className="btn-text">{isAdminView ? 'Обучение' : (isAdmin ? 'Админка' : 'Панель Ментора')}</span>
           </button>
         )}
 

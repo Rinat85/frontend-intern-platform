@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2fe"/>
+      <stop offset="100%" stop-color="#4facfe"/>
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#e11d48"/>
+    </linearGradient>
+    <linearGradient id="amberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="glowCyan" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="960" height="540" rx="14" fill="url(#bgGrad)"/>
+  <rect width="958" height="538" x="1" y="1" rx="13" fill="none" stroke="#1f293d" stroke-width="1.5"/>
+
+  <!-- Title Badge -->
+  <rect x="40" y="28" width="880" height="46" rx="8" fill="#161f30" stroke="#2a3854" stroke-width="1"/>
+  <circle cx="62" cy="51" r="5" fill="#f43f5e"/>
+  <circle cx="78" cy="51" r="5" fill="#f59e0b"/>
+  <circle cx="94" cy="51" r="5" fill="#10b981"/>
+  <text x="120" y="56" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="700" letter-spacing="1">
+    АНАТОМИЯ СОВЕРШЕННОГО КОММИТА (AIRBNB &amp; CONVENTIONAL COMMITS)
+  </text>
+  <rect x="810" y="37" width="95" height="26" rx="5" fill="rgba(0, 242, 254, 0.12)" stroke="#00f2fe" stroke-width="1"/>
+  <text x="822" y="54" fill="#00f2fe" font-family="monospace" font-size="12" font-weight="bold">RULE 50/72</text>
+
+  <!-- Terminal Window for Commit Anatomy -->
+  <rect x="40" y="90" width="880" height="415" rx="10" fill="#0d131f" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Line 1: Header (Type, Scope, Breaking, Subject) -->
+  <g transform="translate(60, 115)">
+    <!-- Type Box -->
+    <rect x="0" y="0" width="95" height="42" rx="6" fill="rgba(244, 63, 94, 0.15)" stroke="#f43f5e" stroke-width="1.5"/>
+    <text x="47" y="26" fill="#f43f5e" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">feat</text>
+    
+    <!-- Scope Box -->
+    <rect x="105" y="0" width="105" height="42" rx="6" fill="rgba(245, 158, 11, 0.15)" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="157" y="26" fill="#f59e0b" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">(auth)</text>
+    
+    <!-- Breaking ! Box -->
+    <rect x="220" y="0" width="30" height="42" rx="6" fill="rgba(239, 68, 68, 0.2)" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="235" y="26" fill="#ef4444" font-family="monospace" font-size="18" font-weight="bold" text-anchor="middle">!</text>
+
+    <!-- Colon -->
+    <text x="260" y="27" fill="#94a3b8" font-family="monospace" font-size="20" font-weight="bold">:</text>
+
+    <!-- Subject Box -->
+    <rect x="280" y="0" width="560" height="42" rx="6" fill="rgba(0, 242, 254, 0.1)" stroke="#00f2fe" stroke-width="1.5"/>
+    <text x="300" y="26" fill="#00f2fe" font-family="monospace" font-size="15" font-weight="bold">add OAuth2 Google and GitHub login support</text>
+  </g>
+
+  <!-- Labels under Header Components -->
+  <g transform="translate(60, 168)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11">
+    <text x="47" y="0" fill="#f43f5e" text-anchor="middle" font-weight="bold">1. ТИП (TYPE)</text>
+    <text x="47" y="14" fill="#64748b" text-anchor="middle">feat / fix / refactor</text>
+
+    <text x="157" y="0" fill="#f59e0b" text-anchor="middle" font-weight="bold">2. ОБЛАСТЬ (SCOPE)</text>
+    <text x="157" y="14" fill="#64748b" text-anchor="middle">модуль / компонент</text>
+
+    <text x="235" y="0" fill="#ef4444" text-anchor="middle" font-weight="bold">BREAKING</text>
+    <text x="235" y="14" fill="#64748b" text-anchor="middle">Major Bump</text>
+
+    <text x="560" y="0" fill="#00f2fe" text-anchor="middle" font-weight="bold">3. ПРЕДМЕТ (SUBJECT) — МАКСИМУМ 50 СИМВОЛОВ</text>
+    <text x="560" y="14" fill="#64748b" text-anchor="middle">Императивный залог (add, fix), строчные буквы, без точки в конце</text>
+  </g>
+
+  <!-- Line 2: Empty Line Indicator -->
+  <g transform="translate(60, 210)">
+    <rect x="0" y="0" width="840" height="22" rx="4" fill="#131d2e" stroke="#25354e" stroke-dasharray="4,4"/>
+    <text x="420" y="15" fill="#475569" font-family="monospace" font-size="11" text-anchor="middle">
+      [ПУСТАЯ СТРОКА-РАЗДЕЛИТЕЛЬ] — ОБЯЗАТЕЛЬНО ДЛЯ ОТДЕЛЕНИЯ HEADER ОТ BODY
+    </text>
+  </g>
+
+  <!-- Line 3: Body Block (Rule 72) -->
+  <g transform="translate(60, 245)">
+    <rect x="0" y="0" width="840" height="110" rx="8" fill="#131c2d" stroke="#334155" stroke-width="1.5"/>
+    <rect x="15" y="12" width="68" height="20" rx="4" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1"/>
+    <text x="49" y="26" fill="#10b981" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">4. BODY</text>
+    <text x="95" y="26" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11">
+      Объясняет <strong style="fill:#e2e8f0;">ПОЧЕМУ</strong> и <strong style="fill:#e2e8f0;">ЧТО</strong> сделано (перенос строк строго на 72 символах):
+    </text>
+
+    <!-- Body Text -->
+    <text x="25" y="58" fill="#cbd5e1" font-family="monospace" font-size="13">
+      Implement multi-provider social authentication flow using Supabase Auth.
+    </text>
+    <text x="25" y="78" fill="#cbd5e1" font-family="monospace" font-size="13">
+      Store secure refresh tokens in HTTP-only cookies to mitigate XSS risks.
+    </text>
+    <text x="25" y="98" fill="#cbd5e1" font-family="monospace" font-size="13">
+      Update user profile state synchronizer with unified OAuth payload.
+    </text>
+
+    <!-- 72 char limit ruler indicator -->
+    <line x1="720" y1="42" x2="720" y2="105" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="3,3"/>
+    <text x="725" y="54" fill="#ef4444" font-family="monospace" font-size="10" font-weight="bold">| 72 col</text>
+  </g>
+
+  <!-- Line 4: Footer Block (Breaking Changes & Issue tracker) -->
+  <g transform="translate(60, 370)">
+    <rect x="0" y="0" width="840" height="115" rx="8" fill="#161f30" stroke="#3b4d6e" stroke-width="1.5"/>
+    <rect x="15" y="12" width="78" height="20" rx="4" fill="rgba(168, 85, 247, 0.15)" stroke="#a855f7" stroke-width="1"/>
+    <text x="54" y="26" fill="#a855f7" font-family="monospace" font-size="11" font-weight="bold" text-anchor="middle">5. FOOTER</text>
+    <text x="105" y="26" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11">
+      Breaking Changes и интеграция с таск-трекером (Jira, GitHub Issues):
+    </text>
+
+    <text x="25" y="58" fill="#f43f5e" font-family="monospace" font-size="13" font-weight="bold">
+      BREAKING CHANGE:
+    </text>
+    <text x="165" y="58" fill="#cbd5e1" font-family="monospace" font-size="13">
+      legacy authSession() endpoint is deprecated; use auth.getSession() instead.
+    </text>
+
+    <text x="25" y="85" fill="#38bdf8" font-family="monospace" font-size="13" font-weight="bold">
+      Closes #142, Refs #89
+    </text>
+    <text x="210" y="85" fill="#64748b" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12">
+      (Автоматически закрывает тикет в GitHub/GitLab при мерже в main)
+    </text>
+  </g>
+</svg>

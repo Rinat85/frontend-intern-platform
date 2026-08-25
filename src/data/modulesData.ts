@@ -19,7 +19,7 @@ export const modulesData: Module[] = [
   {
     id: 'css',
     title: 'CSS Core',
-    subtitle: '21 уровень мастерства',
+    subtitle: '22 уровня мастерства',
     description: 'Погрузитесь в стилизацию: Flexbox, CSS Grid, адаптивность, анимации, CSS-переменные, трансформации и современные эффекты.',
     iconName: 'Palette',
     accentColor: '#2563eb',
@@ -41,8 +41,8 @@ export const modulesData: Module[] = [
   {
     id: 'pro',
     title: 'Web Development Pro',
-    subtitle: '21 уровень мастерства',
-    description: 'Узнайте о работе в ИТ-команде, Agile/Scrum, Git workflow, сборщиках, Web Performance, паттернах JS, TypeScript, CI/CD, безопасности, WebSockets, FSD 2.0, State Management, тестировании, рендеринге, микрофронтендах, PWA, мониторинге (Sentry), GraphQL/tRPC, Frontend System Design и Tech Leadership (DORA).',
+    subtitle: '22 уровня мастерства',
+    description: 'Узнайте о работе в ИТ-команде, Agile/Scrum, Git workflow, сборщиках, Web Performance, паттернах JS, TypeScript, CI/CD, безопасности, WebSockets, FSD 2.0, State Management, тестировании, рендеринге, микрофронтендах, PWA, мониторинге (Sentry), GraphQL/tRPC, Frontend System Design, Tech Leadership (DORA), стандартах Airbnb Git Commit Naming и Conventional Commits.',
     iconName: 'Award',
     accentColor: '#10b981',
     gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',

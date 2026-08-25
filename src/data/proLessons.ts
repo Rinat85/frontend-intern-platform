@@ -4068,5 +4068,219 @@ export const proLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+  "id": "pro-22",
+  "moduleId": "pro",
+  "level": 22,
+  "title": "Стандарты коммитов: Airbnb Git Style Guide, Conventional Commits и Git Hooks",
+  "subtitle": "Анатомия коммита, типы изменений (feat, fix, refactor...), правило 50/72, Husky, commitlint и автоматизация релизов",
+  "description": "Глубокое практическое руководство по культуре коммитов в ведущих IT-компаниях: стандарты Airbnb и Conventional Commits 1.0, атомарность, оформление Scope, Body и Breaking Changes, автоматическая валидация через Husky и commitlint, генерация CHANGELOG и семантическое версионирование (SemVer).",
+  "estimatedMinutes": 45,
+  "difficulty": "advanced",
+  "tags": [
+    "Git",
+    "Airbnb Style",
+    "Conventional Commits",
+    "Husky",
+    "commitlint",
+    "SemVer",
+    "Git Hooks",
+    "CI/CD",
+    "Code Quality"
+  ],
+  "theory": {
+    "overview": "В профессиональной командной разработке история системы контроля версий (`git log`) — это не просто архив сохранённых файлов, а живая техническая документация продукта. Небрежные сообщения коммитов вроде `fix`, `wip`, `update` или `asdasd` превращают отладку в кошмар, парализуют поиск регрессий через `git bisect` и делают невозможной автоматизацию релизов.\n\nСтандарты **Airbnb Git Style Guide** и **Conventional Commits 1.0** — общепринятый золотой стандарт оформления коммитов в high-level IT-компаниях. Они превращают историю репозитория в машиночитаемый реестр изменений, позволяющий автоматически вычислять версии по SemVer, генерировать `CHANGELOG.md` и ускорять Code Review.",
+    "sections": [
+      {
+        "title": "Зачем IT-индустрии строгий стандарт именования коммитов?",
+        "content": "История коммитов решает три критически важные инженерные задачи:\n\n1. **Мгновенный контекст на Code Review**: Ревьюер открывает пулл-реквест и по списку коммитов понимает логику мышления автора ещё до погружения в строчки кода.\n2. **Ускоренная локализация багов (`git bisect` и `git log --grep`)**: Если в продакшене возник баг, можно за секунды найти коммит, изменивший нужный модуль, или выполнить автоматический бинарный поиск виновного коммита.\n3. **Автоматический релизный пайплайн (Semantic Release & SemVer)**: Инструменты автоматизации (`semantic-release`, `standard-version`, `release-please`) парсят историю коммитов в ветке `main` и без участия человека определяют номер следующей версии и формируют `CHANGELOG.md`.",
+        "image": {
+          "src": "/images/lessons/git-commit-anatomy-airbnb.svg",
+          "alt": "Анатомия коммита по стандарту Airbnb и Conventional Commits",
+          "caption": "Схема 1: Анатомия коммита — Type, Scope, Subject, Body и Footer"
+        }
+      },
+      {
+        "title": "Анатомия коммита: Правило 50/72 и Императивный залог",
+        "content": "Согласно стандартам Airbnb и Conventional Commits, коммит состоит из заголовка (Header), опционального тела (Body) и подвала (Footer):\n\n```\n<type>(<scope>): <subject>\n\n[optional body]\n\n[optional footer(s)]\n```\n\n### Золотые правила оформления:\n- **Правило 50/72 (Rule 50/72)**:\n  - **Subject (тема)**: не более **50 символов** (жёсткий лимит 72). Короткий, ёмкий заголовок без точки в конце.\n  - **Body (тело)**: отделяется от заголовка пустой строкой. Каждая строка тела переносится строго на **72 символах** (для идеального отображения в `git log` терминала и GitHub GUI).\n- **Императивный залог в настоящем времени (Imperative Mood)**:\n  - Всегда пишите глагол так, будто отдаёте команду Git: `add`, `fix`, `refactor`, `remove`, `update` (НЕ `added`, `fixes`, `fixing`, `добавил`).\n  - **Проверочное правило Airbnb**: подставьте фразу *«If applied, this commit will...»* перед вашим subject. Фраза *«If applied, this commit will add OAuth2 login»* звучит грамматически безупречно, а *«...will added OAuth2 login»* — с ошибкой.\n- **Регистр**: Заголовок и тип начинаются со строчной (маленькой) буквы: `feat: ...`, а не `Feat: ...`.",
+        "codeExample": {
+          "language": "bash",
+          "title": "ПРИМЕР ИДЕАЛЬНОГО КОММИТА ПО AIRBNB & CONVENTIONAL COMMITS",
+          "code": "feat(checkout): add promo code discount calculation\n\nIntegrate promo code validation endpoint with cart total calculation.\nApply 15% discount for first-time buyers and display savings badge.\nHandle invalid and expired coupon error states gracefully.\n\nCloses #204, Refs #189"
+        }
+      },
+      {
+        "title": "Таксономия типов коммитов (Commit Types Taxonomy)",
+        "content": "В стандарте Conventional Commits каждому типу отведена строго определённая роль:\n\n| Тип коммита | Когда использовать | Влияние на SemVer |\n|:---|:---|:---:|\n| `feat` | Добавление нового функционала для пользователя | `MINOR` (1.1.0 -> 1.2.0) |\n| `fix` | Исправление бага в существующей функциональности | `PATCH` (1.1.0 -> 1.1.1) |\n| `refactor` | Изменение кода без изменения поведения и без багфиксов | Нет (или PATCH) |\n| `perf` | Оптимизация производительности (скорость рендера, память) | `PATCH` |\n| `docs` | Изменения только в документации (JSDoc, README, Swagger) | Нет |\n| `style` | Форматирование, пробелы, точки с запятой (без изменения AST) | Нет |\n| `test` | Добавление или корректировка тестов (Jest, Vitest, Playwright) | Нет |\n| `build` | Изменения в сборщике (Vite, Rollup) или npm-зависимостях | `PATCH` |\n| `ci` | Настройки пайплайнов (GitHub Actions, Dockerfile, scripts) | Нет |\n| `chore` | Рутинные задачи (обновление `.gitignore`, лицензий, утилит) | Нет |\n| `revert` | Откат предыдущего коммита с указанием его SHA-хеша | Зависит от отката |",
+        "codeExample": {
+          "language": "bash",
+          "title": "ПРИМЕРЫ ПРАВИЛЬНЫХ КОММИТОВ ДЛЯ РАЗНЫХ ТИПОВ",
+          "code": "# 1. Новая фича с областью (scope)\nfeat(auth): implement Google one-tap sign-in\n\n# 2. Багфикс\nfix(cart): prevent negative item counter on fast clicks\n\n# 3. Рефакторинг без изменения функционала\nrefactor(table): extract pagination logic into usePagination hook\n\n# 4. Оптимизация производительности\nperf(feed): virtualize infinite scroll list with tanstack-virtual\n\n# 5. Сборка и зависимости\nbuild(deps): upgrade vite from 5.4.0 to 6.0.0"
+        }
+      },
+      {
+        "title": "Ломающие изменения (Breaking Changes) и связь с тикетами",
+        "content": "Когда коммит ломает обратную совместимость (удаление устаревшего метода API, изменение контракта пропсов, смена структуры ответа), об этом необходимо явно сообщить:\n\n1. **Восклицательный знак `!` после типа/скоупа**:\n   `feat(api)!: switch authentication header from Bearer to Token`\n2. **Блок `BREAKING CHANGE:` в футере коммита**:\n   В теле или подвале коммита добавляется подробная инструкция по миграции:\n   ```\n   BREAKING CHANGE: The 'userId' parameter has been removed from getUserProfile().\n   Use auth.currentUser.id instead.\n   ```\n\n### Интеграция с Jira / GitHub / GitLab Issues:\nВ футере коммита указываются ключевые слова, автоматически переводящие статус задачи при мерже:\n- `Closes #123` / `Fixes #123` — автоматически закрывает задачу #123.\n- `Refs #456` / `Relates to #456` — привязывает коммит к задаче без её закрытия.",
+        "codeExample": {
+          "language": "bash",
+          "title": "КОММИТ С BREAKING CHANGE И СВЯЗЬЮ С ТАСК-ТРЕКЕРОМ",
+          "code": "refactor(http-client)!: migrate from axios to native fetch API\n\nRemove axios dependency to reduce client bundle size by 14 KB.\nStandardize request interceptors using Fetch API Request/Response wrappers.\n\nBREAKING CHANGE: custom axios config options (e.g. `transformRequest`)\nare no longer supported in apiService. Use standard RequestInit options.\n\nCloses PROJ-1420\nRefs PROJ-1105"
+        }
+      },
+      {
+        "title": "Автоматизация контроля: Настройка Husky и commitlint",
+        "content": "Полагаться только на сознательность разработчиков нельзя. В профессиональных проектах коммиты проверяются автоматически перед фиксацией с помощью **Git Hooks**:\n\n1. **Husky**: менеджер локальных Git Hooks в Node.js-проектах.\n2. **commitlint**: линтер, проверяющий текст сообщения на соответствие `@commitlint/config-conventional`.\n\nЕсли разработчик напишет `git commit -m \"fix bug\"`, хук `commit-msg` перехватит выполнение, выведет понятную ошибку с подсказкой и **заблокирует создание коммита** до исправления.",
+        "image": {
+          "src": "/images/lessons/git-commitlint-husky-flow.svg",
+          "alt": "Пайплайн валидации коммитов через Husky и Commitlint",
+          "caption": "Схема 2: Валидация коммит-сообщений через Husky hook и авто-релиз"
+        },
+        "codeExample": {
+          "language": "json",
+          "title": "КОНФИГУРАЦИЯ .commitlintrc.json",
+          "code": "{\n  \"extends\": [\"@commitlint/config-conventional\"],\n  \"rules\": {\n    \"type-enum\": [\n      2,\n      \"always\",\n      [\n        \"feat\", \"fix\", \"docs\", \"style\", \"refactor\",\n        \"perf\", \"test\", \"build\", \"ci\", \"chore\", \"revert\"\n      ]\n    ],\n    \"subject-case\": [2, \"never\", [\"sentence-case\", \"start-case\", \"pascal-case\", \"upper-case\"]],\n    \"subject-empty\": [2, \"never\"],\n    \"subject-full-stop\": [2, \"never\", \".\"],\n    \"header-max-length\": [2, \"always\", 72]\n  }\n}"
+        }
+      },
+      {
+        "title": "Атомарность коммитов и полезные команды (git add -p, amend)",
+        "content": "Принцип **атомарного коммита (Atomic Commit)** гласит: *один коммит должен решать ровно одну логическую задачу*. Если вы исправили баг и попутно отрефакторили 5 соседних файлов — разделите это на 2 разных коммита!\n\n### Инструменты опытного разработчика:\n- `git add -p` (**patch mode**): позволяет интерактивно просматривать каждый изменённый блок кода (`hunk`) и добавлять в индекс только нужные строчки, разделяя несвязанные изменения.\n- `git commit --amend`: позволяет дополнить последний коммит забытыми файлами или исправить опечатку в сообщении без создания лишнего коммита `fix typo`.\n- `git commit --amend --no-edit`: быстрое добавление изменений в последний коммит без открытия редактора сообщений (только до пуша в origin!).",
+        "codeExample": {
+          "language": "bash",
+          "title": "ПОЛЕЗНЫЕ КОМАНДЫ ДЛЯ ЧИСТОЙ ИСТОРИИ",
+          "code": "# 1. Интерактивный выбор строк для атомарного коммита\ngit add -p src/components/Header.tsx\n\n# 2. Исправление последнего локального коммита\ngit add src/utils/format.ts\ngit commit --amend --no-edit\n\n# 3. Проверка истории в красивом однострочном графе\ngit log --graph --oneline --decorate -n 10"
+        }
+      }
+    ],
+    "commonMistakes": [
+      {
+        "bad": "git commit -m \"fix bug\"",
+        "good": "git commit -m \"fix(auth): resolve token refresh loop on expired session\"",
+        "reason": "Сообщение 'fix bug' не даёт никакой информации о том, где и какой именно баг был исправлен. В Conventional Commits обязательно указывать скоуп и конкретное описание проблемы."
+      },
+      {
+        "bad": "git commit -m \"Added user profile avatar upload, fixed CSS padding in navbar and updated dependencies\"",
+        "good": "Разбить на 3 отдельных коммита:\n1. feat(profile): add avatar image upload functionality\n2. fix(navbar): adjust mobile horizontal padding\n3. chore(deps): bump typescript from 5.4 to 5.5",
+        "reason": "Нарушение принципа атомарности. Если один из функционалов вызовет сбой, его невозможно будет безопасно откатить через git revert, не затронув остальные несвязанные изменения."
+      },
+      {
+        "bad": "git commit -m \"feat(cart): Added new discount calculator.\"",
+        "good": "git commit -m \"feat(cart): add new discount calculator\"",
+        "reason": "Заголовок должен быть в императивном залоге (add вместо added) и без точки в конце (экономит лимит символов)."
+      },
+      {
+        "bad": "git commit -m \"WIP (work in progress)\"",
+        "good": "git commit -m \"feat(checkout): scaffold delivery address selection form\"",
+        "reason": "WIP-коммиты засоряют историю ветки. Используйте git stash для временного сохранения или оформляйте логически завершённый шаг работы."
+      }
+    ],
+    "seniorTips": [
+      "Всегда пишите subject на английском языке в нижнем регистре без точки в конце: 'feat(search): add debounced query input'. Это международный стандарт в любой IT-компании.",
+      "Используйте 'git commit --amend' только для локальных коммитов, которые ещё не были запушены в общий репозиторий. Никогда не делайте force-push в main / develop.",
+      "Тело коммита (Body) должно отвечать на вопросы 'ПОЧЕМУ' и 'ЧТО' изменилось, а не дублировать диф кода (диф уже отвечает на вопрос 'КАК').",
+      "Настройте утилиту 'commitizen' (команда 'git cz'), если команде сложно держать в голове все типы коммитов — интерактивный CLI задаст нужные вопросы и сформирует идеальное сообщение.",
+      "Всегда проверяйте 'git log -n 5' перед созданием Pull Request, чтобы убедиться в чистоте и логичности сформированной цепочки коммитов."
+    ],
+    "keyTakeaways": [
+      "Стандарты Conventional Commits и Airbnb структурируют историю проекта в строгом формате: '<type>(<scope>): <subject>'.",
+      "Тема коммита (Subject) пишется в императивном наклонении настоящего времени, начинается со строчной буквы и не превышает 50 символов.",
+      "Тело коммита (Body) отделяется пустой строкой и форматируется с переносом строк на 72 символах (правило 50/72).",
+      "Ломающие изменения (Breaking Changes) обозначаются символом '!' после скоупа или ключевым блоком 'BREAKING CHANGE:' в футере коммита.",
+      "Автоматическая валидация через Husky ('commit-msg') и commitlint гарантирует чистоту репозитория, позволяя автоматически генерировать CHANGELOG.md и бампать версии по SemVer."
+    ]
+  },
+  "sandbox": {
+    "instructions": "Интерактивный валидатор и генератор коммитов по стандарту Airbnb & Conventional Commits. Выберите тип, укажите Scope, введите Subject и проверьте соблюдение правила 50/72, регистра и императивного залога в реальном времени!",
+    "initialHtml": "<div class=\"commit-tool\">\n  <h2>Генератор & Валидатор коммитов Airbnb</h2>\n  \n  <div class=\"form-group\">\n    <label>Тип коммита (Type):</label>\n    <select id=\"commit-type\">\n      <option value=\"feat\">feat (Новая фича / Minor bump)</option>\n      <option value=\"fix\">fix (Исправление бага / Patch bump)</option>\n      <option value=\"refactor\">refactor (Рефакторинг без смены логики)</option>\n      <option value=\"perf\">perf (Оптимизация производительности)</option>\n      <option value=\"docs\">docs (Документация)</option>\n      <option value=\"style\">style (Форматирование)</option>\n      <option value=\"test\">test (Тесты)</option>\n      <option value=\"build\">build (Сборка / Зависимости)</option>\n      <option value=\"ci\">ci (CI/CD конфигурация)</option>\n      <option value=\"chore\">chore (Рутинные задачи)</option>\n    </select>\n  </div>\n\n  <div class=\"form-row\">\n    <div class=\"form-group flex-1\">\n      <label>Область (Scope, опционально):</label>\n      <input type=\"text\" id=\"commit-scope\" placeholder=\"auth, cart, profile...\" value=\"auth\" />\n    </div>\n    <div class=\"form-group flex-checkbox\">\n      <label><input type=\"checkbox\" id=\"commit-breaking\" /> Breaking Change (!)</label>\n    </div>\n  </div>\n\n  <div class=\"form-group\">\n    <div class=\"label-with-counter\">\n      <label>Тема (Subject — императивный залог, lowercase, без точки):</label>\n      <span id=\"subject-counter\" class=\"counter\">0 / 50</span>\n    </div>\n    <input type=\"text\" id=\"commit-subject\" placeholder=\"add Google OAuth2 social login support\" value=\"add Google OAuth2 social login support\" />\n  </div>\n\n  <div class=\"form-group\">\n    <label>Тело (Body — описание деталей и причин, перенос 72 симв.):</label>\n    <textarea id=\"commit-body\" rows=\"3\" placeholder=\"Integrate Supabase OAuth provider flow.\nStore refresh tokens in secure HTTP-only cookies.\"></textarea>\n  </div>\n\n  <div class=\"form-group\">\n    <label>Футер / Issue Tracker (Footer, опционально):</label>\n    <input type=\"text\" id=\"commit-footer\" placeholder=\"Closes #142, Refs #89\" value=\"Closes #142\" />\n  </div>\n\n  <div class=\"validation-box\" id=\"validation-box\">\n    <h4>Статус валидации Conventional Commits:</h4>\n    <ul id=\"validation-list\"></ul>\n  </div>\n\n  <div class=\"preview-box\">\n    <h4>Итоговое сообщение коммита:</h4>\n    <pre id=\"commit-preview\"></pre>\n    <button id=\"btn-copy\" class=\"btn-copy\">Копировать команду git commit</button>\n  </div>\n</div>",
+    "initialCss": "* { box-sizing: border-box; }\nbody {\n  background: #0d1117;\n  color: #c9d1d9;\n  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n  padding: 16px;\n  margin: 0;\n}\n.commit-tool {\n  max-width: 680px;\n  margin: 0 auto;\n  background: #161b22;\n  border: 1px solid #30363d;\n  border-radius: 8px;\n  padding: 20px;\n}\nh2 { margin-top: 0; color: #58a6ff; font-size: 18px; border-bottom: 1px solid #21262d; padding-bottom: 10px; }\nh4 { margin: 0 0 8px 0; font-size: 14px; }\n.form-group { margin-bottom: 14px; }\n.form-row { display: flex; gap: 12px; align-items: flex-end; }\n.flex-1 { flex: 1; }\n.flex-checkbox { padding-bottom: 10px; }\n.flex-checkbox label { display: flex; align-items: center; gap: 6px; cursor: pointer; color: #f85149; font-weight: bold; }\nlabel { display: block; margin-bottom: 5px; font-size: 12.5px; color: #8b949e; font-weight: 500; }\n.label-with-counter { display: flex; justify-content: space-between; align-items: center; }\n.counter { font-size: 11px; font-family: monospace; color: #3fb950; font-weight: bold; }\n.counter.warn { color: #d29922; }\n.counter.err { color: #f85149; }\ninput[type=\"text\"], select, textarea {\n  width: 100%;\n  background: #0d1117;\n  border: 1px solid #30363d;\n  border-radius: 6px;\n  color: #f0f6fc;\n  padding: 8px 12px;\n  font-size: 13px;\n  font-family: monospace;\n}\ninput[type=\"text\"]:focus, select:focus, textarea:focus {\n  outline: none;\n  border-color: #58a6ff;\n  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);\n}\n.validation-box {\n  background: #0d1117;\n  border: 1px solid #30363d;\n  border-radius: 6px;\n  padding: 12px;\n  margin-top: 16px;\n}\n.validation-box ul { margin: 0; padding-left: 20px; font-size: 12px; }\n.val-pass { color: #3fb950; margin-bottom: 4px; }\n.val-fail { color: #f85149; margin-bottom: 4px; }\n.preview-box {\n  margin-top: 16px;\n  background: #090d13;\n  border: 1px solid #238636;\n  border-radius: 6px;\n  padding: 14px;\n}\npre {\n  background: #040d1a;\n  color: #7ee787;\n  padding: 10px;\n  border-radius: 4px;\n  font-size: 12.5px;\n  line-height: 1.45;\n  white-space: pre-wrap;\n  margin: 0 0 10px 0;\n  border: 1px solid #1f3a5f;\n}\n.btn-copy {\n  background: #238636;\n  color: #fff;\n  border: none;\n  padding: 8px 16px;\n  border-radius: 6px;\n  font-weight: 600;\n  font-size: 12.5px;\n  cursor: pointer;\n  transition: 0.15s ease;\n}\n.btn-copy:hover { background: #2ea043; }",
+    "initialJs": "const typeEl = document.getElementById('commit-type');\nconst scopeEl = document.getElementById('commit-scope');\nconst breakingEl = document.getElementById('commit-breaking');\nconst subjectEl = document.getElementById('commit-subject');\nconst bodyEl = document.getElementById('commit-body');\nconst footerEl = document.getElementById('commit-footer');\nconst counterEl = document.getElementById('subject-counter');\nconst previewEl = document.getElementById('commit-preview');\nconst valListEl = document.getElementById('validation-list');\nconst copyBtn = document.getElementById('btn-copy');\n\nfunction updateCommit() {\n  const type = typeEl.value;\n  const scope = scopeEl.value.trim();\n  const isBreaking = breakingEl.checked;\n  const subject = subjectEl.value.trim();\n  const body = bodyEl.value.trim();\n  const footer = footerEl.value.trim();\n\n  // Header construction\n  let header = type;\n  if (scope) header += `(${scope})`;\n  if (isBreaking) header += '!';\n  header += ': ' + subject;\n\n  // Full message\n  let fullMsg = header;\n  if (body) fullMsg += '\\n\\n' + body;\n  if (isBreaking && !body.includes('BREAKING CHANGE:')) {\n    fullMsg += '\\n\\nBREAKING CHANGE: ' + (subject || 'Major architectural update');\n  }\n  if (footer) fullMsg += '\\n\\n' + footer;\n\n  previewEl.textContent = fullMsg;\n\n  // Subject Counter & Validation\n  const subjLen = subject.length;\n  counterEl.textContent = `${subjLen} / 50`;\n  counterEl.className = 'counter' + (subjLen > 72 ? ' err' : subjLen > 50 ? ' warn' : '');\n\n  // Rules validation list\n  const checks = [];\n  \n  // Rule 1: Subject length <= 50 (max 72)\n  if (subjLen > 0 && subjLen <= 50) {\n    checks.push({ ok: true, text: `✓ Длина заголовка в идеале (<= 50 символов: ${subjLen})` });\n  } else if (subjLen <= 72 && subjLen > 0) {\n    checks.push({ ok: true, text: `⚠ Длина заголовка допустима, но превышает 50 символов (${subjLen}/72)` });\n  } else {\n    checks.push({ ok: false, text: `✖ Длина заголовка превышает лимит 72 символа (${subjLen})` });\n  }\n\n  // Rule 2: Lowercase subject\n  if (subject && subject[0] === subject[0].toLowerCase() && subject[0] !== subject[0].toUpperCase()) {\n    checks.push({ ok: true, text: '✓ Тема начинается со строчной буквы (lowercase)' });\n  } else if (subject) {\n    checks.push({ ok: false, text: '✖ Тема должна начинаться со строчной буквы (не с Заглавной)' });\n  }\n\n  // Rule 3: No full stop at the end\n  if (subject.endsWith('.')) {\n    checks.push({ ok: false, text: '✖ В конце заголовка не должно быть точки \".\"' });\n  } else {\n    checks.push({ ok: true, text: '✓ В конце заголовка нет точки' });\n  }\n\n  // Rule 4: Imperative mood check (added -> add, fixed -> fix)\n  const nonImperative = ['added', 'fixed', 'fixing', 'updates', 'updated', 'updating', 'removed', 'removing', 'changed', 'changing'];\n  const firstWord = subject.split(' ')[0].toLowerCase();\n  if (nonImperative.includes(firstWord)) {\n    checks.push({ ok: false, text: `✖ Используйте императивный залог: замените \"${firstWord}\" на правильную форму глагола` });\n  } else if (subject) {\n    checks.push({ ok: true, text: '✓ Используется императивный залог настоящего времени (add, fix, refactor)' });\n  }\n\n  // Render checks\n  valListEl.innerHTML = checks.map(c => `<li class=\"${c.ok ? 'val-pass' : 'val-fail'}\">${c.text}</li>`).join('');\n}\n\n[typeEl, scopeEl, breakingEl, subjectEl, bodyEl, footerEl].forEach(el => {\n  el.addEventListener('input', updateCommit);\n  el.addEventListener('change', updateCommit);\n});\n\ncopyBtn.addEventListener('click', () => {\n  const msg = previewEl.textContent;\n  const cmd = `git commit -m \"${msg.replace(/\"/g, '\\\\\"')}\"`;\n  navigator.clipboard.writeText(cmd);\n  copyBtn.textContent = 'Скопировано в буфер!';\n  setTimeout(() => copyBtn.textContent = 'Копировать команду git commit', 2000);\n});\n\nupdateCommit();"
+  },
+  "task": {
+    "title": "Настройка Commitlint и цепочка атомарных коммитов по стандарту Airbnb",
+    "scenario": "Вы разрабатываете модуль двухфакторной аутентификации (2FA) для финтех-платформы. Вам необходимо подготовить файл конфигурации `.commitlintrc.json` и составить последовательность из 3 идеальных атомарных коммитов для Pull Request, включая Breaking Change.",
+    "criteria": [
+      "Файл .commitlintrc.json расширяет @commitlint/config-conventional и задает типы: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert",
+      "Задано правило subject-case: запрет sentence-case, start-case, pascal-case, upper-case (уровень 2 - error)",
+      "Сформирована цепочка из 3 правильных коммитов в императивном залоге (feat, test, refactor!)",
+      "Оформлен коммит с Breaking Change через восклицательный знак '!' и блок 'BREAKING CHANGE:' в футере",
+      "Присутствует связь с тикетом в футере ('Closes #312')"
+    ],
+    "starterCode": {
+      "js": "// 1. Конфигурация .commitlintrc.json (исправьте и дополните правила)\nconst commitlintConfig = {\n  extends: ['@commitlint/config-conventional'],\n  rules: {\n    // Настройте список допустимых типов (type-enum)\n    'type-enum': [2, 'always', []],\n    // Запретите заглавные буквы в subject\n    'subject-case': [2, 'never', []],\n    // Запретите точку в конце заголовка\n    'subject-full-stop': [2, 'never', '.']\n  }\n};\n\n// 2. Цепочка из 3 коммитов для ветки feature/2fa-auth\nconst gitCommitLog = [\n  // Коммит 1: Добавление сервиса генерации TOTP токенов\n  '???',\n\n  // Коммит 2: Добавление Unit-тестов для TOTP валидатора\n  '???',\n\n  // Коммит 3: Ломающее изменение в сигнатуре метода authService.verify()\n  '???'\n];"
+    },
+    "hints": [
+      "В type-enum перечислите все стандартные типы: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.",
+      "В subject-case в массив 'never' передайте ['sentence-case', 'start-case', 'pascal-case', 'upper-case'].",
+      "Для Breaking Change используйте структуру: refactor(auth)!: ... с блоком BREAKING CHANGE: в футере и Closes #312."
+    ],
+    "solution": {
+      "js": "// 1. Эталонная конфигурация .commitlintrc.json\nconst commitlintConfig = {\n  extends: ['@commitlint/config-conventional'],\n  rules: {\n    'type-enum': [\n      2,\n      'always',\n      [\n        'feat', 'fix', 'docs', 'style', 'refactor',\n        'perf', 'test', 'build', 'ci', 'chore', 'revert'\n      ]\n    ],\n    'subject-case': [\n      2,\n      'never',\n      ['sentence-case', 'start-case', 'pascal-case', 'upper-case']\n    ],\n    'subject-full-stop': [2, 'never', '.'],\n    'header-max-length': [2, 'always', 72]\n  }\n};\n\n// 2. Эталонная цепочка атомарных коммитов\nconst gitCommitLog = [\n  // Коммит 1: Новая фича с указанием скоупа\n  'feat(auth): add TOTP two-factor authentication generator',\n\n  // Коммит 2: Unit-тесты для нового функционала\n  'test(auth): add unit test suite for TOTP code validation',\n\n  // Коммит 3: Breaking Change с миграцией и закрытием задачи в Jira\n  `refactor(auth)!: require mandatory 2FA token in verifySession\\n\\nBREAKING CHANGE: verifySession() now requires 6-digit TOTP token in payload.\\nLegacy single-factor payload will be rejected with HTTP 401.\\n\\nCloses #312`\n];",
+      "explanation": "Конфигурация commitlint строго форсирует правила Conventional Commits: тип из белого списка, lowercase в заголовке, отсутствие точки и максимальную длину заголовка 72 символа. Цепочка коммитов разделена на три атомарных шага: реализация фичи -> тестирование -> ломающее обновление с подробным описанием миграции в BREAKING CHANGE."
+    }
+  },
+  "quiz": {
+    "questions": [
+      {
+        "id": "pro-22-q1",
+        "question": "Какое сообщение коммита составлено строго по правилам Airbnb Git Style Guide и Conventional Commits?",
+        "options": [
+          "feat(auth): Added support for OAuth2 authentication.",
+          "feat(auth): add OAuth2 authentication support",
+          "Feature(Auth): Add oauth2 authentication support!",
+          "feat(auth): adding OAuth2 authentication support"
+        ],
+        "correctIndex": 1,
+        "explanation": "По стандарту заголовок пишется строчными буквами ('feat', а не 'Feature'), в императивном залоге настоящего времени ('add', а не 'Added' или 'adding') и без точки на конце."
+      },
+      {
+        "id": "pro-22-q2",
+        "question": "Разработчик оптимизировал алгоритм рендера списка каталога с помощью useMemo и виртуализации, ускорив FPS в 3 раза. Функционал и дизайн не изменились. Какой тип коммита следует выбрать?",
+        "options": [
+          "fix(catalog): optimize list rendering performance",
+          "refactor(catalog): optimize list rendering performance",
+          "perf(catalog): optimize catalog list rendering performance",
+          "chore(catalog): optimize catalog list rendering performance"
+        ],
+        "correctIndex": 2,
+        "explanation": "Тип 'perf' (performance) предназначен специально для изменений кода, направленных на повышение производительности приложения."
+      },
+      {
+        "id": "pro-22-q3",
+        "question": "Как согласно Conventional Commits 1.0 оформляется ломающее изменение (Breaking Change), чтобы semantic-release автоматически повысил MAJOR версию (например, с 1.4.0 до 2.0.0)?",
+        "options": [
+          "Добавлением восклицательного знака '!' перед двоеточием (например, feat(api)!: ...) или блоком 'BREAKING CHANGE:' в футере",
+          "Написанием слова 'BREAKING' в начале заголовка в верхнем регистре",
+          "Указанием типа 'major(api): change method signature'",
+          "Добавлением тега [major] в квадратных скобках в конце заголовка"
+        ],
+        "correctIndex": 0,
+        "explanation": "Спецификация Conventional Commits определяет два способа обозначения ломающих изменений: символ '!' сразу после типа/скоупа (например, 'feat(api)!:') и/или секция 'BREAKING CHANGE:' в футере."
+      },
+      {
+        "id": "pro-22-q4",
+        "question": "Что предписывает классическое правило Airbnb 50/72 для форматирования Git-коммитов?",
+        "options": [
+          "Заголовок не длиннее 50 символов, а строки тела (body) переносятся на 72 символах",
+          "Не более 50 коммитов в ветке и 72 строчки кода в файле",
+          "Коммит должен делаться за 50 минут, а код-ревью за 72 минуты",
+          "Не менее 50 тестов и 72% покрытия кода в проекте"
+        ],
+        "correctIndex": 0,
+        "explanation": "Правило 50/72 требует, чтобы заголовок (subject) был ёмким и не превышал 50 символов, а строки в теле коммита (body) форматировались с переносом на 72 символах для удобного чтения в терминале и Git GUI."
+      },
+      {
+        "id": "pro-22-q5",
+        "question": "Какой хук Git используется инструментом Husky для перехвата и валидации текста сообщения коммита с помощью commitlint?",
+        "options": [
+          "pre-commit",
+          "commit-msg",
+          "pre-push",
+          "post-merge"
+        ],
+        "correctIndex": 1,
+        "explanation": "Хук 'commit-msg' вызывается после ввода текста коммита и передает путь к временному файлу сообщения в commitlint. Хук 'pre-commit' проверяет сам код (линтер, тесты), но не текст сообщения."
+      }
+    ]
   }
+}
 ];

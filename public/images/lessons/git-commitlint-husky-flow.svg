@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="pCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#0099ff"/>
+    </linearGradient>
+    <linearGradient id="pGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="pPink" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e"/>
+      <stop offset="100%" stop-color="#be123c"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#10b981"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#f43f5e"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="500" rx="14" fill="url(#pBg)"/>
+  <rect width="958" height="498" x="1" y="1" rx="13" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+
+  <!-- Title Badge -->
+  <rect x="40" y="24" width="880" height="46" rx="8" fill="#161f30" stroke="#2a3854" stroke-width="1"/>
+  <text x="60" y="52" fill="#38bdf8" font-family="monospace" font-size="16" font-weight="bold">
+    &gt; GIT HOOKS PIPELINE: HUSKY + COMMITLINT + SEMANTIC RELEASE
+  </text>
+
+  <!-- Step 1: Dev executes git commit -->
+  <g transform="translate(50, 100)">
+    <rect width="180" height="150" rx="10" fill="#131c2d" stroke="#00e5ff" stroke-width="1.5"/>
+    <circle cx="28" cy="28" r="14" fill="rgba(0, 229, 255, 0.15)"/>
+    <text x="28" y="33" fill="#00e5ff" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">1</text>
+    <text x="54" y="32" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold">Команда в терминале</text>
+    
+    <rect x="15" y="55" width="150" height="75" rx="6" fill="#090d16" stroke="#1f293d"/>
+    <text x="25" y="78" fill="#94a3b8" font-family="monospace" font-size="11">$ git add .</text>
+    <text x="25" y="98" fill="#00e5ff" font-family="monospace" font-size="11">$ git commit</text>
+    <text x="25" y="116" fill="#64748b" font-family="monospace" font-size="10">-m "feat(api): ..."</text>
+  </g>
+
+  <!-- Arrow 1 -> 2 -->
+  <line x1="230" y1="175" x2="275" y2="175" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: Husky Hook triggers -->
+  <g transform="translate(285, 100)">
+    <rect width="190" height="150" rx="10" fill="#131c2d" stroke="#f59e0b" stroke-width="1.5"/>
+    <circle cx="28" cy="28" r="14" fill="rgba(245, 158, 11, 0.15)"/>
+    <text x="28" y="33" fill="#f59e0b" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">2</text>
+    <text x="54" y="32" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold">Husky Git Hook</text>
+    
+    <rect x="15" y="55" width="160" height="75" rx="6" fill="#090d16" stroke="#1f293d"/>
+    <text x="25" y="75" fill="#f59e0b" font-family="monospace" font-size="11">.husky/commit-msg</text>
+    <text x="25" y="98" fill="#cbd5e1" font-family="monospace" font-size="10">npx --no --</text>
+    <text x="25" y="115" fill="#00e5ff" font-family="monospace" font-size="10">commitlint --edit $1</text>
+  </g>
+
+  <!-- Arrow 2 -> 3 -->
+  <line x1="475" y1="175" x2="520" y2="175" stroke="#38bdf8" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: commitlint decision -->
+  <g transform="translate(530, 80)">
+    <polygon points="100,0 200,95 100,190 0,95" fill="#1e293b" stroke="#38bdf8" stroke-width="1.5"/>
+    <text x="100" y="85" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">Commitlint</text>
+    <text x="100" y="105" fill="#94a3b8" font-family="monospace" font-size="11" text-anchor="middle">Валидация</text>
+    <text x="100" y="122" fill="#64748b" font-family="monospace" font-size="10" text-anchor="middle">Conventional</text>
+  </g>
+
+  <!-- Branch Fail (Down) -->
+  <line x1="630" y1="270" x2="630" y2="330" stroke="#f43f5e" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <g transform="translate(520, 340)">
+    <rect width="220" height="120" rx="8" fill="rgba(244, 63, 94, 0.1)" stroke="#f43f5e" stroke-width="1.5"/>
+    <text x="15" y="25" fill="#f43f5e" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="bold">❌ ОШИБКА: Коммит отклонён</text>
+    <text x="15" y="48" fill="#cbd5e1" font-family="monospace" font-size="10">✖ subject may not be empty</text>
+    <text x="15" y="65" fill="#cbd5e1" font-family="monospace" font-size="10">✖ type must be lower-case</text>
+    <text x="15" y="85" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10">Коммит НЕ попадает в git log.</text>
+    <text x="15" y="102" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10">Разработчик исправляет текст.</text>
+  </g>
+
+  <!-- Branch Pass (Right) -->
+  <line x1="730" y1="175" x2="775" y2="175" stroke="#10b981" stroke-width="2" marker-end="url(#arrowGreen)"/>
+  <g transform="translate(785, 100)">
+    <rect width="135" height="150" rx="10" fill="#131c2d" stroke="#10b981" stroke-width="1.5"/>
+    <circle cx="28" cy="28" r="14" fill="rgba(16, 185, 129, 0.15)"/>
+    <text x="28" y="33" fill="#10b981" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">✓</text>
+    <text x="54" y="32" fill="#10b981" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold">Успех!</text>
+    
+    <rect x="15" y="55" width="105" height="75" rx="6" fill="#090d16" stroke="#1f293d"/>
+    <text x="22" y="75" fill="#10b981" font-family="monospace" font-size="10">Коммит создан</text>
+    <text x="22" y="95" fill="#94a3b8" font-family="monospace" font-size="10">git push</text>
+    <text x="22" y="115" fill="#00e5ff" font-family="monospace" font-size="10">CI/CD Deploy</text>
+  </g>
+
+  <!-- Bottom Bar: Automation & SemVer -->
+  <g transform="translate(50, 360)">
+    <rect width="425" height="100" rx="8" fill="#111827" stroke="#334155" stroke-width="1.5"/>
+    <text x="20" y="28" fill="#38bdf8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="bold">
+      🚀 Автоматизация CI/CD и Semantic Release:
+    </text>
+    <text x="20" y="52" fill="#94a3b8" font-family="monospace" font-size="11">
+      • feat(...)  -&gt; MINOR bump (v1.2.0 -&gt; v1.3.0)
+    </text>
+    <text x="20" y="70" fill="#94a3b8" font-family="monospace" font-size="11">
+      • fix(...)   -&gt; PATCH bump (v1.2.0 -&gt; v1.2.1)
+    </text>
+    <text x="20" y="88" fill="#94a3b8" font-family="monospace" font-size="11">
+      • BREAKING   -&gt; MAJOR bump (v1.2.0 -&gt; v2.0.0) + авто-CHANGELOG
+    </text>
+  </g>
+</svg>

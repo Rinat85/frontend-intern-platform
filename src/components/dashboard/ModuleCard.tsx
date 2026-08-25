@@ -38,32 +38,36 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
       </div>
 
       <div className="module-card-body">
-        <h3 className="module-card-title">{module.title}</h3>
-        <p className="module-card-subtitle">{module.subtitle}</p>
-        <p className="module-card-desc">{module.description}</p>
-
-        <div className="module-card-progress">
-          <div className="module-card-progress-meta">
-            <span>Прогресс модуля</span>
-            <span className="font-bold">{completedCount}/{module.lessons.length} ({percentage}%)</span>
-          </div>
-          <ProgressBar value={percentage} height={8} />
+        <div className="module-card-content">
+          <h3 className="module-card-title">{module.title}</h3>
+          <p className="module-card-subtitle">{module.subtitle}</p>
+          <p className="module-card-desc">{module.description}</p>
         </div>
 
-        <div className="module-card-actions">
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => onSelectModule(module.id)}
-          >
-            Все темы
-          </button>
-          <button
-            className="btn btn-primary btn-sm"
-            onClick={() => onStartFirstUncompleted(module.id)}
-          >
-            <span>{isDone ? 'Повторить' : completedCount > 0 ? 'Продолжить' : 'Начать обучение'}</span>
-            <ArrowRight size={16} />
-          </button>
+        <div className="module-card-footer">
+          <div className="module-card-progress">
+            <div className="module-card-progress-meta">
+              <span>Прогресс модуля</span>
+              <span className="font-bold">{completedCount}/{module.lessons.length} ({percentage}%)</span>
+            </div>
+            <ProgressBar value={percentage} height={8} />
+          </div>
+
+          <div className="module-card-actions">
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => onSelectModule(module.id)}
+            >
+              Все темы
+            </button>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => onStartFirstUncompleted(module.id)}
+            >
+              <span>{isDone ? 'Повторить' : completedCount > 0 ? 'Продолжить' : 'Начать обучение'}</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

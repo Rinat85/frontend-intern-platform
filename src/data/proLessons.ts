@@ -465,6 +465,10 @@ export const proLessons: Lesson[] = [
             "title": "Техника рефакторинга: устранение глубокой вложенности через Guard Clauses",
             "explanation": "Код с ранними выходами (Guard Clauses) имеет цикломатическую сложность 1 и читается мгновенно."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоуроки по принципам SOLID и чистому коду",
+          "content": "Для глубокого и наглядного понимания принципов проектирования гибкого и расширяемого кода рекомендуем изучить видеоматериал:\n\n- **[SOLID принципы разработки программного обеспечения простыми словами (YouTube)](https://youtu.be/TxZwqVTaCmA?si=r3G1_2tTERpVPYbn)** — подробный и понятный видеоразбор каждого из пяти принципов SOLID (Single Responsibility, Open-Closed, Liskov Substitution, Interface Segregation, Dependency Inversion) с разбором архитектурных решений и типичных ошибок проектирования."
         }
       ],
       "seniorTips": [

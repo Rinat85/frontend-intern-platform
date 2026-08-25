@@ -2217,6 +2217,10 @@ export const jsLessons: Lesson[] = [
             "title": "Параллельная загрузка через Promise.all и таймаут через Promise.race",
             "explanation": "Promise.all выполняет запросы одновременно за время самого долгого запроса (например, 200мс вместо 200+200+200=600мс при последовательном await)."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоуроки по Event Loop и асинхронности",
+          "content": "Для глубокого визуального понимания работы цикла событий (Event Loop), очередей микротасок (Promises, queueMicrotask) и макротасок (setTimeout, I/O), а также порядка выполнения асинхронного кода на реальных задачах рекомендуем изучить следующий видеоурок:\n\n- **[Разбор Event Loop в JavaScript на понятных примерах (YouTube)](https://youtu.be/kZFLHCz2a30?si=qaaNLt0M0jdhCeLZ)** — подробный интерактивный разбор работы Call Stack, Web APIs, Microtask Queue и Macrotask Queue с пошаговым решением типовых задач с собеседований."
         }
       ],
       "seniorTips": [

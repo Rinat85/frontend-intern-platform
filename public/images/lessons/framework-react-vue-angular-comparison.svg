@@ -1,0 +1,171 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgC" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17"/>
+      <stop offset="100%" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="560" rx="14" fill="url(#bgC)"/>
+  <rect width="958" height="558" x="1" y="1" rx="13" fill="none" stroke="#1f293d" stroke-width="1.5"/>
+
+  <!-- Title -->
+  <rect x="40" y="24" width="880" height="44" rx="8" fill="#161f30" stroke="#2a3854"/>
+  <text x="480" y="52" fill="#e2e8f0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="700" text-anchor="middle" letter-spacing="0.8">
+    СРАВНЕНИЕ ФРЕЙМВОРКОВ: REACT vs VUE 3 vs ANGULAR vs SVELTE
+  </text>
+
+  <!-- Table Header Row -->
+  <rect x="40" y="84" width="150" height="40" rx="0" fill="#1e293b"/>
+  <text x="115" y="108" fill="#94a3b8" font-family="-apple-system, sans-serif" font-size="12" font-weight="bold" text-anchor="middle">Критерий</text>
+
+  <rect x="190" y="84" width="190" height="40" rx="0" fill="rgba(97,218,251,0.1)"/>
+  <text x="285" y="108" fill="#61dafb" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">⚛ React 19</text>
+
+  <rect x="380" y="84" width="190" height="40" rx="0" fill="rgba(66,184,131,0.1)"/>
+  <text x="475" y="108" fill="#42b883" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">🟢 Vue 3</text>
+
+  <rect x="570" y="84" width="190" height="40" rx="0" fill="rgba(221,0,49,0.1)"/>
+  <text x="665" y="108" fill="#dd0031" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">🔺 Angular 18+</text>
+
+  <rect x="760" y="84" width="160" height="40" rx="0" fill="rgba(255,62,0,0.1)"/>
+  <text x="840" y="108" fill="#ff3e00" font-family="monospace" font-size="13" font-weight="bold" text-anchor="middle">🔥 Svelte 5</text>
+
+  <!-- Row 1: Paradigm -->
+  <rect x="40" y="124" width="150" height="52" fill="#131c2d" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="52" y="146" fill="#e2e8f0" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold">Парадигма</text>
+  <text x="52" y="162" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">(Архитектура)</text>
+
+  <rect x="190" y="124" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="205" y="146" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">Библиотека (View layer)</text>
+  <text x="205" y="162" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">«Конструктор» — собирай сам</text>
+
+  <rect x="380" y="124" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="395" y="146" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">Прогрессивный фреймворк</text>
+  <text x="395" y="162" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Масштабируй по мере роста</text>
+
+  <rect x="570" y="124" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="585" y="146" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">Full framework (Batteries)</text>
+  <text x="585" y="162" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Всё включено + TypeScript</text>
+
+  <rect x="760" y="124" width="160" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="775" y="146" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">Компилятор</text>
+  <text x="775" y="162" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Compile-time реактивность</text>
+
+  <!-- Row 2: Reactivity -->
+  <rect x="40" y="176" width="150" height="52" fill="#131c2d" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="52" y="198" fill="#e2e8f0" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold">Реактивность</text>
+  <text x="52" y="214" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">(Обновление DOM)</text>
+
+  <rect x="190" y="176" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="205" y="198" fill="#61dafb" font-family="monospace" font-size="11">Virtual DOM + Diffing</text>
+  <text x="205" y="214" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Fiber Tree рекончиляция</text>
+
+  <rect x="380" y="176" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="395" y="198" fill="#42b883" font-family="monospace" font-size="11">Proxy-based Reactivity</text>
+  <text x="395" y="214" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Track / Trigger + VNode</text>
+
+  <rect x="570" y="176" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="585" y="198" fill="#dd0031" font-family="monospace" font-size="11">Zone.js → Signals</text>
+  <text x="585" y="214" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Change Detection → Signals</text>
+
+  <rect x="760" y="176" width="160" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="775" y="198" fill="#ff3e00" font-family="monospace" font-size="11">Runes ($state)</text>
+  <text x="775" y="214" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Без Virtual DOM</text>
+
+  <!-- Row 3: Syntax -->
+  <rect x="40" y="228" width="150" height="52" fill="#131c2d" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="52" y="250" fill="#e2e8f0" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold">Синтаксис</text>
+  <text x="52" y="266" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">(Шаблонизация)</text>
+
+  <rect x="190" y="228" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="205" y="250" fill="#61dafb" font-family="monospace" font-size="11">JSX / TSX</text>
+  <text x="205" y="266" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">JS внутри разметки</text>
+
+  <rect x="380" y="228" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="395" y="250" fill="#42b883" font-family="monospace" font-size="11">SFC (.vue) + &lt;template&gt;</text>
+  <text x="395" y="266" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">HTML + Script + Scoped CSS</text>
+
+  <rect x="570" y="228" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="585" y="250" fill="#dd0031" font-family="monospace" font-size="11">@Component + HTML Template</text>
+  <text x="585" y="266" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Декораторы + DI</text>
+
+  <rect x="760" y="228" width="160" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="775" y="250" fill="#ff3e00" font-family="monospace" font-size="11">.svelte файлы</text>
+  <text x="775" y="266" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">HTML с {выражениями}</text>
+
+  <!-- Row 4: State Mgmt -->
+  <rect x="40" y="280" width="150" height="52" fill="#131c2d" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="52" y="302" fill="#e2e8f0" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold">State Management</text>
+  <text x="52" y="318" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">(Состояние)</text>
+
+  <rect x="190" y="280" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="205" y="302" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">Zustand, Redux Toolkit,</text>
+  <text x="205" y="318" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Jotai, Context API</text>
+
+  <rect x="380" y="280" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="395" y="302" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">Pinia (official),</text>
+  <text x="395" y="318" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">composables, provide/inject</text>
+
+  <rect x="570" y="280" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="585" y="302" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">NgRx, RxJS, Signals,</text>
+  <text x="585" y="318" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Services + DI</text>
+
+  <rect x="760" y="280" width="160" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="775" y="302" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="11">Svelte Stores,</text>
+  <text x="775" y="318" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">$state runes</text>
+
+  <!-- Row 5: Learning Curve -->
+  <rect x="40" y="332" width="150" height="52" fill="#131c2d" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="52" y="354" fill="#e2e8f0" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold">Порог входа</text>
+  <text x="52" y="370" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">(Learning Curve)</text>
+
+  <rect x="190" y="332" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="205" y="354" fill="#10b981" font-family="-apple-system, sans-serif" font-size="11">🟢 Средний</text>
+  <text x="205" y="370" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">JSX быстро осваивается</text>
+
+  <rect x="380" y="332" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="395" y="354" fill="#10b981" font-family="-apple-system, sans-serif" font-size="11">🟢 Низкий</text>
+  <text x="395" y="370" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Самый простой старт</text>
+
+  <rect x="570" y="332" width="190" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="585" y="354" fill="#f43f5e" font-family="-apple-system, sans-serif" font-size="11">🔴 Высокий</text>
+  <text x="585" y="370" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">TS + DI + RxJS + Декораторы</text>
+
+  <rect x="760" y="332" width="160" height="52" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="775" y="354" fill="#10b981" font-family="-apple-system, sans-serif" font-size="11">🟢 Низкий</text>
+  <text x="775" y="370" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">Почти чистый HTML/JS</text>
+
+  <!-- Row 6: Use Case -->
+  <rect x="40" y="384" width="150" height="68" fill="#131c2d" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="52" y="412" fill="#e2e8f0" font-family="-apple-system, sans-serif" font-size="11" font-weight="bold">Где применяется</text>
+  <text x="52" y="428" fill="#64748b" font-family="-apple-system, sans-serif" font-size="10">(Production)</text>
+
+  <rect x="190" y="384" width="190" height="68" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="205" y="406" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Meta, Netflix, Airbnb,</text>
+  <text x="205" y="422" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Uber, Shopify, Discord</text>
+  <text x="205" y="440" fill="#61dafb" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold">#1 в вакансиях мира</text>
+
+  <rect x="380" y="384" width="190" height="68" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="395" y="406" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Alibaba, GitLab, Grammarly,</text>
+  <text x="395" y="422" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Nintendo, BMW, Apple</text>
+  <text x="395" y="440" fill="#42b883" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold">Популярен в Азии и Европе</text>
+
+  <rect x="570" y="384" width="190" height="68" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="585" y="406" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Google, Microsoft, SAP,</text>
+  <text x="585" y="422" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Deutsche Bank, Forbes</text>
+  <text x="585" y="440" fill="#dd0031" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold">Enterprise и банковский сектор</text>
+
+  <rect x="760" y="384" width="160" height="68" fill="#0d131f" stroke="#1e293b" stroke-width="0.5"/>
+  <text x="775" y="406" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">Apple Music (Web),</text>
+  <text x="775" y="422" fill="#cbd5e1" font-family="-apple-system, sans-serif" font-size="10">1Password, Spotify</text>
+  <text x="775" y="440" fill="#ff3e00" font-family="-apple-system, sans-serif" font-size="10" font-weight="bold">Стартапы и инди-проекты</text>
+
+  <!-- Bottom: Formula -->
+  <rect x="40" y="470" width="880" height="68" rx="8" fill="#131c2d" stroke="#38bdf8" stroke-width="1.5"/>
+  <text x="480" y="498" fill="#38bdf8" font-family="monospace" font-size="16" font-weight="bold" text-anchor="middle">
+    UI = f(State)
+  </text>
+  <text x="480" y="522" fill="#94a3b8" font-family="-apple-system, sans-serif" font-size="12" text-anchor="middle">
+    Единая формула всех фреймворков: интерфейс — это чистая функция от состояния приложения
+  </text>
+</svg>

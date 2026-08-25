@@ -4282,5 +4282,195 @@ export const proLessons: Lesson[] = [
       }
     ]
   }
+},
+  {
+  "id": "pro-23",
+  "moduleId": "pro",
+  "level": 23,
+  "title": "От Vanilla JS к фреймворкам: React, Vue, Angular и современная компонентная разработка",
+  "subtitle": "Императивный vs Декларативный подход, Virtual DOM, Proxy Reactivity, Signals, JSX, SFC, компонентное мышление и выбор стека",
+  "description": "Фундаментальное руководство по переходу от Vanilla JavaScript к современной компонентной разработке. Почему индустрия ушла от прямых DOM-манипуляций к декларативным фреймворкам, как работает реактивность в React (Virtual DOM), Vue 3 (Proxy), Angular (Signals) и Svelte (компилятор), и как выбрать правильный стек для вашего проекта.",
+  "estimatedMinutes": 55,
+  "difficulty": "advanced",
+  "tags": [
+    "React",
+    "Vue",
+    "Angular",
+    "Svelte",
+    "Virtual DOM",
+    "Reactivity",
+    "JSX",
+    "Components",
+    "SPA",
+    "Framework"
+  ],
+  "theory": {
+    "overview": "Каждый Junior-разработчик, освоивший Vanilla JavaScript, рано или поздно сталкивается с ключевым вопросом: *почему все реальные продукты строятся на React, Vue или Angular, а не на чистом JS?*\n\nОтвет кроется в фундаментальном ограничении императивного подхода: при росте сложности UI (десятки динамических списков, формы, модальные окна, синхронизация с сервером) ручное управление DOM через `querySelector`, `addEventListener` и `innerHTML` приводит к неуправляемому «спагетти-коду», где состояние приложения (данные) и его визуальное представление (DOM) критически рассинхронизируются.\n\nСовременные фреймворки решают эту проблему единой формулой: **`UI = f(State)`** — интерфейс является чистой функцией от состояния. Разработчик декларирует *ЧТО* отображать при определённом состоянии, а фреймворк сам оптимально обновляет DOM. Это и есть парадигмальный переход, который вам предстоит совершить.",
+    "sections": [
+      {
+        "title": "Проблема Vanilla JS при масштабировании: почему фреймворки стали необходимостью",
+        "content": "Рассмотрим типичный сценарий: вы разрабатываете страницу интернет-магазина с каталогом товаров, фильтрацией, корзиной и чекаутом. На Vanilla JS это означает:\n\n1. **Ручной поиск элементов**: десятки вызовов `document.querySelector`, `getElementById`, `getElementsByClassName` для каждого интерактивного элемента.\n2. **Ручная привязка событий**: сотни вызовов `addEventListener` с необходимостью помнить о делегировании и утечках памяти (`removeEventListener`).\n3. **Ручная синхронизация данных и DOM**: при изменении массива товаров нужно вручную пересоздавать HTML-разметку (`innerHTML`) или управлять каждым узлом (`createElement`, `appendChild`, `removeChild`).\n4. **Проблема «спагетти-состояния» (State Spaghetti)**: состояние разбросано по десяткам глобальных переменных, замыканиям и DOM-атрибутам (`data-*`). Отследить, какая именно часть кода изменила значение `totalPrice`, становится невозможно.\n\n**Результат**: при достижении ~2000+ строк кода на Vanilla JS проект становится практически неподдерживаемым. Любое новое изменение ломает два существующих модуля, а локализация бага занимает часы вместо минут.\n\nИменно эту проблему решают React, Vue и Angular — они берут на себя синхронизацию State ↔ DOM, позволяя разработчику сфокусироваться на бизнес-логике.",
+        "image": {
+          "src": "/images/lessons/framework-imperative-vs-declarative.svg",
+          "alt": "Сравнение императивного (Vanilla JS) и декларативного (React) подходов",
+          "caption": "Схема 1: Императивный подход (Vanilla JS) описывает КАК обновить DOM шаг за шагом, а декларативный (React/Vue) описывает ЧТО должно отображаться"
+        }
+      },
+      {
+        "title": "Фундаментальная формула: UI = f(State) и декларативная парадигма",
+        "content": "Все современные фреймворки объединены одной идеей — **декларативной парадигмой рендеринга**:\n\n```\nUI = f(State)\n```\n\n- **State (Состояние)**: объект, содержащий все данные приложения: `{ items: [...], user: {...}, isLoading: true }`.\n- **f (Функция-компонент)**: чистая функция (или шаблон), описывающая, как состояние трансформируется в HTML-разметку.\n- **UI (Интерфейс)**: результат рендеринга — то, что видит пользователь в браузере.\n\n### Как это работает на практике:\n1. Пользователь нажимает кнопку `«Добавить в корзину»`.\n2. Обработчик вызывает функцию обновления состояния: `setState({ cartCount: prev + 1 })` (React) или `cart.value++` (Vue).\n3. Фреймворк **автоматически** вычисляет разницу между старым и новым UI и применяет минимальный набор DOM-операций.\n4. Разработчик **НЕ** пишет ни одного `querySelector` и `textContent = ...` — фреймворк делает это за него.\n\n### Ключевой ментальный сдвиг:\n- **Vanilla JS**: *«Когда юзер кликнул → найди элемент `.counter` → обнови его `textContent`»* (пошаговый алгоритм).\n- **React/Vue**: *«Counter всегда равен `{count}` → если count изменился, UI обновится автоматически»* (декларация результата).\n\nЭтот переход от *«как сделать»* к *«что должно быть»* — самый важный ментальный сдвиг при переходе к фреймворкам."
+      },
+      {
+        "title": "Как фреймворки обновляют DOM: Virtual DOM, Proxy и Компиляция",
+        "content": "Каждый фреймворк решает задачу эффективного обновления DOM по-своему:\n\n### 1. React: Virtual DOM и Reconciliation (Fiber Tree)\n- При каждом обновлении состояния React создаёт легковесное **виртуальное дерево** (JavaScript-объекты, описывающие структуру UI).\n- Алгоритм **Reconciliation (Diffing)** сравнивает новое виртуальное дерево с предыдущим и вычисляет минимальный набор реальных DOM-операций (патчей).\n- **Fiber Architecture** позволяет прерывать и возобновлять рендеринг, приоритизируя пользовательские взаимодействия.\n\n### 2. Vue 3: Proxy-based Fine-Grained Reactivity\n- Vue 3 оборачивает реактивные объекты в `Proxy` (ES2015 API).\n- При обращении к свойству (`get`) Vue **отслеживает** (track), какой компонент зависит от этого свойства.\n- При изменении свойства (`set`) Vue точечно **триггерит** (trigger) перерисовку только зависимых компонентов, минуя полный обход дерева.\n- Это даёт **мелкозернистую реактивность**: обновляется только тот `<span>`, который реально зависит от изменённых данных.\n\n### 3. Angular: Zone.js → Angular Signals\n- Исторически Angular использовал **Zone.js** — библиотеку, перехватывающую все асинхронные операции (клики, HTTP-запросы, таймеры) и запускающую **Change Detection** — полный обход дерева компонентов.\n- С Angular 16+ появились **Signals** — реактивные примитивы (аналогично Vue `ref()`), позволяющие точечно отслеживать зависимости и обходить Zone.js.\n\n### 4. Svelte / SolidJS: Компиляция реактивности\n- Svelte **не использует Virtual DOM** вообще. Компилятор Svelte анализирует код на этапе сборки и генерирует хирургически точный императивный JavaScript, который напрямую обновляет нужные DOM-узлы.\n- **SolidJS** использует **Signals** (fine-grained reactivity) без Virtual DOM, достигая рекордной производительности.\n\n| Фреймворк | Механизм реактивности | Virtual DOM? | Гранулярность |\n|:---|:---|:---:|:---|\n| React 19 | Virtual DOM + Fiber Reconciliation | ✅ Да | Компонент |\n| Vue 3 | Proxy-based Track/Trigger | ✅ (VNode) | Свойство |\n| Angular 18+ | Zone.js → Signals | ❌ Нет | Компонент / Signal |\n| Svelte 5 | Compile-time Runes ($state) | ❌ Нет | DOM-узел |\n| SolidJS | Runtime Signals | ❌ Нет | DOM-узел |"
+      },
+      {
+        "title": "Сравнительная матрица: React vs Vue 3 vs Angular vs Svelte",
+        "content": "Выбор фреймворка — это не вопрос «лучший / худший», а вопрос контекста: команда, экосистема, масштаб проекта и карьерная стратегия.\n\n### ⚛️ React (Meta)\n- **Философия**: минималистичная UI-библиотека. Всё остальное (роутинг, state, формы) — отдельные пакеты на выбор разработчика.\n- **Синтаксис**: JSX/TSX — JavaScript-выражения прямо внутри разметки: `<h1>{user.name}</h1>`.\n- **Экосистема**: крупнейшая в мире — Next.js (SSR/SSG), React Native (мобилки), Zustand, TanStack Query, Radix UI.\n- **Рынок труда**: #1 по количеству вакансий в мире и в СНГ.\n\n### 🟢 Vue 3 (Evan You)\n- **Философия**: «прогрессивный фреймворк» — можно начать с CDN-скрипта и масштабировать до SPA с Nuxt и Pinia.\n- **Синтаксис**: Single File Components (`.vue`) — `<template>`, `<script setup>`, `<style scoped>` в одном файле.\n- **Composition API**: `ref()`, `computed()`, `watch()` — композируемые функции, аналогичные React Hooks.\n- **Рынок**: популярен в Китае, Европе, активно растёт в СНГ.\n\n### 🔺 Angular (Google)\n- **Философия**: «batteries included» — роутинг, HTTP-клиент, формы, анимации, DI, RxJS встроены из коробки.\n- **Синтаксис**: TypeScript-first, декораторы (`@Component`, `@Injectable`), Dependency Injection.\n- **Кривая обучения**: самая крутая — требует знания TypeScript, RxJS, Decorators, Module System.\n- **Рынок**: Enterprise, банки, крупные корпорации (Google, SAP, Deutsche Bank).\n\n### 🔥 Svelte 5 (Rich Harris)\n- **Философия**: «исчезающий фреймворк» — весь код компилируется в оптимальный vanilla JS.\n- **Синтаксис**: `.svelte` файлы — почти чистый HTML с `{выражениями}` и `$state` runes.\n- **Размер бандла**: минимальный среди всех фреймворков.\n- **Рынок**: быстро растёт, но экосистема пока меньше.",
+        "image": {
+          "src": "/images/lessons/framework-react-vue-angular-comparison.svg",
+          "alt": "Сравнительная таблица React, Vue 3, Angular и Svelte",
+          "caption": "Схема 2: Детальное сравнение четырёх основных фреймворков по 6 критериям"
+        }
+      },
+      {
+        "title": "Компонентное мышление: Props, State, Lifecycle и однонаправленный поток данных",
+        "content": "Переход к фреймворкам — это прежде всего переход к **компонентному мышлению**. Вместо одного монолитного JS-файла вы декомпозируете интерфейс на изолированные, переиспользуемые блоки — **компоненты**.\n\n### Анатомия компонента (общие концепции):\n\n1. **Props (Свойства)**: входные данные, передаваемые от родительского компонента. Props **только для чтения** (read-only).\n   - React: `function Card({ title, price }) { ... }`\n   - Vue: `defineProps<{ title: string; price: number }>()`\n\n2. **State (Состояние)**: внутренние данные компонента, при изменении которых UI перерисовывается.\n   - React: `const [count, setCount] = useState(0)`\n   - Vue: `const count = ref(0)`\n\n3. **Lifecycle (Жизненный цикл)**: этапы существования компонента — монтирование, обновление, размонтирование.\n   - React: `useEffect(() => { ... return () => cleanup() }, [deps])`\n   - Vue: `onMounted(() => { ... })`, `onUnmounted(() => { ... })`\n\n4. **Однонаправленный поток данных (One-Way Data Flow)**:\n   - Данные всегда передаются **сверху вниз** (от родителя к ребёнку через Props).\n   - Ребёнок **не может** напрямую изменить Props родителя.\n   - Для обратной коммуникации ребёнок вызывает **callback** (React) или **emit** (Vue), переданный родителем.\n\n### Иммутабельность (Immutability):\n- В React **НЕЛЬЗЯ** напрямую мутировать состояние: `state.items.push(item)` — ❌ НЕ вызовет перерисовку.\n- Правильно: `setItems(prev => [...prev, item])` — создаётся **новый массив**, и React обнаруживает изменение по ссылке.\n- В Vue 3 мутации допустимы благодаря Proxy: `items.value.push(item)` — ✅ Vue отследит изменение автоматически.",
+        "codeExample": {
+          "language": "javascript",
+          "title": "ОДИН И ТОТ ЖЕ СЧЁТЧИК: VANILLA JS vs REACT vs VUE 3",
+          "code": "// ========= VANILLA JS (Императивный) =========\nlet count = 0;\nconst btn = document.getElementById('btn');\nconst display = document.getElementById('count');\nbtn.addEventListener('click', () => {\n  count++;\n  display.textContent = count; // Ручное обновление DOM\n});\n\n// ========= REACT (Декларативный — JSX) =========\n// function Counter() {\n//   const [count, setCount] = useState(0);\n//   return (\n//     <div>\n//       <span>{count}</span>\n//       <button onClick={() => setCount(c => c + 1)}>+</button>\n//     </div>\n//   );\n// }\n\n// ========= VUE 3 (Декларативный — SFC) =========\n// <script setup>\n// import { ref } from 'vue';\n// const count = ref(0);\n// </script>\n// <template>\n//   <span>{{ count }}</span>\n//   <button @click=\"count++\">+</button>\n// </template>"
+        }
+      },
+      {
+        "title": "Практический роадмап: как начать и что учить после Vanilla JS",
+        "content": "После прохождения модулей JavaScript Master и Web Development Pro вы готовы к изучению любого фреймворка. Вот рекомендуемый план:\n\n### Шаг 1: Выберите первый фреймворк (рекомендация: React)\n- **React** — оптимальный выбор для первого фреймворка благодаря крупнейшей экосистеме, количеству вакансий и обучающих материалов.\n- Альтернативно: **Vue 3**, если хотите более плавный переход от Vanilla JS (ближе к обычному HTML).\n\n### Шаг 2: Освойте базовый стек\n- **React**: JSX → Hooks (useState, useEffect) → Props → React Router → Fetch/TanStack Query.\n- **Vue**: SFC → Composition API (ref, computed) → Vue Router → Pinia → Axios.\n\n### Шаг 3: Добавьте TypeScript\n- TypeScript — обязательный навык в современной разработке. Изучите его параллельно с фреймворком: Generic Props, Interface для State, строгая типизация API-ответов.\n\n### Шаг 4: SSR-фреймворк (мета-фреймворк)\n- **Next.js** (для React) или **Nuxt** (для Vue) — для server-side rendering, static generation и полноценных full-stack приложений.\n\n### Шаг 5: Расширяйте горизонты\n- Попробуйте Svelte / SolidJS — они дадут глубокое понимание реактивности.\n- Изучите Angular, если планируете работать в Enterprise / банковском секторе.\n\n### Важно помнить:\n- **Vanilla JS — это фундамент, а не устаревшая технология!** Глубокое понимание DOM, Event Loop, замыканий и прототипов делает вас сильнее в любом фреймворке.\n- **Фреймворки приходят и уходят, а JavaScript остаётся.** Разработчик, понимающий основы языка, освоит любой новый фреймворк за 2-3 недели."
+      }
+    ],
+    "commonMistakes": [
+      {
+        "bad": "state.items.push(newItem);\n// React: Компонент НЕ перерисуется!",
+        "good": "setItems(prev => [...prev, newItem]);\n// React: Новая ссылка → перерисовка!",
+        "reason": "В React состояние (State) должно обновляться иммутабельно — через создание нового объекта/массива. Прямая мутация не изменяет ссылку и React не обнаруживает изменение."
+      },
+      {
+        "bad": "// Логика, стили и разметка в разных файлах\n// logic.js + template.html + styles.css\n// Нужно держать 3 файла синхронно",
+        "good": "// Компонент = единый модуль:\n// React: Card.tsx (JSX + логика + CSS-in-JS)\n// Vue: Card.vue (template + script + style scoped)",
+        "reason": "Компонентный подход объединяет связанные разметку, логику и стили в один файл (Single File Component). Это повышает читаемость и упрощает переиспользование."
+      },
+      {
+        "bad": "// Прямые DOM-манипуляции внутри React-компонента\ndocument.getElementById('title').textContent = name;\ndocument.querySelector('.list').innerHTML = html;",
+        "good": "// Декларативный подход через JSX\nreturn (\n  <h1>{name}</h1>\n  <ul>{items.map(i => <li key={i.id}>{i.text}</li>)}</ul>\n);",
+        "reason": "Внутри компонентов React/Vue НЕЛЬЗЯ напрямую обращаться к DOM. Фреймворк управляет DOM сам. Используйте ref() / useRef() только для исключительных случаев (фокус, измерение размеров)."
+      }
+    ],
+    "seniorTips": [
+      "Не начинайте изучение React/Vue с мега-проекта. Постройте 3 маленьких приложения: Todo, Weather Widget и простой чат — это закрепит основные паттерны.",
+      "Поймите разницу между Controlled и Uncontrolled компонентами (особенно для форм). В React предпочитайте Controlled: значение поля хранится в State, а не в DOM.",
+      "Используйте DevTools фреймворка: React DevTools, Vue DevTools — они показывают дерево компонентов, Props, State и позволяют отлаживать перерисовки.",
+      "Не оборачивайте всё в глобальный State Manager (Redux/Pinia) с первого дня. Начните с локального useState/ref и поднимайте состояние (Lifting State Up) только когда несколько компонентов нуждаются в одних данных.",
+      "Изучите паттерн 'Container / Presentational' (Smart / Dumb components): контейнеры загружают данные и управляют логикой, а презентационные компоненты только отображают Props."
+    ],
+    "keyTakeaways": [
+      "Фреймворки решают фундаментальную проблему Vanilla JS — рассинхронизацию состояния (данных) и DOM (интерфейса) при масштабировании приложения.",
+      "Единая формула всех фреймворков: UI = f(State) — интерфейс является чистой функцией от текущего состояния, а DOM обновляется автоматически.",
+      "React использует Virtual DOM и Fiber Reconciliation, Vue 3 — Proxy-based реактивность, Angular — Signals, Svelte — компиляцию в чистый JS без Virtual DOM.",
+      "Компонентное мышление (Props, State, Lifecycle, однонаправленный поток данных) — это универсальный навык, переносимый между любыми фреймворками.",
+      "Vanilla JavaScript — не устаревшая технология, а фундамент. Глубокое понимание JS делает вас сильнее в любом фреймворке и ускоряет освоение новых инструментов."
+    ]
+  },
+  "sandbox": {
+    "instructions": "Интерактивное сравнение: реализация одного и того же счётчика (Counter) на Vanilla JS и на декларативном подходе (эмуляция React-подхода). Измените состояние и наблюдайте, как UI обновляется автоматически без ручных DOM-манипуляций!",
+    "initialHtml": "<div class=\"demo-container\">\n  <h2>Vanilla JS vs Декларативный подход</h2>\n  <p class=\"subtitle\">Сравните два способа обновления интерфейса</p>\n\n  <div class=\"panels\">\n    <!-- Imperative Panel -->\n    <div class=\"panel panel-imperative\">\n      <div class=\"panel-header imperative-header\">\n        <span class=\"dot red\"></span>\n        <span class=\"dot yellow\"></span>\n        <span class=\"dot green\"></span>\n        <span class=\"panel-title\">❌ Vanilla JS (Императивный)</span>\n      </div>\n      <div class=\"panel-body\">\n        <div class=\"counter-display\">\n          <span class=\"counter-label\">Счётчик:</span>\n          <span id=\"imp-count\" class=\"counter-value\">0</span>\n        </div>\n        <div class=\"btn-row\">\n          <button id=\"imp-dec\" class=\"btn btn-dec\">−</button>\n          <button id=\"imp-reset\" class=\"btn btn-reset\">Reset</button>\n          <button id=\"imp-inc\" class=\"btn btn-inc\">+</button>\n        </div>\n        <div class=\"dom-ops\">\n          <span class=\"dom-ops-label\">DOM-операций:</span>\n          <span id=\"imp-ops\" class=\"dom-ops-count\">0</span>\n        </div>\n        <pre id=\"imp-log\" class=\"log-box\"></pre>\n      </div>\n    </div>\n\n    <!-- Declarative Panel -->\n    <div class=\"panel panel-declarative\">\n      <div class=\"panel-header declarative-header\">\n        <span class=\"dot red\"></span>\n        <span class=\"dot yellow\"></span>\n        <span class=\"dot green\"></span>\n        <span class=\"panel-title\">✅ Декларативный (React-подход)</span>\n      </div>\n      <div class=\"panel-body\">\n        <div class=\"counter-display\">\n          <span class=\"counter-label\">Счётчик:</span>\n          <span id=\"dec-count\" class=\"counter-value\">0</span>\n        </div>\n        <div class=\"btn-row\">\n          <button id=\"dec-dec\" class=\"btn btn-dec\">−</button>\n          <button id=\"dec-reset\" class=\"btn btn-reset\">Reset</button>\n          <button id=\"dec-inc\" class=\"btn btn-inc\">+</button>\n        </div>\n        <div class=\"dom-ops\">\n          <span class=\"dom-ops-label\">Авто-рендеров:</span>\n          <span id=\"dec-ops\" class=\"dom-ops-count\">0</span>\n        </div>\n        <pre id=\"dec-log\" class=\"log-box\"></pre>\n      </div>\n    </div>\n  </div>\n\n  <div class=\"comparison-note\">\n    <strong>💡 Ключевое отличие:</strong> Слева — каждое обновление DOM выполняется вручную (querySelector + textContent). Справа — UI автоматически пересчитывается из State (как в React/Vue).\n  </div>\n</div>",
+    "initialCss": "* { box-sizing: border-box; margin: 0; }\nbody { background: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 16px; }\n.demo-container { max-width: 780px; margin: 0 auto; }\nh2 { color: #58a6ff; font-size: 18px; margin-bottom: 4px; }\n.subtitle { color: #8b949e; font-size: 13px; margin-bottom: 18px; }\n.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }\n.panel { background: #161b22; border-radius: 10px; overflow: hidden; border: 1px solid #30363d; }\n.panel-header { display: flex; align-items: center; gap: 6px; padding: 10px 14px; }\n.imperative-header { background: rgba(248, 81, 73, 0.1); border-bottom: 1px solid rgba(248, 81, 73, 0.2); }\n.declarative-header { background: rgba(63, 185, 80, 0.1); border-bottom: 1px solid rgba(63, 185, 80, 0.2); }\n.dot { width: 10px; height: 10px; border-radius: 50%; }\n.dot.red { background: #f85149; }\n.dot.yellow { background: #d29922; }\n.dot.green { background: #3fb950; }\n.panel-title { font-size: 12px; font-weight: 700; color: #e6edf3; margin-left: 6px; }\n.panel-body { padding: 16px; }\n.counter-display { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }\n.counter-label { color: #8b949e; font-size: 13px; }\n.counter-value { font-size: 36px; font-weight: 800; font-family: monospace; color: #f0f6fc; min-width: 60px; text-align: center; background: #0d1117; padding: 6px 14px; border-radius: 8px; border: 1px solid #30363d; }\n.btn-row { display: flex; gap: 8px; margin-bottom: 14px; }\n.btn { flex: 1; padding: 10px; border: none; border-radius: 6px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.15s; }\n.btn-inc { background: #238636; color: #fff; }\n.btn-inc:hover { background: #2ea043; }\n.btn-dec { background: #da3633; color: #fff; }\n.btn-dec:hover { background: #f85149; }\n.btn-reset { background: #30363d; color: #c9d1d9; }\n.btn-reset:hover { background: #484f58; }\n.dom-ops { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }\n.dom-ops-label { color: #8b949e; font-size: 12px; }\n.dom-ops-count { color: #f0883e; font-weight: bold; font-family: monospace; font-size: 14px; }\n.log-box { background: #0d1117; border: 1px solid #21262d; border-radius: 6px; padding: 8px 10px; font-family: monospace; font-size: 10.5px; line-height: 1.5; color: #7ee787; height: 100px; overflow-y: auto; white-space: pre-wrap; }\n.comparison-note { background: rgba(88, 166, 255, 0.08); border: 1px solid rgba(88, 166, 255, 0.2); border-radius: 8px; padding: 12px 16px; font-size: 12.5px; line-height: 1.5; color: #c9d1d9; }\n.comparison-note strong { color: #58a6ff; }",
+    "initialJs": "// ==============================\n// ЛЕВАЯ ПАНЕЛЬ: Vanilla JS (Императивный)\n// ==============================\nlet impCount = 0;\nlet impOps = 0;\nconst impCountEl = document.getElementById('imp-count');\nconst impOpsEl = document.getElementById('imp-ops');\nconst impLog = document.getElementById('imp-log');\n\nfunction impLogMsg(msg) {\n  impLog.textContent = msg + '\\n' + impLog.textContent;\n}\n\ndocument.getElementById('imp-inc').addEventListener('click', () => {\n  impCount++;\n  // Шаг 1: Вручную найти элемент и обновить текст\n  impCountEl.textContent = impCount;\n  impOps++;\n  impOpsEl.textContent = impOps;\n  impLogMsg(`[DOM] querySelector('.counter') → textContent = ${impCount}`);\n});\n\ndocument.getElementById('imp-dec').addEventListener('click', () => {\n  impCount--;\n  impCountEl.textContent = impCount;\n  impOps++;\n  impOpsEl.textContent = impOps;\n  impLogMsg(`[DOM] querySelector('.counter') → textContent = ${impCount}`);\n});\n\ndocument.getElementById('imp-reset').addEventListener('click', () => {\n  impCount = 0;\n  impCountEl.textContent = impCount;\n  impOps++;\n  impOpsEl.textContent = impOps;\n  impLogMsg(`[DOM] reset → textContent = 0`);\n});\n\n// ==============================\n// ПРАВАЯ ПАНЕЛЬ: Декларативный (React-подход)\n// ==============================\n// Эмуляция реактивного State → автоматический UI рендер\nlet decRenders = 0;\nconst decCountEl = document.getElementById('dec-count');\nconst decOpsEl = document.getElementById('dec-ops');\nconst decLog = document.getElementById('dec-log');\n\nfunction decLogMsg(msg) {\n  decLog.textContent = msg + '\\n' + decLog.textContent;\n}\n\n// Мини-реактивная система: State → автоматический render()\nfunction createReactiveState(initial) {\n  let _state = initial;\n  return {\n    get value() { return _state; },\n    set value(newVal) {\n      const oldVal = _state;\n      _state = newVal;\n      // Автоматический рендер при изменении (как React setState)\n      render(oldVal, newVal);\n    }\n  };\n}\n\nconst count = createReactiveState(0);\n\n// Функция render() — аналог React reconciliation\nfunction render(oldVal, newVal) {\n  decRenders++;\n  // UI = f(State): Описываем ЧТО показать\n  decCountEl.textContent = newVal;\n  decOpsEl.textContent = decRenders;\n  decLogMsg(`[Auto-Render #${decRenders}] State: ${oldVal} → ${newVal}`);\n}\n\n// Обработчики: только меняют State, НЕ трогают DOM!\ndocument.getElementById('dec-inc').addEventListener('click', () => {\n  count.value = count.value + 1; // Просто обновляем state\n});\n\ndocument.getElementById('dec-dec').addEventListener('click', () => {\n  count.value = count.value - 1;\n});\n\ndocument.getElementById('dec-reset').addEventListener('click', () => {\n  count.value = 0;\n});"
+  },
+  "task": {
+    "title": "Рефакторинг Vanilla JS-компонента в декларативную реактивную архитектуру",
+    "scenario": "У вас есть императивный Vanilla JS код для списка задач (Todo List): прямые querySelector, createElement, appendChild и глобальные переменные. Ваша задача — отрефакторить его в мини-реактивную систему с State → автоматическим рендерингом, имитирующую подход React/Vue.",
+    "criteria": [
+      "Создать функцию createStore(initialState) с методами getState(), setState(updater) и subscribe(listener)",
+      "Все данные задач хранятся в едином State объекте: { todos: [...], filter: 'all' }",
+      "При вызове setState() автоматически вызывается функция render() для перерисовки UI",
+      "Функция render() полностью заменяет содержимое контейнера на основе текущего State (декларативно)",
+      "Обработчики событий только вызывают setState(), НЕ обращаются к DOM напрямую"
+    ],
+    "starterCode": {
+      "js": "// Императивный Vanilla JS (нужно отрефакторить):\nlet todos = [];\nlet nextId = 1;\n\nfunction addTodo(text) {\n  const todo = { id: nextId++, text, done: false };\n  todos.push(todo);\n  // Прямая DOM-манипуляция\n  const li = document.createElement('li');\n  li.textContent = todo.text;\n  li.id = 'todo-' + todo.id;\n  document.getElementById('list').appendChild(li);\n}\n\nfunction toggleTodo(id) {\n  const todo = todos.find(t => t.id === id);\n  todo.done = !todo.done;\n  // Прямая DOM-манипуляция\n  const li = document.getElementById('todo-' + id);\n  li.style.textDecoration = todo.done ? 'line-through' : 'none';\n}\n\n// ЗАДАНИЕ: Перепишите используя createStore() и render()\n// function createStore(initialState) { ... }\n// function render(state, container) { ... }"
+    },
+    "hints": [
+      "createStore должен хранить state, массив listeners и вызывать forEach(fn => fn(state)) при каждом setState.",
+      "setState принимает функцию-апдейтер: setState(prev => ({ ...prev, todos: [...prev.todos, newTodo] })) — аналогично React.",
+      "Функция render должна очищать контейнер (innerHTML = '') и строить весь UI заново из текущего state. Это неоптимально для больших списков, но именно так концептуально работает Virtual DOM."
+    ],
+    "solution": {
+      "js": "// Мини-реактивный Store (аналог Redux / Zustand)\nfunction createStore(initialState) {\n  let state = initialState;\n  const listeners = [];\n  return {\n    getState: () => state,\n    setState: (updater) => {\n      state = typeof updater === 'function' ? updater(state) : updater;\n      listeners.forEach(fn => fn(state));\n    },\n    subscribe: (fn) => { listeners.push(fn); return () => listeners.splice(listeners.indexOf(fn), 1); }\n  };\n}\n\n// Инициализация Store\nconst store = createStore({ todos: [], nextId: 1, filter: 'all' });\n\n// Декларативная функция render: UI = f(State)\nfunction render(state) {\n  const container = document.getElementById('app');\n  const filtered = state.filter === 'all' ? state.todos\n    : state.filter === 'done' ? state.todos.filter(t => t.done)\n    : state.todos.filter(t => !t.done);\n\n  container.innerHTML = `\n    <input id=\"input\" placeholder=\"Новая задача...\" />\n    <button id=\"add-btn\">Добавить</button>\n    <div>\n      <button class=\"filter\" data-f=\"all\">Все</button>\n      <button class=\"filter\" data-f=\"active\">Активные</button>\n      <button class=\"filter\" data-f=\"done\">Готовые</button>\n    </div>\n    <ul>${filtered.map(t => `\n      <li style=\"text-decoration: ${t.done ? 'line-through' : 'none'}\">\n        <input type=\"checkbox\" data-id=\"${t.id}\" ${t.done ? 'checked' : ''} />\n        ${t.text}\n      </li>`).join('')}</ul>\n    <p>Всего: ${state.todos.length} | Готово: ${state.todos.filter(t => t.done).length}</p>\n  `;\n\n  // Привязка событий после рендера\n  document.getElementById('add-btn').onclick = () => {\n    const text = document.getElementById('input').value.trim();\n    if (!text) return;\n    store.setState(s => ({\n      ...s,\n      todos: [...s.todos, { id: s.nextId, text, done: false }],\n      nextId: s.nextId + 1\n    }));\n  };\n  container.querySelectorAll('.filter').forEach(btn => {\n    btn.onclick = () => store.setState(s => ({ ...s, filter: btn.dataset.f }));\n  });\n  container.querySelectorAll('[data-id]').forEach(cb => {\n    cb.onchange = () => {\n      const id = Number(cb.dataset.id);\n      store.setState(s => ({\n        ...s,\n        todos: s.todos.map(t => t.id === id ? { ...t, done: !t.done } : t)\n      }));\n    };\n  });\n}\n\n// Подписка: автоматический рендер при ЛЮБОМ изменении State\nstore.subscribe(render);\nrender(store.getState()); // Первый рендер",
+      "explanation": "Мы создали мини-реактивную систему, повторяющую паттерн Redux/Zustand: единый Store хранит всё состояние, setState() принимает иммутабельный updater, а subscribe() автоматически вызывает функцию render() при каждом изменении. Функция render() декларативно строит весь UI из текущего состояния — точно так же, как это концептуально делает React с Virtual DOM."
+    }
+  },
+  "quiz": {
+    "questions": [
+      {
+        "id": "pro-23-q1",
+        "question": "Какая фундаментальная формула описывает декларативный принцип работы всех современных фреймворков (React, Vue, Angular)?",
+        "options": [
+          "DOM = querySelector(State)",
+          "UI = f(State)",
+          "State = DOM.innerHTML",
+          "render() = new VirtualDOM()"
+        ],
+        "correctIndex": 1,
+        "explanation": "Формула UI = f(State) означает, что интерфейс (UI) является чистой функцией (f) от текущего состояния приложения (State). Разработчик описывает, как State трансформируется в разметку, а фреймворк автоматически обновляет DOM при изменении State."
+      },
+      {
+        "id": "pro-23-q2",
+        "question": "Какой механизм обновления DOM использует React для оптимизации перерисовки?",
+        "options": [
+          "Прямые DOM-манипуляции через document.createElement()",
+          "Virtual DOM с алгоритмом Reconciliation (Diffing) и Fiber Architecture",
+          "Proxy-based реактивность с автоматическим Track/Trigger",
+          "Компиляция шаблонов в императивный JavaScript на этапе сборки"
+        ],
+        "correctIndex": 1,
+        "explanation": "React создаёт легковесное виртуальное дерево (Virtual DOM) — JavaScript-объекты, описывающие UI. При обновлении State алгоритм Reconciliation сравнивает новое и предыдущее дерево и применяет минимальный набор реальных DOM-операций."
+      },
+      {
+        "id": "pro-23-q3",
+        "question": "Почему в React НЕЛЬЗЯ обновлять состояние массива через прямую мутацию: state.items.push(newItem)?",
+        "options": [
+          "Метод push() не поддерживается в JavaScript ES6+",
+          "React сравнивает состояние по ссылке (reference equality). Мутация не создаёт новую ссылку, и React не обнаруживает изменение",
+          "Virtual DOM не умеет отслеживать изменения массивов, только примитивных типов",
+          "Push() работает только в Angular, а в React нужно использовать concat()"
+        ],
+        "correctIndex": 1,
+        "explanation": "React использует поверхностное сравнение (shallow comparison) ссылок для определения, изменилось ли состояние. Метод push() мутирует существующий массив, не меняя его ссылку. Поэтому React не запускает перерисовку. Правильный подход: setItems(prev => [...prev, newItem]) — создать новый массив."
+      },
+      {
+        "id": "pro-23-q4",
+        "question": "Какой фреймворк НЕ использует Virtual DOM, а компилирует реактивный код в хирургически точные DOM-операции на этапе сборки?",
+        "options": [
+          "React",
+          "Vue 3",
+          "Angular",
+          "Svelte"
+        ],
+        "correctIndex": 3,
+        "explanation": "Svelte — это компилятор, а не runtime-фреймворк. Он анализирует компоненты на этапе сборки и генерирует оптимальный императивный JavaScript, который напрямую обновляет конкретные DOM-узлы без использования Virtual DOM."
+      },
+      {
+        "id": "pro-23-q5",
+        "question": "Что означает принцип 'однонаправленный поток данных' (One-Way Data Flow) в компонентной архитектуре?",
+        "options": [
+          "Данные передаются только от сервера к клиенту, обратная связь невозможна",
+          "Данные передаются сверху вниз через Props (родитель → ребёнок), а обратная коммуникация идёт через callbacks / emit",
+          "Компоненты могут свободно менять Props друг друга в любом направлении",
+          "HTTP-запросы могут отправляться только методом GET, но не POST"
+        ],
+        "correctIndex": 1,
+        "explanation": "Однонаправленный поток данных означает, что данные всегда передаются от родительского компонента к дочернему через Props (сверху вниз). Дочерний компонент не может напрямую изменить Props родителя. Для обратной связи используются callback-функции (React) или emit-события (Vue)."
+      }
+    ]
+  }
 }
 ];

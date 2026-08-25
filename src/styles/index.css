@@ -2827,3 +2827,27 @@ pre code,
 .btn-danger-custom:hover {
   background: #e11d48;
 }
+
+/* Theory Links & Video Resources */
+.theory-link {
+  color: var(--neon, #00f2fe);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: color var(--transition-fast, 0.15s ease), text-shadow var(--transition-fast, 0.15s ease);
+}
+
+.theory-link:hover {
+  color: #38bdf8;
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+.theory-link .inline-link-icon {
+  display: inline-block;
+  vertical-align: middle;
+  opacity: 0.85;
+  flex-shrink: 0;
+}

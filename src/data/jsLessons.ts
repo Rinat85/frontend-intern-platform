@@ -66,6 +66,10 @@ export const jsLessons: Lesson[] = [
             "code": "'use strict';\n\nfunction checkType(value) {\n  // Корректная проверка на null (обход бага typeof)\n  if (value === null) {\n    return 'null';\n  }\n  // Проверка на массив\n  if (Array.isArray(value)) {\n    return 'array';\n  }\n  return typeof value;\n}\n\nconsole.log(checkType(null));        // 'null'\nconsole.log(checkType([1, 2, 3]));   // 'array'\nconsole.log(checkType('Octo'));      // 'string'",
             "explanation": "Оператор typeof корректно определяет примитивы, а для массивов и null требуются специальные проверки Array.isArray и прямое сравнение."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоуроки и практические материалы по JavaScript",
+          "content": "Для закрепления фундаментальных основ JavaScript, наглядного знакомства со средой исполнения и закрепления тем первого уровня рекомендуем изучить следующие видеоматериалы:\n\n- **[Полный курс по основам JavaScript с нуля (YouTube)](https://youtu.be/maPRR_jjyOE?si=GeU3ZDeas59Non4w)** — фундаментальный видеоурок с детальным разбором синтаксиса, типов данных, переменных и базовых алгоритмических конструкций.\n- **[JavaScript для начинающих: ключевые концепции и практика (YouTube)](https://youtu.be/_jkiPoDmHnE?si=oGH4dyRr8O8zs18h)** — практический видеоурок с разбором работы среды исполнения, функций, объектов и типичных ошибок начинающих разработчиков."
         }
       ],
       "seniorTips": [

@@ -1,4 +1,5 @@
-﻿import React from 'react';
+import React from 'react';
+import { ExternalLink } from 'lucide-react';
 
 const CODE_KEYWORDS = new Set([
   'DOCTYPE', 'HTML5', 'HTML', 'DOM', 'CSS3', 'CSS', 'ES6+', 'ES6', 'W3C',
@@ -44,8 +45,15 @@ const CODE_KEYWORDS = new Set([
   'feat:', 'fix:', 'refactor:', 'style:', 'docs:', 'chore:'
 ]);
 
-// Use RegExp constructor to avoid TSX parser confusion with angle brackets in regex
-const PRIMARY_REGEX = new RegExp('`([^`]+)`|\\*\\*([^*]+)\\*\\*|(<\\/?[a-zA-Z!][a-zA-Z0-9_-]*(?:\\s+[^>]*)?>)', 'g');
+// Support: [text](url) | `code` | **bold** | <tag> | https://...
+const PRIMARY_REGEX = new RegExp(
+  '\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s)]+)\\)|' +
+  '`([^`]+)`|' +
+  '\\*\\*([^*]+)\\*\\*|' +
+  '(<\\/?[a-zA-Z!][a-zA-Z0-9_-]*(?:\\s+[^>]*)?>)|' +
+  '(https?:\\/\\/[^\\s<)]+)',
+  'g'
+);
 
 const TOKEN_REGEX = new RegExp(
   '(<!DOCTYPE\\s+html>|<!DOCTYPE>|html\\s+lang|DOCTYPE|HTML5|ES6\\+|DOM|CSS3|W3C|JSON-LD|Schema\\.org|' +
@@ -68,12 +76,41 @@ export const formatInlineCode = (text: string): React.ReactNode[] => {
       const plain = text.slice(lastIdx, match.index);
       nodes.push(...highlightPlainKeywords(plain, nodes.length));
     }
-    if (match[1] !== undefined) {
-      nodes.push(<code key={'c' + nodes.length} className="inline-code">{match[1]}</code>);
-    } else if (match[2] !== undefined) {
-      nodes.push(<strong key={'b' + nodes.length}>{match[2]}</strong>);
+
+    if (match[1] !== undefined && match[2] !== undefined) {
+      // Markdown link [text](url)
+      nodes.push(
+        <a
+          key={'l' + nodes.length}
+          href={match[2]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="theory-link"
+        >
+          {match[1]}
+          <ExternalLink size={12} className="inline-link-icon" />
+        </a>
+      );
     } else if (match[3] !== undefined) {
-      nodes.push(<code key={'t' + nodes.length} className="inline-code">{match[3]}</code>);
+      nodes.push(<code key={'c' + nodes.length} className="inline-code">{match[3]}</code>);
+    } else if (match[4] !== undefined) {
+      nodes.push(<strong key={'b' + nodes.length}>{match[4]}</strong>);
+    } else if (match[5] !== undefined) {
+      nodes.push(<code key={'t' + nodes.length} className="inline-code">{match[5]}</code>);
+    } else if (match[6] !== undefined) {
+      // Standalone URL
+      nodes.push(
+        <a
+          key={'u' + nodes.length}
+          href={match[6]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="theory-link"
+        >
+          {match[6]}
+          <ExternalLink size={12} className="inline-link-icon" />
+        </a>
+      );
     }
     lastIdx = match.index + match[0].length;
   }

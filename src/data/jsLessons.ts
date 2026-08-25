@@ -272,6 +272,10 @@ export const jsLessons: Lesson[] = [
             "title": "Деструктуризация, rest/spread и optional chaining",
             "explanation": "Деструктуризация в параметрах функции — стандартный паттерн React-компонентов ({ props }). Spread для immutable updates — основа Redux и React state. ?. и ?? — безопасный доступ к вложенным данным."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоуроки по ES6+, Optional Chaining и Nullish Coalescing",
+          "content": "Для наглядного закрепления синтаксиса ES6+, безопасной работы со свойствами и значениями по умолчанию рекомендуем изучить видеоурок:\n\n- **[Операторы Nullish Coalescing (??) и Optional Chaining (?.) в JavaScript простыми словами (YouTube)](https://youtu.be/zyjhDRKpqm8?si=O-yqKG6a4W8XaCzZ)** — подробный видеоразбор оператора нулевого слияния `??` и опциональной цепочки `?.`, разница с логическим ИЛИ `||` и защита от ошибок `TypeError: Cannot read properties of undefined`."
         }
       ],
       "seniorTips": [
@@ -853,6 +857,14 @@ export const jsLessons: Lesson[] = [
             "title": "Иммутабельные методы массивов стандарта ES2023",
             "explanation": "toSorted и with производят операции без мутации исходного массива scores, гарантируя надежность состояния в React."
           }
+        },
+        {
+          "title": "Безопасная работа со свойствами: Опциональная последовательность (?.) и Нулевое слияние (??)",
+          "content": "При работе с глубоко вложенными объектами и конфигурациями (например, ответами API) доступ к свойствам может привести к критической ошибке `TypeError: Cannot read properties of undefined/null` (краш приложения).\n\n### 1. Опциональная цепочка `?.` (Optional Chaining):\n- **Доступ к свойствам**: `user?.profile?.address?.city` — возвращает `undefined`, если любой промежуточный узел равен `null` или `undefined`, не выбрасывая ошибку.\n- **Доступ к массивам и динамическим ключам**: `items?.[0]` или `data?.[dynamicKey]`.\n- **Безопасный вызов методов**: `callback?.(payload)` или `user.getDiscount?.()`.\n- **Short-circuiting**: если левая часть `null/undefined`, правая часть выражения даже не вычисляется.\n\n### 2. Оператор нулевого слияния `??` (Nullish Coalescing):\n- Возвращает правый операнд **только** тогда, когда левый равен `null` или `undefined`.\n- **Критическое отличие от логического ИЛИ (`||`)**:\n  - `||` считает ложными (`falsy`) значения: `0`, `\"\"`, `false`, `NaN`, `null`, `undefined`.\n  - `??` считает пустыми (`nullish`) ТОЛЬКО: `null` и `undefined`.\n  - Пример: `const count = user.itemsCount ?? 10;` — если у пользователя 0 предметов (`itemsCount: 0`), оператор `??` корректно сохранит `0`, в то время как `||` ошибочно перезаписал бы его на `10`!\n\n### 3. Идеальный тандем `?.` и `??`:\n`const theme = user?.settings?.appearance?.theme ?? 'system';`"
+        },
+        {
+          "title": "Рекомендуемые видеоуроки по объектам, Optional Chaining и Nullish Coalescing",
+          "content": "Для детального визуального закрепления работы операторов нулевого слияния и опциональной цепочки рекомендуем изучить видеоурок:\n\n- **[Операторы Nullish Coalescing (??) и Optional Chaining (?.) в JavaScript простыми словами (YouTube)](https://youtu.be/zyjhDRKpqm8?si=O-yqKG6a4W8XaCzZ)** — подробный видеоразбор оператора нулевого слияния `??` и опциональной цепочки `?.`, разница с логическим ИЛИ `||` и защита от ошибок `TypeError: Cannot read properties of undefined`."
         }
       ],
       "seniorTips": [

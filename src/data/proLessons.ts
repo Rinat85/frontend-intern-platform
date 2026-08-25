@@ -1817,6 +1817,10 @@ export const proLessons: Lesson[] = [
             "title": "Безопасная архитектура: Access Token в памяти + Refresh в HttpOnly Cookie",
             "explanation": "Access token хранится в памяти переменной JS, а долгоживущий Refresh token защищен HttpOnly cookie, недоступным для XSS скриптов."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоуроки по безопасности и CORS",
+          "content": "Для детального понимания механизмов защиты браузера, политики Same-Origin, работы CORS, Preflight-запросов (OPTIONS) и решения проблем с блокировкой запросов рекомендуем изучить видеоурок:\n\n- **[CORS простыми словами: что это, как работает и как исправить ошибки (YouTube)](https://youtu.be/aq_chBS-OI0?si=1Ag2B47o5pZ2B8kV)** — наглядный и практический видеоразбор Cross-Origin Resource Sharing, заголовков Access-Control-Allow-Origin, механизмов безопасности браузера и способов настройки бэкенда и проксирования."
         }
       ],
       "seniorTips": [

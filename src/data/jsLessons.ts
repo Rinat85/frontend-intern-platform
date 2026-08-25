@@ -2413,6 +2413,14 @@ export const jsLessons: Lesson[] = [
             "title": "Централизованный API-клиент с авторизацией и обработкой 401",
             "explanation": "Все запросы проходят через единый apiClient: токен добавляется автоматически, 401 перенаправляет на логин, тело сериализуется в JSON."
           }
+        },
+        {
+          "title": "Политика Same-Origin, механизм CORS и решение ошибок запросов",
+          "content": "При отправке сетевых запросов через fetch() браузер применяет политику безопасности **Same-Origin Policy (SOP)**: скрипт с источника http://localhost:3000 не может свободно читать данные с https://api.example.com, если сервер не разрешил это через механизм **CORS (Cross-Origin Resource Sharing)**.\n\n### Ключевые понятия CORS:\n1. **Заголовки ответа сервера**:\n- `Access-Control-Allow-Origin: *` (или конкретный домен приложения `https://app.dev`).\n- `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS`.\n- `Access-Control-Allow-Headers: Content-Type, Authorization`.\n- `Access-Control-Allow-Credentials: true` (для передачи cookies при `credentials: 'include'`).\n\n2. **Preflight-запросы (OPTIONS)**:\n- Перед отправкой «непростых» запросов (с методами PUT/DELETE, JSON заголовком `Content-Type: application/json` или авторизацией) браузер автоматически отправляет быстрый HTTP-запрос `OPTIONS` для предварительной проверки разрешений.\n\n3. **Как решать проблемы с CORS в разработке**:\n- Настроить CORS middleware на бэкенде (например, в Express через `app.use(cors())`).\n- В локальной разработке настроить dev-прокси (например, свойство `server.proxy` в Vite), чтобы браузер делал запрос к локальному порту, а сервер Vite перенаправлял его без ограничений CORS."
+        },
+        {
+          "title": "Рекомендуемые видеоуроки по Fetch API и CORS",
+          "content": "Для наглядного понимания работы CORS, политики Same-Origin, Preflight-запросов (OPTIONS) и исправления сетевых ошибок в Fetch рекомендуем изучить следующий видеоматериал:\n\n- **[CORS простыми словами: что это, как работает и как исправить ошибки (YouTube)](https://youtu.be/aq_chBS-OI0?si=1Ag2B47o5pZ2B8kV)** — наглядный и практический видеоразбор Cross-Origin Resource Sharing, заголовков Access-Control-Allow-Origin, механизмов безопасности браузера и способов настройки бэкенда и проксирования."
         }
       ],
       "seniorTips": [

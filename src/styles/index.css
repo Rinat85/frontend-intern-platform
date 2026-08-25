@@ -3029,3 +3029,382 @@ pre code,
   opacity: 0.85;
   flex-shrink: 0;
 }
+
+
+/* ==========================================================================
+   COMPREHENSIVE RESPONSIVE DESIGN SYSTEM (ALL SCREEN SIZES)
+   Breakpoints: 1280px (Laptop), 1024px (Tablet), 768px (Mobile L), 640px, 480px (Mobile S)
+   ========================================================================== */
+
+/* --- Base Fluid & Touch Optimizations --- */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+img, svg, iframe, video {
+  max-width: 100%;
+}
+
+button, a, input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* --- 1. Laptop & Medium Desktops (<= 1280px) --- */
+@media (max-width: 1280px) {
+  .theory-video-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  
+  .sandbox-workspace {
+    gap: 12px;
+  }
+}
+
+/* --- 2. Tablets & Small Desktops (<= 1024px) --- */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 270px;
+  }
+
+  .mobile-menu-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .header {
+    padding: 0 12px;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 200;
+    width: 280px;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.7);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-normal, 0.25s ease);
+  }
+
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .app-content-area {
+    margin-left: 0 !important;
+    max-width: 100% !important;
+    padding: 16px 14px 60px 14px;
+    width: 100%;
+  }
+
+  .sandbox-workspace {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sandbox-editor-panel,
+  .sandbox-preview-panel {
+    min-height: 280px;
+  }
+
+  .task-workspace {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* --- 3. Tablet Portrait & Large Mobiles (<= 768px) --- */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 56px;
+  }
+
+  .header-left {
+    gap: 8px;
+  }
+
+  .logo-title {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+
+  .logo-subtitle {
+    display: none;
+  }
+
+  .logo-icon-wrap {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-center {
+    display: none;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  /* Compact Header Action Buttons on Mobile */
+  .header-action-btn {
+    padding: 6px 9px !important;
+  }
+
+  .header-action-btn .btn-text {
+    display: none !important;
+  }
+
+  .supabase-header-pill {
+    padding: 4px 8px;
+  }
+
+  .supabase-header-pill .db-text {
+    display: none;
+  }
+
+  /* Dashboard Stats */
+  .stats-hero {
+    padding: 16px 14px;
+  }
+
+  .stats-hero-title {
+    font-size: 17px !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 12px 10px;
+    gap: 10px;
+  }
+
+  .stat-val {
+    font-size: 18px;
+  }
+
+  .modules-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Lesson View Header & Tabs */
+  .lesson-header {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .lesson-header-title {
+    font-size: 17px;
+    line-height: 1.35;
+  }
+
+  .lesson-header-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .lesson-tags {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  /* Horizontal swipeable tabs */
+  .lesson-tabs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    gap: 6px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+
+  .lesson-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lesson-tab {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  /* Theory Blocks */
+  .theory-overview-card,
+  .theory-section-block,
+  .senior-tips-card,
+  .mistakes-card,
+  .takeaways-card {
+    padding: 14px 12px;
+    margin-bottom: 14px;
+  }
+
+  .theory-section-title {
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .theory-section-content {
+    font-size: 13.5px;
+  }
+
+  .theory-video-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .theory-video-card {
+    border-radius: 10px;
+  }
+
+  .theory-video-info {
+    padding: 12px;
+  }
+
+  .theory-video-title {
+    font-size: 13.5px;
+  }
+
+  .theory-video-desc {
+    font-size: 12px;
+  }
+
+  /* Code Blocks touch friendliness */
+  .code-block-header {
+    padding: 8px 12px;
+  }
+
+  .code-block pre {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  /* Sandbox Toolbar */
+  .sandbox-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 10px;
+  }
+
+  .sandbox-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 6px;
+  }
+
+  .sandbox-actions .btn {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  /* Lesson Nav Footer */
+  .lesson-nav-footer {
+    flex-direction: column-reverse;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .lesson-nav-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Modals */
+  .modal-container,
+  .auth-modal-content,
+  .admin-modal-content,
+  .certificate-modal-content {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    margin: 10px auto;
+    padding: 16px 14px;
+  }
+
+  .cheat-sheet-modal-body {
+    flex-direction: column;
+  }
+
+  .cheat-sheet-categories {
+    width: 100%;
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .cheat-sheet-items-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- 4. Small Mobile Screens (<= 480px) --- */
+@media (max-width: 480px) {
+  .app-content-area {
+    padding: 12px 8px 60px 8px;
+  }
+
+  .header {
+    padding: 0 8px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-card {
+    padding: 10px;
+  }
+
+  .stat-val {
+    font-size: 16px;
+  }
+
+  .lesson-header-title {
+    font-size: 15px;
+  }
+
+  .theory-section-header {
+    gap: 8px;
+  }
+
+  .theory-section-number {
+    width: 22px;
+    height: 22px;
+    font-size: 11px;
+  }
+
+  .quiz-option {
+    padding: 10px 8px;
+    font-size: 12.5px;
+  }
+
+  .quiz-option-radio {
+    transform: scale(0.85);
+  }
+
+  .senior-tips-header h3,
+  .mistakes-header h3 {
+    font-size: 13.5px;
+  }
+
+  .theory-bullet-list li {
+    font-size: 12.5px;
+    gap: 6px;
+  }
+}

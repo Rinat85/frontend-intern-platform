@@ -92,6 +92,7 @@ const AppInner: React.FC = () => {
         <Sidebar
           modules={modulesData}
           currentLessonId={currentLessonId}
+          isAdminView={isAdminView}
           onSelectLesson={handleSelectLesson}
           onNavigateHome={handleNavigateHome}
           isOpen={isSidebarOpen}

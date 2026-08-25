@@ -6,6 +6,7 @@ import { CheckCircle2, Bookmark, ChevronDown, ChevronRight, Home, Code, Palette,
 interface SidebarProps {
   modules: Module[];
   currentLessonId: string | null;
+  isAdminView?: boolean;
   onSelectLesson: (lessonId: string) => void;
   onNavigateHome: () => void;
   isOpen: boolean;
@@ -15,11 +16,13 @@ interface SidebarProps {
 export const Sidebar: React.FC<SidebarProps> = ({
   modules,
   currentLessonId,
+  isAdminView = false,
   onSelectLesson,
   onNavigateHome,
   isOpen,
   onClose
 }) => {
+  const isHomeActive = currentLessonId === null && !isAdminView;
   const { isLessonCompleted, isLessonBookmarked, toggleBookmark } = useProgress();
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({
     html: true,
@@ -49,7 +52,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         onClick={onClose}
       />
       <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
-        <div className="sidebar-home-btn" onClick={() => { onNavigateHome(); onClose(); }}>
+        <div
+          className={`sidebar-home-btn ${isHomeActive ? 'active' : ''}`}
+          onClick={() => { onNavigateHome(); onClose(); }}
+        >
           <Home size={18} />
           <span>Главная панель обучения</span>
         </div>

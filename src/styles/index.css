@@ -302,8 +302,15 @@ a:hover { color: var(--cyan); }
   font-weight: 600; font-size: 11px; font-family: var(--font-mono);
   transition: all var(--transition-fast); border: 1px solid transparent;
   letter-spacing: 0.08em; text-transform: uppercase;
+  border-radius: 4px;
 }
 .sidebar-home-btn:hover { background: rgba(45, 255, 138, 0.06); color: var(--neon); border-color: var(--line); }
+.sidebar-home-btn.active {
+  background: rgba(45, 255, 138, 0.1);
+  color: var(--neon);
+  border-color: rgba(45, 255, 138, 0.35);
+  box-shadow: 0 0 14px rgba(45, 255, 138, 0.12), inset 0 0 10px rgba(45, 255, 138, 0.06);
+}
 
 .sidebar-nav { padding: 4px 8px; }
 .sidebar-module { margin-bottom: 2px; }

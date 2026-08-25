@@ -45,10 +45,18 @@ const CODE_KEYWORDS = new Set([
   'feat:', 'fix:', 'refactor:', 'style:', 'docs:', 'chore:'
 ]);
 
-// Support: [text](url) | `code` | **bold** | <tag> | https://...
+// 1. **[text](url)** (bold outer link)
+// 2. [**text**](url) (bold inner link)
+// 3. [text](url) (normal link)
+// 4. `code` (inline code)
+// 5. **bold** (bold text)
+// 6. <tag> (html tag)
+// 7. https://... (standalone url)
 const PRIMARY_REGEX = new RegExp(
+  '\\*\\*\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s)]+)\\)\\*\\*|' +
+  '\\[\\*\\*([^*]+)\\*\\*\\]\\((https?:\\/\\/[^\\s)]+)\\)|' +
   '\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s)]+)\\)|' +
-  '`([^`]+)`|' +
+  '\x60([^\x60]+)\x60|' +
   '\\*\\*([^*]+)\\*\\*|' +
   '(<\\/?[a-zA-Z!][a-zA-Z0-9_-]*(?:\\s+[^>]*)?>)|' +
   '(https?:\\/\\/[^\\s<)]+)',
@@ -78,36 +86,67 @@ export const formatInlineCode = (text: string): React.ReactNode[] => {
     }
 
     if (match[1] !== undefined && match[2] !== undefined) {
-      // Markdown link [text](url)
+      // 1. **[text](url)**
       nodes.push(
         <a
-          key={'l' + nodes.length}
+          key={'l-bold1-' + nodes.length}
           href={match[2]}
           target="_blank"
           rel="noopener noreferrer"
-          className="theory-link"
+          className="theory-link theory-link-bold"
         >
-          {match[1]}
+          <strong>{match[1]}</strong>
           <ExternalLink size={12} className="inline-link-icon" />
         </a>
       );
-    } else if (match[3] !== undefined) {
-      nodes.push(<code key={'c' + nodes.length} className="inline-code">{match[3]}</code>);
-    } else if (match[4] !== undefined) {
-      nodes.push(<strong key={'b' + nodes.length}>{match[4]}</strong>);
-    } else if (match[5] !== undefined) {
-      nodes.push(<code key={'t' + nodes.length} className="inline-code">{match[5]}</code>);
-    } else if (match[6] !== undefined) {
-      // Standalone URL
+    } else if (match[3] !== undefined && match[4] !== undefined) {
+      // 2. [**text**](url)
       nodes.push(
         <a
-          key={'u' + nodes.length}
+          key={'l-bold2-' + nodes.length}
+          href={match[4]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="theory-link theory-link-bold"
+        >
+          <strong>{match[3]}</strong>
+          <ExternalLink size={12} className="inline-link-icon" />
+        </a>
+      );
+    } else if (match[5] !== undefined && match[6] !== undefined) {
+      // 3. [text](url)
+      nodes.push(
+        <a
+          key={'l-' + nodes.length}
           href={match[6]}
           target="_blank"
           rel="noopener noreferrer"
           className="theory-link"
         >
-          {match[6]}
+          {match[5]}
+          <ExternalLink size={12} className="inline-link-icon" />
+        </a>
+      );
+    } else if (match[7] !== undefined) {
+      // 4. code
+      nodes.push(<code key={'c-' + nodes.length} className="inline-code">{match[7]}</code>);
+    } else if (match[8] !== undefined) {
+      // 5. bold
+      nodes.push(<strong key={'b-' + nodes.length}>{match[8]}</strong>);
+    } else if (match[9] !== undefined) {
+      // 6. tag
+      nodes.push(<code key={'t-' + nodes.length} className="inline-code">{match[9]}</code>);
+    } else if (match[10] !== undefined) {
+      // 7. Standalone URL
+      nodes.push(
+        <a
+          key={'u-' + nodes.length}
+          href={match[10]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="theory-link"
+        >
+          {match[10]}
           <ExternalLink size={12} className="inline-link-icon" />
         </a>
       );

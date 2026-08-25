@@ -1,7 +1,7 @@
 import React from 'react';
 import { LessonTheory } from '../../types/curriculum';
 import { CodeBlock, CodeSnippet } from './CodeBlock';
-import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2, ZoomIn, X } from 'lucide-react';
+import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2, ZoomIn, X, Play, ExternalLink, Video } from 'lucide-react';
 import { formatInlineCode } from '../../utils/formatText';
 
 interface TheorySectionProps {
@@ -32,6 +32,41 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
     };
   }, [zoomedImage]);
 
+  const parseVideoItem = (itemText: string) => {
+    const clean = itemText.replace(/^- /, '').trim();
+    const urlMatch = /(https?:\/\/(?:youtu\.be\/|www\.youtube\.com\/)[^\s)]+)/.exec(clean);
+    if (!urlMatch) return null;
+    const url = urlMatch[1];
+
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+    } else if (url.includes('v=')) {
+      videoId = url.split('v=')[1]?.split('&')[0] || '';
+    }
+
+    let title = '';
+    const titleMatch = /\[([^\]]+)\]/.exec(clean);
+    if (titleMatch) {
+      title = titleMatch[1].replace(/\*\*/g, '').trim();
+    } else {
+      title = 'Видеоурок по JavaScript';
+    }
+
+    let desc = '';
+    const dashIdx = clean.indexOf('—');
+    if (dashIdx !== -1) {
+      desc = clean.slice(dashIdx + 1).trim();
+    } else {
+      const hypIdx = clean.indexOf(' - ');
+      if (hypIdx !== -1) {
+        desc = clean.slice(hypIdx + 3).trim();
+      }
+    }
+
+    return { title, url, desc, videoId };
+  };
+
   const renderParagraphs = (text: string) => {
     return text.split('\n\n').map((para, i) => {
       const trimmed = para.trim();
@@ -39,8 +74,60 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
 
       // Check if this paragraph is a list
       if (trimmed.includes('\n- ') || trimmed.startsWith('- ')) {
-        const items = trimmed.split('\n').filter(line => line.trim().startsWith('- '));
-        const nonListParts = trimmed.split('\n').filter(line => !line.trim().startsWith('- ')).join(' ');
+        const lines = trimmed.split('\n');
+        const items = lines.filter(line => line.trim().startsWith('- '));
+        const nonListParts = lines.filter(line => !line.trim().startsWith('- ')).join(' ');
+
+        // Check if all items in this list are YouTube video links
+        const videoItems = items.map(parseVideoItem).filter(Boolean);
+        const isVideoList = videoItems.length > 0 && videoItems.length === items.length;
+
+        if (isVideoList) {
+          return (
+            <div key={i} className="theory-paragraph-group">
+              {nonListParts && <p className="theory-text-paragraph">{formatInlineCode(nonListParts)}</p>}
+              <div className="theory-video-grid">
+                {videoItems.map((v, j) => {
+                  if (!v) return null;
+                  const thumbUrl = v.videoId ? `https://img.youtube.com/vi/${v.videoId}/hqdefault.jpg` : '';
+
+                  return (
+                    <a
+                      key={j}
+                      href={v.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="theory-video-card"
+                    >
+                      <div className="theory-video-thumb-wrapper">
+                        {thumbUrl ? (
+                          <img src={thumbUrl} alt={v.title} className="theory-video-thumb" loading="lazy" />
+                        ) : (
+                          <div className="theory-video-thumb-placeholder" />
+                        )}
+                        <div className="theory-video-play-btn">
+                          <Play size={22} className="play-icon" fill="currentColor" />
+                        </div>
+                        <span className="theory-video-badge">
+                          <Video size={14} className="yt-icon" />
+                          <span>YouTube</span>
+                        </span>
+                      </div>
+                      <div className="theory-video-info">
+                        <h4 className="theory-video-title">{v.title}</h4>
+                        {v.desc && <p className="theory-video-desc">{v.desc}</p>}
+                        <div className="theory-video-action">
+                          <span>Смотреть видеоурок</span>
+                          <ExternalLink size={14} />
+                        </div>
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        }
 
         return (
           <div key={i} className="theory-paragraph-group">

@@ -34,10 +34,7 @@ export function tokenizeCode(rawCode: string, lang: string): Token[][] {
   const tokens: Token[] = [];
 
   if (normalizedLang === 'html' || normalizedLang === 'xml') {
-    const htmlRegex = new RegExp(
-      '(<!--[\\s\\S]*?-->|<!DOCTYPE[\\s\\S]*?>|<\\/?[a-zA-Z0-9_-]+|[a-zA-Z0-9_:-]+=(?:"[^"]*"|\'[^\']*\')|[a-zA-Z0-9_:-]+|"[^"]*"|\'[^\']*\'|\\/?>|>|[^<\\s"\'=]+|\\s+)',
-      'g'
-    );
+    const htmlRegex = /(<!--[\s\S]*?-->|<!DOCTYPE[\s\S]*?>|<\/?[a-zA-Z0-9_\u0400-\u04FF:-]+|[a-zA-Z0-9_\u0400-\u04FF:-]+=(?:"[^"]*"|'[^']*')|[a-zA-Z0-9_\u0400-\u04FF:-]+|"[^"]*"|'[^']*'|\/?>|>|[^<\s"'=]+|\s+|[^\s])/gu;
     let match: RegExpExecArray | null;
     let inTag = false;
 
@@ -74,10 +71,7 @@ export function tokenizeCode(rawCode: string, lang: string): Token[][] {
       }
     }
   } else if (normalizedLang === 'css') {
-    const cssRegex = new RegExp(
-      '(\\/\\*[\\s\\S]*?\\*\\/|"[^"]*"|\'[^\']*\'|[a-zA-Z0-9_-]+(?=\\s*:)|:[^;{}]+|[{};:,]|@[a-zA-Z0-9_-]+|\\.[a-zA-Z0-9_-]+|#[a-zA-Z0-9_-]+|[a-zA-Z0-9_-]+|\\s+|[^\\s])',
-      'g'
-    );
+    const cssRegex = /(\/\*[\s\S]*?\*\/|"[^"]*"|'[^']*'|[a-zA-Z0-9_\u0400-\u04FF-]+(?=\s*:)|:[^;{}]+|[{};:,]|@[a-zA-Z0-9_\u0400-\u04FF-]+|\.[a-zA-Z0-9_\u0400-\u04FF-]+|#[a-zA-Z0-9_\u0400-\u04FF-]+|[a-zA-Z0-9_\u0400-\u04FF-]+|\s+|[^\s])/gu;
     let match: RegExpExecArray | null;
     while ((match = cssRegex.exec(rawCode)) !== null) {
       const text = match[0];
@@ -98,22 +92,21 @@ export function tokenizeCode(rawCode: string, lang: string): Token[][] {
       }
     }
   } else {
-    // JavaScript / TypeScript / Bash / JSON / Default
+    // JavaScript / TypeScript / Bash / JSON / Universal Default
     const jsKeywords = new Set([
       'const', 'let', 'var', 'function', 'return', 'import', 'export', 'from',
       'async', 'await', 'class', 'extends', 'super', 'new', 'if', 'else', 'for',
       'while', 'do', 'switch', 'case', 'break', 'continue', 'try', 'catch',
       'finally', 'throw', 'typeof', 'instanceof', 'in', 'of', 'this', 'null',
-      'undefined', 'true', 'false', 'NaN', 'default', 'git', 'npm', 'yarn', 'pnpm'
+      'undefined', 'true', 'false', 'NaN', 'default', 'git', 'npm', 'yarn', 'pnpm',
+      'npx', 'cd', 'ls', 'mkdir', 'type', 'interface', 'as'
     ]);
-    const jsRegex = new RegExp(
-      '(\\/\\/.*|\\/\\*[\\s\\S]*?\\*\\/|`[^`]*`|"[^"]*"|\'[^\']*\'|\\b[a-zA-Z0-9_$]+\\b|[{}()\\[\\].,;:+\\-*\\/%=<>!&|^~?]+|\\s+)',
-      'g'
-    );
+
+    const jsRegex = /(\/\/.*|\/\*[\s\S]*?\*\/|`[^`]*`|"[^"]*"|'[^']*'|[\p{L}\p{N}_$]+|[{}()\[\].,;:+\-*\/%=<>!&|^~?#@]+|\s+|[^\s])/gu;
     let match: RegExpExecArray | null;
     while ((match = jsRegex.exec(rawCode)) !== null) {
       const text = match[0];
-      if (text.startsWith('//') || text.startsWith('/*')) {
+      if (text.startsWith('//') || text.startsWith('/*') || (text.startsWith('#') && (normalizedLang === 'bash' || normalizedLang === 'sh'))) {
         tokens.push({ type: 'syn-comment', text });
       } else if (text.startsWith('`') || text.startsWith('"') || text.startsWith("'")) {
         tokens.push({ type: 'syn-string', text });
@@ -121,7 +114,7 @@ export function tokenizeCode(rawCode: string, lang: string): Token[][] {
         tokens.push({ type: 'syn-keyword', text });
       } else if (/^[0-9]+(\.[0-9]+)?$/.test(text)) {
         tokens.push({ type: 'syn-string', text });
-      } else if (/^[{}()[\],;:+\-*\/%=<>!&|^~?]+$/.test(text)) {
+      } else if (/^[{}()[],;:+\-*\/%=<>!&|^~?#@]+$/.test(text)) {
         tokens.push({ type: 'syn-bracket', text });
       } else {
         tokens.push({ type: 'syn-text', text });

@@ -412,7 +412,7 @@ a:hover { color: var(--cyan); }
   font-family: var(--font-mono); font-size: 9px; font-weight: 600;
   padding: 1px 5px; background: var(--bg-3); border: 1px solid var(--line); color: var(--fg-2);
 }
-.theme-toggle-btn { display: none !important; }
+
 @media (max-width: 768px) {
   .header-center { display: none; }
   .header-search-btn { min-width: auto; }
@@ -3591,14 +3591,26 @@ button, a, input, select, textarea {
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .theme-toggle-btn {
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  color: var(--fg-1);
-  transition: all var(--transition-fast);
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
   border-radius: var(--radius-sm);
-  background: transparent;
-  border: 1px solid transparent;
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  color: var(--fg-1);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  padding: 0;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--neon);
+  background: var(--accent-primary-light);
+  border-color: var(--neon);
+  box-shadow: 0 0 10px var(--glow-accent);
 }
 
 .theme-toggle-btn:hover {

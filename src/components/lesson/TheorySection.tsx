@@ -68,7 +68,8 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
   };
 
   const renderParagraphs = (text: string) => {
-    return text.split('\n\n').map((para, i) => {
+    const normalizedText = text.replace(/\\n/g, '\n');
+    return normalizedText.split('\n\n').map((para, i) => {
       const trimmed = para.trim();
       if (!trimmed) return null;
 

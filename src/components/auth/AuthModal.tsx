@@ -8,7 +8,7 @@ import {
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'login' | 'register' | 'quick';
+  initialTab?: 'login' | 'register';
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -16,8 +16,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   initialTab = 'login'
 }) => {
-  const { users, login, register, quickLogin } = useAuth();
-  const [activeTab, setActiveTab] = useState<'login' | 'register' | 'quick'>(initialTab);
+  const { login, register } = useAuth();
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>(initialTab);
 
   // Form states
   const [email, setEmail] = useState('');
@@ -95,20 +95,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
   };
 
-  const handleQuickSelect = async (userItem: typeof users[0]) => {
-    const res = await quickLogin(userItem.id);
-    if (res.success) {
-      setSuccessMsg('Вход выполнен!');
-      setTimeout(() => {
-        setSuccessMsg(null);
-        onClose();
-      }, 300);
-    } else {
-      setEmail(userItem.email);
-      setActiveTab('login');
-      setError(res.error || 'Ошибка входа');
-    }
-  };
+  
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -141,12 +128,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           >
             Регистрация стажёра
           </button>
-          <button
-            className={`auth-tab-btn ${activeTab === 'quick' ? 'active' : ''}`}
-            onClick={() => { setActiveTab('quick'); setError(null); setEmailConfirmationSent(null); }}
-          >
-            ⚡️ Аккаунты ({users.length})
-          </button>
+          
         </div>
 
         <div className="modal-body auth-modal-body">
@@ -352,37 +334,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </form>
           )}
 
-          {/* Quick Accounts Tab */}
-          {activeTab === 'quick' && (
-            <div className="quick-accounts-list">
-              <p className="text-sm text-muted" style={{ marginBottom: '14px' }}>
-                Быстрый вход для тестирования и переключения между ролями:
-              </p>
-              {users.map(u => (
-                <div
-                  key={u.id}
-                  className="quick-user-card"
-                  onClick={() => handleQuickSelect(u)}
-                >
-                  <div className="quick-user-avatar">{u.avatar || '👤'}</div>
-                  <div className="quick-user-info">
-                    <div className="quick-user-name">
-                      {u.name}
-                      <span className={`role-badge role-${u.role}`}>
-                        {u.role === 'admin' ? '👑 Администратор' : u.role === 'mentor' ? '👨‍🏫 Ментор' : '👨‍💻 Стажёр'}
-                      </span>
-                    </div>
-                    <div className="quick-user-email">{u.email}</div>
-                  </div>
-                  <button className="btn btn-secondary btn-sm quick-select-btn">
-                    <span>Войти</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+          </div>
       </div>
     </div>
   );

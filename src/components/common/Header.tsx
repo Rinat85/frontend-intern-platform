@@ -14,7 +14,7 @@ interface HeaderProps {
   onOpenCertificate: () => void;
   onToggleSidebar: () => void;
   onNavigateHome: () => void;
-  onOpenAuth: (tab?: 'login' | 'register' | 'quick') => void;
+  onOpenAuth: (tab?: 'login' | 'register') => void;
   onOpenAdmin: () => void;
   isAdminView: boolean;
   onSelectLesson?: (lessonId: string) => void;

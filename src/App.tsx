@@ -25,7 +25,7 @@ const AppInner: React.FC = () => {
   const [isCheatSheetsOpen, setIsCheatSheetsOpen] = useState(false);
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
-  const [authInitialTab, setAuthInitialTab] = useState<'login' | 'register' | 'quick'>('quick');
+  const [authInitialTab, setAuthInitialTab] = useState<'login' | 'register'>('login');
 
   // Automatic scroll to top on page / lesson / admin view navigation
   useEffect(() => {
@@ -54,7 +54,7 @@ const AppInner: React.FC = () => {
   const currentLesson = currentLessonId ? allLessons.find(l => l.id === currentLessonId) : null;
   const currentModule = currentLesson ? modulesData.find(m => m.id === currentLesson.moduleId) : null;
 
-  const handleOpenAuth = (tab: 'login' | 'register' | 'quick' = 'quick') => {
+  const handleOpenAuth = (tab: 'login' | 'register' = 'login') => {
     setAuthInitialTab(tab);
     setIsAuthOpen(true);
   };

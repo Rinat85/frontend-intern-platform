@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useProgress } from '../../context/ProgressContext';
-import { LogIn, LogOut, Shield, LayoutDashboard, Users, ChevronDown, Check, UserPlus, GraduationCap } from 'lucide-react';
+import { LogIn, LogOut, Shield, LayoutDashboard, ChevronDown, UserPlus } from 'lucide-react';
 
 interface UserMenuProps {
-  onOpenAuth: (tab?: 'login' | 'register' | 'quick') => void;
+  onOpenAuth: (tab?: 'login' | 'register') => void;
   onOpenAdmin: () => void;
   onNavigateHome: () => void;
   isAdminView: boolean;
@@ -16,7 +16,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
   onNavigateHome,
   isAdminView
 }) => {
-  const { user, users, isAuthenticated, isAdmin, isMentor, isIntern, canReview, logout, quickLogin } = useAuth();
+  const { user, isAuthenticated, isAdmin, canReview, logout } = useAuth();
   const { getOverallPercentage, completedLessonsCount, totalLessonsCount } = useProgress();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -125,32 +125,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({
             </button>
           </div>
 
-          {/* Quick Switch for Dev / Testing */}
-          {users.length > 1 && (
-            <>
-              <div className="user-dropdown-divider" />
-              <div className="dropdown-section-title">Переключение аккаунтов:</div>
-              <div className="quick-switch-list">
-                {users.map(u => (
-                  <button
-                    key={u.id}
-                    className={`quick-switch-item ${u.id === user.id ? 'active' : ''}`}
-                    onClick={() => {
-                      quickLogin(u.id);
-                      setIsOpen(false);
-                    }}
-                  >
-                    <span className="quick-switch-avatar">{u.avatar || '👤'}</span>
-                    <span className="quick-switch-name">{u.name}</span>
-                    <span className="quick-switch-role">
-                      ({u.role === 'admin' ? 'Админ' : u.role === 'mentor' ? 'Ментор' : 'Стажёр'})
-                    </span>
-                    {u.id === user.id && <Check size={14} className="active-check" />}
-                  </button>
-                ))}
-              </div>
-            </>
-          )}
+          
 
           <div className="user-dropdown-divider" />
 

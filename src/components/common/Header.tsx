@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { useNotifications } from '../../context/NotificationContext';
 import { UserMenu } from './UserMenu';
 import { NotificationDropdown } from './NotificationDropdown';
 import {
-  Menu, Search, BookOpen, Award, Shield, Bell
+  Menu, Search, BookOpen, Award, Shield, Bell, Sun, Moon
 } from 'lucide-react';
 import { OctoLogoIcon } from './OctoLogo';
 
@@ -32,6 +33,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectLesson = () => {}
 }) => {
   const { user, isAdmin, isMentor, canReview, supabaseStatus } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const { unreadCount } = useNotifications();
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
@@ -74,6 +76,20 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="db-dot" />
           <span className="db-text">{supabaseStatus.connected ? 'Supabase DB' : 'Offline Mode'}</span>
         </div>
+
+        {/* Theme Toggle Button */}
+        <button
+          className="btn-icon theme-toggle-btn"
+          onClick={toggleTheme}
+          title={theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему'}
+          aria-label="Переключить тему оформления"
+        >
+          {theme === 'dark' ? (
+            <Sun size={18} className="theme-sun-icon" />
+          ) : (
+            <Moon size={18} className="theme-moon-icon" />
+          )}
+        </button>
 
         {/* Notifications Bell */}
         <div style={{ position: 'relative' }}>

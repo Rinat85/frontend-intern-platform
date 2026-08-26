@@ -1,33 +1,50 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'dark';
+export type Theme = 'dark' | 'light';
 
 interface ThemeContextType {
   theme: Theme;
+  isDark: boolean;
+  isLight: boolean;
   toggleTheme: () => void;
   setTheme: (theme: Theme) => void;
 }
 
+const THEME_STORAGE_KEY = 'intern_platform_theme';
+
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme] = useState<Theme>('dark');
+  const [theme, setThemeState] = useState<Theme>(() => {
+    try {
+      const saved = localStorage.getItem(THEME_STORAGE_KEY) as Theme;
+      if (saved === 'light' || saved === 'dark') {
+        return saved;
+      }
+    } catch {}
+    return 'dark';
+  });
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    localStorage.setItem('intern_theme', 'dark');
-  }, []);
+    try {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {}
+  }, [theme]);
 
   const toggleTheme = () => {
-    // Cyberpunk theme is locked to dark mode
+    setThemeState(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const setTheme = () => {
-    // Cyberpunk theme is locked to dark mode
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
   };
+
+  const isDark = theme === 'dark';
+  const isLight = theme === 'light';
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, isDark, isLight, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );

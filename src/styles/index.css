@@ -5,7 +5,7 @@
 
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700;800&family=Major+Mono+Display&family=Inter:wght@400;500;600;700;800&display=swap');
 
-:root, [data-theme='dark'], [data-theme='light'] {
+:root, [data-theme='dark'] {
   --void: #03060a;
   --bg-0: #06090d;
   --bg-1: #0a0e13;
@@ -84,6 +84,95 @@
   --header-glass: var(--bg-1);
   --sidebar-glass: var(--bg-1);
   --glow-accent: rgba(45, 255, 138, 0.15);
+  --color-danger: var(--red);
+  --color-success: var(--neon);
+
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+}
+
+
+[data-theme='light'] {
+  --void: #f8fafc;
+  --bg-0: #f1f5f9;
+  --bg-1: #ffffff;
+  --bg-2: #f8fafc;
+  --bg-3: #e2e8f0;
+  --line: #e2e8f0;
+  --line-2: #cbd5e1;
+
+  --fg-0: #0f172a;
+  --fg-1: #334155;
+  --fg-2: #64748b;
+  --fg-3: #94a3b8;
+
+  --neon: #059669;
+  --neon-dim: #047857;
+  --magenta: #c026d3;
+  --amber: #d97706;
+  --cyan: #0284c7;
+  --red: #e11d48;
+  --violet: #7c3aed;
+
+  --pos: var(--neon);
+  --neg: var(--red);
+
+  --grid-line: rgba(15, 23, 42, 0.04);
+  --scan: rgba(15, 23, 42, 0.01);
+
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --font-display: 'Major Mono Display', 'JetBrains Mono', monospace;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-code: 'JetBrains Mono', ui-monospace, monospace;
+
+  --sidebar-width: 280px;
+  --header-height: 52px;
+
+  --transition-fast: 0.12s ease;
+  --transition-normal: 0.22s ease;
+  --transition-smooth: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+
+  --bg-primary: var(--bg-0);
+  --bg-secondary: var(--bg-1);
+  --bg-tertiary: var(--bg-2);
+  --bg-card: var(--bg-1);
+  --bg-surface: var(--bg-1);
+  --bg-hover: var(--bg-2);
+  --bg-active: var(--bg-3);
+  --border-color: var(--line);
+  --border-color-light: var(--line-2);
+  --border-focus: var(--neon);
+  --text-primary: var(--fg-0);
+  --text-secondary: var(--fg-1);
+  --text-muted: var(--fg-2);
+  --accent-primary: var(--neon);
+  --accent-primary-hover: var(--neon-dim);
+  --accent-primary-light: rgba(5, 150, 105, 0.08);
+  --accent-secondary: var(--cyan);
+  --accent-success: var(--neon);
+  --accent-success-light: rgba(5, 150, 105, 0.1);
+  --accent-warning: var(--amber);
+  --accent-warning-light: rgba(217, 119, 6, 0.1);
+  --accent-danger: var(--red);
+  --accent-danger-light: rgba(225, 29, 72, 0.1);
+  --accent-purple: var(--violet);
+  --accent-purple-light: rgba(124, 58, 237, 0.1);
+  --accent-gradient: linear-gradient(135deg, #059669, #0284c7);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(5, 150, 105, 0.25);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+  --modal-backdrop: rgba(15, 23, 42, 0.5);
+  --code-bg: #0f172a;
+  --code-text: #f8fafc;
+  --code-block-header: #1e293b;
+  --header-glass: rgba(255, 255, 255, 0.95);
+  --sidebar-glass: rgba(255, 255, 255, 0.98);
+  --glow-accent: rgba(5, 150, 105, 0.15);
   --color-danger: var(--red);
   --color-success: var(--neon);
 
@@ -3494,4 +3583,291 @@ button, a, input, select, textarea {
     font-size: 12.5px;
     gap: 6px;
   }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LIGHT THEME ENHANCEMENTS & THEME SWITCHER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--fg-1);
+  transition: all var(--transition-fast);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.theme-toggle-btn:hover {
+  color: var(--neon);
+  background: var(--accent-primary-light);
+  border-color: var(--line);
+}
+
+.theme-sun-icon {
+  color: #ffb02e;
+  filter: drop-shadow(0 0 6px rgba(255, 176, 46, 0.4));
+  transition: transform var(--transition-normal);
+}
+
+.theme-moon-icon {
+  color: #0284c7;
+  filter: drop-shadow(0 0 6px rgba(2, 132, 199, 0.4));
+  transition: transform var(--transition-normal);
+}
+
+.theme-toggle-btn:hover .theme-sun-icon,
+.theme-toggle-btn:hover .theme-moon-icon {
+  transform: rotate(15deg) scale(1.1);
+}
+
+/* Light Theme Component Refinements */
+[data-theme='light'] .app-layout::before {
+  background:
+    radial-gradient(ellipse at 75% 15%, rgba(5, 150, 105, 0.04), transparent 55%),
+    radial-gradient(ellipse at 15% 85%, rgba(192, 38, 211, 0.03), transparent 50%);
+}
+
+[data-theme='light'] .app-layout::after {
+  display: none;
+}
+
+[data-theme='light'] ::selection {
+  background: rgba(5, 150, 105, 0.2);
+  color: #047857;
+}
+
+[data-theme='light'] .header {
+  background: var(--header-glass);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='light'] .sidebar {
+  background: var(--sidebar-glass);
+  border-right: 1px solid var(--line);
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.03);
+}
+
+[data-theme='light'] .header-search-btn {
+  background: var(--bg-0);
+  border-color: var(--line);
+  color: var(--fg-2);
+}
+
+[data-theme='light'] .header-search-btn:hover {
+  background: var(--bg-1);
+  border-color: var(--neon);
+  color: var(--fg-0);
+}
+
+[data-theme='light'] .kbd-shortcut {
+  background: var(--bg-2);
+  border-color: var(--line);
+  color: var(--fg-2);
+}
+
+[data-theme='light'] .supabase-header-pill.connected {
+  background: rgba(5, 150, 105, 0.08);
+  border-color: rgba(5, 150, 105, 0.25);
+  color: #047857;
+}
+
+[data-theme='light'] .supabase-header-pill.connected .db-dot {
+  background: #059669;
+  box-shadow: 0 0 6px rgba(5, 150, 105, 0.4);
+}
+
+[data-theme='light'] .supabase-header-pill.offline {
+  background: rgba(217, 119, 6, 0.08);
+  border-color: rgba(217, 119, 6, 0.25);
+  color: #b45309;
+}
+
+[data-theme='light'] .supabase-header-pill.offline .db-dot {
+  background: #d97706;
+}
+
+[data-theme='light'] .btn-primary {
+  color: #ffffff;
+  background: var(--neon);
+  border-color: var(--neon);
+}
+
+[data-theme='light'] .btn-primary:hover {
+  color: #ffffff;
+  background: var(--neon-dim);
+  border-color: var(--neon-dim);
+}
+
+[data-theme='light'] .btn-secondary {
+  background: var(--bg-1);
+  color: var(--fg-0);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .btn-secondary:hover {
+  background: var(--bg-2);
+  border-color: var(--neon);
+  color: var(--neon);
+}
+
+[data-theme='light'] .stats-hero {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme='light'] .stats-hero::before {
+  background: radial-gradient(circle at top right, rgba(5, 150, 105, 0.06), transparent 60%);
+}
+
+[data-theme='light'] .stat-card {
+  background: var(--bg-1);
+  border-color: var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme='light'] .module-card {
+  background: var(--bg-1);
+  border-color: var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme='light'] .module-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--neon);
+}
+
+[data-theme='light'] .bookmark-card {
+  background: var(--bg-1);
+  border-color: var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme='light'] .bookmark-card:hover {
+  box-shadow: var(--card-shadow-hover);
+  border-color: var(--neon);
+}
+
+[data-theme='light'] .theory-section,
+[data-theme='light'] .task-container,
+[data-theme='light'] .quiz-card,
+[data-theme='light'] .sandbox-container {
+  background: var(--bg-1);
+  border-color: var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme='light'] .video-resource-card {
+  background: var(--bg-1);
+  border-color: var(--line);
+  box-shadow: var(--card-shadow);
+}
+
+[data-theme='light'] .video-resource-card:hover {
+  border-color: #ff3b5c;
+  box-shadow: 0 8px 20px -4px rgba(255, 59, 92, 0.15);
+}
+
+[data-theme='light'] .video-thumb-wrap {
+  background: #0f172a;
+}
+
+[data-theme='light'] .tip-card {
+  background: rgba(5, 150, 105, 0.05);
+  border-left: 3px solid var(--neon);
+}
+
+[data-theme='light'] .mistake-card {
+  background: rgba(225, 29, 72, 0.05);
+  border-left: 3px solid var(--red);
+}
+
+[data-theme='light'] .takeaway-item {
+  background: var(--bg-0);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .lesson-nav-btn {
+  background: var(--bg-1);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .lesson-nav-btn:hover {
+  background: var(--bg-2);
+  border-color: var(--neon);
+}
+
+[data-theme='light'] .progress-bar-track {
+  background: var(--bg-3);
+}
+
+[data-theme='light'] .modal-container,
+[data-theme='light'] .search-modal,
+[data-theme='light'] .user-dropdown-menu,
+[data-theme='light'] .notif-dropdown-menu {
+  background: var(--bg-1);
+  border-color: var(--line);
+  box-shadow: var(--shadow-xl);
+}
+
+[data-theme='light'] .form-input,
+[data-theme='light'] .search-input {
+  background: var(--bg-0);
+  border-color: var(--line);
+  color: var(--fg-0);
+}
+
+[data-theme='light'] .form-input:focus,
+[data-theme='light'] .search-input:focus {
+  background: var(--bg-1);
+  border-color: var(--neon);
+}
+
+[data-theme='light'] .sidebar-search-input {
+  background: var(--bg-0);
+  border-color: var(--line);
+  color: var(--fg-0);
+}
+
+[data-theme='light'] .sidebar-item {
+  color: var(--fg-1);
+}
+
+[data-theme='light'] .sidebar-item:hover {
+  background: var(--bg-2);
+  color: var(--neon);
+}
+
+[data-theme='light'] .sidebar-item.active {
+  background: rgba(5, 150, 105, 0.08);
+  border-color: var(--neon);
+  color: var(--neon);
+}
+
+[data-theme='light'] .admin-table-container,
+[data-theme='light'] .admin-stat-card,
+[data-theme='light'] .admin-table th {
+  background: var(--bg-1);
+  border-color: var(--line);
+}
+
+[data-theme='light'] .admin-table th {
+  background: var(--bg-0);
+  color: var(--fg-1);
+}
+
+[data-theme='light'] .admin-table tr:hover {
+  background: var(--bg-2);
+}
+
+[data-theme='light'] .code-inline {
+  background: var(--bg-2);
+  color: #047857;
+  border: 1px solid var(--line);
 }

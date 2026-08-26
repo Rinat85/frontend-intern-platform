@@ -237,20 +237,71 @@ a:hover { color: var(--cyan); }
 .mobile-menu-btn { display: none; }
 @media (max-width: 1024px) { .mobile-menu-btn { display: flex; } }
 
-.header-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity var(--transition-fast);
+}
+.header-logo:hover {
+  opacity: 0.92;
+}
+.logo-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 8px;
+  background: rgba(45, 255, 138, 0.05);
+  border: 1px solid rgba(45, 255, 138, 0.22);
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+  box-shadow: 0 0 12px rgba(45, 255, 138, 0.08), inset 0 0 8px rgba(45, 255, 138, 0.03);
+}
+.header-logo:hover .logo-icon-wrap {
+  background: rgba(45, 255, 138, 0.1);
+  border-color: rgba(45, 255, 138, 0.5);
+  box-shadow: 0 0 18px rgba(45, 255, 138, 0.25), inset 0 0 12px rgba(45, 255, 138, 0.06);
+  transform: translateY(-1px);
+}
+.octo-logo-svg {
+  display: block;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+.header-logo:hover .octo-logo-svg {
+  transform: scale(1.04);
+}
 .logo-icon {
   width: 32px; height: 32px; border: 1px solid var(--neon);
   background: rgba(45, 255, 138, 0.08);
   display: flex; align-items: center; justify-content: center;
   color: var(--neon); font-size: 14px; box-shadow: 0 0 10px rgba(45, 255, 138, 0.2);
 }
-.logo-text { display: flex; flex-direction: column; }
-.logo-title {
-  font-family: var(--font-mono); font-weight: 800; font-size: 13px; line-height: 1.1;
-  color: var(--neon); letter-spacing: 0.12em; text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(45, 255, 138, 0.45);
+.logo-text-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
-.logo-badge { font-size: 8px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--fg-2); font-family: var(--font-mono); }
+.logo-title {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 13px;
+  line-height: 1.1;
+  color: var(--neon);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(45, 255, 138, 0.45);
+}
+.logo-subtitle {
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-3);
+  font-family: var(--font-mono);
+  line-height: 1;
+}
 
 .header-center { flex: 1; display: flex; justify-content: center; }
 .header-progress-compact { display: flex; flex-direction: column; gap: 3px; min-width: 160px; max-width: 240px; width: 100%; }

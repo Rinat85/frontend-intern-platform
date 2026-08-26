@@ -4,9 +4,9 @@ import { useNotifications } from '../../context/NotificationContext';
 import { UserMenu } from './UserMenu';
 import { NotificationDropdown } from './NotificationDropdown';
 import {
-  Menu, Search, BookOpen, Award, Shield,
-  Terminal, Sparkles, Bell
+  Menu, Search, BookOpen, Award, Shield, Bell
 } from 'lucide-react';
+import { OctoLogoIcon } from './OctoLogo';
 
 interface HeaderProps {
   onOpenSearch: () => void;
@@ -48,8 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="header-logo" onClick={onNavigateHome} title="На главную страницу">
           <div className="logo-icon-wrap">
-            <Terminal size={20} className="text-accent" />
-            <span className="logo-sparkle"><Sparkles size={10} /></span>
+            <OctoLogoIcon size={20} />
           </div>
           <div className="logo-text-wrap">
             <span className="logo-title">OCTO INTERN</span>

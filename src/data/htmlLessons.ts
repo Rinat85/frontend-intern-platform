@@ -70,6 +70,10 @@ export const htmlLessons: Lesson[] = [
             "code": "<!DOCTYPE html>\n<html lang=\"ru\">\n  <head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Личный кабинет стажёра — Frontend Academy</title>\n    <link rel=\"stylesheet\" href=\"styles/main.css\">\n    <script defer src=\"scripts/app.js\"></script>\n  </head>\n  <body>\n    <header class=\"app-header\">\n      <h1>Frontend Intern Academy</h1>\n    </header>\n    <main class=\"app-content\">\n      <p>Добро пожаловать в учебную программу!</p>\n    </main>\n  </body>\n</html>",
             "explanation": "Стили подключаются в <head> через <link>, а скрипты с атрибутом defer выполняются после построения DOM, не блокируя рендеринг."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоуроки по основам HTML",
+          "content": "Для наглядного закрепления основ HTML-разметки, структуры документа, семантических тегов и построения первых веб-страниц рекомендуем изучить видеоурок:\n\n- **[Основы HTML для начинающих — полный курс (YouTube)](https://youtu.be/DhleEgRmWF8?si=s0WXuYtmX1orv5AO)** — подробный и понятный видеокурс по HTML с нуля: структура документа, теги, атрибуты, семантическая разметка и практические примеры."
         }
       ],
       "seniorTips": [

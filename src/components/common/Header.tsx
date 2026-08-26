@@ -60,7 +60,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="header-center">
         <button className="header-search-btn" onClick={onOpenSearch}>
           <Search size={16} />
-          <span className="search-placeholder">Поиск по 67 урокам, темам и коду...</span>
+          <span className="search-placeholder">Поиск по 70 урокам, темам и коду...</span>
           <span className="kbd-shortcut">Ctrl+K</span>
         </button>
       </div>

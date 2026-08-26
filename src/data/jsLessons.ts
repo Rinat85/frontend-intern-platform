@@ -2750,5 +2750,192 @@ export const jsLessons: Lesson[] = [
         }
       ]
     }
+  },
+  {
+    "id": "javascript-15",
+    "moduleId": "javascript",
+    "level": 15,
+    "title": "Регулярные выражения (RegExp) и обработка строк",
+    "subtitle": "Синтаксис шаблонов, флаги, квантификаторы, группы захвата, Lookaround и методы RegExp/String",
+    "description": "Фундаментальное руководство по регулярным выражениям в JavaScript: создание через литерал и конструктор, флаги (g, i, m, s, u, y, d), символьные классы, жадные и ленивые квантификаторы, скобочные группы, именованный захват (?<name>), Lookahead и Lookbehind, методы test(), exec(), matchAll(), replace(), replaceAll(), split(), защита от катастрофического возврата (ReDoS) и практическая валидация данных.",
+    "estimatedMinutes": 60,
+    "difficulty": "intermediate",
+    "tags": [
+      "JavaScript",
+      "RegExp",
+      "RegEx",
+      "Регулярные выражения",
+      "Pattern Matching",
+      "Lookahead",
+      "Lookbehind",
+      "String Methods",
+      "ReDoS",
+      "Validation"
+    ],
+    "theory": {
+      "overview": "Регулярные выражения (Regular Expressions / RegExp) — это мощный формальный язык поиска, извлечения и трансформации текстовых данных по заданному шаблону. В JavaScript объект `RegExp` встроен на уровне спецификации ECMAScript и компилируется движком V8 в машинный байткод.\n\nВо фронтенд-разработке регулярные выражения применяются повсеместно: валидация пользовательского ввода (email, телефоны, пароли), маскирование полей ввода (банковские карты, ИНН), парсинг URL и search params, форматирование денежных сумм и дат, санация HTML от XSS-уязвимостей.",
+      "sections": [
+        {
+          "title": "1. Создание RegExp и флаги сопоставления",
+          "content": "В JS существует 2 способа создания регулярных выражений:\n\n1. **Литеральная нотация (`/pattern/flags`):** Компилируется один раз при загрузке скрипта. Идеально для статических шаблонов.\n2. **Конструктор `new RegExp('pattern', 'flags')`:** Позволяет динамически собирать шаблон из переменных во время выполнения (требует экранирования спецсимволов `\\\\d`).\n\n**Ключевые флаги:**\n- `g` (global) — поиск всех совпадений, а не только первого.\n- `i` (ignoreCase) — регистронезависимый поиск (`/a/i` совпадет с `A` и `a`).\n- `m` (multiline) — многострочный режим (якоря `^` и `$` срабатывают в начале и конце каждой строки, а не только всей строки).\n- `s` (dotAll) — символ точки `.` совпадает абсолютно с любым символом, включая перенос строки `\\n`.\n- `u` (unicode) — корректная обработка 4-байтовых символов Unicode (эмодзи 🚀, иероглифы).\n- `y` (sticky) — поиск строго с позиции `regex.lastIndex` без пропуска символов.\n- `d` (hasIndices) — генерация индексов начала и конца для всех групп захвата в `match.indices`.",
+          "codeExample": {
+            "language": "javascript",
+            "title": "Создание RegExp и безопасная динамическая сборка",
+            "code": "// Статический литерал\nconst emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$/;\nconsole.log(emailRegex.test('intern@octobank.uz')); // true\n\n// Функция безопасного экранирования спецсимволов\nfunction escapeRegExp(string) {\n  return string.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n}\n\n// Динамический поиск с подсветкой\nfunction highlightSearch(text, query) {\n  if (!query.trim()) return text;\n  const safe = escapeRegExp(query);\n  const regex = new RegExp(`(${safe})`, 'gi');\n  return text.replace(regex, '<mark>$1</mark>');\n}\n\nconsole.log(highlightSearch('Frontend Academy от Octobank', 'octo'));\n// 'Frontend Academy от <mark>Octo</mark>bank'"
+          }
+        },
+        {
+          "title": "2. Символьные классы, квантификаторы и якоря",
+          "content": "Регулярные выражения состоят из базовых строительных блоков:\n\n- **Символьные классы:**\n  - `\\d` — цифра `[0-9]`, `\\D` — не-цифра `[^0-9]`.\n  - `\\w` — латинская буква, цифра или знак подчеркивания `[a-zA-Z0-9_]`, `\\W` — не словарный символ.\n  - `\\s` — пробел, табуляция `\\t`, перенос строки `\\n`, `\\S` — не пробел.\n  - `.` — любой символ (кроме `\\n` без флага `s`).\n\n- **Квантификаторы (Жадные vs Ленивые):**\n  - `+` (1 или более), `*` (0 или более), `?` (0 или 1), `{n}` (ровно n раз), `{n,m}` (от n до m раз).\n  - По умолчанию все квантификаторы **жадные** — они захватывают максимальный объем текста. Добавление знака `?` (например, `.*?` или `+?`) делает квантификатор **ленивым**, заставляя его остановиться на первом подходящем совпадении.\n\n- **Якоря границ:**\n  - `^` — начало строки/текста.\n  - `$` — конец строки/текста.\n  - `\\b` — граница слова (граница между `\\w` и `\\W` или краем строки).\n  - `\\B` — позиция внутри слова (не граница).",
+          "codeExample": {
+            "language": "javascript",
+            "title": "Жадный vs Ленивый поиск и границы слов",
+            "code": "const html = '<div>Первый</div><div>Второй</div>';\n\n// Жадный квантификатор (захватит всё до последнего </div>)\nconsole.log(html.match(/<div>.*<\\/div>/)[0]);\n// '<div>Первый</div><div>Второй</div>'\n\n// Ленивый квантификатор (остановится на первом же </div>)\nconsole.log(html.match(/<div>.*?<\\/div>/)[0]);\n// '<div>Первый</div>'\n\n// Граница слова \\b\nconst text = 'Java и JavaScript — абсолютно разные языки';\nconsole.log(text.replace(/\\bJava\\b/g, 'TypeScript'));\n// 'TypeScript и JavaScript — абсолютно разные языки' (JavaScript не затронут!)"
+          }
+        },
+        {
+          "title": "3. Группы захвата, именованный захват и matchAll",
+          "content": "Скобочные группы `(...)` решают две задачи:\n1. Применение квантификаторов к группе: `(ha)+` -> 'hahaha'.\n2. Захват подстрок для последующего использования в `match`, `replace` (`$1`, `$2`) или в самом шаблоне (`\\1`).\n\n**Виды групп:**\n- **Обычный захват `(pattern)`:** Сохраняет совпадение в `$1`, `$2`.\n- **Именованные группы `(?<name>pattern)` (ES2018+):** Сохраняет совпадение в объект `match.groups[name]` и доступен в `replace` через `$<name>`.\n- **Незахватывающие группы `(?:pattern)`:** Группирует логику без сохранения в память, ускоряя сопоставление.\n- **`str.matchAll(regex)`:** Возвращает итератор по всем совпадениям строки с группами захвата (требует флаг `g`).",
+          "codeExample": {
+            "language": "javascript",
+            "title": "Именованные группы захвата и разбор данных",
+            "code": "// Разбор строки даты\nconst datePattern = /(?<year>\\d{4})-(?<month>\\d{2})-(?<day>\\d{2})/;\nconst dateStr = '2026-08-26';\n\nconst match = dateStr.match(datePattern);\nif (match) {\n  const { year, month, day } = match.groups;\n  console.log(`День: ${day}, Месяц: ${month}, Год: ${year}`);\n  // 'День: 26, Месяц: 08, Год: 2026'\n}\n\n// Быстрая замена через именованные группы\nconst formatted = dateStr.replace(datePattern, '$<day>.$<month>.$<year>');\nconsole.log(formatted); // '26.08.2026'\n\n// Извлечение всех параметров через matchAll\nconst queryStr = 'filter=active&page=2&sort=desc';\nconst paramPattern = /(?<key>[^&=]+)=(?<value>[^&=]+)/g;\n\nconst params = {};\nfor (const m of queryStr.matchAll(paramPattern)) {\n  params[m.groups.key] = m.groups.value;\n}\nconsole.log(params); // { filter: 'active', page: '2', sort: 'desc' }"
+          }
+        },
+        {
+          "title": "4. Продвинутый Lookaround (Lookahead & Lookbehind)",
+          "content": "Проверки Lookaround (опережающие и ретроспективные) позволяют искать совпадения на основе того, что находится **до** или **после** них, **не включая сами проверяемые символы в результат совпадения** (утверждения нулевой ширины):\n\n1. **Positive Lookahead `X(?=Y)`:** Находит `X`, только если за ним следует `Y`.\n2. **Negative Lookahead `X(?!Y)`:** Находит `X`, только если за ним НЕ следует `Y`.\n3. **Positive Lookbehind `(?<=Y)X`:** Находит `X`, только если перед ним стоит `Y`.\n4. **Negative Lookbehind `(?<!Y)X`:** Находит `X`, только если перед ним НЕ стоит `Y`.\n\nLookaround идеален для валидации сложности паролей, форматирования разрядов чисел и парсинга цен с валютами.",
+          "codeExample": {
+            "language": "javascript",
+            "title": "Валидация пароля и форматирование валюты через Lookaround",
+            "code": "// 1. Проверка надежности пароля одной регуляркой:\n// - минимум 8 символов\n// - хотя бы 1 строчная буква (?=.*[a-z])\n// - хотя бы 1 заглавная буква (?=.*[A-Z])\n// - хотя бы 1 цифра (?=.*\\d)\n// - хотя бы 1 спецсимвол (?=.*[@$!%*?&])\nconst passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$/;\n\nconsole.log(passwordRegex.test('OctoPass2026!')); // true\nconsole.log(passwordRegex.test('qwerty'));        // false\n\n// 2. Форматирование разрядов чисел (1 000 000)\nfunction formatThousands(num) {\n  return String(num).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ' ');\n}\nconsole.log(formatThousands(15000000)); // '15 000 000'\n\n// 3. Извлечение только цен в долларах через Lookbehind\nconst prices = 'Товары: 100EUR, 250USD, 500UZS, 99USD';\nconst usdPrices = prices.match(/\\d+(?=USD)/g); // Positive Lookahead\nconsole.log(usdPrices); // ['250', '99']"
+          }
+        }
+      ],
+      "seniorTips": [
+        "При валидации одиночных строк через regex.test() никогда не ставьте глобальный флаг /g — иначе мутирующее свойство lastIndex приведет к чередованию true/false на одинаковом вводе.",
+        "Для простых проверок подстрок ('hello world'.includes('world')) используйте нативные строковые методы вместо RegExp — они в 5–10 раз быстрее и не нагружают память движка V8.",
+        "Выносите константные регулярные выражения на уровень модуля (вне тел функций/компонентов), чтобы избежать их повторной компиляции на каждом рендере.",
+        "Защищайтесь от ReDoS (Regular Expression Denial of Service): избегайте вложенных квантификаторов вида (a+)+$ и всегда ограничивайте максимальную длину входной строки перед regex-проверкой.",
+        "Для маскирования номеров карт, телефонов и сумм используйте комбинацию String.prototype.replace() с функциями обратного вызова (replacer function)."
+      ],
+      "commonMistakes": [
+        {
+          "bad": "const emailReg = /^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$/gi;\nfunction validate(email) {\n  return emailReg.test(email); // Чередует true и false при одинаковом вводе!\n}",
+          "good": "const emailReg = /^[\\w.-]+@[\\w.-]+\\.[a-z]{2,}$/i; // БЕЗ флага g\nfunction validate(email) {\n  return emailReg.test(email);\n}",
+          "reason": "Флаг 'g' включает сохранение состояния в свойстве regex.lastIndex. Следующий вызов .test() ищет совпадение с конца предыдущего совпадения."
+        },
+        {
+          "bad": "const regex = new RegExp('\\d+\\.\\d+'); // Получится /d+.d+/, так как \\ съедается строкой",
+          "good": "const regex = new RegExp('\\\\d+\\\\.\\\\d+'); // Двойное экранирование спецсимволов",
+          "reason": "В строковых литералах обратный слэш экранирует сам себя. В конструктор new RegExp необходимо передавать '\\\\d', чтобы RegExp получил '\\d'."
+        },
+        {
+          "bad": "const isNumber = (val) => /\\d+/.test(val); // 'abc 123 def' вернет true!",
+          "good": "const isNumber = (val) => /^\\d+$/.test(val); // Строго от начала (^) до конца ($)",
+          "reason": "Без якорей ^ и $ регулярное выражение сопоставляется с ЛЮБОЙ подстрокой, а не проверяет всю строку целиком."
+        }
+      ],
+      "keyTakeaways": [
+        "Литералы /.../ компилируются статически, new RegExp() — динамически с обязательным экранированием спецсимволов.",
+        "Флаги g, i, m, s, u, y, d расширяют поведение поиска, но флаг g мутирует свойство lastIndex при вызове .test() и .exec().",
+        "Жадные квантификаторы (+, *) берут максимум, ленивые (+?, *?) — минимум.",
+        "Именованные группы (?<name>...) и метод matchAll() делают разбор сложных текстовых структур читаемым и надежным.",
+        "Lookahead (?=...) и Lookbehind (?<=...) позволяют проверять контекст без включения его в результат совпадения."
+      ]
+    },
+    "sandbox": {
+      "initialHtml": "<div class=\"card-checker-app\">\n  <h2>💳 Валидатор и маскирование карт</h2>\n  <div class=\"input-group\">\n    <label>Номер карты:</label>\n    <input type=\"text\" id=\"cardInput\" placeholder=\"8600 1234 5678 9012\" maxlength=\"19\" />\n    <span id=\"cardStatus\" class=\"status-badge\">Ожидание ввода...</span>\n  </div>\n  <div class=\"result-box\">\n    <div><strong>Очищенный номер:</strong> <span id=\"cleanResult\">—</span></div>\n    <div><strong>Маскированный вид:</strong> <span id=\"maskedResult\">—</span></div>\n    <div><strong>Тип платежной системы:</strong> <span id=\"paymentSystem\">—</span></div>\n  </div>\n</div>",
+      "initialCss": ".card-checker-app {\n  padding: 24px;\n  background: #06090d;\n  color: #e6edf3;\n  border-radius: 12px;\n  border: 1px solid #1c2c22;\n  font-family: 'JetBrains Mono', monospace;\n  max-width: 540px;\n}\n.input-group {\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  margin: 16px 0;\n}\ninput {\n  padding: 10px 14px;\n  background: #0d1520;\n  border: 1px solid #2dff8a44;\n  color: #2dff8a;\n  font-size: 16px;\n  border-radius: 6px;\n  outline: none;\n  font-family: inherit;\n}\ninput:focus {\n  border-color: #2dff8a;\n  box-shadow: 0 0 10px rgba(45, 255, 138, 0.2);\n}\n.status-badge {\n  font-size: 12px;\n  color: #8b949e;\n}\n.status-badge.valid { color: #2dff8a; }\n.status-badge.invalid { color: #ff5555; }\n.result-box {\n  background: #0a0f16;\n  padding: 16px;\n  border-radius: 8px;\n  display: flex;\n  flex-direction: column;\n  gap: 8px;\n  font-size: 13px;\n}",
+      "initialJs": "const input = document.getElementById('cardInput');\nconst status = document.getElementById('cardStatus');\nconst cleanEl = document.getElementById('cleanResult');\nconst maskedEl = document.getElementById('maskedResult');\nconst systemEl = document.getElementById('paymentSystem');\n\nfunction detectSystem(digits) {\n  if (/^8600/.test(digits)) return 'Uzcard';\n  if (/^9860/.test(digits)) return 'Humo';\n  if (/^4/.test(digits)) return 'Visa';\n  if (/^5[1-5]/.test(digits)) return 'Mastercard';\n  return 'Неизвестно';\n}\n\ninput.addEventListener('input', (e) => {\n  const raw = e.target.value;\n  // Удаляем всё кроме цифр\n  const digits = raw.replace(/\\D/g, '');\n  \n  // Автоматическое форматирование ввода по 4 цифры\n  const formatted = digits.replace(/(\\d{4})(?=\\d)/g, '$1 ');\n  e.target.value = formatted;\n  \n  cleanEl.textContent = digits || '—';\n  \n  if (digits.length === 16) {\n    status.textContent = '✓ Номер карты валиден';\n    status.className = 'status-badge valid';\n    maskedEl.textContent = digits.replace(/^(\\d{4})(\\d{8})(\\d{4})$/, '$1 **** **** $3');\n    systemEl.textContent = detectSystem(digits);\n  } else {\n    status.textContent = `Введено цифр: ${digits.length}/16`;\n    status.className = 'status-badge invalid';\n    maskedEl.textContent = '—';\n    systemEl.textContent = detectSystem(digits);\n  }\n});",
+      "instructions": "Интерактивная песочница демонстрирует работу регулярных выражений в реальном времени: форматирование ввода по 4 цифры через Lookahead `(\\d{4})(?=\\d)`, очистку от не-цифр `\\D`, маскирование номера и автоопределение типа карты (Uzcard/Humo/Visa/Mastercard)."
+    },
+    "task": {
+      "title": "Разработка модуля валидации и парсера финансовых транзакций",
+      "scenario": "Вы разрабатываете финансовый шлюз для интернет-банкинга Octobank. Вам необходимо реализовать надежный класс `TransactionProcessor` со строгой валидацией, безопасным маскированием и парсингом текстовых выписок.",
+      "criteria": [
+        "Метод isValidCard(cardNumber): возвращает true, если номер содержит ровно 16 цифр (слитно или по 4 через пробел)",
+        "Метод maskCard(cardNumber): возвращает номер вида '8600 **** **** 9012' или 'INVALID', если карта невалидна",
+        "Метод parseLog(logText): извлекает из логов массив объектов { id, user, amount, currency } с преобразованием amount в Number",
+        "Метод sanitizeHtml(text): удаляет все теги <script>...</script> и опасные on-атрибуты через регулярные выражения"
+      ],
+      "starterCode": {
+        "js": "class TransactionProcessor {\n  /**\n   * Проверяет валидность номера карты (16 цифр)\n   * @param {string} card\n   * @returns {boolean}\n   */\n  static isValidCard(card) {\n    // Ваш код\n  }\n\n  /**\n   * Маскирует номер карты: '8600 **** **** 9012'\n   * @param {string} card\n   * @returns {string}\n   */\n  static maskCard(card) {\n    // Ваш код\n  }\n\n  /**\n   * Парсит журнал транзакций вида 'TRX-101: USER=Anna, SUM=150000UZS'\n   * @param {string} logText\n   * @returns {Array<{id: string, user: string, amount: number, currency: string}>}\n   */\n  static parseLog(logText) {\n    // Ваш код\n  }\n\n  /**\n   * Очищает текст от опасных <script> тегов\n   * @param {string} html\n   * @returns {string}\n   */\n  static sanitizeHtml(html) {\n    // Ваш код\n  }\n}"
+      },
+      "hints": [
+        "Для isValidCard используйте: /^\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}$/.test(card?.trim())",
+        "Для maskCard: очистите от \\D, проверьте длину 16, затем примените .replace(/^(\\d{4})\\d{8}(\\d{4})$/, '$1 **** **** $2')",
+        "Для parseLog: используйте именованные группы /(?<id>\\d+):\\s*USER=(?<user>[^,]+),\\s*SUM=(?<amount>\\d+)(?<currency>[A-Z]{3})/g и matchAll",
+        "Для sanitizeHtml: html.replace(/<script[\\s\\S]*?<\\/script>/gi, '').replace(/\\s+on\\w+=\\S+/gi, '')"
+      ],
+      "solution": {
+        "js": "class TransactionProcessor {\n  static isValidCard(card) {\n    if (typeof card !== 'string') return false;\n    const clean = card.trim();\n    return /^\\d{4}\\s?\\d{4}\\s?\\d{4}\\s?\\d{4}$/.test(clean);\n  }\n\n  static maskCard(card) {\n    if (!this.isValidCard(card)) return 'INVALID';\n    const digits = card.replace(/\\D/g, '');\n    return digits.replace(/^(\\d{4})\\d{8}(\\d{4})$/, '$1 **** **** $2');\n  }\n\n  static parseLog(logText) {\n    if (typeof logText !== 'string') return [];\n    const regex = /TRX-(?<id>\\d+):\\s*USER=(?<user>[A-Za-zа-яА-ЯёЁ]+),\\s*SUM=(?<amount>\\d+)(?<currency>[A-Z]{3})/g;\n    const results = [];\n    for (const match of logText.matchAll(regex)) {\n      const { id, user, amount, currency } = match.groups;\n      results.push({\n        id,\n        user,\n        amount: Number(amount),\n        currency\n      });\n    }\n    return results;\n  }\n\n  static sanitizeHtml(html) {\n    if (typeof html !== 'string') return '';\n    return html\n      .replace(/<script[\\s\\S]*?<\\/script>/gi, '')\n      .replace(/\\s+on\\w+=(['\"]).*?\\1/gi, '')\n      .replace(/\\s+on\\w+=\\S+/gi, '');\n  }\n}\n\nconsole.log('TransactionProcessor успешно инициализирован!');",
+        "explanation": "TransactionProcessor использует современные возможности регулярных выражений: строгие якоря границ, именованные группы захвата с matchAll, ленивую очистку скриптов и защиту от инъекций."
+      }
+    },
+    "quiz": {
+      "questions": [
+        {
+          "id": "js15-q1",
+          "question": "Почему вызов regex.test(str) может вернуть false при повторной проверке одной и той же валидной строки, если у регулярного выражения установлен флаг 'g'?",
+          "options": [
+            "Флаг g изменяет кодировку строки на UTF-16",
+            "Флаг g сохраняет и сдвигает свойство regex.lastIndex, поэтому следующий поиск начинается с конца предыдущего совпадения",
+            "Движок JavaScript кеширует результат и инвертирует булево значение",
+            "Метод test() поддерживает только одиночный вызов и после первого вызова уничтожает объект RegExp"
+          ],
+          "correctIndex": 1,
+          "explanation": "При наличии глобального флага g или y объект RegExp запоминает позицию в свойстве lastIndex. Следующий вызов .test() ищет совпадение начиная с lastIndex. Когда поиск доходит до конца строки, lastIndex сбрасывается в 0."
+        },
+        {
+          "id": "js15-q2",
+          "question": "В чем ключевое отличие между квантификатором .*? (ленивый) и .* (жадный)?",
+          "options": [
+            "Ленивый квантификатор ищет только цифры, а жадный — любые символы",
+            "Жадный квантификатор захватывает как можно больше символов, а ленивый — минимально возможное количество для совпадения",
+            "Ленивый квантификатор работает асинхронно через Promise",
+            "Между ними нет разницы в JavaScript"
+          ],
+          "correctIndex": 1,
+          "explanation": "Жадный квантификатор .* сопоставляет максимально длинную цепочку символов, удовлетворяющую шаблону, а ленивый .*? останавливается на самом первом совпадении следующего символа."
+        },
+        {
+          "id": "js15-q3",
+          "question": "Какая конструкция используется для Positive Lookahead (опережающей позитивной проверки)?",
+          "options": [
+            "(?<=pattern)",
+            "(?:pattern)",
+            "(?=pattern)",
+            "(?!pattern)"
+          ],
+          "correctIndex": 2,
+          "explanation": "(?=pattern) — это Positive Lookahead («далее должно следовать»). (?!pattern) — Negative Lookahead. (?<=pattern) — Positive Lookbehind. (?:pattern) — незахватывающая группа."
+        },
+        {
+          "id": "js15-q4",
+          "question": "Как в ES2018+ получить доступ к именованной группе захвата (?<userName>\\w+) в результате выполнения match?",
+          "options": [
+            "match.groups.userName",
+            "match.named('userName')",
+            "match[userName]",
+            "match.getGroup('userName')"
+          ],
+          "correctIndex": 0,
+          "explanation": "Именованные группы сохраняются в свойстве match.groups, где ключами являются имена групп, заданные в шаблоне через (?<name>...)."
+        },
+        {
+          "id": "js15-q5",
+          "question": "Что такое уязвимость ReDoS (Regular Expression Denial of Service) и из-за чего она возникает?",
+          "options": [
+            "Утечка памяти из-за замыканий внутри функции replacer в методе str.replace",
+            "Блокировка потока выполнения и 100% загрузка процессора из-за катастрофического возврата (catastrophic backtracking) при вложенных квантификаторах",
+            "Выполнение вредоносного SQL-кода при передаче регулярного выражения в IndexedDB",
+            "Переполнение стека вызовов Call Stack из-за рекурсивного создания объектов RegExp"
+          ],
+          "correctIndex": 1,
+          "explanation": "ReDoS возникает, когда движок регулярных выражений перебирает экспоненциальное количество комбинаций (катастрофический возврат) на несовпадающих строках при наличии вложенных квантификаторов вида (a+)+$."
+        }
+      ]
+    }
   }
 ];

@@ -50,17 +50,23 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
     if (titleMatch) {
       title = titleMatch[1].replace(/\*\*/g, '').trim();
     } else {
-      title = 'Видеоурок по JavaScript';
+      title = 'Видеоурок';
     }
 
     let desc = '';
-    const dashIdx = clean.indexOf('—');
-    if (dashIdx !== -1) {
-      desc = clean.slice(dashIdx + 1).trim();
+    // Look for description after the markdown link: [title](url)** — description
+    const afterLinkMatch = /\]\([^)]+\)\*{0,2}\s*(?:—|-)\s*(.*)$/.exec(clean);
+    if (afterLinkMatch) {
+      desc = afterLinkMatch[1].trim();
     } else {
-      const hypIdx = clean.indexOf(' - ');
-      if (hypIdx !== -1) {
-        desc = clean.slice(hypIdx + 3).trim();
+      const dashIdx = clean.lastIndexOf('—');
+      if (dashIdx !== -1) {
+        desc = clean.slice(dashIdx + 1).trim();
+      } else {
+        const hypIdx = clean.lastIndexOf(' - ');
+        if (hypIdx !== -1) {
+          desc = clean.slice(hypIdx + 3).trim();
+        }
       }
     }
 

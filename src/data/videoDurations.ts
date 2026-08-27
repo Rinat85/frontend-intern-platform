@@ -211,6 +211,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '38 мин',
     title: 'Frontend System Design Explained w/ Senior Engineer (Microfrontends, Monorepo, MCP UI, Reactjs)'
   },
+  'h784nJ5_-7E': {
+    seconds: 375,
+    formatted: '6:15',
+    human: '6 мин',
+    title: '5 JavaScript Mistakes Beginners Make (And How to Avoid Them)'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

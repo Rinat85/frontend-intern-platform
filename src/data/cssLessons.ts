@@ -3192,6 +3192,10 @@ export const cssLessons: Lesson[] = [
             "title": "Поддержка prefers-reduced-motion для доступности WCAG",
             "explanation": "prefers-reduced-motion отключает тяжелые вращения и сдвиги, сохраняя доступность интерфейса для всех категорий пользователей."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: CSS Animations за 9 минут",
+          "content": "Для быстрого и наглядного закрепления синтаксиса @keyframes, свойств animation и создания плавных эффектов рекомендуем видеоматериал:\n\n- **[Learn CSS Animations in 9 Minutes (YouTube)](https://youtu.be/z2LQYsZhsFw?si=p8J_ZGvLkz5fKjhm)** — экспресс-руководство от Coding2GO по созданию анимаций на чистом CSS: от базовых ключевых кадров до интерактивных эффектов."
         }
       ],
       "seniorTips": [

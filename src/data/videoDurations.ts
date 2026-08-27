@@ -187,6 +187,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '11 мин',
     title: 'How to create RESPONSIVE Layouts with CSS GRID'
   },
+  'z2LQYsZhsFw': {
+    seconds: 520,
+    formatted: '8:40',
+    human: '8 мин',
+    title: 'Learn CSS Animations in 9 Minutes'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

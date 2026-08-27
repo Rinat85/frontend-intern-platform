@@ -193,6 +193,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '8 мин',
     title: 'Learn CSS Animations in 9 Minutes'
   },
+  'YEmdHbQBCSQ': {
+    seconds: 277,
+    formatted: '4:37',
+    human: '4 мин',
+    title: 'Learn CSS Positions in 4 minutes'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

@@ -859,6 +859,10 @@ export const cssLessons: Lesson[] = [
             "title": "Баг fixed внутри transform и решение через React Portal",
             "explanation": "Свойство transform на предке превращает его в контейнер для fixed. Решение — монтировать модалки в корень body через React Portal."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: CSS Positions за 4 минуты",
+          "content": "Для быстрого и наглядного повторения всех типов позиционирования в CSS рекомендуем видеоматериал:\n\n- **[Learn CSS Positions in 4 minutes (YouTube)](https://youtu.be/YEmdHbQBCSQ?si=1uM-L6aOgA--vn3C)** — лаконичное визуальное руководство от Coding2GO, наглядно объясняющее разницу между static, relative, absolute, fixed и sticky за 4 минуты."
         }
       ],
       "seniorTips": [

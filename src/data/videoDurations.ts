@@ -157,6 +157,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '13 мин',
     title: 'Grid CSS полный курс за 13 минут. Все свойства'
   },
+  'aEj6k-gi9-s': {
+    seconds: 480,
+    formatted: '8:00',
+    human: '8 мин',
+    title: 'CSS Flexbox vs Grid - Are you using them right?'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

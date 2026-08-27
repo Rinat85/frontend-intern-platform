@@ -2219,6 +2219,10 @@ export const cssLessons: Lesson[] = [
             "title": "Плотная раскладка плитки через grid-auto-flow: dense",
             "explanation": "grid-auto-flow: dense устраняет дыры в сетке, автоматически переставляя маленькие фотографии в свободные ячейки."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: Flexbox vs Grid",
+          "content": "Для закрепления понимания того, когда использовать Flexbox, а когда Grid, и как правильно сочетать их в реальных проектах, рекомендуем видеоматериал:\n\n- **[CSS Flexbox vs Grid - Are you using them right? (YouTube)](https://youtu.be/aEj6k-gi9-s?si=nT0KUT5tHhQ0g9vg)** — наглядное практическое руководство от Coding2GO о ключевых различиях одномерных (Flexbox) и двумерных (Grid) сеток и правильном выборе инструментов."
         }
       ],
       "seniorTips": [

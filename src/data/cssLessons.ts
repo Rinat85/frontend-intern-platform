@@ -469,6 +469,10 @@ export const cssLessons: Lesson[] = [
             "title": "Логические свойства, отрицательный margin и outline-offset",
             "explanation": "margin-inline: -24px компенсирует padding карточки. outline-offset создаёт элегантный зазор для фокусного кольца клавиатурной навигации без сдвига верстки."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: Размеры элементов и единицы измерения в CSS",
+          "content": "Для глубокого и практического понимания единиц измерения (px, %, rem, em, vw, vh), управления геометрией блоков и отказа от жесткого хардкода рекомендуем подробный видеоурок:\n\n- **[Stop Using px: Everything You Need To Know About CSS Sizing and Units (YouTube)](https://youtu.be/EWA__M25pLs?si=nagH27-k8juwiF9F)** — комплексный разбор от Parham CodeLab: как на самом деле работают width/height, min/max ограничения, относительные единицы и функция calc()."
         }
       ],
       "seniorTips": [

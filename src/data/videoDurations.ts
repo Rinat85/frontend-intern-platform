@@ -199,6 +199,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '4 мин',
     title: 'Learn CSS Positions in 4 minutes'
   },
+  'EWA__M25pLs': {
+    seconds: 1651,
+    formatted: '27:31',
+    human: '27 мин',
+    title: 'Stop Using px: Everything You Need To Know About CSS Sizing and Units'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

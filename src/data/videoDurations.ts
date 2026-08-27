@@ -205,6 +205,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '27 мин',
     title: 'Stop Using px: Everything You Need To Know About CSS Sizing and Units'
   },
+  'KuClyhvSzXk': {
+    seconds: 2282,
+    formatted: '38:02',
+    human: '38 мин',
+    title: 'Frontend System Design Explained w/ Senior Engineer (Microfrontends, Monorepo, MCP UI, Reactjs)'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

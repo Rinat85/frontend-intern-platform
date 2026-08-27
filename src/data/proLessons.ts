@@ -3765,6 +3765,10 @@ export const proLessons: Lesson[] = [
             "title": "Многоуровневый Fallback для обеспечения 99.99% доступности интерфейса",
             "explanation": "Многоуровневая деградация исключает белые экраны и фатальные сбои при авариях на серверной инфраструктуре."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: Frontend System Design от Senior инженера",
+          "content": "Для глубокого погружения в проектирование крупномасштабных клиентских архитектур рекомендуем подробный видеоразбор:\n\n- **[Frontend System Design Explained w/ Senior Engineer (Microfrontends, Monorepo, MCP UI, Reactjs) (YouTube)](https://youtu.be/KuClyhvSzXk?si=x-qpAN6oCWgoHDHr)** — Senior-разработчик из theSeniorDev разбирает ключевые концепции System Design: декомпозицию монолитов, микрофронтенды, архитектуру монорепозиториев, изоляцию UI и проектирование масштабируемых React-приложений."
         }
       ],
       "seniorTips": [

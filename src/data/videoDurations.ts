@@ -229,6 +229,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '45 мин',
     title: 'JavaScript Примеры. Prototype, This, Классы, Контекст, Наследование'
   },
+  'v6AVfIupNB8': {
+    seconds: 1137,
+    formatted: '18:57',
+    human: '18 мин',
+    title: 'Композиция или Наследование в JavaScript?'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

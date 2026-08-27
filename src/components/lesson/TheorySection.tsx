@@ -1,7 +1,8 @@
 import React from 'react';
 import { LessonTheory } from '../../types/curriculum';
 import { CodeBlock, CodeSnippet } from './CodeBlock';
-import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2, ZoomIn, X, Play, ExternalLink, Video } from 'lucide-react';
+import { Lightbulb, AlertTriangle, CheckCircle, BookOpen, CheckCircle2, ZoomIn, X, Play, ExternalLink, Video, Clock } from 'lucide-react';
+import { getVideoDuration, extractYouTubeVideoId } from '../../data/videoDurations';
 import { formatInlineCode } from '../../utils/formatText';
 
 interface TheorySectionProps {
@@ -38,12 +39,8 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
     if (!urlMatch) return null;
     const url = urlMatch[1];
 
-    let videoId = '';
-    if (url.includes('youtu.be/')) {
-      videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
-    } else if (url.includes('v=')) {
-      videoId = url.split('v=')[1]?.split('&')[0] || '';
-    }
+    const videoId = extractYouTubeVideoId(url);
+    const duration = getVideoDuration(videoId);
 
     let title = '';
     const titleMatch = /\[([^\]]+)\]/.exec(clean);
@@ -70,7 +67,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
       }
     }
 
-    return { title, url, desc, videoId };
+    return { title, url, desc, videoId, duration };
   };
 
   const renderParagraphs = (text: string) => {
@@ -119,13 +116,24 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
                           <Video size={14} className="yt-icon" />
                           <span>YouTube</span>
                         </span>
+                        {v.duration && (
+                          <span className="theory-video-duration" title={`Длительность: ${v.duration.human}`}>
+                            <Clock size={12} className="duration-clock-icon" />
+                            <span>{v.duration.formatted}</span>
+                          </span>
+                        )}
                       </div>
                       <div className="theory-video-info">
                         <h4 className="theory-video-title">{v.title}</h4>
                         {v.desc && <p className="theory-video-desc">{v.desc}</p>}
                         <div className="theory-video-action">
                           <span>Смотреть видеоурок</span>
-                          <ExternalLink size={14} />
+                          {v.duration && (
+                            <span className="theory-video-duration-tag">
+                              {v.duration.human}
+                            </span>
+                          )}
+                          <ExternalLink size={14} className="action-link-icon" />
                         </div>
                       </div>
                     </a>

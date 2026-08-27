@@ -3132,6 +3132,47 @@ pre code,
   color: #ff0000;
 }
 
+.theory-video-duration {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(3, 7, 18, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #f8fafc;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+  letter-spacing: 0.03em;
+}
+
+.theory-video-duration .duration-clock-icon {
+  color: #2dff8a;
+}
+
+.theory-video-duration-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  margin-left: auto;
+}
+
+.theory-video-action .action-link-icon {
+  flex-shrink: 0;
+}
+
 .theory-video-info {
   padding: 16px;
   display: flex;

@@ -217,6 +217,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '6 мин',
     title: '5 JavaScript Mistakes Beginners Make (And How to Avoid Them)'
   },
+  'LcOl02m0sXc': {
+    seconds: 686,
+    formatted: '11:26',
+    human: '11 мин',
+    title: '8 редких HTML тегов, которые почти НИКТО не знает!'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

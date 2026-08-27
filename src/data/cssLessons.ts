@@ -1830,6 +1830,10 @@ export const cssLessons: Lesson[] = [
             "title": "Адаптивное управление визуальным порядком через order",
             "explanation": "order: 0 перемещает сайдбар влево на больших экранах без дублирования HTML-разметки."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: Flexbox и свойства элементов",
+          "content": "Для глубокого закрепления работы с Flexbox, понимания flex-grow, flex-shrink, flex-basis и выравнивания элементов рекомендуем видеоматериал:\n\n- **[Learn CSS Flexbox in 20 Minutes (YouTube)](https://youtu.be/wsTv9y931o8?si=VYdLtAl6Hkmtncs7)** — подробный и наглядный видеокурс от Coding2GO: полное руководство по свойствам Flexbox с практическими примерами за 20 минут."
         }
       ],
       "seniorTips": [

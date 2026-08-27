@@ -1843,6 +1843,10 @@ export const jsLessons: Lesson[] = [
             "title": "Прототипное наследование через User.prototype и проверка цепочки",
             "explanation": "user1 и user2 делят один метод sayHello в User.prototype. Цепочка user1 → User.prototype → Object.prototype → null демонстрирует Prototype Chain."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: Prototype, This, Классы и Наследование",
+          "content": "Для глубокого закрепления работы с контекстом и цепочкой прототипов рекомендуем посмотреть фундаментальный практический урок:\n\n- **[JavaScript Примеры. Prototype, This, Классы, Контекст, Наследование (YouTube)](https://youtu.be/cTlxzxsFbDQ?si=aXeMpb4ss4i1m75j)** — детальный 45-минутный разбор от Владилена Минина с наглядными примерами: как устроен `this`, привязка контекста (`call`, `apply`, `bind`), работа `prototype` и `__proto__`, реализация наследования и сравнение с классами ES6."
         }
       ],
       "seniorTips": [

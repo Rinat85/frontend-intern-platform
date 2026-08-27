@@ -223,6 +223,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '11 мин',
     title: '8 редких HTML тегов, которые почти НИКТО не знает!'
   },
+  'cTlxzxsFbDQ': {
+    seconds: 2702,
+    formatted: '45:02',
+    human: '45 мин',
+    title: 'JavaScript Примеры. Prototype, This, Классы, Контекст, Наследование'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

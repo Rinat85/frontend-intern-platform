@@ -2422,7 +2422,7 @@ export const cssLessons: Lesson[] = [
         },
         {
           "title": "Рекомендуемые видеоматериалы: Советы по адаптивному дизайну",
-          "content": "Для закрепления лучших практик отзывчивой верстки, использования современных приемов и функций адаптивного дизайна рекомендуем видеоматериал:\n\n- **[5 CSS Tips & Tricks for better Responsive Web Design (YouTube)](https://youtu.be/2IV08sP9m3U?si=xW6CG_NrwxMlWZOz)** — 5 практических советов и приемов от Coding2GO для создания чистого, гибкого и современного адаптивного интерфейса."
+          "content": "Для закрепления лучших практик отзывчивой верстки, использования современных приемов и функций адаптивного дизайна рекомендуем видеоматериалы:\n\n- **[5 CSS Tips & Tricks for better Responsive Web Design (YouTube)](https://youtu.be/2IV08sP9m3U?si=xW6CG_NrwxMlWZOz)** — 5 практических советов и приемов от Coding2GO для создания чистого, гибкого и современного адаптивного интерфейса.\n- **[How to create RESPONSIVE Layouts with CSS GRID (YouTube)](https://youtu.be/S9OiWe5iBYo?si=CPEDbAmSMvXMUeBo)** — практическое руководство от Coding2GO по созданию полностью адаптивных сеток на CSS Grid без громоздких медиа-запросов."
         }
       ],
       "seniorTips": [

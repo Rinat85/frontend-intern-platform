@@ -169,6 +169,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '20 мин',
     title: 'Learn CSS Flexbox in 20 Minutes (Course)'
   },
+  '2IV08sP9m3U': {
+    seconds: 578,
+    formatted: '9:38',
+    human: '9 мин',
+    title: '5 CSS Tips & Tricks for better Responsive Web Design'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

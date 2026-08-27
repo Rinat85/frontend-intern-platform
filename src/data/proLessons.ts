@@ -1633,8 +1633,8 @@ export const proLessons: Lesson[] = [
           }
         },
         {
-          "title": "Рекомендуемые видеоматериалы: CI/CD наглядные примеры",
-          "content": "Для наглядного и практического понимания принципов работы Continuous Integration и Continuous Delivery рекомендуем видеоурок:\n\n- **[CI CD наглядные примеры (YouTube)](https://youtu.be/ANj7qUgzNq4?si=NjvrVMULWRIjIfTr)** — наглядный видеоразбор от Ulbi TV: что такое CI/CD, архитектура конвейера, автоматизация тестирования, сборки и деплоя с живыми примерами и разбором пайплайнов."
+          "title": "Рекомендуемые видеоматериалы: CI/CD и GitHub Actions",
+          "content": "Для наглядного и практического освоения Continuous Integration, Continuous Delivery и автоматизации конвейеров рекомендуем видеоматериалы:\n\n- **[CI CD наглядные примеры (YouTube)](https://youtu.be/ANj7qUgzNq4?si=NjvrVMULWRIjIfTr)** — наглядный видеоразбор от Ulbi TV: что такое CI/CD, архитектура конвейера, автоматизация тестирования, сборки и деплоя с живыми примерами и разбором пайплайнов.\n- **[Github Actions - Введение в CI/CD (YouTube)](https://youtu.be/e0A2hDObLmg?si=iaoNQG3XpDnz0oQL)** — подробный практический видеоурок от Владилена Минина: настройка GitHub Actions с нуля, создание workflow-файлов, триггеры (push, pull_request), jobs, steps, работа с secrets и автоматический деплой."
         }
       ],
       "seniorTips": [

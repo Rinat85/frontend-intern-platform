@@ -267,6 +267,10 @@ export const proLessons: Lesson[] = [
             "title": "GitHub Actions CI/CD пайплайн",
             "explanation": "CI запускается на каждый push и PR. npm ci — детерминированная установка (без обновления lock-файла). Последовательно: lint → type check → build. Если хоть один шаг падает — PR блокируется."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: Гайд по Git для начинающих",
+          "content": "Для наглядного освоения системы контроля версий Git, базовых команд, веток и разрешения конфликтов рекомендуем видеоурок:\n\n- **[Лучший Гайд по Git Для Начинающих За 15 Минут (YouTube)](https://youtu.be/XuFaQSW79rM?si=_8sCVKAYLWPDe6l4)** — емкий и понятный видеогайд от Vlad Mishustin: базовые команды (init, add, commit, push, pull), работа с ветками (branch, checkout, merge), разрешение конфликтов и работа с GitHub."
         }
       ],
       "seniorTips": [

@@ -175,6 +175,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '9 мин',
     title: '5 CSS Tips & Tricks for better Responsive Web Design'
   },
+  'yNyR_A73eTI': {
+    seconds: 745,
+    formatted: '12:25',
+    human: '12 мин',
+    title: 'The Best Flexbox & Grid Tricks You Need to Start Using'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

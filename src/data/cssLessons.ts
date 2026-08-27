@@ -2225,8 +2225,8 @@ export const cssLessons: Lesson[] = [
           }
         },
         {
-          "title": "Рекомендуемые видеоматериалы: Flexbox vs Grid",
-          "content": "Для закрепления понимания того, когда использовать Flexbox, а когда Grid, и как правильно сочетать их в реальных проектах, рекомендуем видеоматериал:\n\n- **[CSS Flexbox vs Grid - Are you using them right? (YouTube)](https://youtu.be/aEj6k-gi9-s?si=nT0KUT5tHhQ0g9vg)** — наглядное практическое руководство от Coding2GO о ключевых различиях одномерных (Flexbox) и двумерных (Grid) сеток и правильном выборе инструментов."
+          "title": "Рекомендуемые видеоматериалы: Flexbox и Grid",
+          "content": "Для закрепления понимания того, когда использовать Flexbox, а когда Grid, и освоения продвинутых приемов работы с ними, рекомендуем видеоматериалы:\n\n- **[CSS Flexbox vs Grid - Are you using them right? (YouTube)](https://youtu.be/aEj6k-gi9-s?si=nT0KUT5tHhQ0g9vg)** — наглядное практическое руководство от Coding2GO о ключевых различиях одномерных (Flexbox) и двумерных (Grid) сеток и правильном выборе инструментов.\n- **[The Best Flexbox & Grid Tricks You Need to Start Using (YouTube)](https://youtu.be/yNyR_A73eTI?si=huAALpeRrn4To8XX)** — подборка лучших трюков и практических фишек по Flexbox и CSS Grid от Coding2GO для создания современных макетов."
         }
       ],
       "seniorTips": [

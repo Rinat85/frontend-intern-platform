@@ -145,6 +145,12 @@ export const YOUTUBE_VIDEO_DURATIONS: Record<string, VideoDurationInfo> = {
     human: '17 мин',
     title: 'ВСЁ Что нужно знать о БЕЗОПАСНОСТИ Фронтенд разработчику (XSS, CSRF)'
   },
+  'eVZEwEQg4pg': {
+    seconds: 389,
+    formatted: '6:29',
+    human: '6 мин',
+    title: 'Flexbox CSS практический курс за 6 минут. Все свойства'
+  },
 };
 
 export function getVideoDuration(videoId?: string): VideoDurationInfo | null {

@@ -1634,6 +1634,10 @@ export const cssLessons: Lesson[] = [
             "title": "flex-wrap, gap и margin: auto для прижатия элементов",
             "explanation": "margin-left: auto на notifications-icon съедает свободное пространство, прижимая иконку к правому краю без пустых Spacer-div'ов."
           }
+        },
+        {
+          "title": "Рекомендуемые видеоматериалы: Flexbox CSS",
+          "content": "Для наглядного закрепления Flexbox, осей, выравнивания и практики верстки рекомендуем видеоматериал:\n\n- **[Flexbox CSS практический курс за 6 минут. Все свойства (YouTube)](https://youtu.be/eVZEwEQg4pg?si=xiBIbltHQhxSgfLB)** — компактный и насыщенный видеокурс от Ulbi TV: все свойства Flexbox-контейнера и flex-элементов за 6 минут с визуальными примерами."
         }
       ],
       "seniorTips": [

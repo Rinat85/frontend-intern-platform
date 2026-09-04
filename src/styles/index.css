@@ -184,6 +184,10 @@
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-body);
   background-color: var(--bg-0);
@@ -1541,6 +1545,7 @@ pre code,
   vertical-align: baseline;
   letter-spacing: -0.01em;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 /* Theory Code Example & Explanation Box */
@@ -1642,7 +1647,14 @@ pre code,
   line-height: 1.7;
 }
 
+.theory-toc-link {
+  color: inherit;
+  text-decoration: none;
+}
 
+.theory-toc-link:hover {
+  color: var(--neon);
+}
 /* ==========================================================================
    CODE SNIPPETS & COMMON MISTAKES
    ========================================================================== */

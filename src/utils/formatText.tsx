@@ -79,6 +79,7 @@ export const formatInlineCode = (text: string): React.ReactNode[] => {
   let lastIdx = 0;
   let match: RegExpExecArray | null;
 
+
   while ((match = PRIMARY_REGEX.exec(text)) !== null) {
     if (match.index > lastIdx) {
       const plain = text.slice(lastIdx, match.index);

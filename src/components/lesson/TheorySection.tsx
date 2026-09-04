@@ -183,7 +183,7 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
       {/* Main Sections */}
       <div className="theory-sections-list">
         {theory.sections.map((section, idx) => (
-          <div key={idx} className="theory-section-block">
+          <div key={idx} className="theory-section-block" id={`section-${idx}`}>
             <div className="theory-section-header">
               <span className="theory-section-number">{idx + 1}</span>
               <h3 className="theory-section-title">{formatInlineCode(section.title)}</h3>
@@ -295,7 +295,11 @@ export const TheorySection: React.FC<TheorySectionProps> = ({ theory }) => {
           <h4>Ключевые выводы урока (шпаргалка):</h4>
           <ul className="takeaways-list">
             {theory.keyTakeaways.map((k, idx) => (
-              <li key={idx}>{formatInlineCode(k)}</li>
+              <li key={idx}>
+                <a href={`#section-${idx}`} className="theory-toc-link">
+                  {formatInlineCode(k)}
+                </a>
+              </li>
             ))}
           </ul>
         </div>

@@ -47,7 +47,7 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ isOpen, onCl
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="certificate-modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
+        <div className="certificate-banner">
           <div className="modal-header-title">
             <Award size={22} className="text-warning" />
             <h3>Сертификат об окончании обучения</h3>

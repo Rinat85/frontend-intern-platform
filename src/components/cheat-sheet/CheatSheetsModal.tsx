@@ -36,7 +36,7 @@ export const CheatSheetsModal: React.FC<CheatSheetsModalProps> = ({
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div className="cheatsheet-modal" onClick={e => e.stopPropagation()}>
-        <div className="modal-header">
+        <div className="cheatsheets-header">
           <div className="modal-header-title">
             <BookOpen size={22} className="text-accent" />
             <h3>Интерактивные шпаргалки по Frontend</h3>
@@ -46,8 +46,8 @@ export const CheatSheetsModal: React.FC<CheatSheetsModalProps> = ({
           </button>
         </div>
 
-        <div className="cheatsheet-toolbar">
-          <div className="cheatsheet-tabs">
+        <div className="cheatsheets-toolbar">
+          <div>
             {categories.map(cat => (
               <button
                 key={cat.id}

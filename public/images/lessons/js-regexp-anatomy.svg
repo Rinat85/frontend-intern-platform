@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 440" font-family="'JetBrains Mono',monospace">
+  <defs><linearGradient id="bgre15" x1="0" y1="0" x2="800" y2="440" gradientUnits="userSpaceOnUse"><stop offset="0%" stop-color="#0a0e13"/><stop offset="100%" stop-color="#0d1219"/></linearGradient></defs>
+  <rect width="800" height="440" fill="url(#bgre15)" rx="12"/>
+  <text x="400" y="30" fill="#2dff8a" font-size="16" font-weight="700" text-anchor="middle">Анатомия регулярного выражения</text>
+  <text x="400" y="48" fill="#8b949e" font-size="10" text-anchor="middle">Якоря, классы, квантификаторы, группы захвата и флаги сопоставления</text>
+
+  <!-- Dissected pattern -->
+  <rect x="20" y="65" width="760" height="112" rx="8" fill="#0d1117" stroke="#29e7ff" stroke-width="1.5"/>
+  <text x="400" y="85" fill="#29e7ff" font-size="11" font-weight="600" text-anchor="middle">Разбор шаблона по частям</text>
+
+  <text x="150" y="118" font-size="17" letter-spacing="1">
+    <tspan fill="#ffb02e">/</tspan><tspan fill="#ff7b72">^</tspan><tspan fill="#d2a8ff">(</tspan><tspan fill="#79c0ff">?&lt;user&gt;</tspan><tspan fill="#e6edf3">[\w.-]</tspan><tspan fill="#2dff8a">+</tspan><tspan fill="#d2a8ff">)</tspan><tspan fill="#e6edf3">@</tspan><tspan fill="#e6edf3">[\w-]</tspan><tspan fill="#2dff8a">+</tspan><tspan fill="#e6edf3">\.</tspan><tspan fill="#e6edf3">[a-z]</tspan><tspan fill="#2dff8a">{2,}</tspan><tspan fill="#ff7b72">$</tspan><tspan fill="#ffb02e">/</tspan><tspan fill="#ffb02e">gi</tspan>
+  </text>
+
+  <line x1="162" y1="126" x2="150" y2="145" stroke="#ff7b72" stroke-width="1"/>
+  <text x="96" y="157" fill="#ff7b72" font-size="7">^ якорь начала строки</text>
+
+  <line x1="230" y1="126" x2="250" y2="145" stroke="#79c0ff" stroke-width="1"/>
+  <text x="222" y="157" fill="#79c0ff" font-size="7">(?&lt;user&gt;…) именованная группа захвата</text>
+
+  <line x1="330" y1="126" x2="360" y2="168" stroke="#e6edf3" stroke-width="1"/>
+  <text x="330" y="176" fill="#e6edf3" font-size="7">[\w.-] класс символов</text>
+
+  <line x1="452" y1="126" x2="500" y2="145" stroke="#2dff8a" stroke-width="1"/>
+  <text x="470" y="157" fill="#2dff8a" font-size="7">+ и {2,} квантификаторы</text>
+
+  <line x1="596" y1="126" x2="640" y2="145" stroke="#ffb02e" stroke-width="1"/>
+  <text x="612" y="157" fill="#ffb02e" font-size="7">g и i — флаги поиска</text>
+
+  <!-- Left: greedy vs lazy -->
+  <rect x="20" y="188" width="370" height="145" rx="8" fill="#0d1117" stroke="#2dff8a" stroke-width="1.5"/>
+  <text x="205" y="208" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">Жадность против лени</text>
+
+  <rect x="35" y="220" width="340" height="48" rx="4" fill="#161b22" stroke="#ff7b72"/>
+  <text x="45" y="237" fill="#ff7b72" font-size="8" font-weight="600">Жадный /&lt;.+&gt;/ — берёт максимум:</text>
+  <text x="45" y="251" fill="#e6edf3" font-size="7">'&lt;b&gt;текст&lt;/b&gt;' → совпало '&lt;b&gt;текст&lt;/b&gt;'</text>
+  <text x="45" y="263" fill="#8b949e" font-size="6">Доходит до конца строки и отступает назад до первого совпадения</text>
+
+  <rect x="35" y="276" width="340" height="48" rx="4" fill="#161b22" stroke="#2dff8a"/>
+  <text x="45" y="293" fill="#2dff8a" font-size="8" font-weight="600">Ленивый /&lt;.+?&gt;/ — берёт минимум:</text>
+  <text x="45" y="307" fill="#e6edf3" font-size="7">'&lt;b&gt;текст&lt;/b&gt;' → совпало '&lt;b&gt;'</text>
+  <text x="45" y="319" fill="#8b949e" font-size="6">Расширяется по одному символу, пока совпадение не состоится</text>
+
+  <!-- Right: lookaround -->
+  <rect x="410" y="188" width="370" height="145" rx="8" fill="none" stroke="#d2a8ff" stroke-width="1.5"/>
+  <text x="595" y="208" fill="#d2a8ff" font-size="11" font-weight="600" text-anchor="middle">Проверка контекста (Lookaround)</text>
+
+  <rect x="425" y="220" width="340" height="48" rx="4" fill="#161b22" stroke="#79c0ff"/>
+  <text x="435" y="237" fill="#79c0ff" font-size="8" font-weight="600">Вперёд (?=…) и (?!…):</text>
+  <text x="435" y="251" fill="#e6edf3" font-size="7">/\d+(?=₽)/ найдёт '500' в строке '500₽', но НЕ в '500$'</text>
+  <text x="435" y="263" fill="#8b949e" font-size="6">Символ проверяется, но в результат совпадения не включается</text>
+
+  <rect x="425" y="276" width="340" height="48" rx="4" fill="#161b22" stroke="#d2a8ff"/>
+  <text x="435" y="293" fill="#d2a8ff" font-size="8" font-weight="600">Назад (?&lt;=…) и (?&lt;!…):</text>
+  <text x="435" y="307" fill="#e6edf3" font-size="7">/(?&lt;=₽)\d+/ найдёт '500' в строке '₽500'</text>
+  <text x="435" y="319" fill="#8b949e" font-size="6">Отличие от (?:…): незахватывающая группа символ всё же поглощает</text>
+
+  <!-- Bottom warnings -->
+  <rect x="20" y="343" width="760" height="82" rx="8" fill="#0d1117" stroke="#30363d"/>
+  <text x="400" y="363" fill="#2dff8a" font-size="11" font-weight="600" text-anchor="middle">⚠️ Две ловушки, на которых спотыкаются чаще всего</text>
+  <text x="400" y="383" fill="#e6edf3" font-size="8" text-anchor="middle">• Флаг g делает объект выражения объектом с состоянием: test() сдвигает lastIndex и на втором вызове вернёт false</text>
+  <text x="400" y="399" fill="#e6edf3" font-size="8" text-anchor="middle">• Вложенные квантификаторы вида (a+)+ дают лавинный перебор (ReDoS) и подвешивают поток на длинной строке</text>
+  <text x="400" y="415" fill="#8b949e" font-size="8" text-anchor="middle">• Без якорей ^ и $ выражение ищет совпадение в любой подстроке, а не проверяет строку целиком</text>
+</svg>

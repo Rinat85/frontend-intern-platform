@@ -738,6 +738,10 @@ a:hover { color: var(--cyan); }
   transition: all var(--transition-fast); background: var(--bg-1);
 }
 .quiz-option:hover { border-color: var(--neon-dim); }
+.quiz-option:focus-visible { outline: 2px solid var(--neon); outline-offset: 2px; border-color: var(--neon); }
+.quiz-option[aria-disabled='true'] { cursor: default; }
+.quiz-code-snippet { margin: 0 0 12px; }
+.quiz-code-snippet .code-block { margin: 0; }
 .quiz-option.option-selected { border-color: var(--neon); color: var(--neon); background: rgba(45, 255, 138, 0.06); }
 .quiz-option.option-correct { border-color: var(--neon); color: var(--neon); background: rgba(45, 255, 138, 0.08); }
 .quiz-option.option-wrong { border-color: var(--red); color: var(--red); background: rgba(255, 59, 92, 0.06); }

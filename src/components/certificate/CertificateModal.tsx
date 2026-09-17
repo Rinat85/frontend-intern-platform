@@ -9,7 +9,13 @@ interface CertificateModalProps {
 }
 
 export const CertificateModal: React.FC<CertificateModalProps> = ({ isOpen, onClose }) => {
-  const { internName, setInternName } = useProgress();
+  const {
+    internName,
+    setInternName,
+    completedLessonsCount,
+    totalLessonsCount,
+    completedTasks
+  } = useProgress();
   const [name, setName] = useState(internName || 'Алексей Смирнов');
   const [isEditing, setIsEditing] = useState(false);
 
@@ -37,6 +43,11 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ isOpen, onCl
   const handlePrint = () => {
     window.print();
   };
+
+  // Показываем реальный прогресс стажёра, а не зафиксированные в вёрстке числа.
+  const tasksPercent = totalLessonsCount > 0
+    ? Math.round((completedTasks.length / totalLessonsCount) * 100)
+    : 0;
 
   const dateStr = new Date().toLocaleDateString('ru-RU', {
     year: 'numeric',
@@ -102,11 +113,11 @@ export const CertificateModal: React.FC<CertificateModalProps> = ({ isOpen, onCl
 
                 <div className="cert-stats-row">
                   <div className="cert-stat-item">
-                    <span className="cert-stat-val">48 / 48</span>
+                    <span className="cert-stat-val">{completedLessonsCount} / {totalLessonsCount}</span>
                     <span className="cert-stat-lbl">Уровней завершено</span>
                   </div>
                   <div className="cert-stat-item">
-                    <span className="cert-stat-val">100%</span>
+                    <span className="cert-stat-val">{tasksPercent}%</span>
                     <span className="cert-stat-lbl">Практических задач</span>
                   </div>
                   <div className="cert-stat-item">

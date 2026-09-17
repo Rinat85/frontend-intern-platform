@@ -8,6 +8,8 @@ import {
   Menu, Search, BookOpen, Award, Shield, Bell, Sun, Moon
 } from 'lucide-react';
 import { OctoLogoIcon } from './OctoLogo';
+import { TOTAL_PLATFORM_LESSONS } from '../../data/modulesData';
+import { pluralRu, LESSON_FORMS } from '../../utils/plural';
 
 interface HeaderProps {
   onOpenSearch: () => void;
@@ -62,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="header-center">
         <button className="header-search-btn" onClick={onOpenSearch}>
           <Search size={16} />
-          <span className="search-placeholder">Поиск по 70 урокам, темам и коду...</span>
+          <span className="search-placeholder">Поиск по {TOTAL_PLATFORM_LESSONS} {pluralRu(TOTAL_PLATFORM_LESSONS, LESSON_FORMS)}, темам и коду...</span>
           <span className="kbd-shortcut">Ctrl+K</span>
         </button>
       </div>

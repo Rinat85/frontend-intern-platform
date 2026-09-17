@@ -3,6 +3,8 @@ import { Module } from '../../types/curriculum';
 import { StatsOverview } from './StatsOverview';
 import { ModuleCard } from './ModuleCard';
 import { useProgress } from '../../context/ProgressContext';
+import { TOTAL_PLATFORM_LESSONS } from '../../data/modulesData';
+import { withPluralRu, LEVEL_FORMS } from '../../utils/plural';
 import { Bookmark, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface DashboardHomeProps {
@@ -45,7 +47,7 @@ export const DashboardHome: React.FC<DashboardHomeProps> = ({
             <Sparkles size={28} className="text-warning" />
             <div>
               <h3>Поздравляем! Вы прошли всю программу обучения!</h3>
-              <p>Все 48 уровней успешно завершены. Вы готовы получить персональный сертификат фронтенд-разработчика.</p>
+              <p>Все {withPluralRu(TOTAL_PLATFORM_LESSONS, LEVEL_FORMS)} успешно завершены. Вы готовы получить персональный сертификат фронтенд-разработчика.</p>
             </div>
           </div>
           <button className="btn btn-primary" onClick={onOpenCertificate}>

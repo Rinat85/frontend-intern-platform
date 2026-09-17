@@ -4,6 +4,10 @@ import {
   X, Mail, Lock, User as UserIcon, Sparkles, CheckCircle2,
   ArrowRight, ShieldAlert, KeyRound, CheckCheck, Send, Eye, EyeOff
 } from 'lucide-react';
+import { TOTAL_PLATFORM_LESSONS } from '../../data/modulesData';
+import { pluralRu } from '../../utils/plural';
+
+const LEVEL_DATIVE_FORMS: [string, string, string] = ['уровню', 'уровням', 'уровням'];
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -309,7 +313,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               <div className="auth-role-notice-card">
                 <div className="role-badge role-intern">Роль: Стажёр</div>
                 <p className="text-xs text-muted" style={{ margin: '4px 0 0 0' }}>
-                  После отправки формы вам придёт ссылка на подтверждение почты. Вы получите доступ ко всем 70 уровням, проверке ментором и получению сертификата.
+                  После отправки формы вам придёт ссылка на подтверждение почты. Вы получите доступ ко всем {TOTAL_PLATFORM_LESSONS} {pluralRu(TOTAL_PLATFORM_LESSONS, LEVEL_DATIVE_FORMS)}, проверке ментором и получению сертификата.
                 </p>
               </div>
 

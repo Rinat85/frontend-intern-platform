@@ -2,6 +2,9 @@
 import { Module, Lesson } from '../../types/curriculum';
 import { Search, X, BookOpen, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { useProgress } from '../../context/ProgressContext';
+import { pluralRu } from '../../utils/plural';
+
+const LEVEL_DATIVE_FORMS: [string, string, string] = ['уровню', 'уровням', 'уровням'];
 
 interface SearchModalProps {
   isOpen: boolean;
@@ -17,6 +20,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
   onSelectLesson
 }) => {
   const [query, setQuery] = useState('');
+  const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0);
   const inputRef = useRef<HTMLInputElement>(null);
   const { isLessonCompleted } = useProgress();
 
@@ -58,7 +62,7 @@ export const SearchModal: React.FC<SearchModalProps> = ({
             ref={inputRef}
             type="text"
             className="search-modal-input"
-            placeholder="Поиск по всем 48 уровням, тегам и темам..."
+            placeholder={`Поиск по всем ${totalLessons} ${pluralRu(totalLessons, LEVEL_DATIVE_FORMS)}, тегам и темам...`}
             value={query}
             onChange={e => setQuery(e.target.value)}
           />

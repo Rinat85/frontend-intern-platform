@@ -4,7 +4,7 @@ import { cssLessons } from './cssLessons';
 import { jsLessons } from './jsLessons';
 import { proLessons } from './proLessons';
 
-export const modulesData: Module[] = [
+const moduleDefs: Omit<Module, 'levelsCount'>[] = [
   {
     id: 'html',
     title: 'HTML Fundamentals',
@@ -13,7 +13,6 @@ export const modulesData: Module[] = [
     iconName: 'Code',
     accentColor: '#ea580c',
     gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-    levelsCount: 11,
     lessons: htmlLessons
   },
   {
@@ -24,18 +23,16 @@ export const modulesData: Module[] = [
     iconName: 'Palette',
     accentColor: '#2563eb',
     gradient: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-    levelsCount: 21,
     lessons: cssLessons
   },
   {
     id: 'javascript',
     title: 'JavaScript Master',
-    subtitle: '14 уровней мастерства',
+    subtitle: '15 уровней мастерства',
     description: 'Освойте язык интерактивности: типы данных, методы массивов, работу с DOM, события, замыкания, асинхронность, Fetch API и WebSockets.',
     iconName: 'Zap',
     accentColor: '#eab308',
     gradient: 'linear-gradient(135deg, #eab308 0%, #ca8a04 100%)',
-    levelsCount: 14,
     lessons: jsLessons
   },
   {
@@ -46,10 +43,16 @@ export const modulesData: Module[] = [
     iconName: 'Award',
     accentColor: '#10b981',
     gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-    levelsCount: 21,
     lessons: proLessons
   }
 ];
+
+// levelsCount выводится из фактического количества уроков,
+// чтобы счётчик на карточке модуля не расходился с данными.
+export const modulesData: Module[] = moduleDefs.map(m => ({
+  ...m,
+  levelsCount: m.lessons.length
+}));
 
 export const ALL_LESSON_IDS: string[] = modulesData.flatMap(m => m.lessons.map(l => l.id));
 export const TOTAL_PLATFORM_LESSONS: number = ALL_LESSON_IDS.length;

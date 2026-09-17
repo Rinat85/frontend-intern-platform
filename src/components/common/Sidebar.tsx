@@ -2,6 +2,7 @@
 import { Module } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { CheckCircle2, Bookmark, ChevronDown, ChevronRight, Home, Code, Palette, Zap, Award } from 'lucide-react';
+import { pluralRu, LEVEL_FORMS } from '../../utils/plural';
 
 interface SidebarProps {
   modules: Module[];
@@ -79,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <div className="sidebar-module-info">
                     <div className="sidebar-module-title">{module.title}</div>
                     <div className="sidebar-module-meta">
-                      {completedInMod}/{module.lessons.length} уровней ({progressMod}%)
+                      {completedInMod}/{module.lessons.length} {pluralRu(module.lessons.length, LEVEL_FORMS)} ({progressMod}%)
                     </div>
                   </div>
                   <div className="sidebar-module-chevron">

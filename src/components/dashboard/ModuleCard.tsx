@@ -3,6 +3,7 @@ import { Module } from '../../types/curriculum';
 import { useProgress } from '../../context/ProgressContext';
 import { ProgressBar } from '../common/ProgressBar';
 import { ArrowRight, Code, Palette, Zap, Award } from 'lucide-react';
+import { withPluralRu, LEVEL_FORMS } from '../../utils/plural';
 
 interface ModuleCardProps {
   module: Module;
@@ -34,7 +35,7 @@ export const ModuleCard: React.FC<ModuleCardProps> = ({
     <div className={`module-card ${isDone ? 'module-completed' : ''}`}>
       <div className="module-card-header" style={{ background: module.gradient }}>
         <div className="module-card-icon">{getIcon(module.iconName)}</div>
-        <div className="module-card-badge">{module.levelsCount} уровней</div>
+        <div className="module-card-badge">{withPluralRu(module.levelsCount, LEVEL_FORMS)}</div>
       </div>
 
       <div className="module-card-body">
